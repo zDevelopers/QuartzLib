@@ -19,7 +19,7 @@
 package fr.zcraft.zlib.gui;
 
 import fr.zcraft.zlib.PluginLogger;
-import fr.zcraft.zlib.ReflectionUtils;
+import fr.zcraft.zlib.tools.ReflectionUtils;
 import fr.zcraft.zlib.ZLib;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
