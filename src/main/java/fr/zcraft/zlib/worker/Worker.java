@@ -127,6 +127,4 @@ public abstract class Worker
             }
         };
     }
-    
-    
 }

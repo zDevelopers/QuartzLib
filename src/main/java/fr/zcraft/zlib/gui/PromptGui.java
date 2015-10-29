@@ -19,10 +19,8 @@
 package fr.zcraft.zlib.gui;
 
 import fr.zcraft.zlib.PluginLogger;
-import fr.zcraft.zlib.tools.ReflectionUtils;
 import fr.zcraft.zlib.ZLib;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import fr.zcraft.zlib.tools.ReflectionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -34,6 +32,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class PromptGui extends Gui
 {
@@ -134,7 +135,6 @@ public class PromptGui extends Gui
                 }
             }  
         }, 3);
-        
     }
     
     @Override

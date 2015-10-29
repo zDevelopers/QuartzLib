@@ -150,7 +150,7 @@ abstract public class ActionGui extends InventoryGui
     /**
      * Adds an action to the GUI.
      *
-     * @param action The {@link fr.moribus.imageonmap.guiproko.core.ActionGui.Action} to register.
+     * @param action The {@link fr.zcraft.zlib.gui.ActionGui.Action} to register.
      */
     private void action(Action action)
     {
@@ -291,7 +291,7 @@ abstract public class ActionGui extends InventoryGui
         
         try
         {
-            if(action.callback.getParameterCount() == 1)
+            if(action.callback.getParameterTypes().length == 1)
             {
                 action.callback.invoke(this, event);
             }
@@ -319,8 +319,10 @@ abstract public class ActionGui extends InventoryGui
      */
     private boolean isActionHandlerValid(Method method)
     {
-        if(method.getParameterCount() >= 2) return false;
-        if(method.getParameterCount() == 1)
+        int parameterCount = method.getParameterTypes().length;
+
+        if(parameterCount >= 2) return false;
+        if(parameterCount == 1)
             if(method.getParameterTypes()[0] != InventoryClickEvent.class) 
                 return false;
         
