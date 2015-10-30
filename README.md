@@ -1,4 +1,4 @@
-zLib [![Build Status](http://jenkins.carrade.eu/job/zLib/1/badge/icon)](http://jenkins.carrade.eu/job/zLib/1/)
+zLib [![Build Status](http://jenkins.carrade.eu/job/zLib/badge/icon)](http://jenkins.carrade.eu/job/zLib/)
 ==========
 
 Helper library for Bukkit plugins development.
