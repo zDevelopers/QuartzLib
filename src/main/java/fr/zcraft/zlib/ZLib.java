@@ -25,6 +25,7 @@ public abstract class ZLib
     static public void init(JavaPlugin plugin)
     {
         ZLib.plugin = plugin;
+        PluginLogger.init();
     }
     
     static public JavaPlugin getPlugin() throws IllegalStateException
