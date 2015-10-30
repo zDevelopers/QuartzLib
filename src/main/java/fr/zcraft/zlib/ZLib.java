@@ -1,41 +1,131 @@
 /*
- * Copyright (C) 2015 ProkopyL <prokopylmc@gmail.com>
+ * Copyright or © or Copr. ZLib contributors (2015)
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.zcraft.zlib;
 
+import com.google.common.collect.ImmutableSet;
+import fr.zcraft.zlib.core.ZLibComponent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public abstract class ZLib 
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+
+public abstract class ZLib
 {
     static private JavaPlugin plugin;
-    
+    static private Set<ZLibComponent> loadedComponents = new CopyOnWriteArraySet<>();
+
+    /**
+     * Initializes the ZLibrary.
+     *
+     * This needs to be called before anything else; otherwise, you will encounter
+     * {@link IllegalStateException}s.
+     *
+     * @param plugin The plugin currently using this instance of the ZLib.
+     */
     static public void init(JavaPlugin plugin)
     {
         ZLib.plugin = plugin;
     }
-    
+
+    /**
+     * Loads a ZLib component, and store it as loaded to automatically unload it when needed.
+     *
+     * @param component The component to load.
+     * @throws IllegalStateException if the zlib was not initialized.
+     */
+    static public void loadComponent(ZLibComponent component) throws IllegalStateException
+    {
+        checkInitialized();
+
+        if(loadedComponents.add(component))
+        {
+            component.onEnable();
+        }
+    }
+
+    /**
+     * Unloads all the registered components.
+     *
+     * This method is automatically called when the plugin is unloaded.
+     *
+     * @throws IllegalStateException if the zlib was not initialized.
+     */
+    static public void unloadComponents()
+    {
+        checkInitialized();
+
+        for(ZLibComponent component : loadedComponents)
+        {
+            component.onDisable();
+        }
+
+        loadedComponents.clear();
+    }
+
+    /**
+     * Returns the plugin currently using the library.
+     *
+     * @return The plugin currently using the library.
+     * @throws IllegalStateException if the zlib was not initialized.
+     */
     static public JavaPlugin getPlugin() throws IllegalStateException
     {
-        if(plugin == null)
-            throw new IllegalStateException("Assertion failed : ZLib is not correctly inizialized");
+        checkInitialized();
         return plugin;
     }
-    
+
+    static public Set<ZLibComponent> getLoadedComponents() throws IllegalStateException
+    {
+        checkInitialized();
+        return ImmutableSet.copyOf(loadedComponents);
+    }
+
+    /**
+     * Check wherever the ZLib is correctly initialized.
+     *
+     * @return {@code true} if initialized.
+     */
     static public boolean isInitialized()
     {
         return plugin != null;
+    }
+
+    /**
+     * Check wherever the ZLib is correctly initialized.
+     *
+     * @throws IllegalStateException if the ZLib is not initialized.
+     */
+    static private void checkInitialized() throws IllegalStateException
+    {
+        if(plugin == null)
+            throw new IllegalStateException("Assertion failed: ZLib is not correctly inizialized");
     }
 }
