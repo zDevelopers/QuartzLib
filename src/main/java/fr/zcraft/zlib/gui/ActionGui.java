@@ -353,7 +353,7 @@ abstract public class ActionGui extends InventoryGui
             
             for(Method method : klass.getDeclaredMethods())
             {
-                actionAnnotation = method.getDeclaredAnnotation(GuiAction.class);
+                actionAnnotation = method.getAnnotation(GuiAction.class);
                 if(actionAnnotation == null) continue;
                 if(!(actionAnnotation.value() == null || actionAnnotation.value().isEmpty()))
                 {
