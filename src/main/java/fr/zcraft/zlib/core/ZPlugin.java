@@ -55,7 +55,8 @@ public abstract class ZPlugin extends JavaPlugin
 	 *
 	 * @param components The base classes of the components to load.
 	 */
-	public void loadComponents(Class<? extends ZLibComponent>... components)
+	@SafeVarargs
+	public final void loadComponents(Class<? extends ZLibComponent>... components)
 	{
 		for (Class<? extends ZLibComponent> componentClass : components)
 		{

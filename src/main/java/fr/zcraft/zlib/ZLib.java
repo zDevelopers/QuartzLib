@@ -42,6 +42,7 @@ public abstract class ZLib
     static private JavaPlugin plugin;
     static private Set<ZLibComponent> loadedComponents = new CopyOnWriteArraySet<>();
 
+
     /**
      * Initializes the ZLibrary.
      *
@@ -67,7 +68,7 @@ public abstract class ZLib
 
         if(loadedComponents.add(component))
         {
-            component.onEnable();
+            component.setEnabled(true);
         }
     }
 
@@ -76,7 +77,7 @@ public abstract class ZLib
      *
      * This method is automatically called when the plugin is unloaded.
      *
-     * @throws IllegalStateException if the zlib was not initialized.
+     * @throws IllegalStateException if the ZLib was not initialized.
      */
     static public void unloadComponents()
     {
@@ -84,7 +85,7 @@ public abstract class ZLib
 
         for(ZLibComponent component : loadedComponents)
         {
-            component.onDisable();
+            component.setEnabled(false);
         }
 
         loadedComponents.clear();
@@ -94,7 +95,7 @@ public abstract class ZLib
      * Returns the plugin currently using the library.
      *
      * @return The plugin currently using the library.
-     * @throws IllegalStateException if the zlib was not initialized.
+     * @throws IllegalStateException if the ZLib was not initialized.
      */
     static public JavaPlugin getPlugin() throws IllegalStateException
     {
@@ -102,6 +103,14 @@ public abstract class ZLib
         return plugin;
     }
 
+    /**
+     * Returns the currently loaded ZLib components.
+     *
+     * This returns a copy of the components list,
+     *
+     * @return the loaded components.
+     * @throws IllegalStateException
+     */
     static public Set<ZLibComponent> getLoadedComponents() throws IllegalStateException
     {
         checkInitialized();
