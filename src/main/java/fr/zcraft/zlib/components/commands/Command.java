@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.commands;
+package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.ZLib;
-import fr.zcraft.zlib.commands.CommandException.Reason;
+import fr.zcraft.zlib.components.commands.CommandException.Reason;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

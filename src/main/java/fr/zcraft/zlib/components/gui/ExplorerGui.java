@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.gui;
+package fr.zcraft.zlib.components.gui;
 
 import org.bukkit.*;
 import org.bukkit.event.inventory.ClickType;

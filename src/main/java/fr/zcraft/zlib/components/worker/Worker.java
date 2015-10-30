@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.worker;
+package fr.zcraft.zlib.components.worker;
 
-import fr.zcraft.zlib.PluginLogger;
+import fr.zcraft.zlib.tools.PluginLogger;
 import java.util.ArrayDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;

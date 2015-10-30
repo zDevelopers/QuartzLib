@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib;
+package fr.zcraft.zlib.tools;
+
+import fr.zcraft.zlib.ZLib;
 
 import java.util.HashMap;
 import java.util.logging.Level;

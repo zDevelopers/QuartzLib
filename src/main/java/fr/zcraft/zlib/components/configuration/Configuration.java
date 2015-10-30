@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.configuration;
+package fr.zcraft.zlib.components.configuration;
 
 import fr.zcraft.zlib.ZLib;
 import java.lang.reflect.Field;

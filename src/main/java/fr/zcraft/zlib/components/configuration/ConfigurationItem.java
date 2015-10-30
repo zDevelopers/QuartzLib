@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package fr.zcraft.zlib.configuration;
+package fr.zcraft.zlib.components.configuration;
 
 import fr.zcraft.zlib.ZLib;
 import org.bukkit.configuration.file.FileConfiguration;

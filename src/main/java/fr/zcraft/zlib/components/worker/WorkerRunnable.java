@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.zcraft.zlib.gui;
+package fr.zcraft.zlib.components.worker;
 
-public interface Callback<T>
+public interface WorkerRunnable<T>
 {
-    public void call(T parameter);
+    public T run() throws Throwable;
 }

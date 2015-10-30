@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.gui;
+package fr.zcraft.zlib.components.gui;
 
-import fr.zcraft.zlib.PluginLogger;
+import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
@@ -150,7 +150,7 @@ abstract public class ActionGui extends InventoryGui
     /**
      * Adds an action to the GUI.
      *
-     * @param action The {@link fr.zcraft.zlib.gui.ActionGui.Action} to register.
+     * @param action The {@link fr.zcraft.zlib.components.gui.ActionGui.Action} to register.
      */
     private void action(Action action)
     {

@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.commands;
+package fr.zcraft.zlib.components.commands;
 
-import fr.zcraft.zlib.PluginLogger;
+import fr.zcraft.zlib.tools.PluginLogger;
 import org.apache.commons.lang.*;
 import org.bukkit.command.*;
 

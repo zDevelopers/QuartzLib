@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.gui;
+package fr.zcraft.zlib.components.gui;
 
-import fr.zcraft.zlib.PluginLogger;
+import fr.zcraft.zlib.tools.PluginLogger;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import org.bukkit.Bukkit;

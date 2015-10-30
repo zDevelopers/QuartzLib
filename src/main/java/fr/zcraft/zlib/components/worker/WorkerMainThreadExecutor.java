@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.worker;
+package fr.zcraft.zlib.components.worker;
 
 import fr.zcraft.zlib.ZLib;
 import java.util.ArrayDeque;

@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.gui;
+package fr.zcraft.zlib.components.gui;
 
-import static fr.zcraft.zlib.gui.Gui.getOpenGui;
+import static fr.zcraft.zlib.components.gui.Gui.getOpenGui;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;

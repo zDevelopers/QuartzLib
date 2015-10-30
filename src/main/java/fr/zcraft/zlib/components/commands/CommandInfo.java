@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.commands;
+package fr.zcraft.zlib.components.commands;
 
 import java.lang.annotation.*;
 

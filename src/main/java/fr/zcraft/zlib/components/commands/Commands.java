@@ -1,4 +1,4 @@
-package fr.zcraft.zlib.commands;
+package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.ZLib;
 import java.util.ArrayList;
