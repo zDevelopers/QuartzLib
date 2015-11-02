@@ -18,11 +18,12 @@
 
 package fr.zcraft.zlib.components.worker;
 
-import fr.zcraft.zlib.ZLib;
-import java.util.ArrayDeque;
-import java.util.HashMap;
+import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
+
+import java.util.ArrayDeque;
+import java.util.HashMap;
 
 class WorkerCallbackManager implements Runnable
 {

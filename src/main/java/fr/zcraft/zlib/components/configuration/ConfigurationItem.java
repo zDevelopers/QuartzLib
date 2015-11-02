@@ -6,7 +6,7 @@
 
 package fr.zcraft.zlib.components.configuration;
 
-import fr.zcraft.zlib.ZLib;
+import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class ConfigurationItem<T>

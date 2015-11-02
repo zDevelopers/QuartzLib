@@ -18,7 +18,8 @@
 
 package fr.zcraft.zlib.components.configuration;
 
-import fr.zcraft.zlib.ZLib;
+import fr.zcraft.zlib.core.ZLib;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 

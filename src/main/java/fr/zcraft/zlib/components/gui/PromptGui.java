@@ -18,8 +18,8 @@
 
 package fr.zcraft.zlib.components.gui;
 
+import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
-import fr.zcraft.zlib.ZLib;
 import fr.zcraft.zlib.tools.ReflectionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;

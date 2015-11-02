@@ -18,7 +18,7 @@
 
 package fr.zcraft.zlib.tools;
 
-import fr.zcraft.zlib.ZLib;
+import fr.zcraft.zlib.core.ZLib;
 
 import java.util.HashMap;
 import java.util.logging.Level;

@@ -1,10 +1,11 @@
 package fr.zcraft.zlib.components.commands;
 
-import fr.zcraft.zlib.ZLib;
-import java.util.ArrayList;
-import java.util.List;
+import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Commands 
 {

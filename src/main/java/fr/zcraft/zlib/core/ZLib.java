@@ -27,10 +27,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib;
+package fr.zcraft.zlib.core;
 
 import com.google.common.collect.ImmutableSet;
-import fr.zcraft.zlib.core.ZLibComponent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
@@ -62,7 +61,7 @@ public abstract class ZLib
      * @param component The component to load.
      * @throws IllegalStateException if the zlib was not initialized.
      */
-    static public void loadComponent(ZLibComponent component) throws IllegalStateException
+    static void loadComponent(ZLibComponent component) throws IllegalStateException
     {
         checkInitialized();
 
@@ -79,7 +78,7 @@ public abstract class ZLib
      *
      * @throws IllegalStateException if the ZLib was not initialized.
      */
-    static public void unloadComponents()
+    static void unloadComponents()
     {
         checkInitialized();
 

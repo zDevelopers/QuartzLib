@@ -18,14 +18,15 @@
 
 package fr.zcraft.zlib.components.commands;
 
-import fr.zcraft.zlib.ZLib;
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 abstract public class Command 
 {   

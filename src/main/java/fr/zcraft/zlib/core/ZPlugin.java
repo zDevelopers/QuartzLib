@@ -29,7 +29,6 @@
  */
 package fr.zcraft.zlib.core;
 
-import fr.zcraft.zlib.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 
