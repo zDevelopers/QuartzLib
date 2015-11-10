@@ -338,7 +338,7 @@ abstract public class ReflectionUtils
      *                                   to an enum type.
      * @throws InvocationTargetException if an exception is thrown in the constructor.
      */
-    static public Object instanciate(Class hClass, Object... parameters)
+    static public Object instantiate(Class hClass, Object... parameters)
             throws NoSuchMethodException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {

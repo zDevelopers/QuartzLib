@@ -111,11 +111,11 @@ public final class MessageSender
             if (nmsVersion.equalsIgnoreCase("v1_8_R1") || !nmsVersion.startsWith("v1_8_"))
             {
                 Object baseComponent = iChatBaseComponentClass.cast(ReflectionUtils.call(chatSerializerClass, chatSerializerClass, "a", "{\"text\": \"" + message + "\"}"));
-                chatPacket = ReflectionUtils.instanciate(packetPlayOutChatClass, baseComponent, type.getMessagePositionByte());
+                chatPacket = ReflectionUtils.instantiate(packetPlayOutChatClass, baseComponent, type.getMessagePositionByte());
             }
             else
             {
-                Object componentText = ReflectionUtils.instanciate(chatComponentTextClass, message);
+                Object componentText = ReflectionUtils.instantiate(chatComponentTextClass, message);
                 chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
             }
 
