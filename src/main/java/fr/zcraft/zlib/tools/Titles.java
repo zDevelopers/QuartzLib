@@ -1,0 +1,305 @@
+/*
+ * Copyright or © or Copr. ZLib contributors (2015)
+ *
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
+ */
+package fr.zcraft.zlib.tools;
+
+import fr.zcraft.zlib.PluginLogger;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import java.lang.reflect.InvocationTargetException;
+
+
+/**
+ * This utility class sends titles to the players.
+ *
+ * @author Amaury Carrade
+ */
+public final class Titles
+{
+    private static boolean enabled = true;
+
+    private static Class<?> packetPlayOutTitleClass;
+    private static Class<?> chatSerializerClass;
+    private static Class<?> iChatBaseComponentClass;
+    private static Class<?> enumTitleActionClass;
+
+    private static Object enumTitleActionTitle;
+    private static Object enumTitleActionSubtitle;
+
+    static
+    {
+        try
+        {
+            packetPlayOutTitleClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutTitle");
+            iChatBaseComponentClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent");
+
+            try
+            {
+                chatSerializerClass = ReflectionUtils.getMinecraftClassByName("ChatSerializer");
+            }
+            catch (ClassNotFoundException e)
+            {
+                chatSerializerClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
+            }
+
+            try
+            {
+                enumTitleActionClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutTitle$EnumTitleAction");
+            }
+            catch (ClassNotFoundException e)
+            {
+                enumTitleActionClass = ReflectionUtils.getMinecraftClassByName("EnumTitleAction");
+            }
+
+            for (Object enumConstant : enumTitleActionClass.getEnumConstants())
+            {
+                switch (Enum.class.cast(enumConstant).name())
+                {
+                    case "TITLE":
+                        enumTitleActionTitle = enumConstant;
+                        break;
+                    case "SUBTITLE":
+                        enumTitleActionSubtitle = enumConstant;
+                        break;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            PluginLogger.error("Unable to load classes needed to display titles.", e);
+            enabled = false;
+        }
+    }
+
+
+    private Titles() {}
+
+
+    /**
+     * Displays a title to the given player.
+     *
+     * @param player   The receiver of the title.
+     * @param fadeIn   The fade-in time, in ticks.
+     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     *                 ticks).
+     * @param fadeOut  The fade-out time, in ticks.
+     * @param title    The text of the title. {@code null} if you don't want to display a title.
+     * @param subtitle The text of the subtitle. {@code null} if you don't want to display a
+     *                 subtitle.
+     *
+     * @return {@code true} if the title was successfully sent.
+     */
+    public static boolean displayTitle(Player player, int fadeIn, int stay, int fadeOut, String title, String subtitle)
+    {
+        return displayRawTitle(player, fadeIn, stay, fadeOut, "{\"text\": \"" + title.replace("\"", "\\\"") + "\"}", "{\"text\": \"" + subtitle.replace("\"", "\\\"") + "\"}");
+    }
+
+    /**
+     * Displays a title to the given player.
+     *
+     * @param player      The receiver of the title.
+     * @param fadeIn      The fade-in time, in ticks.
+     * @param stay        The time the title stays in the screen, fade-in & out times excluded (in
+     *                    ticks).
+     * @param fadeOut     The fade-out time, in ticks.
+     * @param rawTitle    The JSON representation of the title. {@code null} if you don't want to
+     *                    display a title.
+     * @param rawSubtitle The JSON representation of the subtitle. {@code null} if you don't want to
+     *                    display a subtitle.
+     *
+     * @return {@code true} if the title was successfully sent.
+     */
+    public static boolean displayRawTitle(Player player, int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
+    {
+        try
+        {
+            return displayTitle(ReflectionUtils.getPlayerConnection(player), fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
+        }
+        catch (InvocationTargetException e)
+        {
+            PluginLogger.info("Exception caught while sending a title", e);
+            return false;
+        }
+    }
+
+    /**
+     * Displays a title to the whole server.
+     *
+     * @param fadeIn   The fade-in time, in ticks.
+     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     *                 ticks).
+     * @param fadeOut  The fade-out time, in ticks.
+     * @param title    The text of the title. {@code null} if you don't want to display a title.
+     * @param subtitle The text of the subtitle. {@code null} if you don't want to display a
+     *                 subtitle.
+     *
+     * @return {@code true} if the title was successfully sent to everyone.
+     */
+    public static boolean broadcastTitle(int fadeIn, int stay, int fadeOut, String title, String subtitle)
+    {
+        boolean success = true;
+
+        for (Player player : Bukkit.getOnlinePlayers())
+        {
+            success &= displayTitle(player, fadeIn, stay, fadeOut, title, subtitle);
+        }
+
+        return success;
+    }
+
+    /**
+     * Displays a title to the whole server.
+     *
+     * @param fadeIn      The fade-in time, in ticks.
+     * @param stay        The time the title stays in the screen, fade-in & out times excluded (in
+     *                    ticks).
+     * @param fadeOut     The fade-out time, in ticks.
+     * @param rawTitle    The JSON representation of the title. {@code null} if you don't want to
+     *                    display a title.
+     * @param rawSubtitle The JSON representation of the subtitle. {@code null} if you don't want to
+     *                    display a subtitle.
+     *
+     * @return {@code true} if the title was successfully sent to everyone.
+     */
+    public static boolean broadcastRawTitle(int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
+    {
+        boolean success = true;
+
+        for (Player player : Bukkit.getOnlinePlayers())
+        {
+            success &= displayRawTitle(player, fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
+        }
+
+        return success;
+    }
+
+
+
+    /* *** Private API *** */
+
+
+    /**
+     * The core method to send a title to a player.
+     *
+     * @param connection  The player's connection (instance of {@code net.minecraft.server.PlayerConnection})
+     * @param fadeIn      The fade-in time, in ticks.
+     * @param stay        The time the title stays in the screen, fade-in & out times excluded (in
+     *                    ticks).
+     * @param fadeOut     The fade-out time, in ticks.
+     * @param rawTitle    The JSON representation of the title. {@code null} if you don't want to
+     *                    display a title.
+     * @param rawSubtitle The JSON representation of the subtitle. {@code null} if you don't want to
+     *                    display a subtitle.
+     *
+     * @return {@code true} if the title was successfully sent.
+     */
+    private static boolean displayTitle(Object connection, int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
+    {
+        if (!enabled) return false;
+
+        boolean success = sendTimes(connection, fadeIn, stay, fadeOut);
+
+        // Subtitles needs a title to be displayed.
+        if ((rawTitle == null || rawTitle.isEmpty()) && rawSubtitle != null && !rawSubtitle.isEmpty())
+        {
+            rawTitle = "{\"text\":\" \"}";
+        }
+
+        if (rawTitle != null && !rawTitle.isEmpty())
+            success &= sendTitleAction(connection, enumTitleActionTitle, rawTitle);
+
+        if (rawSubtitle != null && !rawSubtitle.isEmpty())
+            success &= sendTitleAction(connection, enumTitleActionSubtitle, rawSubtitle);
+
+        return success;
+    }
+
+    /**
+     * Sends the Titles TIMES packet, used to send the fade-in, stay and fade-out times to the
+     * client.
+     *
+     * @param connection The player's connection (instance of {@code net.minecraft.server.PlayerConnection})
+     * @param fadeIn     The fade-in time, in ticks.
+     * @param stay       The time the title stays in the screen, fade-in & out times excluded (in
+     *                   ticks).
+     * @param fadeOut    The fade-out time, in ticks.
+     *
+     * @return {@code true} if the packet was successfully sent.
+     */
+    private static boolean sendTimes(Object connection, int fadeIn, int stay, int fadeOut)
+    {
+        try
+        {
+            if (fadeIn >= 0 || stay >= 0 || fadeOut >= 0)
+            {
+                ReflectionUtils.sendPacket(
+                        connection,
+                        packetPlayOutTitleClass.getConstructor(int.class, int.class, int.class).newInstance(fadeIn, stay, fadeOut)
+                );
+                return true;
+            }
+
+            else return false;
+        }
+        catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e)
+        {
+            PluginLogger.error("Error while sending a TIMES title packet", e);
+            return false;
+        }
+    }
+
+    /**
+     * Sends a full title packet to the player.
+     *
+     * @param connection The player's connection (instance of {@code net.minecraft.server.PlayerConnection})
+     * @param action     The action, an item of the {@code net.minecraft.server.PacketPlayOutTitle$EnumTitleAction}
+     *                   enumeration (only TITLE and SUBTITLE are implemented).
+     * @param payload    The content to be sent; MUST be a valid JSON payload.
+     *
+     * @return {@code true} if successful.
+     */
+    private static boolean sendTitleAction(Object connection, Object action, String payload)
+    {
+        try
+        {
+            Object baseComponent = iChatBaseComponentClass.cast(ReflectionUtils.call(chatSerializerClass, chatSerializerClass, "a", payload));
+            Object titlePacket = packetPlayOutTitleClass.getConstructor(enumTitleActionClass, iChatBaseComponentClass).newInstance(action, baseComponent);
+
+            ReflectionUtils.sendPacket(connection, titlePacket);
+
+            return true;
+        }
+        catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e)
+        {
+            PluginLogger.error("Error while sending a {0} title packet", e, action);
+            return false;
+        }
+    }
+}
