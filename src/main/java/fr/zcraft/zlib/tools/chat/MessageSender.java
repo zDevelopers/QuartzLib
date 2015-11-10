@@ -42,8 +42,6 @@ public final class MessageSender
 
     private static String nmsVersion = ReflectionUtils.getBukkitPackageVersion();
 
-    private static Class<?> craftPlayerClass;
-    private static Class<?> packetClass;
     private static Class<?> packetPlayOutChatClass;
     private static Class<?> chatSerializerClass;
     private static Class<?> iChatBaseComponentClass;
@@ -55,17 +53,11 @@ public final class MessageSender
         {
             iChatBaseComponentClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent");
             packetPlayOutChatClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutChat");
-            craftPlayerClass = ReflectionUtils.getBukkitClassByName("entity.CraftPlayer");
-            packetClass = ReflectionUtils.getMinecraftClassByName("Packet");
 
             if (nmsVersion.equalsIgnoreCase("v1_8_R1") || !nmsVersion.startsWith("v1_8_"))
-            {
                 chatSerializerClass = ReflectionUtils.getMinecraftClassByName("ChatSerializer");
-            }
             else
-            {
                 chatComponentTextClass = ReflectionUtils.getMinecraftClassByName("ChatComponentText");
-            }
         }
         catch (Exception e)
         {
@@ -114,7 +106,6 @@ public final class MessageSender
 
         try
         {
-            Object craftPlayer = craftPlayerClass.cast(receiver);
             Object chatPacket;
 
             if (nmsVersion.equalsIgnoreCase("v1_8_R1") || !nmsVersion.startsWith("v1_8_"))
@@ -125,16 +116,10 @@ public final class MessageSender
             else
             {
                 Object componentText = ReflectionUtils.instanciate(chatComponentTextClass, message);
-                //chatPacket = ReflectionUtils.instanciate(packetPlayOutChatClass, componentText, type.getMessagePositionByte());
-
                 chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
             }
 
-            Object handle = ReflectionUtils.call(craftPlayer, "getHandle");
-            Object playerConnection = ReflectionUtils.getFieldValue(handle, "playerConnection");
-
-            //ReflectionUtils.call(playerConnection, "sendPacket", chatPacket);
-            playerConnection.getClass().getDeclaredMethod("sendPacket", packetClass).invoke(playerConnection, chatPacket);
+            ReflectionUtils.sendPacket(receiver, chatPacket);
             return true;
         }
         catch (Exception e)
