@@ -154,8 +154,10 @@ public final class ActionBar
      * Initializes the {@link Runnable} that will re-send the permanent action messages to the
      * players.
      */
-    public static void init()
+    public static void initActionMessageUpdaterTask()
     {
+        if(actionMessagesUpdater != null) return;
+
         actionMessagesUpdater = new Runnable()
         {
             @Override
@@ -179,6 +181,8 @@ public final class ActionBar
      */
     private static void checkActionMessageUpdaterRunningState()
     {
+        initActionMessageUpdaterTask();
+
         int messagesCount = actionMessages.size();
 
         if (messagesCount == 0 && actionMessagesUpdaterTask != null)
