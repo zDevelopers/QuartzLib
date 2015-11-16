@@ -29,7 +29,7 @@
  */
 package fr.zcraft.zlib.tools;
 
-import fr.zcraft.zlib.PluginLogger;
+import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -67,8 +67,8 @@ public final class ListHeaderFooter
         }
         catch (Exception e)
         {
-            PluginLogger.error("Unable to load classes needed to send player list header and footer.", e);
             enabled = false;
+            throw new IncompatibleMinecraftVersionException("Unable to load classes needed to send player list header and footer.", e);
         }
     }
 
@@ -83,11 +83,11 @@ public final class ListHeaderFooter
      * @param header The header.
      * @param footer The footer.
      *
-     * @return {@code true} if successful.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean sendListHeaderFooter(Player player, String header, String footer)
+    public static void sendListHeaderFooter(Player player, String header, String footer)
     {
-        return sendRawListHeaderFooter(player, "{\"text\": \"" + header.replace("\"", "\\\"") + "\"}", "{\"text\": \"" + footer.replace("\"", "\\\"") + "\"}");
+        sendRawListHeaderFooter(player, "{\"text\": \"" + header.replace("\"", "\\\"") + "\"}", "{\"text\": \"" + footer.replace("\"", "\\\"") + "\"}");
     }
 
     /**
@@ -97,11 +97,11 @@ public final class ListHeaderFooter
      * @param rawHeader The header (raw JSON message).
      * @param rawFooter The footer (raw JSON message).
      *
-     * @return {@code true} if successful.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean sendRawListHeaderFooter(Player player, String rawHeader, String rawFooter)
+    public static void sendRawListHeaderFooter(Player player, String rawHeader, String rawFooter)
     {
-        if (!enabled) return false;
+        if (!enabled) return;
 
         try
         {
@@ -112,12 +112,10 @@ public final class ListHeaderFooter
             ReflectionUtils.setFieldValue(packet, "b", serializedFooter);
 
             ReflectionUtils.sendPacket(player, packet);
-            return true;
         }
         catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchFieldException e)
         {
-            PluginLogger.error("Unable to send player list header and footer.", e);
-            return false;
+            throw new IncompatibleMinecraftVersionException("Unable to send player list header and footer.", e);
         }
     }
 
@@ -127,18 +125,14 @@ public final class ListHeaderFooter
      * @param header The header.
      * @param footer The footer.
      *
-     * @return {@code true} if successful for everyone.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean sendListHeaderFooter(String header, String footer)
+    public static void sendListHeaderFooter(String header, String footer)
     {
-        boolean success = true;
-
         for (Player player : Bukkit.getOnlinePlayers())
         {
-            success &= sendListHeaderFooter(player, header, footer);
+            sendListHeaderFooter(player, header, footer);
         }
-
-        return success;
     }
 
     /**
@@ -147,17 +141,13 @@ public final class ListHeaderFooter
      * @param rawHeader The header (raw JSON message).
      * @param rawFooter The footer (raw JSON message).
      *
-     * @return {@code true} if successful for everyone.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean sendRawListHeaderFooter(String rawHeader, String rawFooter)
+    public static void sendRawListHeaderFooter(String rawHeader, String rawFooter)
     {
-        boolean success = true;
-
         for (Player player : Bukkit.getOnlinePlayers())
         {
-            success &= sendRawListHeaderFooter(player, rawHeader, rawFooter);
+            sendRawListHeaderFooter(player, rawHeader, rawFooter);
         }
-
-        return success;
     }
 }

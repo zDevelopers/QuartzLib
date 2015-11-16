@@ -29,7 +29,7 @@
  */
 package fr.zcraft.zlib.tools;
 
-import fr.zcraft.zlib.PluginLogger;
+import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -93,8 +93,8 @@ public final class Titles
         }
         catch (Exception e)
         {
-            PluginLogger.error("Unable to load classes needed to display titles.", e);
             enabled = false;
+            throw new IncompatibleMinecraftVersionException("Unable to load classes needed to display titles.", e);
         }
     }
 
@@ -114,11 +114,11 @@ public final class Titles
      * @param subtitle The text of the subtitle. {@code null} if you don't want to display a
      *                 subtitle.
      *
-     * @return {@code true} if the title was successfully sent.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean displayTitle(Player player, int fadeIn, int stay, int fadeOut, String title, String subtitle)
+    public static void displayTitle(Player player, int fadeIn, int stay, int fadeOut, String title, String subtitle)
     {
-        return displayRawTitle(player, fadeIn, stay, fadeOut, "{\"text\": \"" + title.replace("\"", "\\\"") + "\"}", "{\"text\": \"" + subtitle.replace("\"", "\\\"") + "\"}");
+        displayRawTitle(player, fadeIn, stay, fadeOut, "{\"text\": \"" + title.replace("\"", "\\\"") + "\"}", "{\"text\": \"" + subtitle.replace("\"", "\\\"") + "\"}");
     }
 
     /**
@@ -134,18 +134,17 @@ public final class Titles
      * @param rawSubtitle The JSON representation of the subtitle. {@code null} if you don't want to
      *                    display a subtitle.
      *
-     * @return {@code true} if the title was successfully sent.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean displayRawTitle(Player player, int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
+    public static void displayRawTitle(Player player, int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
     {
         try
         {
-            return displayTitle(ReflectionUtils.getPlayerConnection(player), fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
+            displayTitle(ReflectionUtils.getPlayerConnection(player), fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
         }
         catch (InvocationTargetException e)
         {
-            PluginLogger.info("Exception caught while sending a title", e);
-            return false;
+            throw new IncompatibleMinecraftVersionException(e);
         }
     }
 
@@ -160,18 +159,14 @@ public final class Titles
      * @param subtitle The text of the subtitle. {@code null} if you don't want to display a
      *                 subtitle.
      *
-     * @return {@code true} if the title was successfully sent to everyone.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean broadcastTitle(int fadeIn, int stay, int fadeOut, String title, String subtitle)
+    public static void broadcastTitle(int fadeIn, int stay, int fadeOut, String title, String subtitle)
     {
-        boolean success = true;
-
         for (Player player : Bukkit.getOnlinePlayers())
         {
-            success &= displayTitle(player, fadeIn, stay, fadeOut, title, subtitle);
+            displayTitle(player, fadeIn, stay, fadeOut, title, subtitle);
         }
-
-        return success;
     }
 
     /**
@@ -186,18 +181,14 @@ public final class Titles
      * @param rawSubtitle The JSON representation of the subtitle. {@code null} if you don't want to
      *                    display a subtitle.
      *
-     * @return {@code true} if the title was successfully sent to everyone.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static boolean broadcastRawTitle(int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
+    public static void broadcastRawTitle(int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
     {
-        boolean success = true;
-
         for (Player player : Bukkit.getOnlinePlayers())
         {
-            success &= displayRawTitle(player, fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
+            displayRawTitle(player, fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
         }
-
-        return success;
     }
 
 
@@ -218,13 +209,13 @@ public final class Titles
      * @param rawSubtitle The JSON representation of the subtitle. {@code null} if you don't want to
      *                    display a subtitle.
      *
-     * @return {@code true} if the title was successfully sent.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    private static boolean displayTitle(Object connection, int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
+    private static void displayTitle(Object connection, int fadeIn, int stay, int fadeOut, String rawTitle, String rawSubtitle)
     {
-        if (!enabled) return false;
+        if(!enabled) return;
 
-        boolean success = sendTimes(connection, fadeIn, stay, fadeOut);
+        sendTimes(connection, fadeIn, stay, fadeOut);
 
         // Subtitles needs a title to be displayed.
         if ((rawTitle == null || rawTitle.isEmpty()) && rawSubtitle != null && !rawSubtitle.isEmpty())
@@ -233,12 +224,10 @@ public final class Titles
         }
 
         if (rawTitle != null && !rawTitle.isEmpty())
-            success &= sendTitleAction(connection, enumTitleActionTitle, rawTitle);
+            sendTitleAction(connection, enumTitleActionTitle, rawTitle);
 
         if (rawSubtitle != null && !rawSubtitle.isEmpty())
-            success &= sendTitleAction(connection, enumTitleActionSubtitle, rawSubtitle);
-
-        return success;
+            sendTitleAction(connection, enumTitleActionSubtitle, rawSubtitle);
     }
 
     /**
@@ -251,9 +240,9 @@ public final class Titles
      *                   ticks).
      * @param fadeOut    The fade-out time, in ticks.
      *
-     * @return {@code true} if the packet was successfully sent.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the times.
      */
-    private static boolean sendTimes(Object connection, int fadeIn, int stay, int fadeOut)
+    private static void sendTimes(Object connection, int fadeIn, int stay, int fadeOut)
     {
         try
         {
@@ -263,15 +252,11 @@ public final class Titles
                         connection,
                         packetPlayOutTitleClass.getConstructor(int.class, int.class, int.class).newInstance(fadeIn, stay, fadeOut)
                 );
-                return true;
             }
-
-            else return false;
         }
         catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e)
         {
-            PluginLogger.error("Error while sending a TIMES title packet", e);
-            return false;
+            throw new IncompatibleMinecraftVersionException("Error while sending a TIMES title packet", e instanceof InvocationTargetException ? e.getCause() : e);
         }
     }
 
@@ -283,9 +268,9 @@ public final class Titles
      *                   enumeration (only TITLE and SUBTITLE are implemented).
      * @param payload    The content to be sent; MUST be a valid JSON payload.
      *
-     * @return {@code true} if successful.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    private static boolean sendTitleAction(Object connection, Object action, String payload)
+    private static void sendTitleAction(Object connection, Object action, String payload)
     {
         try
         {
@@ -293,13 +278,10 @@ public final class Titles
             Object titlePacket = packetPlayOutTitleClass.getConstructor(enumTitleActionClass, iChatBaseComponentClass).newInstance(action, baseComponent);
 
             ReflectionUtils.sendPacket(connection, titlePacket);
-
-            return true;
         }
         catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e)
         {
-            PluginLogger.error("Error while sending a {0} title packet", e, action);
-            return false;
+            throw new IncompatibleMinecraftVersionException("Error while sending a " + action + " title packet", e instanceof InvocationTargetException ? e.getCause() : e);
         }
     }
 }
