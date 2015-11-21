@@ -29,14 +29,17 @@
  */
 package fr.zcraft.zlib.components.scoreboard;
 
+import com.google.common.collect.ImmutableSet;
 import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 
@@ -56,6 +59,9 @@ public abstract class Sidebar
     /* ** Global attributes ** */
 
     private static Set<Sidebar> sidebars = new CopyOnWriteArraySet<>();
+
+    // Asynchronously available list of the logged in players.
+    private static Map<UUID, Player> loggedInPlayers = new ConcurrentHashMap<>();
 
 
     /* ** This instance's attributes ** */
@@ -232,7 +238,7 @@ public abstract class Sidebar
 
         for (UUID id : recipients)
         {
-            Player recipient = Bukkit.getPlayer(id);
+            Player recipient = getPlayerAsync(id);
             if (recipient != null && recipient.isOnline())
             {
                 refresh(recipient, title, content);
@@ -293,8 +299,62 @@ public abstract class Sidebar
 
     /* **  System-wide methods  ** */
 
+    /**
+     * Initializes the scoreboards API.
+     * Must be called before this library is used.
+     */
     public static void init()
     {
+        updateLoggedInPlayers();
 
+        Bukkit.getPluginManager().registerEvents(new OnlinePlayersListener(), ZLib.getPlugin());
+    }
+
+    /**
+     * Returns the current sidebars.
+     *
+     * @return The sidebars.
+     */
+    public static Set<Sidebar> getSidebars()
+    {
+        return ImmutableSet.copyOf(sidebars);
+    }
+
+    /**
+     * Returns a set containing the currently logged-in players. This method can be used asynchronously.
+     *
+     * @return The logged-in players.
+     */
+    public static Set<Player> getOnlinePlayersAsync()
+    {
+        return ImmutableSet.copyOf(loggedInPlayers.values());
+    }
+
+    /**
+     * Get a player from an UUID. This method can be used asynchronously.
+     *
+     * The returned {@link Player} object must be used read-only for thread safety.
+     *
+     * @param id The player's UUID.
+     * @return The Player object.
+     */
+    public static Player getPlayerAsync(UUID id)
+    {
+        return loggedInPlayers.get(id);
+    }
+
+    /**
+     * Updates the asynchronously-available list of logged-in players.
+     *
+     * This method needs to be called synchronously!
+     */
+    static void updateLoggedInPlayers()
+    {
+        loggedInPlayers.clear();
+
+        for(Player player : Bukkit.getOnlinePlayers())
+        {
+            loggedInPlayers.put(player.getUniqueId(), player);
+        }
     }
 }
