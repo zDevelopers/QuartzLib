@@ -284,27 +284,34 @@ public abstract class Sidebar
     public void runAutoRefresh(final boolean run)
     {
         if(refreshTask != null)
+        {
             refreshTask.cancel();
-
-        Runnable refreshRunnable = new Runnable() {
-            @Override
-            public void run()
-            {
-                refresh();
-            }
-        };
-
-        if(async)
-        {
-            refreshTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
-                    ZLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
-            );
+            refreshTask = null;
         }
-        else
+
+        if(run)
         {
-            refreshTask = Bukkit.getScheduler().runTaskTimer(
-                    ZLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
-            );
+            Runnable refreshRunnable = new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    refresh();
+                }
+            };
+
+            if (async)
+            {
+                refreshTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
+                        ZLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
+                );
+            }
+            else
+            {
+                refreshTask = Bukkit.getScheduler().runTaskTimer(
+                        ZLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
+                );
+            }
         }
     }
 
