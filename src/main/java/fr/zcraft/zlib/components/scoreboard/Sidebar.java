@@ -63,7 +63,7 @@ public abstract class Sidebar
     private static Set<Sidebar> sidebars = new CopyOnWriteArraySet<>();
 
     // Asynchronously available list of the logged in players.
-    private static Map<UUID, Player> loggedInPlayers = new ConcurrentHashMap<>();
+    private static final Map<UUID, Player> loggedInPlayers = new ConcurrentHashMap<>();
 
 
     /* ** This instance's attributes ** */
@@ -428,15 +428,18 @@ public abstract class Sidebar
     /**
      * Updates the asynchronously-available list of logged-in players.
      *
-     * This method needs to be called synchronously!
+     * This method needs to be called from the Bukkit's main thread!
      */
     static void updateLoggedInPlayers()
     {
-        loggedInPlayers.clear();
-
-        for(Player player : Bukkit.getOnlinePlayers())
+        synchronized (loggedInPlayers)
         {
-            loggedInPlayers.put(player.getUniqueId(), player);
+            loggedInPlayers.clear();
+
+            for (Player player : Bukkit.getOnlinePlayers())
+            {
+                loggedInPlayers.put(player.getUniqueId(), player);
+            }
         }
     }
 }
