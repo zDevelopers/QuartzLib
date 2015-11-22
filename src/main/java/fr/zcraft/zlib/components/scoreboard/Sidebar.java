@@ -30,11 +30,13 @@
 package fr.zcraft.zlib.components.scoreboard;
 
 import com.google.common.collect.ImmutableSet;
+import fr.zcraft.zlib.components.scoreboard.sender.SidebarObjective;
 import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,6 +79,12 @@ public abstract class Sidebar
     private long autoRefreshDelay = 0;
     private BukkitTask refreshTask = null;
 
+    // Only used if both titleMode and contentMode are global.
+    private SidebarObjective globalObjective = null;
+
+    // Other cases
+    private Map<UUID,SidebarObjective> objectives = new ConcurrentHashMap<>();
+
 
     public Sidebar()
     {
@@ -99,7 +107,7 @@ public abstract class Sidebar
      *
      * @return The content. {@code null} to cancel this update.
      */
-    abstract List<String> getContent(Player player);
+    abstract List<String> getContent(final Player player);
 
     /**
      * Returns the title of the scoreboard. Called by the update methods.
@@ -110,7 +118,7 @@ public abstract class Sidebar
      *
      * @return The title. {@code null} to cancel this update.
      */
-    abstract String getTitle(Player player);
+    abstract String getTitle(final Player player);
 
 
 
@@ -126,7 +134,7 @@ public abstract class Sidebar
      *
      * @param async {@code true} if async.
      */
-    public void setAsync(boolean async)
+    public void setAsync(final boolean async)
     {
         this.async = async;
     }
@@ -139,7 +147,7 @@ public abstract class Sidebar
      *
      * @param autoRefreshDelay The delay, in ticks.
      */
-    public void setAutoRefreshDelay(long autoRefreshDelay)
+    public void setAutoRefreshDelay(final long autoRefreshDelay)
     {
         this.autoRefreshDelay = autoRefreshDelay;
     }
@@ -152,7 +160,7 @@ public abstract class Sidebar
      *
      * @param lastLineScore The score of the bottom line.
      */
-    public void setLastLineScore(int lastLineScore)
+    public void setLastLineScore(final int lastLineScore)
     {
         this.lastLineScore = Math.max(lastLineScore, 1);
     }
@@ -163,7 +171,7 @@ public abstract class Sidebar
      *
      * @param contentMode The mode.
      */
-    public void setContentMode(SidebarMode contentMode)
+    public void setContentMode(final SidebarMode contentMode)
     {
         this.contentMode = contentMode;
     }
@@ -174,7 +182,7 @@ public abstract class Sidebar
      *
      * @param titleMode The mode.
      */
-    public void setTitleMode(SidebarMode titleMode)
+    public void setTitleMode(final SidebarMode titleMode)
     {
         this.titleMode = titleMode;
     }
@@ -184,7 +192,7 @@ public abstract class Sidebar
      *
      * @param id The recipient's UUID.
      */
-    public void addRecipient(UUID id)
+    public void addRecipient(final UUID id)
     {
         recipients.add(id);
     }
@@ -194,7 +202,7 @@ public abstract class Sidebar
      *
      * @param player The recipient.
      */
-    public void addRecipient(Player player)
+    public void addRecipient(final Player player)
     {
         addRecipient(player.getUniqueId());
     }
@@ -204,9 +212,10 @@ public abstract class Sidebar
      *
      * @param id The recipient's UUID.
      */
-    public void removeRecipient(UUID id)
+    public void removeRecipient(final UUID id)
     {
         recipients.remove(id);
+        objectives.remove(id);
     }
 
     /**
@@ -214,7 +223,7 @@ public abstract class Sidebar
      *
      * @param player The recipient.
      */
-    public void removeRecipient(Player player)
+    public void removeRecipient(final Player player)
     {
         removeRecipient(player.getUniqueId());
     }
@@ -235,13 +244,26 @@ public abstract class Sidebar
         if (contentMode == SidebarMode.GLOBAL)
             content = getContent(null);
 
-
-        for (UUID id : recipients)
+        if(titleMode == SidebarMode.GLOBAL && contentMode == SidebarMode.GLOBAL)
         {
-            Player recipient = getPlayerAsync(id);
-            if (recipient != null && recipient.isOnline())
+            // If the content needs to be refreshed, a new objective is created
+            if(content != null || globalObjective == null)
+                globalObjective = constructObjective(title, content, recipients);
+
+            // Else, only the title is updated, or nothing
+            else if(title != null)
+                globalObjective.setDisplayName(title);
+        }
+
+        else
+        {
+            for (UUID id : recipients)
             {
-                refresh(recipient, title, content);
+                Player recipient = getPlayerAsync(id);
+                if (recipient != null && recipient.isOnline())
+                {
+                    refresh(recipient, title, content);
+                }
             }
         }
     }
@@ -254,7 +276,7 @@ public abstract class Sidebar
      *
      * @param run {@code true} to run the task. {@code false} to stop it.
      */
-    public void runAutoRefresh(boolean run)
+    public void runAutoRefresh(final boolean run)
     {
         if(refreshTask != null)
             refreshTask.cancel();
@@ -290,9 +312,60 @@ public abstract class Sidebar
      *
      * @param player The player.
      */
-    private void refresh(Player player, String globalTitle, List<String> globalContent)
+    private void refresh(final Player player, final String globalTitle, final List<String> globalContent)
     {
+        String title = globalTitle;
+        List<String> content = globalContent;
 
+        final UUID playerID = player.getUniqueId();
+
+
+        if(titleMode == SidebarMode.PER_PLAYER)
+        {
+            title = getTitle(player);
+        }
+
+        if(contentMode == SidebarMode.PER_PLAYER)
+        {
+            content = getContent(player);
+        }
+
+
+        if(content != null || !objectives.containsKey(playerID))
+        {
+            final SidebarObjective objective = constructObjective(title, content, Collections.singleton(playerID));
+
+            objectives.put(playerID, objective);
+            // TODO send the objective to the player
+        }
+        else if(title != null)
+        {
+            objectives.get(playerID).setDisplayName(title);
+        }
+    }
+
+    /**
+     * Construct an objective ready to be sent, from the raw data.
+     *
+     * @param title The sidebar's title.
+     * @param content The sidebar's content.
+     * @param receivers The receivers of this objective.
+     *
+     * @return The objective.
+     */
+    private SidebarObjective constructObjective(final String title, final List<String> content, Set<UUID> receivers)
+    {
+        SidebarObjective objective = new SidebarObjective(title);
+
+        int score = lastLineScore + content.size() - 1;  // The score of the first line
+
+        for(String line : content)
+        {
+            objective.setScore(line, score);
+            score--;
+        }
+
+        return objective;
     }
 
 
@@ -338,7 +411,7 @@ public abstract class Sidebar
      * @param id The player's UUID.
      * @return The Player object.
      */
-    public static Player getPlayerAsync(UUID id)
+    public static Player getPlayerAsync(final UUID id)
     {
         return loggedInPlayers.get(id);
     }
