@@ -246,6 +246,11 @@ public abstract class Sidebar
 
         if(titleMode == SidebarMode.GLOBAL && contentMode == SidebarMode.GLOBAL)
         {
+            // If nothing was done before (objective never created) and we don't have anything to
+            // do, we exit now to avoid errors.
+            if (title == null && content == null && globalObjective == null)
+                return;
+
             // If the content needs to be refreshed, a new objective is created
             if(content != null || globalObjective == null)
                 globalObjective = constructObjective(title, content, recipients);
@@ -318,6 +323,7 @@ public abstract class Sidebar
         List<String> content = globalContent;
 
         final UUID playerID = player.getUniqueId();
+        final boolean objectiveAlreadyExists = objectives.containsKey(playerID);
 
 
         if(titleMode == SidebarMode.PER_PLAYER)
@@ -331,16 +337,19 @@ public abstract class Sidebar
         }
 
 
-        if(content != null || !objectives.containsKey(playerID))
+        if (title != null || content != null)
         {
-            final SidebarObjective objective = constructObjective(title, content, Collections.singleton(playerID));
+            if (content != null || !objectiveAlreadyExists)
+            {
+                final SidebarObjective objective = constructObjective(title, content, Collections.singleton(playerID));
 
-            objectives.put(playerID, objective);
-            // TODO send the objective to the player
-        }
-        else if(title != null)
-        {
-            objectives.get(playerID).setDisplayName(title);
+                objectives.put(playerID, objective);
+                // TODO send the objective to the player
+            }
+            else
+            {
+                objectives.get(playerID).setDisplayName(title);
+            }
         }
     }
 

@@ -58,8 +58,11 @@ public class SidebarObjective
      */
     public SidebarObjective(String name, String displayName)
     {
+        if(name == null)
+            name = UUID.randomUUID().getLeastSignificantBits() + "";
+
         this.name = name.substring(0, Math.min(32, name.length()));
-        this.displayName = displayName.substring(0, Math.min(32, displayName.length()));
+        this.displayName = displayName != null ? displayName.substring(0, Math.min(32, displayName.length())) : "";
     }
 
     /**
@@ -69,7 +72,7 @@ public class SidebarObjective
      */
     public SidebarObjective(String displayName)
     {
-        this(UUID.randomUUID().getLeastSignificantBits() + "", displayName);
+        this(null, displayName);
     }
 
     /**
@@ -77,7 +80,7 @@ public class SidebarObjective
      */
     public SidebarObjective()
     {
-        this("");
+        this(null);
     }
 
 
