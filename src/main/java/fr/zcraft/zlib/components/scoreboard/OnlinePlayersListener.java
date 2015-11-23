@@ -44,19 +44,18 @@ public class OnlinePlayersListener implements Listener
     public void onPlayerJoin(PlayerJoinEvent ev)
     {
         Sidebar.updateLoggedInPlayers();
+        ObjectiveSender.invalidateConnection(ev.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerLeft(PlayerQuitEvent ev)
     {
         Sidebar.updateLoggedInPlayers();
-        ObjectiveSender.invalidateConnection(ev.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerLeft(PlayerKickEvent ev)
     {
         Sidebar.updateLoggedInPlayers();
-        ObjectiveSender.invalidateConnection(ev.getPlayer().getUniqueId());
     }
 }
