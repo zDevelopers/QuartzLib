@@ -96,6 +96,9 @@ public class SidebarObjective
         Validate.notNull(name, "The score name cannot be null!");
         Validate.notNull(score, "The score cannot be null!");
 
+        if(name.length() > 40)
+            name = name.substring(0, 40);
+
         return scores.put(name, score) != null;
     }
 
