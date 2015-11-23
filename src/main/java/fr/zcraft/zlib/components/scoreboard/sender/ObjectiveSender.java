@@ -32,7 +32,6 @@ package fr.zcraft.zlib.components.scoreboard.sender;
 
 import fr.zcraft.zlib.components.scoreboard.Sidebar;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
-import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.ReflectionUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
@@ -181,9 +180,7 @@ public class ObjectiveSender
             {
                 send(receiver, objective);
             }
-            catch (RuntimeException ignored) {
-                PluginLogger.error("Cannot send objective", ignored);
-            } // Caught, so the packets are not sent for this player only.
+            catch (RuntimeException ignored) {} // Caught, so the packets are not sent for this player only.
         }
     }
 
