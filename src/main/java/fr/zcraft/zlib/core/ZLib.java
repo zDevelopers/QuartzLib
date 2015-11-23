@@ -30,6 +30,7 @@
 package fr.zcraft.zlib.core;
 
 import com.google.common.collect.ImmutableSet;
+import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
@@ -48,18 +49,22 @@ public abstract class ZLib
      * This needs to be called before anything else; otherwise, you will encounter
      * {@link IllegalStateException}s.
      *
+     * This method also initializes the {@link PluginLogger}, used by the zLib.
+     *
      * @param plugin The plugin currently using this instance of the ZLib.
      */
     static public void init(JavaPlugin plugin)
     {
         ZLib.plugin = plugin;
+
+        PluginLogger.init();
     }
 
     /**
      * Loads a ZLib component, and store it as loaded to automatically unload it when needed.
      *
      * @param component The component to load.
-     * @throws IllegalStateException if the zlib was not initialized.
+     * @throws IllegalStateException if the zLib was not initialized.
      */
     static void loadComponent(ZLibComponent component) throws IllegalStateException
     {

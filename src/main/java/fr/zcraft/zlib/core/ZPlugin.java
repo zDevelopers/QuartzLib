@@ -44,7 +44,7 @@ public abstract class ZPlugin extends JavaPlugin
 {
 
 	@Override
-	public void onEnable()
+	public void onLoad()
 	{
 		ZLib.init(this);
 	}
