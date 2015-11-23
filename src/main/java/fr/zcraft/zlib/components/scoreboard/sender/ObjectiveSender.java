@@ -160,14 +160,6 @@ public class ObjectiveSender
     /**
      * Sends the given objective to its receiver(s).
      *
-     * This method will:
-     * <ul>
-     *     <li>send the “create objective” packet if needed;</li>
-     *     <li>send the “display scoreboard” packet, to show the sidebar at the right place;</li>
-     *     <li>send the “update score” packet for each score in the objective;</li>
-     *     <li>if previously present, send a “remove objective” packet to remove the previously-sent objective.</li>
-     * </ul>
-     *
      * @param objective The objective to be displayed.
      */
     public static void send(SidebarObjective objective)
@@ -184,6 +176,14 @@ public class ObjectiveSender
         }
     }
 
+    /**
+     * Updates the display name of the given objective.
+     *
+     * For each receiver, this will send a display name update packet if the objective is already
+     * displayed, or send the whole sidebar, if not.
+     *
+     * @param objective The objective to update.
+     */
     public static void updateDisplayName(SidebarObjective objective)
     {
         Validate.notNull(objective, "The objective cannot be null");
@@ -210,6 +210,20 @@ public class ObjectiveSender
 
     /* **  Objective senders private API  ** */
 
+    /**
+     * Sends the given objective to the receiver.
+     *
+     * This method will:
+     * <ul>
+     *     <li>send the “create objective” packet if needed;</li>
+     *     <li>send the “display scoreboard” packet, to show the sidebar at the right place;</li>
+     *     <li>send the “update score” packet for each score in the objective;</li>
+     *     <li>if previously present, send a “remove objective” packet to remove the previously-sent objective.</li>
+     * </ul>
+     *
+     * @param receiver  The receiver of this objective.
+     * @param objective The objective to display.
+     */
     private static void send(UUID receiver, SidebarObjective objective)
     {
         final String oldObjective = sentObjectives.get(receiver);
@@ -231,21 +245,45 @@ public class ObjectiveSender
         }
     }
 
+    /**
+     * Sends the packet to create the given objective.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objective The objective to create.
+     */
     private static void createObjective(Object connection, SidebarObjective objective)
     {
         sendScoreboardObjectivePacket(connection, objective.getName(), objective.getDisplayName(), PACKET_SCOREBOARD_OBJECTIVE_ACTION_CREATE);
     }
 
+    /**
+     * Sends the packet to update the display name of the given objective.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objective The objective to update.
+     */
     private static void updateObjectiveDisplayName(Object connection, SidebarObjective objective)
     {
         sendScoreboardObjectivePacket(connection, objective.getName(), objective.getDisplayName(), PACKET_SCOREBOARD_OBJECTIVE_ACTION_UPDATE);
     }
 
+    /**
+     * Sends the packet to set the display slot of the given objective.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objective The objective to place.
+     */
     private static void setObjectiveDisplay(Object connection, SidebarObjective objective)
     {
         sendScoreboardDisplayObjectivePacket(connection, objective.getName(), PACKET_DISPLAY_OBJECTIVE_SIDEBAR_LOCATION);
     }
 
+    /**
+     * Sends the score packets of the given objective.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objective The objective containing the score packets to send.
+     */
     private static void sendScores(Object connection, SidebarObjective objective)
     {
         for (Map.Entry<String, Integer> score : objective.getScores().entrySet())
@@ -254,16 +292,37 @@ public class ObjectiveSender
         }
     }
 
+    /**
+     * Sends a create score packet.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objective The objective the score belongs to.
+     * @param score The score's name to send. If this is longer than 40 characters, the client will crash.
+     * @param value The score's value to send.
+     */
     private static void sendScore(Object connection, SidebarObjective objective, String score, Integer value)
     {
         sendScoreboardScorePacket(connection, objective.getName(), score, value, enumScoreboardAction_CHANGE);
     }
 
+    /**
+     * Sends a remove score packet.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objective The objective the score belongs to.
+     * @param score The score to delete.
+     */
     private static void deleteScore(Object connection, SidebarObjective objective, String score)
     {
         sendScoreboardScorePacket(connection, objective.getName(), score, 0, enumScoreboardAction_REMOVE);
     }
 
+    /**
+     * Sends the packet to destroy an objective.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objectiveName The name of the objective to destroy.
+     */
     private static void destroyObjective(Object connection, String objectiveName)
     {
         sendScoreboardObjectivePacket(connection, objectiveName, "", PACKET_SCOREBOARD_OBJECTIVE_ACTION_DELETE);
@@ -273,6 +332,17 @@ public class ObjectiveSender
 
     /* **  Low level packet senders  ** */
 
+    /**
+     * Sends a Scoreboard Objective packet.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objectiveName The name of the objective.
+     * @param objectiveDisplayName The display name of the objective.
+     * @param action The action to execute: 0 (to create), 1 (to delete) or 2 (to update).
+     *
+     * @throws IncompatibleMinecraftVersionException if the packet cannot be constructed or sent.
+     * @throws RuntimeException if something bad happens.
+     */
     private static void sendScoreboardObjectivePacket(Object connection, String objectiveName, String objectiveDisplayName, int action)
     {
         try
@@ -296,6 +366,16 @@ public class ObjectiveSender
         }
     }
 
+    /**
+     * Sends a Scoreboard Display Objective packet.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objectiveName The objective's name.
+     * @param location Where the objective will be displayed: 0 (list), 1 (sidebar) or 2 (below name).
+     *
+     * @throws IncompatibleMinecraftVersionException if the packet cannot be constructed or sent.
+     * @throws RuntimeException if something bad happens.
+     */
     private static void sendScoreboardDisplayObjectivePacket(Object connection, String objectiveName, int location)
     {
         try
@@ -317,6 +397,19 @@ public class ObjectiveSender
         }
     }
 
+    /**
+     * Sends a Scoreboard Score packet.
+     *
+     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param objectiveName The objective's name.
+     * @param scoreName The score's name.
+     * @param scoreValue The score's value.
+     * @param action The action to execute: an enum value of {@code PacketPlayOutScoreboardScore$EnumScoreboardAction}
+     *               (CHANGE or REMOVE — use {@link #enumScoreboardAction_CHANGE} or {@link #enumScoreboardAction_REMOVE}).
+     *
+     * @throws IncompatibleMinecraftVersionException if the packet cannot be constructed or sent.
+     * @throws RuntimeException if something bad happens.
+     */
     private static void sendScoreboardScorePacket(Object connection, String objectiveName, String scoreName, int scoreValue, Object action)
     {
         try
