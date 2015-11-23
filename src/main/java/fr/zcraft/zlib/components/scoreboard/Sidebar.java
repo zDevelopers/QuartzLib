@@ -30,6 +30,7 @@
 package fr.zcraft.zlib.components.scoreboard;
 
 import com.google.common.collect.ImmutableSet;
+import fr.zcraft.zlib.components.scoreboard.sender.ObjectiveSender;
 import fr.zcraft.zlib.components.scoreboard.sender.SidebarObjective;
 import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;
@@ -351,17 +352,20 @@ public abstract class Sidebar
                 final SidebarObjective objective = constructObjective(title, content, Collections.singleton(playerID));
 
                 objectives.put(playerID, objective);
-                // TODO send the objective to the player
+                ObjectiveSender.send(objective);
             }
             else
             {
-                objectives.get(playerID).setDisplayName(title);
+                final SidebarObjective objective = objectives.get(playerID);
+
+                objective.setDisplayName(title);
+                ObjectiveSender.updateDisplayName(objective);
             }
         }
     }
 
     /**
-     * Construct an objective ready to be sent, from the raw data.
+     * Constructs an objective ready to be sent, from the raw data.
      *
      * @param title The sidebar's title.
      * @param content The sidebar's content.
@@ -375,10 +379,15 @@ public abstract class Sidebar
 
         int score = lastLineScore + content.size() - 1;  // The score of the first line
 
-        for(String line : content)
+        for (String line : content)
         {
             objective.setScore(line, score);
             score--;
+        }
+
+        for (UUID receiver : receivers)
+        {
+            objective.addReceiver(receiver);
         }
 
         return objective;

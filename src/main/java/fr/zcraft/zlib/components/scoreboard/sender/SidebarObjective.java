@@ -59,9 +59,9 @@ public class SidebarObjective
     public SidebarObjective(String name, String displayName)
     {
         if(name == null)
-            name = UUID.randomUUID().getLeastSignificantBits() + "";
+            name = Math.abs(UUID.randomUUID().getLeastSignificantBits()) + "";
 
-        this.name = name.substring(0, Math.min(32, name.length()));
+        this.name = name.substring(0, Math.min(16, name.length()));
         this.displayName = displayName != null ? displayName.substring(0, Math.min(32, displayName.length())) : "";
     }
 

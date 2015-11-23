@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.scoreboard.sender;
 
 import fr.zcraft.zlib.components.scoreboard.Sidebar;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
+import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.ReflectionUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
@@ -178,22 +179,30 @@ public class ObjectiveSender
         {
             try
             {
-                final String oldObjective = sentObjectives.get(receiver);
-                final Object connection = getPlayerConnection(receiver);
+                send(receiver, objective);
+            }
+            catch (RuntimeException ignored) {
+                PluginLogger.error("Cannot send objective", ignored);
+            } // Caught, so the packets are not sent for this player only.
+        }
+    }
 
-                createObjective(connection, objective);
-                sendScores(connection, objective);
+    public static void updateDisplayName(SidebarObjective objective)
+    {
+        Validate.notNull(objective, "The objective cannot be null");
 
-                // The objective is displayed when the scores are sent, so all the lines are displayed
-                // instantaneously, even with bad connections.
-                setObjectiveDisplay(connection, objective);
-
-
-                sentObjectives.put(receiver, objective.getName());
-
-                if (oldObjective != null)
+        for (UUID receiver : objective.getReceivers())
+        {
+            try
+            {
+                String currentPlayerObjective = sentObjectives.get(receiver);
+                if(currentPlayerObjective != null && objective.getName().equals(currentPlayerObjective))
                 {
-                    destroyObjective(connection, oldObjective);
+                    updateObjectiveDisplayName(getPlayerConnection(receiver), objective);
+                }
+                else
+                {
+                    send(receiver, objective);
                 }
             }
             catch (RuntimeException ignored) {} // Caught, so the packets are not sent for this player only.
@@ -203,6 +212,27 @@ public class ObjectiveSender
 
 
     /* **  Objective senders private API  ** */
+
+    private static void send(UUID receiver, SidebarObjective objective)
+    {
+        final String oldObjective = sentObjectives.get(receiver);
+        final Object connection = getPlayerConnection(receiver);
+
+        createObjective(connection, objective);
+        sendScores(connection, objective);
+
+        // The objective is displayed when the scores are sent, so all the lines are displayed
+        // instantaneously, even with bad connections.
+        setObjectiveDisplay(connection, objective);
+
+
+        sentObjectives.put(receiver, objective.getName());
+
+        if (oldObjective != null)
+        {
+            destroyObjective(connection, oldObjective);
+        }
+    }
 
     private static void createObjective(Object connection, SidebarObjective objective)
     {
