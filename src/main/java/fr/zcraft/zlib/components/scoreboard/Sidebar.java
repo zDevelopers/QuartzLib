@@ -107,7 +107,7 @@ public abstract class Sidebar
      *
      * @return The content. {@code null} to cancel this update.
      */
-    abstract List<String> getContent(final Player player);
+    public abstract List<String> getContent(final Player player);
 
     /**
      * Returns the title of the scoreboard. Called by the update methods.
@@ -118,7 +118,7 @@ public abstract class Sidebar
      *
      * @return The title. {@code null} to cancel this update.
      */
-    abstract String getTitle(final Player player);
+    public abstract String getTitle(final Player player);
 
 
 

@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.components.scoreboard;
 
+import fr.zcraft.zlib.components.scoreboard.sender.ObjectiveSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -49,11 +50,13 @@ public class OnlinePlayersListener implements Listener
     public void onPlayerLeft(PlayerQuitEvent ev)
     {
         Sidebar.updateLoggedInPlayers();
+        ObjectiveSender.invalidateConnection(ev.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerLeft(PlayerKickEvent ev)
     {
         Sidebar.updateLoggedInPlayers();
+        ObjectiveSender.invalidateConnection(ev.getPlayer().getUniqueId());
     }
 }
