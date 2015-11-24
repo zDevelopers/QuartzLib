@@ -193,7 +193,7 @@ public class ObjectiveSender
             try
             {
                 String currentPlayerObjective = sentObjectives.get(receiver);
-                if(currentPlayerObjective != null && objective.getName().equals(currentPlayerObjective))
+                if (currentPlayerObjective != null && objective.getName().equals(currentPlayerObjective))
                 {
                     updateObjectiveDisplayName(getPlayerConnection(receiver), objective);
                 }
@@ -204,6 +204,19 @@ public class ObjectiveSender
             }
             catch (RuntimeException ignored) {} // Caught, so the packets are not sent for this player only.
         }
+    }
+
+    /**
+     * Tells the given player to destroy the previously sent objective, if it exists.
+     *
+     * @param player The UUID of the player to clear.
+     */
+    public static void clear(UUID player)
+    {
+        String sentObjectiveName = sentObjectives.get(player);
+
+        if (sentObjectiveName != null)
+            destroyObjective(getPlayerConnection(player), sentObjectiveName);
     }
 
 

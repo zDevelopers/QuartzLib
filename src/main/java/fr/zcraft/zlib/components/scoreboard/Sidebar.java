@@ -217,6 +217,11 @@ public abstract class Sidebar
     {
         recipients.remove(id);
         objectives.remove(id);
+
+        if(contentMode == SidebarMode.GLOBAL && titleMode == SidebarMode.GLOBAL && globalObjective != null)
+            globalObjective.removeReceiver(id);
+
+        ObjectiveSender.clear(id);
     }
 
     /**
