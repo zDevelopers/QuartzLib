@@ -130,10 +130,13 @@ public class CommandGroup implements TabCompleter, CommandExecutor
     private void addCommand(Class<? extends Command> commandClass)
     {
         Constructor<? extends Command> constructor;
+        Command newCommand;
         try 
         {
-            constructor = commandClass.getConstructor(CommandGroup.class);
-            commands.add(constructor.newInstance(isShortcutCommand() ? shortcutCommandGroup : this));
+            constructor = commandClass.getConstructor();
+            newCommand = constructor.newInstance();
+            newCommand.init(isShortcutCommand() ? shortcutCommandGroup : this);
+            commands.add(newCommand);
         } 
         catch (Exception ex) 
         {
@@ -268,9 +271,11 @@ public class CommandGroup implements TabCompleter, CommandExecutor
         return commandsNames;
     }
     
-    public void register(JavaPlugin plugin)
+    void register(JavaPlugin plugin)
     {
         PluginCommand bukkitCommand = plugin.getCommand(getUsualName());
+        if(bukkitCommand == null)
+            throw new IllegalStateException("Command " + getUsualName() + " is not correctly registered in plugin.yml");
         bukkitCommand.setAliases(getAliases());
         bukkitCommand.setExecutor(this);
         bukkitCommand.setTabCompleter(this);

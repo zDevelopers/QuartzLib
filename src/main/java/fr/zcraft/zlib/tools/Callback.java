@@ -28,10 +28,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.components.worker;
+package fr.zcraft.zlib.tools;
 
-public interface WorkerCallback<T>
+public interface Callback<T>
 {
-    public void finished(T result);
-    public void errored(Throwable exception);
+    public void call(T parameter);
 }

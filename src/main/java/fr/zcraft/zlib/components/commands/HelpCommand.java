@@ -41,11 +41,6 @@ import java.util.Scanner;
 @CommandInfo(name = "help", usageParameters = "<command name>")
 public class HelpCommand extends Command
 {
-    
-    public HelpCommand(CommandGroup commandGroup) {
-        super(commandGroup);
-    }
-    
     @Override
     protected void run() throws CommandException 
     {

@@ -65,7 +65,7 @@ public abstract class ZPlugin extends JavaPlugin
 			}
 			catch (InstantiationException | IllegalAccessException e)
 			{
-				PluginLogger.error("Cannot instantiate the ZLib component " + componentClass.getName(), e);
+				PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
 			}
 		}
 	}

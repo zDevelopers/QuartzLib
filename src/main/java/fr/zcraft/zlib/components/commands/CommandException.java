@@ -32,7 +32,7 @@ package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.tools.PluginLogger;
 
-class CommandException extends Exception
+public class CommandException extends Exception
 {
     public enum Reason
     {
