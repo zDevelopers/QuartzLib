@@ -1,24 +1,35 @@
 /*
- * Copyright (C) 2013 Moribus
- * Copyright (C) 2015 ProkopyL <prokopylmc@gmail.com>
+ * Copyright or © or Copr. ZLib contributors (2015)
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.gui;
+package fr.zcraft.zlib.components.gui;
 
-import static fr.zcraft.zlib.gui.Gui.getOpenGui;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
@@ -30,7 +41,7 @@ import org.bukkit.inventory.*;
  * It allows you to create custom GUIs by simply providing an inventory
  * to fill, as well as rerouting basic events to it.
  */
-abstract public class InventoryGui extends Gui
+abstract public class InventoryGui extends GuiBase
 {
     static protected final int INVENTORY_ROW_SIZE = 9;
     static protected final int MAX_INVENTORY_COLUMN_SIZE = 6;
@@ -39,7 +50,7 @@ abstract public class InventoryGui extends Gui
     
     public InventoryGui()
     {
-        registerListener(GuiListener.class);
+        Gui.registerListener(GuiListener.class);
     }
     
     /**
@@ -50,7 +61,7 @@ abstract public class InventoryGui extends Gui
     /**
      * The title of the inventory.
      */
-    private String title;
+    private String title = "Inventory";
     
     /**
      * The current Bukkit inventory.
@@ -181,7 +192,7 @@ abstract public class InventoryGui extends Gui
     /* ===== Getters & Setters ===== */
     
     /** @return The size of the inventory. */
-    protected int getSize() { return size; }
+    protected final int getSize() { return size; }
     
     /**
      * Sets the new size of the inventory.
@@ -190,7 +201,7 @@ abstract public class InventoryGui extends Gui
      * It will be applied on the next GUI update.
      * @param size The new size of the inventory.
      */
-    protected void setSize(int size)
+    protected final void setSize(int size)
     {
         this.size = Math.min(((int)(Math.ceil((double) size / INVENTORY_ROW_SIZE))) * INVENTORY_ROW_SIZE, MAX_INVENTORY_SIZE);
     }
@@ -223,7 +234,7 @@ abstract public class InventoryGui extends Gui
         @EventHandler
         public void onInventoryDrag(InventoryDragEvent event)
         {
-            InventoryGui openGui = getOpenGui(event.getWhoClicked(), InventoryGui.class);
+            InventoryGui openGui = Gui.getOpenGui(event.getWhoClicked(), InventoryGui.class);
             if(openGui == null) return;
             
             openGui.onDrag(event);
@@ -232,7 +243,7 @@ abstract public class InventoryGui extends Gui
         @EventHandler
         public void onInventoryClick(InventoryClickEvent event)
         {
-            InventoryGui openGui = getOpenGui(event.getWhoClicked(), InventoryGui.class);
+            InventoryGui openGui = Gui.getOpenGui(event.getWhoClicked(), InventoryGui.class);
             if(openGui == null) return;
             
             openGui.onClick(event);
@@ -241,7 +252,7 @@ abstract public class InventoryGui extends Gui
         @EventHandler
         public void onInventoryClose(InventoryCloseEvent event)
         {
-            InventoryGui openGui = getOpenGui(event.getPlayer(), InventoryGui.class);
+            InventoryGui openGui = Gui.getOpenGui(event.getPlayer(), InventoryGui.class);
             if(openGui == null) return;
             
             if(!event.getInventory().equals(openGui.inventory)) return;

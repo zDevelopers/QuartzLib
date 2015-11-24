@@ -29,7 +29,6 @@
  */
 package fr.zcraft.zlib.tools;
 
-import fr.zcraft.zlib.PluginLogger;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.enchantments.EnchantmentWrapper;

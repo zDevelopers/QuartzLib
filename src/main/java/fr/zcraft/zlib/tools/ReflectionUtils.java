@@ -29,7 +29,6 @@
  */
 package fr.zcraft.zlib.tools;
 
-import fr.zcraft.zlib.PluginLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -45,7 +44,7 @@ import java.lang.reflect.Method;
  * @author ProkopyL
  * @author Amaury Carrade (documentation only).
  */
-abstract public class ReflectionUtils
+abstract public class ReflectionUtils 
 {
     /**
      * Returns the Bukkit's current version, as read in the Bukkit's package name.
@@ -56,7 +55,7 @@ abstract public class ReflectionUtils
     {
         return getBukkitPackageName().substring("org.bukkit.craftbukkit.".length());
     }
-
+    
     /**
      * Returns the full name of the root Bukkit package: something like
      * "org.bukkit.craftbukkit.v1_8_R3".
@@ -67,7 +66,7 @@ abstract public class ReflectionUtils
     {
         return Bukkit.getServer().getClass().getPackage().getName();
     }
-
+    
     /**
      * Returns the full name of the root NMS package: something like "net.minecraft.server.v1_8_R3".
      *
@@ -77,7 +76,7 @@ abstract public class ReflectionUtils
     {
         return "net.minecraft.server." + getBukkitPackageVersion();
     }
-
+    
     /**
      * Returns the {@link Class} of a Bukkit class from it's name (without the main Bukkit
      * package).
@@ -94,7 +93,7 @@ abstract public class ReflectionUtils
     {
         return Class.forName(getBukkitPackageName() + "." + name);
     }
-
+    
     /**
      * Returns the {@link Class} of a NMS class from it's name (without the main NMS package).
      *
@@ -110,7 +109,7 @@ abstract public class ReflectionUtils
     {
         return Class.forName(getMinecraftPackageName() + "." + name);
     }
-
+    
 
     /**
      * Returns the value of a field (regardless of its visibility) for the given instance.
@@ -125,12 +124,12 @@ abstract public class ReflectionUtils
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public Object getFieldValue(Class hClass, Object instance, String name)
+    static public Object getFieldValue(Class hClass, Object instance, String name) 
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         return getField(hClass, name).get(instance);
     }
-
+    
     /**
      * Returns the value of a field (regardless of its visibility) for the given instance.
      *
@@ -144,12 +143,12 @@ abstract public class ReflectionUtils
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public Object getFieldValue(Object instance, String name)
+    static public Object getFieldValue(Object instance, String name) 
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         return getFieldValue(instance.getClass(), instance, name);
     }
-
+    
 
     /**
      * Makes the {@link Field} with the given name in the given class accessible, and returns it.
@@ -166,7 +165,7 @@ abstract public class ReflectionUtils
         field.setAccessible(true);
         return field;
     }
-
+    
     /**
      * Finds the first {@link Field} in the given class with the given type, makes it accessible,
      * and returns it.
@@ -190,7 +189,7 @@ abstract public class ReflectionUtils
 
         throw new NoSuchFieldException("Class " + klass.getName() + " does not define any field of type " + type.getName());
     }
-
+    
 
     /**
      * Update the field with the given name in the given instance using the given value.
@@ -205,12 +204,12 @@ abstract public class ReflectionUtils
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public void setFieldValue(Object instance, String name, Object value)
+    static public void setFieldValue(Object instance, String name, Object value) 
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         setFieldValue(instance.getClass(), instance, name, value);
     }
-
+    
     /**
      * Update the field with the given name in the given instance using the given value.
      *
@@ -224,12 +223,12 @@ abstract public class ReflectionUtils
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public void setFieldValue(Class hClass, Object instance, String name, Object value)
+    static public void setFieldValue(Class hClass, Object instance, String name, Object value) 
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         getField(hClass, name).set(instance, value);
     }
-
+    
 
     /**
      * Calls the given static method of the given class, passing the given parameters to it.
@@ -255,7 +254,7 @@ abstract public class ReflectionUtils
     {
         return call(hClass, null, name, parameters);
     }
-
+    
     /**
      * Calls the given method on the given instance, passing the given parameters to it.
      *
@@ -283,7 +282,7 @@ abstract public class ReflectionUtils
     {
         return call(instance.getClass(), instance, name, parameters);
     }
-
+    
     /**
      * Calls the given method on the given instance, passing the given parameters to it.
      *
@@ -313,7 +312,7 @@ abstract public class ReflectionUtils
         Method method = hClass.getMethod(name, getTypes(parameters));
         return method.invoke(instance, parameters);
     }
-
+    
     /**
      * Creates and returns an instance of the given class, passing the given parameters to the
      * appropriate constructor.
@@ -339,13 +338,13 @@ abstract public class ReflectionUtils
      * @throws InvocationTargetException if an exception is thrown in the constructor.
      */
     static public Object instantiate(Class hClass, Object... parameters)
-            throws NoSuchMethodException, InstantiationException,
+            throws NoSuchMethodException, InstantiationException, 
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         Constructor constructor = hClass.getConstructor(getTypes(parameters));
         return constructor.newInstance(parameters);
     }
-
+    
 
     /**
      * Returns the player's connection, frequently used to send packets.
@@ -368,9 +367,9 @@ abstract public class ReflectionUtils
         {
             PluginLogger.error("Cannot retrieve standard Bukkit or NBS object, is the current Bukkit/Minecraft version supported by this API?", e);
             return null;
-        }
     }
-
+    }
+    
     /**
      * Sends a packet.
      *
@@ -393,13 +392,13 @@ abstract public class ReflectionUtils
 
             playerConnection.getClass().getDeclaredMethod("sendPacket", packetClass).invoke(playerConnection, packet);
             return true;
-        }
+    }
         catch (IllegalAccessException | NoSuchMethodException | ClassNotFoundException e)
         {
             return false;
         }
     }
-
+    
     /**
      * Sends a packet.
      *
@@ -429,12 +428,34 @@ abstract public class ReflectionUtils
      * @return an array with the types of the items in the original array.
      */
     static public Class[] getTypes(Object[] objects)
-    {
+        {
         Class[] types = new Class[objects.length];
         for (int i = 0; i < objects.length; i++)
         {
             types[i] = objects[i].getClass();
         }
         return types;
+    }
+    
+    static public <T> Class<? extends T> getCallerClass(Class<T> baseType)
+    {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for(int i = 2; i < stackTrace.length; i++)
+        {
+            if(stackTrace[i].getClassName().equals(baseType.getName()))
+                continue;
+            Class caller;
+            try
+            {
+                caller = Class.forName(stackTrace[i].getClassName());
+            }
+            catch (ClassNotFoundException ex)
+            {
+                continue;
+            }
+            if(baseType.isAssignableFrom(caller));
+                return caller;
+        }
+        return null;
     }
 }

@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fr.zcraft.zlib.configuration;
+package fr.zcraft.zlib.components.configuration;
 
-import fr.zcraft.zlib.ZLib;
+import fr.zcraft.zlib.core.ZLib;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 

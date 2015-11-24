@@ -29,7 +29,7 @@
  */
 package fr.zcraft.zlib.tools.chat;
 
-import fr.zcraft.zlib.ZLib;
+import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
