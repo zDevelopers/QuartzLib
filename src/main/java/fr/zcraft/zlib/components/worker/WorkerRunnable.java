@@ -17,7 +17,12 @@
  */
 package fr.zcraft.zlib.components.worker;
 
-public interface WorkerRunnable<T>
+public abstract class WorkerRunnable<T>
 {
-    public T run() throws Throwable;
+    private Worker worker;
+            
+    abstract public T run() throws Throwable;
+    
+    Worker getWorker() {return worker;}
+    void setWorker(Worker worker) {this.worker = worker;}
 }

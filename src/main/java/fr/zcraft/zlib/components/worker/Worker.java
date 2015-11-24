@@ -1,30 +1,102 @@
 /*
- * Copyright (C) 2013 Moribus
- * Copyright (C) 2015 ProkopyL <prokopylmc@gmail.com>
+ * Copyright or © or Copr. ZLib contributors (2015)
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package fr.zcraft.zlib.components.worker;
 
+import fr.zcraft.zlib.core.ZLib;
+import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.ReflectionUtils;
 import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-public abstract class Worker
+/**
+ * The base class for workers.
+ * A worker is a thread that can handle multiple tasks, which are executed in a queue.
+ * 
+ */
+public abstract class Worker extends ZLibComponent
 {
+    /*===== Static API =====*/
+    static private final HashMap<Class<? extends Worker>, Worker> runningWorkers = new HashMap();
+    static private final HashMap<Class<? extends WorkerRunnable>, Worker> runnables = new HashMap();
+    
+    
+    static protected <T> Future<T> submitToMainThread(Callable<T> callable)
+    {
+        return getCallerWorkerFromRunnable()._submitToMainThread(callable);
+    }
+    
+    static protected void submitQuery(WorkerRunnable runnable)
+    {
+        getCallerWorker()._submitQuery(runnable);
+    }
+    
+    static protected void submitQuery(WorkerRunnable runnable, WorkerCallback callback)
+    {
+        getCallerWorker()._submitQuery(runnable, callback);
+    }
+    
+    static private Worker getCallerWorker()
+    {
+        Class<? extends Worker> caller = ReflectionUtils.getCallerClass(Worker.class);
+        if(caller == null) 
+            throw new IllegalAccessError("Queries must be submitted from a Worker class");
+        
+        return getWorker(caller);
+    }
+    
+    static private Worker getWorker(Class<? extends Worker> workerClass)
+    {
+        Worker worker = runningWorkers.get(workerClass);
+        
+        if(worker == null)
+            throw new IllegalStateException("Worker '" + workerClass.getName() + "' has not been correctly initialized");
+        
+        return worker;
+    }
+    
+    static private Worker getCallerWorkerFromRunnable()
+    {
+        Class<? extends WorkerRunnable> caller = ReflectionUtils.getCallerClass(WorkerRunnable.class);
+        if(caller == null) 
+            throw new IllegalAccessError("Main thread queries must be submitted from a WorkerRunnable");
+        
+        Worker worker = runnables.get(caller);
+        if(worker == null)
+            throw new IllegalStateException("Caller runnable does not belong to any worker");
+        
+        return worker;
+    }
+    
     private final String name;
     private final ArrayDeque<WorkerRunnable> runQueue = new ArrayDeque<>();
     
@@ -32,37 +104,51 @@ public abstract class Worker
     private final WorkerMainThreadExecutor mainThreadExecutor;
     private Thread thread;
     
-    protected Worker(String name)
+    public Worker()
     {
-        this(name, false);
+        String tempName = null;
+        WorkerAttributes attributes = getClass().getAnnotation(WorkerAttributes.class);
+        
+        if(attributes != null)
+        {
+            tempName = attributes.name();
+            this.mainThreadExecutor = attributes.queriesMainThread() ? new WorkerMainThreadExecutor(tempName) : null;
+        }
+        else
+        {
+            this.mainThreadExecutor = null;
+        }
+        
+        if(tempName == null || tempName.isEmpty())
+            tempName = getClass().getSimpleName();
+        
+        this.name = tempName;
+        this.callbackManager = new WorkerCallbackManager(tempName);
     }
     
-    protected Worker(String name, boolean runMainThreadExecutor)
-    {
-        this.name = name;
-        this.callbackManager = new WorkerCallbackManager(name);
-        this.mainThreadExecutor = runMainThreadExecutor ? new WorkerMainThreadExecutor(name) : null;
-    }
-    
-    protected void init()
+    @Override
+    public void onEnable()
     {
         if(thread != null && thread.isAlive())
         {
-            PluginLogger.warning("Restarting '{0}' thread.", name);
-            exit();
+            PluginLogger.warning("Restarting thread '{0}'.", name);
+            onDisable();
         }
         callbackManager.init();
         if(mainThreadExecutor != null) mainThreadExecutor.init();
+        runningWorkers.put(getClass(), this);
         thread = createThread();
         thread.start();
     }
     
-    protected void exit()
+    @Override
+    public void onDisable()
     {
         thread.interrupt();
         callbackManager.exit();
         if(mainThreadExecutor != null) mainThreadExecutor.exit();
         thread = null;
+        runningWorkers.remove(getClass(), this);
     }
     
     private void run()
@@ -92,11 +178,13 @@ public abstract class Worker
             {
                 callbackManager.callback(currentRunnable, null, ex);
             }
+            runnables.remove(currentRunnable.getClass());
         }
     }
     
-    protected void submitQuery(WorkerRunnable runnable)
+    private void _submitQuery(WorkerRunnable runnable)
     {
+        attachRunnable(runnable);
         synchronized(runQueue)
         {
             runQueue.add(runnable);
@@ -104,13 +192,13 @@ public abstract class Worker
         }
     }
     
-    protected void submitQuery(WorkerRunnable runnable, WorkerCallback callback)
+    private void _submitQuery(WorkerRunnable runnable, WorkerCallback callback)
     {
         callbackManager.setupCallback(runnable, callback);
-        submitQuery(runnable);
+        _submitQuery(runnable);
     }
     
-    protected <T> Future<T> submitToMainThread(Callable<T> callable)
+    private <T> Future<T> _submitToMainThread(Callable<T> callable)
     {
         if(mainThreadExecutor != null) return mainThreadExecutor.submit(callable);
         return null;
@@ -118,7 +206,7 @@ public abstract class Worker
     
     private Thread createThread()
     {
-        return new Thread("ImageOnMap-" + name)
+        return new Thread(getName())
         {
             @Override
             public void run()
@@ -127,4 +215,18 @@ public abstract class Worker
             }
         };
     }
+    
+    private void attachRunnable(WorkerRunnable runnable)
+    {
+        if(runnable.getWorker() != null && runnable.getWorker() != this)
+            throw new IllegalArgumentException("This runnable is already attached to another worker");
+        runnable.setWorker(this);
+        runnables.put(runnable.getClass(), this);
+    }
+    
+    public String getName()
+    {
+        return ZLib.getPlugin().getName() + "-" + name;
+    }
+    
 }

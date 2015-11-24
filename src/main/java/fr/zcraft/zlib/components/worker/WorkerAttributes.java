@@ -27,52 +27,33 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.core;
+package fr.zcraft.zlib.components.worker;
 
-import fr.zcraft.zlib.tools.PluginLogger;
-import org.bukkit.plugin.java.JavaPlugin;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
- * The base class of any plugin using the ZLib.
- *
- * To use the ZLib, you have to use this class instead of {@link JavaPlugin}, and to add calls to
- * the {@code super} methods of {@link JavaPlugin#onEnable()} and {@link JavaPlugin#onDisable()} (if
- * you use them).
+ * Defines various data about a given worker class.
  */
-public abstract class ZPlugin extends JavaPlugin
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface WorkerAttributes
 {
-
-	@Override
-	public void onLoad()
-	{
-		ZLib.init(this);
-	}
-
-	/**
-	 * Load the given ZLib's components.
-	 *
-	 * @param components The base classes of the components to load.
-	 */
-	@SafeVarargs
-	public final void loadComponents(Class<? extends ZLibComponent>... components)
-	{
-		for (Class<? extends ZLibComponent> componentClass : components)
-		{
-			try
-			{
-				ZLib.loadComponent(componentClass.newInstance());
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
-			}
-		}
-	}
-
-	@Override
-	public void onDisable()
-	{
-		ZLib.unloadComponents();
-	}
+    /**
+     * Defines the name of the Worker.
+     * The named is used in various places, such as thread name or logging.
+     * @return The name of the worker.
+     */
+    String name() default "";
+    
+    /**
+     * Defines if the Worker needs to query the main thread or not.
+     * See the {@link Worker} class documentation for more information.
+     * @return If the Worker queries the main thread;
+     */
+    boolean queriesMainThread() default false;
 }
