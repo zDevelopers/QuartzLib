@@ -434,7 +434,7 @@ public abstract class Sidebar
      * The returned {@link Player} object must be used read-only for thread safety.
      *
      * @param id The player's UUID.
-     * @return The Player object.
+     * @return The Player object; {@code null} if offline.
      */
     public static Player getPlayerAsync(final UUID id)
     {
