@@ -38,6 +38,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,6 +76,8 @@ public abstract class Sidebar
 
     private SidebarMode contentMode = SidebarMode.GLOBAL;
     private SidebarMode titleMode = SidebarMode.GLOBAL;
+
+    private boolean automaticDeduplication = true;
 
     private boolean async = false;
     private long autoRefreshDelay = 0;
@@ -164,6 +167,22 @@ public abstract class Sidebar
     public void setLastLineScore(final int lastLineScore)
     {
         this.lastLineScore = Math.max(lastLineScore, 1);
+    }
+
+    /**
+     * Sets wherever, when the objective is built, the lines with the same value are automatically
+     * deduplicated by adding a space after.
+     *
+     * If this is disabled, you'll still be able to insert blank lines with an empty string.
+     *
+     * Please note that enabling this option may have a cost in performances if your sidebar is updated
+     * for a lot of people and/or with high-cost calculations and/or very frequently.
+     *
+     * @param automaticDeduplication {@code true} to enable.
+     */
+    public void setAutomaticDeduplication(boolean automaticDeduplication)
+    {
+        this.automaticDeduplication = automaticDeduplication;
     }
 
     /**
@@ -382,10 +401,35 @@ public abstract class Sidebar
     {
         SidebarObjective objective = new SidebarObjective(title);
 
-        int score = lastLineScore + content.size() - 1;  // The score of the first line
+        // The score of the first line
+        int score = lastLineScore + content.size() - 1;
+
+        // The deduplication stuff
+        Set<String> usedLines = new HashSet<>();
+
+        // The current number of spaces used to create blank lines
+        int spacesInBlankLines = 0;
 
         for (String line : content)
         {
+            // The blank lines are always deduplicated
+            if (line.isEmpty())
+            {
+                for(int i = 0; i < spacesInBlankLines; i++)
+                    line += " ";
+
+                spacesInBlankLines++;
+            }
+
+            // If the deduplication is enabled, we add spaces until the line is unique.
+            else if (automaticDeduplication)
+            {
+                while (usedLines.contains(line))
+                    line += " ";
+
+                usedLines.add(line);
+            }
+
             objective.setScore(line, score);
             score--;
         }
