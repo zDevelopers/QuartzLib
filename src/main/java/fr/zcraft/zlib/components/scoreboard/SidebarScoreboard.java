@@ -39,4 +39,10 @@ public class SidebarScoreboard extends ZLibComponent
     {
         Sidebar.init();
     }
+
+    @Override
+    protected void onDisable()
+    {
+        Sidebar.exit();
+    }
 }

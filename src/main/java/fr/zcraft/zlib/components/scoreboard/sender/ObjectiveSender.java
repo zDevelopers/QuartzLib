@@ -220,6 +220,20 @@ public class ObjectiveSender
     }
 
 
+    /**
+     * Sends destroy packets for the displayed sidebar to any still logged in player.
+     */
+    public static void clearForAll()
+    {
+        for (Map.Entry<UUID, String> sentObjective : sentObjectives.entrySet())
+        {
+            Object connection = getPlayerConnection(sentObjective.getKey());
+            if (connection != null)
+                destroyObjective(connection, sentObjective.getValue());
+        }
+    }
+
+
 
     /* **  Objective senders private API  ** */
 

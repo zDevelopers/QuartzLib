@@ -458,6 +458,22 @@ public abstract class Sidebar
     }
 
     /**
+     * Clears the scoreboard API.
+     * Must be called when the plugin is disabled.
+     */
+    public static void exit()
+    {
+        loggedInPlayers.clear();
+
+        for (Sidebar sidebar : sidebars)
+        {
+            sidebar.runAutoRefresh(false);
+        }
+
+        ObjectiveSender.clearForAll();
+    }
+
+    /**
      * Returns the current sidebars.
      *
      * @return The sidebars.
