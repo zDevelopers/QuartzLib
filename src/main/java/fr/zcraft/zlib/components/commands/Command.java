@@ -42,18 +42,18 @@ import java.util.List;
 
 abstract public class Command 
 {   
-    protected final CommandGroup commandGroup;
-    protected final String commandName;
-    protected final String usageParameters;
-    protected final String commandDescription;
-    protected final String[] aliases;
+    protected CommandGroup commandGroup;
+    protected String commandName;
+    protected String usageParameters;
+    protected String commandDescription;
+    protected String[] aliases;
     
     protected CommandSender sender;
     protected String[] args;
     
     abstract protected void run() throws CommandException;
     
-    Command(CommandGroup commandGroup)
+    void init(CommandGroup commandGroup)
     {
         this.commandGroup = commandGroup;
         
