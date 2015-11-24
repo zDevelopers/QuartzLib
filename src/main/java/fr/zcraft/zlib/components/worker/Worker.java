@@ -148,7 +148,7 @@ public abstract class Worker extends ZLibComponent
         callbackManager.exit();
         if(mainThreadExecutor != null) mainThreadExecutor.exit();
         thread = null;
-        runningWorkers.remove(getClass(), this);
+        runningWorkers.remove(getClass());
     }
     
     private void run()
