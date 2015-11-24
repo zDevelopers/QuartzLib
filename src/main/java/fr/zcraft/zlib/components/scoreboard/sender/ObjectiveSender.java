@@ -227,9 +227,13 @@ public class ObjectiveSender
     {
         for (Map.Entry<UUID, String> sentObjective : sentObjectives.entrySet())
         {
-            Object connection = getPlayerConnection(sentObjective.getKey());
-            if (connection != null)
-                destroyObjective(connection, sentObjective.getValue());
+            try
+            {
+                Object connection = getPlayerConnection(sentObjective.getKey());
+                if (connection != null)
+                    destroyObjective(connection, sentObjective.getValue());
+            }
+            catch (RuntimeException ignored) {}
         }
     }
 
@@ -276,7 +280,7 @@ public class ObjectiveSender
      * Sends the packet to create the given objective.
      *
      * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
-     * @param objective The objective to create.
+     * @param objective  The objective to create.
      */
     private static void createObjective(Object connection, SidebarObjective objective)
     {
@@ -287,7 +291,7 @@ public class ObjectiveSender
      * Sends the packet to update the display name of the given objective.
      *
      * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
-     * @param objective The objective to update.
+     * @param objective  The objective to update.
      */
     private static void updateObjectiveDisplayName(Object connection, SidebarObjective objective)
     {
@@ -298,7 +302,7 @@ public class ObjectiveSender
      * Sends the packet to set the display slot of the given objective.
      *
      * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
-     * @param objective The objective to place.
+     * @param objective  The objective to place.
      */
     private static void setObjectiveDisplay(Object connection, SidebarObjective objective)
     {
@@ -309,7 +313,7 @@ public class ObjectiveSender
      * Sends the score packets of the given objective.
      *
      * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
-     * @param objective The objective containing the score packets to send.
+     * @param objective  The objective containing the score packets to send.
      */
     private static void sendScores(Object connection, SidebarObjective objective)
     {
@@ -323,9 +327,10 @@ public class ObjectiveSender
      * Sends a create score packet.
      *
      * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
-     * @param objective The objective the score belongs to.
-     * @param score The score's name to send. If this is longer than 40 characters, the client will crash.
-     * @param value The score's value to send.
+     * @param objective  The objective the score belongs to.
+     * @param score      The score's name to send. If this is longer than 40 characters, the client
+     *                   will crash.
+     * @param value      The score's value to send.
      */
     private static void sendScore(Object connection, SidebarObjective objective, String score, Integer value)
     {
@@ -336,8 +341,8 @@ public class ObjectiveSender
      * Sends a remove score packet.
      *
      * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
-     * @param objective The objective the score belongs to.
-     * @param score The score to delete.
+     * @param objective  The objective the score belongs to.
+     * @param score      The score to delete.
      */
     private static void deleteScore(Object connection, SidebarObjective objective, String score)
     {
@@ -347,7 +352,7 @@ public class ObjectiveSender
     /**
      * Sends the packet to destroy an objective.
      *
-     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param connection    The receiver's connection: an instance of {@code nms.PlayerConnection}.
      * @param objectiveName The name of the objective to destroy.
      */
     private static void destroyObjective(Object connection, String objectiveName)
@@ -362,13 +367,15 @@ public class ObjectiveSender
     /**
      * Sends a Scoreboard Objective packet.
      *
-     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
-     * @param objectiveName The name of the objective.
+     * @param connection           The receiver's connection: an instance of {@code
+     *                             nms.PlayerConnection}.
+     * @param objectiveName        The name of the objective.
      * @param objectiveDisplayName The display name of the objective.
-     * @param action The action to execute: 0 (to create), 1 (to delete) or 2 (to update).
+     * @param action               The action to execute: 0 (to create), 1 (to delete) or 2 (to
+     *                             update).
      *
      * @throws IncompatibleMinecraftVersionException if the packet cannot be constructed or sent.
-     * @throws RuntimeException if something bad happens.
+     * @throws RuntimeException                      if something bad happens.
      */
     private static void sendScoreboardObjectivePacket(Object connection, String objectiveName, String objectiveDisplayName, int action)
     {
@@ -396,12 +403,13 @@ public class ObjectiveSender
     /**
      * Sends a Scoreboard Display Objective packet.
      *
-     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param connection    The receiver's connection: an instance of {@code nms.PlayerConnection}.
      * @param objectiveName The objective's name.
-     * @param location Where the objective will be displayed: 0 (list), 1 (sidebar) or 2 (below name).
+     * @param location      Where the objective will be displayed: 0 (list), 1 (sidebar) or 2 (below
+     *                      name).
      *
      * @throws IncompatibleMinecraftVersionException if the packet cannot be constructed or sent.
-     * @throws RuntimeException if something bad happens.
+     * @throws RuntimeException                      if something bad happens.
      */
     private static void sendScoreboardDisplayObjectivePacket(Object connection, String objectiveName, int location)
     {
@@ -427,15 +435,16 @@ public class ObjectiveSender
     /**
      * Sends a Scoreboard Score packet.
      *
-     * @param connection The receiver's connection: an instance of {@code nms.PlayerConnection}.
+     * @param connection    The receiver's connection: an instance of {@code nms.PlayerConnection}.
      * @param objectiveName The objective's name.
-     * @param scoreName The score's name.
-     * @param scoreValue The score's value.
-     * @param action The action to execute: an enum value of {@code PacketPlayOutScoreboardScore$EnumScoreboardAction}
-     *               (CHANGE or REMOVE — use {@link #enumScoreboardAction_CHANGE} or {@link #enumScoreboardAction_REMOVE}).
+     * @param scoreName     The score's name.
+     * @param scoreValue    The score's value.
+     * @param action        The action to execute: an enum value of {@code PacketPlayOutScoreboardScore$EnumScoreboardAction}
+     *                      (CHANGE or REMOVE — use {@link #enumScoreboardAction_CHANGE} or {@link
+     *                      #enumScoreboardAction_REMOVE}).
      *
      * @throws IncompatibleMinecraftVersionException if the packet cannot be constructed or sent.
-     * @throws RuntimeException if something bad happens.
+     * @throws RuntimeException                      if something bad happens.
      */
     private static void sendScoreboardScorePacket(Object connection, String objectiveName, String scoreName, int scoreValue, Object action)
     {
@@ -502,15 +511,22 @@ public class ObjectiveSender
     }
 
     /**
-     * Invalidates the stored connection of a player.
+     * Invalidates the stored connection of a player, and removes the last objective sent, because
+     * if the used logged out and now log back in, the client removed by itself the previously-sent
+     * objective.
      *
      * @param id The UUID of the invalidated connection.
      */
-    public static void invalidateConnection(UUID id)
+    public static void handleLogin(UUID id)
     {
         synchronized (playersConnections)
         {
             playersConnections.remove(id);
+        }
+
+        synchronized (sentObjectives)
+        {
+            sentObjectives.remove(id);
         }
     }
 }
