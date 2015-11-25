@@ -38,7 +38,7 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 
-public class OnlinePlayersListener implements Listener
+class OnlinePlayersListener implements Listener
 {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent ev)
