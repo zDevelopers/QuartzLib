@@ -35,6 +35,7 @@ import fr.zcraft.zlib.components.scoreboard.sender.SidebarObjective;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -545,8 +546,33 @@ public abstract class Sidebar
             // If the deduplication is enabled, we add spaces until the line is unique.
             else if (automaticDeduplication)
             {
+                String rawLine = line;
+
+                // The deduplication string used.
+                // We try to use the Minecraft formatting codes. If we can't find an unique
+                // string with the first one, we try with the next, and so one.
+                // This is not used for empty line because a sidebar with 40 empty lines is
+                // not a well-designed sidebar, as the sidebar can't display this amount of
+                // lines. If this is a problem for you, fill a bug report.
+                Character deduplicationChar = '0';
+
                 while (usedLines.contains(line))
-                    line += " ";
+                {
+                    if(line.length() + 2 > SidebarObjective.MAX_LENGTH_SCORE_NAME && deduplicationChar != null)
+                    {
+                        deduplicationChar++;
+
+                        if(deduplicationChar > 'f')
+                            deduplicationChar = null;
+
+                        else if(deduplicationChar > '9')
+                            deduplicationChar = 'a';
+
+                        line = rawLine;
+                    }
+
+                    line += deduplicationChar != null ? String.valueOf(ChatColor.COLOR_CHAR) + "" + String.valueOf(deduplicationChar) : " ";
+                }
 
                 usedLines.add(line);
             }

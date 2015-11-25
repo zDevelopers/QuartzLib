@@ -43,6 +43,10 @@ import java.util.UUID;
  */
 public class SidebarObjective
 {
+    public static final int MAX_LENGTH_OBJECTIVE_NAME = 16;
+    public static final int MAX_LENGTH_OBJECTIVE_DISPLAY_NAME = 32;
+    public static final int MAX_LENGTH_SCORE_NAME = 40;
+
     private String name;
     private String displayName;
 
@@ -61,8 +65,8 @@ public class SidebarObjective
         if(name == null)
             name = Math.abs(UUID.randomUUID().getLeastSignificantBits()) + "";
 
-        this.name = name.substring(0, Math.min(16, name.length()));
-        this.displayName = displayName != null ? displayName.substring(0, Math.min(32, displayName.length())) : "";
+        this.name = name.substring(0, Math.min(MAX_LENGTH_OBJECTIVE_NAME, name.length()));
+        setDisplayName(displayName);
     }
 
     /**
@@ -96,8 +100,8 @@ public class SidebarObjective
         Validate.notNull(name, "The score name cannot be null!");
         Validate.notNull(score, "The score cannot be null!");
 
-        if(name.length() > 40)
-            name = name.substring(0, 40);
+        if(name.length() > MAX_LENGTH_SCORE_NAME)
+            name = name.substring(0, MAX_LENGTH_SCORE_NAME);
 
         return scores.put(name, score) != null;
     }
@@ -116,7 +120,7 @@ public class SidebarObjective
      */
     public void setDisplayName(String displayName)
     {
-        this.displayName = displayName;
+        this.displayName = displayName != null ? displayName.substring(0, Math.min(MAX_LENGTH_OBJECTIVE_DISPLAY_NAME, displayName.length())) : "";
     }
 
     /**
