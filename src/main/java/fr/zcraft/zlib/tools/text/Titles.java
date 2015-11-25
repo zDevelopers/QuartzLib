@@ -27,9 +27,11 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools;
+package fr.zcraft.zlib.tools.text;
 
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
+import fr.zcraft.zlib.tools.reflection.NMSNetwork;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -57,25 +59,25 @@ public final class Titles
     {
         try
         {
-            packetPlayOutTitleClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutTitle");
-            iChatBaseComponentClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent");
+            packetPlayOutTitleClass = Reflection.getMinecraftClassByName("PacketPlayOutTitle");
+            iChatBaseComponentClass = Reflection.getMinecraftClassByName("IChatBaseComponent");
 
             try
             {
-                chatSerializerClass = ReflectionUtils.getMinecraftClassByName("ChatSerializer");
+                chatSerializerClass = Reflection.getMinecraftClassByName("ChatSerializer");
             }
             catch (ClassNotFoundException e)
             {
-                chatSerializerClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
+                chatSerializerClass = Reflection.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
             }
 
             try
             {
-                enumTitleActionClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutTitle$EnumTitleAction");
+                enumTitleActionClass = Reflection.getMinecraftClassByName("PacketPlayOutTitle$EnumTitleAction");
             }
             catch (ClassNotFoundException e)
             {
-                enumTitleActionClass = ReflectionUtils.getMinecraftClassByName("EnumTitleAction");
+                enumTitleActionClass = Reflection.getMinecraftClassByName("EnumTitleAction");
             }
 
             for (Object enumConstant : enumTitleActionClass.getEnumConstants())
@@ -274,7 +276,7 @@ public final class Titles
     {
         try
         {
-            Object baseComponent = iChatBaseComponentClass.cast(ReflectionUtils.call(chatSerializerClass, chatSerializerClass, "a", payload));
+            Object baseComponent = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", payload));
             Object titlePacket = packetPlayOutTitleClass.getConstructor(enumTitleActionClass, iChatBaseComponentClass).newInstance(action, baseComponent);
 
             NMSNetwork.sendPacket(connection, titlePacket);

@@ -27,7 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools;
+package fr.zcraft.zlib.tools.reflection;
 
 import org.bukkit.Bukkit;
 
@@ -43,7 +43,7 @@ import java.lang.reflect.Method;
  * @author ProkopyL
  * @author Amaury Carrade (documentation only).
  */
-abstract public class ReflectionUtils 
+abstract public class Reflection
 {
     /**
      * Returns the Bukkit's current version, as read in the Bukkit's package name.

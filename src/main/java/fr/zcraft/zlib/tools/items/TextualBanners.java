@@ -27,7 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools;
+package fr.zcraft.zlib.tools.items;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -52,7 +52,7 @@ import java.util.Map;
  *
  * @author Florian Cassayre
  */
-public final class BannersUtils
+public final class TextualBanners
 {
 	/**
 	 * The map containing all the supported characters. White color represents the background and
@@ -116,7 +116,7 @@ public final class BannersUtils
 	/**
 	 * Prevents the class to be instantiated.
 	 */
-	private BannersUtils() {}
+	private TextualBanners() {}
 
 	/**
 	 * Return a list of patterns with the same color.

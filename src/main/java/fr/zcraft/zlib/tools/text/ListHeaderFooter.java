@@ -27,9 +27,11 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools;
+package fr.zcraft.zlib.tools.text;
 
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
+import fr.zcraft.zlib.tools.reflection.NMSNetwork;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -53,16 +55,16 @@ public final class ListHeaderFooter
     {
         try
         {
-            packetPlayOutPlayerListHeaderFooterClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutPlayerListHeaderFooter");
-            iChatBaseComponentClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent");
+            packetPlayOutPlayerListHeaderFooterClass = Reflection.getMinecraftClassByName("PacketPlayOutPlayerListHeaderFooter");
+            iChatBaseComponentClass = Reflection.getMinecraftClassByName("IChatBaseComponent");
 
             try
             {
-                chatSerializerClass = ReflectionUtils.getMinecraftClassByName("ChatSerializer");
+                chatSerializerClass = Reflection.getMinecraftClassByName("ChatSerializer");
             }
             catch (ClassNotFoundException e)
             {
-                chatSerializerClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
+                chatSerializerClass = Reflection.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
             }
         }
         catch (Exception e)
@@ -105,11 +107,11 @@ public final class ListHeaderFooter
 
         try
         {
-            Object serializedHeader = iChatBaseComponentClass.cast(ReflectionUtils.call(chatSerializerClass, chatSerializerClass, "a", rawHeader));
-            Object serializedFooter = iChatBaseComponentClass.cast(ReflectionUtils.call(chatSerializerClass, chatSerializerClass, "a", rawFooter));
+            Object serializedHeader = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawHeader));
+            Object serializedFooter = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawFooter));
 
             Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor(iChatBaseComponentClass).newInstance(serializedHeader);
-            ReflectionUtils.setFieldValue(packet, "b", serializedFooter);
+            Reflection.setFieldValue(packet, "b", serializedFooter);
 
             NMSNetwork.sendPacket(player, packet);
         }

@@ -27,10 +27,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools.chat;
+package fr.zcraft.zlib.tools.text;
 
-import fr.zcraft.zlib.tools.NMSNetwork;
-import fr.zcraft.zlib.tools.ReflectionUtils;
+import fr.zcraft.zlib.tools.reflection.NMSNetwork;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -41,7 +41,7 @@ public final class MessageSender
 {
     private static boolean enabled = true;
 
-    private static String nmsVersion = ReflectionUtils.getBukkitPackageVersion();
+    private static String nmsVersion = Reflection.getBukkitPackageVersion();
 
     private static Class<?> packetPlayOutChatClass;
     private static Class<?> chatSerializerClass;
@@ -52,13 +52,13 @@ public final class MessageSender
     {
         try
         {
-            iChatBaseComponentClass = ReflectionUtils.getMinecraftClassByName("IChatBaseComponent");
-            packetPlayOutChatClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutChat");
+            iChatBaseComponentClass = Reflection.getMinecraftClassByName("IChatBaseComponent");
+            packetPlayOutChatClass = Reflection.getMinecraftClassByName("PacketPlayOutChat");
 
             if (nmsVersion.equalsIgnoreCase("v1_8_R1") || !nmsVersion.startsWith("v1_8_"))
-                chatSerializerClass = ReflectionUtils.getMinecraftClassByName("ChatSerializer");
+                chatSerializerClass = Reflection.getMinecraftClassByName("ChatSerializer");
             else
-                chatComponentTextClass = ReflectionUtils.getMinecraftClassByName("ChatComponentText");
+                chatComponentTextClass = Reflection.getMinecraftClassByName("ChatComponentText");
         }
         catch (Exception e)
         {
@@ -111,12 +111,12 @@ public final class MessageSender
 
             if (nmsVersion.equalsIgnoreCase("v1_8_R1") || !nmsVersion.startsWith("v1_8_"))
             {
-                Object baseComponent = iChatBaseComponentClass.cast(ReflectionUtils.call(chatSerializerClass, chatSerializerClass, "a", "{\"text\": \"" + message + "\"}"));
-                chatPacket = ReflectionUtils.instantiate(packetPlayOutChatClass, baseComponent, type.getMessagePositionByte());
+                Object baseComponent = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", "{\"text\": \"" + message + "\"}"));
+                chatPacket = Reflection.instantiate(packetPlayOutChatClass, baseComponent, type.getMessagePositionByte());
             }
             else
             {
-                Object componentText = ReflectionUtils.instantiate(chatComponentTextClass, message);
+                Object componentText = Reflection.instantiate(chatComponentTextClass, message);
                 chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
             }
 

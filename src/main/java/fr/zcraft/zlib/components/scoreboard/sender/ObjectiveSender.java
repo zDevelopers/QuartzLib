@@ -32,8 +32,8 @@ package fr.zcraft.zlib.components.scoreboard.sender;
 
 import fr.zcraft.zlib.components.scoreboard.Sidebar;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
-import fr.zcraft.zlib.tools.NMSNetwork;
-import fr.zcraft.zlib.tools.ReflectionUtils;
+import fr.zcraft.zlib.tools.reflection.NMSNetwork;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 
@@ -87,9 +87,9 @@ public class ObjectiveSender
     {
         try
         {
-            packetPlayOutScoreboardObjectiveClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutScoreboardObjective");
-            packetPlayOutScoreboardDisplayObjectiveClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutScoreboardDisplayObjective");
-            packetPlayOutScoreboardScoreClass = ReflectionUtils.getMinecraftClassByName("PacketPlayOutScoreboardScore");
+            packetPlayOutScoreboardObjectiveClass = Reflection.getMinecraftClassByName("PacketPlayOutScoreboardObjective");
+            packetPlayOutScoreboardDisplayObjectiveClass = Reflection.getMinecraftClassByName("PacketPlayOutScoreboardDisplayObjective");
+            packetPlayOutScoreboardScoreClass = Reflection.getMinecraftClassByName("PacketPlayOutScoreboardScore");
 
 
             // IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER value
@@ -97,11 +97,11 @@ public class ObjectiveSender
             Class<?> enumScoreboardHealthDisplay;
             try
             {
-                enumScoreboardHealthDisplay = ReflectionUtils.getMinecraftClassByName("IScoreboardCriteria$EnumScoreboardHealthDisplay");
+                enumScoreboardHealthDisplay = Reflection.getMinecraftClassByName("IScoreboardCriteria$EnumScoreboardHealthDisplay");
             }
             catch (ClassNotFoundException e)
             {
-                enumScoreboardHealthDisplay = ReflectionUtils.getMinecraftClassByName("EnumScoreboardHealthDisplay");
+                enumScoreboardHealthDisplay = Reflection.getMinecraftClassByName("EnumScoreboardHealthDisplay");
             }
 
             for (Object enumConstant : enumScoreboardHealthDisplay.getEnumConstants())
@@ -122,11 +122,11 @@ public class ObjectiveSender
             Class<?> enumScoreboardAction;
             try
             {
-                enumScoreboardAction = ReflectionUtils.getMinecraftClassByName("PacketPlayOutScoreboardScore$EnumScoreboardAction");
+                enumScoreboardAction = Reflection.getMinecraftClassByName("PacketPlayOutScoreboardScore$EnumScoreboardAction");
             }
             catch (ClassNotFoundException e)
             {
-                enumScoreboardAction = ReflectionUtils.getMinecraftClassByName("EnumScoreboardAction");
+                enumScoreboardAction = Reflection.getMinecraftClassByName("EnumScoreboardAction");
             }
 
             for (Object enumConstant : enumScoreboardAction.getEnumConstants())
@@ -417,12 +417,12 @@ public class ObjectiveSender
     {
         try
         {
-            Object packet = ReflectionUtils.instantiate(packetPlayOutScoreboardObjectiveClass);
+            Object packet = Reflection.instantiate(packetPlayOutScoreboardObjectiveClass);
 
-            ReflectionUtils.setFieldValue(packet, "a", objectiveName);                       // Objective name
-            ReflectionUtils.setFieldValue(packet, "b", objectiveDisplayName);                // Display name
-            ReflectionUtils.setFieldValue(packet, "c", enumScoreboardHealthDisplay_INTEGER); // Display mode (integer or hearts)
-            ReflectionUtils.setFieldValue(packet, "d", action);                              // Action (0 = create; 1 = delete; 2 = update)
+            Reflection.setFieldValue(packet, "a", objectiveName);                       // Objective name
+            Reflection.setFieldValue(packet, "b", objectiveDisplayName);                // Display name
+            Reflection.setFieldValue(packet, "c", enumScoreboardHealthDisplay_INTEGER); // Display mode (integer or hearts)
+            Reflection.setFieldValue(packet, "d", action);                              // Action (0 = create; 1 = delete; 2 = update)
 
             NMSNetwork.sendPacket(connection, packet);
         }
@@ -451,10 +451,10 @@ public class ObjectiveSender
     {
         try
         {
-            Object packet = ReflectionUtils.instantiate(packetPlayOutScoreboardDisplayObjectiveClass);
+            Object packet = Reflection.instantiate(packetPlayOutScoreboardDisplayObjectiveClass);
 
-            ReflectionUtils.setFieldValue(packet, "a", location);      // Objective location (0 = list ; 1 = sidebar ; 2 = below name)
-            ReflectionUtils.setFieldValue(packet, "b", objectiveName); // Objective name
+            Reflection.setFieldValue(packet, "a", location);      // Objective location (0 = list ; 1 = sidebar ; 2 = below name)
+            Reflection.setFieldValue(packet, "b", objectiveName); // Objective name
 
             NMSNetwork.sendPacket(connection, packet);
         }
@@ -486,12 +486,12 @@ public class ObjectiveSender
     {
         try
         {
-            Object packet = ReflectionUtils.instantiate(packetPlayOutScoreboardScoreClass);
+            Object packet = Reflection.instantiate(packetPlayOutScoreboardScoreClass);
 
-            ReflectionUtils.setFieldValue(packet, "a", scoreName);     // Score name
-            ReflectionUtils.setFieldValue(packet, "b", objectiveName); // Objective name this score belongs to
-            ReflectionUtils.setFieldValue(packet, "c", scoreValue);    // Score value
-            ReflectionUtils.setFieldValue(packet, "d", action);        // Action (enum member - CHANGE or REMOVE)
+            Reflection.setFieldValue(packet, "a", scoreName);     // Score name
+            Reflection.setFieldValue(packet, "b", objectiveName); // Objective name this score belongs to
+            Reflection.setFieldValue(packet, "c", scoreValue);    // Score value
+            Reflection.setFieldValue(packet, "d", action);        // Action (enum member - CHANGE or REMOVE)
 
             NMSNetwork.sendPacket(connection, packet);
         }

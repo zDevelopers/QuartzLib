@@ -32,7 +32,8 @@ package fr.zcraft.zlib.components.worker;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.PluginLogger;
-import fr.zcraft.zlib.tools.ReflectionUtils;
+import fr.zcraft.zlib.tools.reflection.Reflection;
+
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -67,7 +68,7 @@ public abstract class Worker extends ZLibComponent
     
     static private Worker getCallerWorker()
     {
-        Class<? extends Worker> caller = ReflectionUtils.getCallerClass(Worker.class);
+        Class<? extends Worker> caller = Reflection.getCallerClass(Worker.class);
         if(caller == null) 
             throw new IllegalAccessError("Queries must be submitted from a Worker class");
         
@@ -86,7 +87,7 @@ public abstract class Worker extends ZLibComponent
     
     static private Worker getCallerWorkerFromRunnable()
     {
-        Class<? extends WorkerRunnable> caller = ReflectionUtils.getCallerClass(WorkerRunnable.class);
+        Class<? extends WorkerRunnable> caller = Reflection.getCallerClass(WorkerRunnable.class);
         if(caller == null) 
             throw new IllegalAccessError("Main thread queries must be submitted from a WorkerRunnable");
         

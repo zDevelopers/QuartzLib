@@ -30,10 +30,10 @@
 
 package fr.zcraft.zlib.components.gui;
 
-import fr.zcraft.zlib.tools.Callback;
 import fr.zcraft.zlib.core.ZLib;
+import fr.zcraft.zlib.tools.Callback;
 import fr.zcraft.zlib.tools.PluginLogger;
-import fr.zcraft.zlib.tools.ReflectionUtils;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -84,13 +84,13 @@ public class PromptGui extends GuiBase
         
         try
         {
-            Class CraftSign = ReflectionUtils.getBukkitClassByName("block.CraftSign");
-            classTileEntitySign = ReflectionUtils.getMinecraftClassByName("TileEntitySign");
-            Class CraftPlayer = ReflectionUtils.getBukkitClassByName("entity.CraftPlayer");
-            Class EntityHuman = ReflectionUtils.getMinecraftClassByName("EntityHuman");
+            Class CraftSign = Reflection.getBukkitClassByName("block.CraftSign");
+            classTileEntitySign = Reflection.getMinecraftClassByName("TileEntitySign");
+            Class CraftPlayer = Reflection.getBukkitClassByName("entity.CraftPlayer");
+            Class EntityHuman = Reflection.getMinecraftClassByName("EntityHuman");
             
             
-            fieldSign = ReflectionUtils.getField(CraftSign, "sign");
+            fieldSign = Reflection.getField(CraftSign, "sign");
             methodGetHandle = CraftPlayer.getDeclaredMethod("getHandle");
             methodOpenSign = EntityHuman.getDeclaredMethod("openSign", classTileEntitySign);
         }

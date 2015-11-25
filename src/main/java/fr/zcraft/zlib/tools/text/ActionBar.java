@@ -27,7 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools.chat;
+package fr.zcraft.zlib.tools.text;
 
 import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;

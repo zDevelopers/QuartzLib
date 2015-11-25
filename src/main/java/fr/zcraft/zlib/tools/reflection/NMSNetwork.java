@@ -27,7 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools;
+package fr.zcraft.zlib.tools.reflection;
 
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
 import org.bukkit.entity.Player;
@@ -51,9 +51,9 @@ public class NMSNetwork
     {
         try
         {
-            craftPlayerClass = ReflectionUtils.getBukkitClassByName("entity.CraftPlayer");
-            packetClass = ReflectionUtils.getMinecraftClassByName("Packet");
-            sendPacketMethod = ((Class<?>) ReflectionUtils.getMinecraftClassByName("PlayerConnection")).getDeclaredMethod("sendPacket", packetClass);
+            craftPlayerClass = Reflection.getBukkitClassByName("entity.CraftPlayer");
+            packetClass = Reflection.getMinecraftClassByName("Packet");
+            sendPacketMethod = ((Class<?>) Reflection.getMinecraftClassByName("PlayerConnection")).getDeclaredMethod("sendPacket", packetClass);
         }
         catch (ClassNotFoundException | NoSuchMethodException e)
         {
@@ -79,8 +79,8 @@ public class NMSNetwork
         try
         {
             Object craftPlayer = craftPlayerClass.cast(player);
-            Object handle = ReflectionUtils.call(craftPlayer, "getHandle");
-            return ReflectionUtils.getFieldValue(handle, "playerConnection");
+            Object handle = Reflection.call(craftPlayer, "getHandle");
+            return Reflection.getFieldValue(handle, "playerConnection");
         }
         catch (NoSuchMethodException | NoSuchFieldException | IllegalAccessException e)
         {
