@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.scoreboard.sender;
 
 import fr.zcraft.zlib.components.scoreboard.Sidebar;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
+import fr.zcraft.zlib.tools.NMSNetwork;
 import fr.zcraft.zlib.tools.ReflectionUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
@@ -423,7 +424,7 @@ public class ObjectiveSender
             ReflectionUtils.setFieldValue(packet, "c", enumScoreboardHealthDisplay_INTEGER); // Display mode (integer or hearts)
             ReflectionUtils.setFieldValue(packet, "d", action);                              // Action (0 = create; 1 = delete; 2 = update)
 
-            ReflectionUtils.sendPacket(connection, packet);
+            NMSNetwork.sendPacket(connection, packet);
         }
         catch (NoSuchMethodException | IllegalAccessException | InstantiationException | NoSuchFieldException e)
         {
@@ -455,7 +456,7 @@ public class ObjectiveSender
             ReflectionUtils.setFieldValue(packet, "a", location);      // Objective location (0 = list ; 1 = sidebar ; 2 = below name)
             ReflectionUtils.setFieldValue(packet, "b", objectiveName); // Objective name
 
-            ReflectionUtils.sendPacket(connection, packet);
+            NMSNetwork.sendPacket(connection, packet);
         }
         catch (NoSuchMethodException | InstantiationException | IllegalAccessException | NoSuchFieldException e)
         {
@@ -492,7 +493,7 @@ public class ObjectiveSender
             ReflectionUtils.setFieldValue(packet, "c", scoreValue);    // Score value
             ReflectionUtils.setFieldValue(packet, "d", action);        // Action (enum member - CHANGE or REMOVE)
 
-            ReflectionUtils.sendPacket(connection, packet);
+            NMSNetwork.sendPacket(connection, packet);
         }
         catch (NoSuchMethodException | InstantiationException | IllegalAccessException | NoSuchFieldException e)
         {
@@ -528,7 +529,7 @@ public class ObjectiveSender
             if (player == null)
                 return null;
 
-            Object connection = ReflectionUtils.getPlayerConnection(player);
+            Object connection = NMSNetwork.getPlayerConnection(player);
             if (connection != null)
             {
                 playersConnections.put(id, connection);

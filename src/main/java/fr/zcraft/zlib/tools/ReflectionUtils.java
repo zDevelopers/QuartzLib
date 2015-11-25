@@ -30,7 +30,6 @@
 package fr.zcraft.zlib.tools;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -343,79 +342,6 @@ abstract public class ReflectionUtils
     {
         Constructor constructor = hClass.getConstructor(getTypes(parameters));
         return constructor.newInstance(parameters);
-    }
-    
-
-    /**
-     * Returns the player's connection, frequently used to send packets.
-     *
-     * @param player The player.
-     *
-     * @return The player's connection (reflection-retrieved object).
-     * @throws InvocationTargetException if an exception is thrown while the connection is
-     *                                   retrieved.
-     */
-    static public Object getPlayerConnection(Player player) throws InvocationTargetException
-    {
-        try
-        {
-            Object craftPlayer = ReflectionUtils.getBukkitClassByName("entity.CraftPlayer").cast(player);
-            Object handle = ReflectionUtils.call(craftPlayer, "getHandle");
-            return ReflectionUtils.getFieldValue(handle, "playerConnection");
-        }
-        catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e)
-        {
-            PluginLogger.error("Cannot retrieve standard Bukkit or NBS object, is the current Bukkit/Minecraft version supported by this API?", e);
-            return null;
-    }
-    }
-    
-    /**
-     * Sends a packet.
-     *
-     * @param playerConnection A player connection, as returned by the {@link #getPlayerConnection(Player)}
-     *                         method.
-     * @param packet           The packet to be sent, an instance of a subclass of the
-     *                         net.minecraft.server.Packet class.
-     *
-     * @return {@code true} if the packet was successfully sent.
-     * @throws InvocationTargetException if an exception is thrown while the packet is sent.
-     */
-    static public boolean sendPacket(Object playerConnection, Object packet) throws InvocationTargetException
-    {
-        try
-        {
-            final Class<?> packetClass = ReflectionUtils.getMinecraftClassByName("Packet");
-
-            if(!packetClass.isAssignableFrom(packet.getClass()))
-                return false;
-
-            playerConnection.getClass().getDeclaredMethod("sendPacket", packetClass).invoke(playerConnection, packet);
-            return true;
-    }
-        catch (IllegalAccessException | NoSuchMethodException | ClassNotFoundException e)
-        {
-            return false;
-        }
-    }
-    
-    /**
-     * Sends a packet.
-     *
-     * If you use this method, the player connection is not cached. If you have multiple packets to
-     * send, store the player's connection returned by {@link #getPlayerConnection(Player)} and then
-     * use the {@link #sendPacket(Object, Object)} method.
-     *
-     * @param player The player this packet will be sent to.
-     * @param packet The packet to be sent, an instance of a subclass of the
-     *               net.minecraft.server.Packet class.
-     *
-     * @return {@code true} if the packet was successfully sent.
-     * @throws InvocationTargetException if an exception is thrown while the packet is sent.
-     */
-    static public boolean sendPacket(Player player, Object packet) throws InvocationTargetException
-    {
-        return sendPacket(getPlayerConnection(player), packet);
     }
 
 

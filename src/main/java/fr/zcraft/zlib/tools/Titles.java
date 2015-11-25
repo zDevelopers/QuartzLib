@@ -140,7 +140,7 @@ public final class Titles
     {
         try
         {
-            displayTitle(ReflectionUtils.getPlayerConnection(player), fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
+            displayTitle(NMSNetwork.getPlayerConnection(player), fadeIn, stay, fadeOut, rawTitle, rawSubtitle);
         }
         catch (InvocationTargetException e)
         {
@@ -248,7 +248,7 @@ public final class Titles
         {
             if (fadeIn >= 0 || stay >= 0 || fadeOut >= 0)
             {
-                ReflectionUtils.sendPacket(
+                NMSNetwork.sendPacket(
                         connection,
                         packetPlayOutTitleClass.getConstructor(int.class, int.class, int.class).newInstance(fadeIn, stay, fadeOut)
                 );
@@ -277,7 +277,7 @@ public final class Titles
             Object baseComponent = iChatBaseComponentClass.cast(ReflectionUtils.call(chatSerializerClass, chatSerializerClass, "a", payload));
             Object titlePacket = packetPlayOutTitleClass.getConstructor(enumTitleActionClass, iChatBaseComponentClass).newInstance(action, baseComponent);
 
-            ReflectionUtils.sendPacket(connection, titlePacket);
+            NMSNetwork.sendPacket(connection, titlePacket);
         }
         catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e)
         {

@@ -111,7 +111,7 @@ public final class ListHeaderFooter
             Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor(iChatBaseComponentClass).newInstance(serializedHeader);
             ReflectionUtils.setFieldValue(packet, "b", serializedFooter);
 
-            ReflectionUtils.sendPacket(player, packet);
+            NMSNetwork.sendPacket(player, packet);
         }
         catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchFieldException e)
         {

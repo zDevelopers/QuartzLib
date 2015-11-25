@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.chat;
 
+import fr.zcraft.zlib.tools.NMSNetwork;
 import fr.zcraft.zlib.tools.ReflectionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -119,7 +120,7 @@ public final class MessageSender
                 chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
             }
 
-            ReflectionUtils.sendPacket(receiver, chatPacket);
+            NMSNetwork.sendPacket(receiver, chatPacket);
             return true;
         }
         catch (Exception e)
