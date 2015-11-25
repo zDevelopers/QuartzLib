@@ -366,10 +366,11 @@ abstract public class Reflection
     static public <T> Class<? extends T> getCallerClass(Class<T> baseType)
     {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        for(int i = 2; i < stackTrace.length; i++)
+        for (int i = 2; i < stackTrace.length; i++)
         {
-            if(stackTrace[i].getClassName().equals(baseType.getName()))
+            if (stackTrace[i].getClassName().equals(baseType.getName()))
                 continue;
+
             Class caller;
             try
             {
@@ -379,9 +380,11 @@ abstract public class Reflection
             {
                 continue;
             }
-            if(baseType.isAssignableFrom(caller));
+
+            if (baseType.isAssignableFrom(caller))
                 return caller;
         }
+
         return null;
     }
 }
