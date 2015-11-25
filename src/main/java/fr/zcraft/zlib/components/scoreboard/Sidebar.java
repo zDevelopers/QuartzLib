@@ -124,6 +124,18 @@ public abstract class Sidebar
      */
     public abstract String getTitle(final Player player);
 
+    /**
+     * This method is called before every update method ({@link #getTitle(Player)} and {@link #getContent(Player)}) by
+     * the {@link #refresh()} method.
+     */
+    public void preRender() {}
+
+    /**
+     * This method is called after every update method ({@link #getTitle(Player)} and {@link #getContent(Player)}) by
+     * the {@link #refresh()} method.
+     */
+    public void postRender() {}
+
 
 
     /* ** Public API ** */
@@ -260,6 +272,8 @@ public abstract class Sidebar
      */
     public void refresh()
     {
+        preRender();
+
         String title = null;
         List<String> content = null;
 
@@ -296,6 +310,8 @@ public abstract class Sidebar
                 }
             }
         }
+
+        postRender();
     }
 
     /**
