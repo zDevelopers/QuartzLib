@@ -33,11 +33,13 @@ import com.google.common.collect.ImmutableSet;
 import fr.zcraft.zlib.components.scoreboard.sender.ObjectiveSender;
 import fr.zcraft.zlib.components.scoreboard.sender.SidebarObjective;
 import fr.zcraft.zlib.core.ZLib;
+import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +89,7 @@ public abstract class Sidebar
     private SidebarObjective globalObjective = null;
 
     // Other cases
-    private Map<UUID,SidebarObjective> objectives = new ConcurrentHashMap<>();
+    private Map<UUID, SidebarObjective> objectives = new ConcurrentHashMap<>();
 
 
     public Sidebar()
@@ -125,14 +127,14 @@ public abstract class Sidebar
     public abstract String getTitle(final Player player);
 
     /**
-     * This method is called before every update method ({@link #getTitle(Player)} and {@link #getContent(Player)}) by
-     * the {@link #refresh()} method.
+     * This method is called before every update method ({@link #getTitle(Player)} and {@link
+     * #getContent(Player)}) by the {@link #refresh()} method.
      */
     public void preRender() {}
 
     /**
-     * This method is called after every update method ({@link #getTitle(Player)} and {@link #getContent(Player)}) by
-     * the {@link #refresh()} method.
+     * This method is called after every update method ({@link #getTitle(Player)} and {@link
+     * #getContent(Player)}) by the {@link #refresh()} method.
      */
     public void postRender() {}
 
@@ -187,8 +189,8 @@ public abstract class Sidebar
      *
      * If this is disabled, you'll still be able to insert blank lines with an empty string.
      *
-     * Please note that enabling this option may have a cost in performances if your sidebar is updated
-     * for a lot of people and/or with high-cost calculations and/or very frequently.
+     * Please note that enabling this option may have a cost in performances if your sidebar is
+     * updated for a lot of people and/or with high-cost calculations and/or very frequently.
      *
      * @param automaticDeduplication {@code true} to enable.
      */
@@ -249,7 +251,7 @@ public abstract class Sidebar
         recipients.remove(id);
         objectives.remove(id);
 
-        if(contentMode == SidebarMode.GLOBAL && titleMode == SidebarMode.GLOBAL && globalObjective != null)
+        if (contentMode == SidebarMode.GLOBAL && titleMode == SidebarMode.GLOBAL && globalObjective != null)
             globalObjective.removeReceiver(id);
 
         ObjectiveSender.clear(id);
@@ -277,13 +279,13 @@ public abstract class Sidebar
         String title = null;
         List<String> content = null;
 
-        if(titleMode == SidebarMode.GLOBAL)
+        if (titleMode == SidebarMode.GLOBAL)
             title = getTitle(null);
 
         if (contentMode == SidebarMode.GLOBAL)
             content = getContent(null);
 
-        if(titleMode == SidebarMode.GLOBAL && contentMode == SidebarMode.GLOBAL)
+        if (titleMode == SidebarMode.GLOBAL && contentMode == SidebarMode.GLOBAL)
         {
             // If nothing was done before (objective never created) and we don't have anything to
             // do, we exit now to avoid errors.
@@ -291,11 +293,11 @@ public abstract class Sidebar
                 return;
 
             // If the content needs to be refreshed, a new objective is created
-            if(content != null || globalObjective == null)
+            if (content != null || globalObjective == null)
                 globalObjective = constructObjective(title, content, recipients);
 
-            // Else, only the title is updated, or nothing
-            else if(title != null)
+                // Else, only the title is updated, or nothing
+            else if (title != null)
                 globalObjective.setDisplayName(title);
         }
 
@@ -324,13 +326,13 @@ public abstract class Sidebar
      */
     public void runAutoRefresh(final boolean run)
     {
-        if(refreshTask != null)
+        if (refreshTask != null)
         {
             refreshTask.cancel();
             refreshTask = null;
         }
 
-        if(run)
+        if (run)
         {
             Runnable refreshRunnable = new Runnable()
             {
@@ -358,6 +360,109 @@ public abstract class Sidebar
 
 
 
+    /* **  Per-line update API  ** */
+
+    /**
+     * Updates a single line of the scoreboard, replacing the old line by the new one.
+     *
+     * This method is only useful if the {@link #getContent(Player)} method returns {@code null};
+     * else, this change will be overwritten by the newly-generated sidebar.
+     *
+     * Please note that this can hardly be used with scoreboards with identical lines, due to the
+     * auto-deduplication, if you use that feature. To handle this case, you can use the {@link
+     * #updateLine(Player, int, String)} method instead.
+     *
+     * If the old sidebar doesn't contains any line equal to {@code oldLine}, nothing is done.
+     *
+     * @param player  The updated player; {@code null} if the content's mode is {@link
+     *                SidebarMode#GLOBAL global}.
+     * @param oldLine The replaced line.
+     * @param newLine The new line.
+     *
+     * @throws IllegalStateException    if there isn't any previously-constructed objective for that
+     *                                  player (or at all, if the content's mode is {@link
+     *                                  SidebarMode#GLOBAL global}).
+     * @throws IllegalArgumentException if {@code player} is {@code null} and the content's mode is
+     *                                  not {@link SidebarMode#GLOBAL global}.
+     *
+     * @see #setAutomaticDeduplication(boolean)
+     * @see #updateLine(Player, int, String)
+     */
+    public void updateLine(Player player, String oldLine, String newLine)
+    {
+        if ((contentMode == SidebarMode.GLOBAL && (globalObjective == null || player == null)) || !objectives.containsKey(player.getUniqueId()))
+            throw new IllegalArgumentException("Cannot change the sidebar for that player because either the objective is not constructed for this player or the player is null out of the GLOBAL content mode.");
+
+        // We need the old score.
+        SidebarObjective objective = (contentMode == SidebarMode.GLOBAL) ? globalObjective : objectives.get(player.getUniqueId());
+        Integer score = objective.getScores().get(oldLine);
+
+        if (score == null)
+            return;  // Nothing to update.
+
+        // Then we updates the line.
+        updateLine(objective, oldLine, newLine, score);
+    }
+
+    /**
+     * Updates a single line of the scoreboard, replacing the line at the given index in the list
+     * returned by {@link #getContent(Player)} with the new one.
+     *
+     * This method is only useful if the {@link #getContent(Player)} method returns {@code null};
+     * else, this change will be overwritten by the newly-generated sidebar.
+     *
+     * If the old sidebar doesn't contains any line at the given index, nothing is done.
+     *
+     * @param player    The updated player; {@code null} if the content's mode is {@link
+     *                  SidebarMode#GLOBAL global}.
+     * @param lineIndex The index of the replaced line in the list previously returned by the {@link
+     *                  #getContent(Player)} method.
+     * @param newLine   The new line.
+     *
+     * @throws IllegalStateException    if there isn't any previously-constructed objective for that
+     *                                  player (or at all, if the content's mode is {@link
+     *                                  SidebarMode#GLOBAL global}).
+     * @throws IllegalArgumentException if {@code player} is {@code null} and the content's mode is
+     *                                  not {@link SidebarMode#GLOBAL global}.
+     */
+    public void updateLine(Player player, int lineIndex, String newLine)
+    {
+        if ((contentMode == SidebarMode.GLOBAL && (globalObjective == null || player == null)) || !objectives.containsKey(player.getUniqueId()))
+            throw new IllegalArgumentException("Cannot change the sidebar for that player because either the objective is not constructed for this player or the player is null out of the GLOBAL content mode.");
+
+        // We need the old score.
+        SidebarObjective objective = (contentMode == SidebarMode.GLOBAL) ? globalObjective : objectives.get(player.getUniqueId());
+        Integer biggestScore = -1;
+
+        for (Integer score : objective.getScores().values())
+            if (score > biggestScore)
+                biggestScore = score;
+
+        if (lineIndex >= biggestScore)
+            return;
+
+        Integer score = biggestScore - lineIndex;
+
+        PluginLogger.info("Sidebar height: {0} - Updated score: {1} - Line index: {2}", biggestScore, score, lineIndex);
+
+        // Then we need the old line at this score.
+        String oldLine = null;
+        for (Map.Entry<String, Integer> scoreEntry : new HashMap<>(objective.getScores()).entrySet())
+        {
+            if (scoreEntry.getValue().equals(score))
+            {
+                oldLine = scoreEntry.getKey();
+                break;
+            }
+        }
+
+        if (oldLine == null)
+            return;
+
+        // Then we updates the line.
+        updateLine(objective, oldLine, newLine, score);
+    }
+
     /* **  Private API  ** */
 
     /**
@@ -374,12 +479,12 @@ public abstract class Sidebar
         final boolean objectiveAlreadyExists = objectives.containsKey(playerID);
 
 
-        if(titleMode == SidebarMode.PER_PLAYER)
+        if (titleMode == SidebarMode.PER_PLAYER)
         {
             title = getTitle(player);
         }
 
-        if(contentMode == SidebarMode.PER_PLAYER)
+        if (contentMode == SidebarMode.PER_PLAYER)
         {
             content = getContent(player);
         }
@@ -407,8 +512,8 @@ public abstract class Sidebar
     /**
      * Constructs an objective ready to be sent, from the raw data.
      *
-     * @param title The sidebar's title.
-     * @param content The sidebar's content.
+     * @param title     The sidebar's title.
+     * @param content   The sidebar's content.
      * @param receivers The receivers of this objective.
      *
      * @return The objective.
@@ -431,7 +536,7 @@ public abstract class Sidebar
             // The blank lines are always deduplicated
             if (line.isEmpty())
             {
-                for(int i = 0; i < spacesInBlankLines; i++)
+                for (int i = 0; i < spacesInBlankLines; i++)
                     line += " ";
 
                 spacesInBlankLines++;
@@ -458,13 +563,38 @@ public abstract class Sidebar
         return objective;
     }
 
+    /**
+     * Sends the packets and updates the objective object to replace the old line at the given score
+     * with the new line.
+     *
+     * @param objective The updated objective.
+     * @param oldLine   The old line.
+     * @param newLine   The new line.
+     * @param score     The score.
+     */
+    private void updateLine(SidebarObjective objective, String oldLine, String newLine, int score)
+    {
+        // First: we check if there is something to do.
+        // This may seems strange, but without this check, if a line is replaced by itself (no change),
+        // the line will disappears (because the new line is sent before the destroy packet of the
+        // old one), and even without that, this avoids useless packets to be sent.
+        if (oldLine.equals(newLine))
+            return;
+
+        // We send the line change packets
+        ObjectiveSender.updateLine(objective, oldLine, newLine, score);
+
+        // ...and we update the objective.
+        objective.removeScore(oldLine);
+        objective.setScore(newLine, score);
+    }
+
 
 
     /* **  System-wide methods  ** */
 
     /**
-     * Initializes the scoreboards API.
-     * Must be called before this library is used.
+     * Initializes the scoreboards API. Must be called before this library is used.
      */
     public static void init()
     {
@@ -474,8 +604,7 @@ public abstract class Sidebar
     }
 
     /**
-     * Clears the scoreboard API.
-     * Must be called when the plugin is disabled.
+     * Clears the scoreboard API. Must be called when the plugin is disabled.
      */
     public static void exit()
     {
@@ -500,7 +629,8 @@ public abstract class Sidebar
     }
 
     /**
-     * Returns a set containing the currently logged-in players. This method can be used asynchronously.
+     * Returns a set containing the currently logged-in players. This method can be used
+     * asynchronously.
      *
      * @return The logged-in players.
      */
@@ -515,6 +645,7 @@ public abstract class Sidebar
      * The returned {@link Player} object must be used read-only for thread safety.
      *
      * @param id The player's UUID.
+     *
      * @return The Player object; {@code null} if offline.
      */
     public static Player getPlayerAsync(final UUID id)

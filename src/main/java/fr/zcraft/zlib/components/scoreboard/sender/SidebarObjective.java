@@ -102,6 +102,13 @@ public class SidebarObjective
         return scores.put(name, score) != null;
     }
 
+    public boolean removeScore(String name)
+    {
+        Validate.notNull(name, "The score name cannot be null!");
+
+        return scores.remove(name) != null;
+    }
+
     /**
      * Sets the objective's display name (i.e. the title of the sidebar).
      *

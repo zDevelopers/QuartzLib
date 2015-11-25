@@ -207,6 +207,41 @@ public class ObjectiveSender
     }
 
     /**
+     * Sends, for each receiver of this objective, the packets needed to replace the old line
+     * (with the given score) with the new line (with the same score).
+     *
+     * @param objective The objective the old line (and the new) belongs to.
+     * @param oldLine The replaced line.
+     * @param newLine The new line.
+     */
+    public static void updateLine(SidebarObjective objective, String oldLine, String newLine, int score)
+    {
+        for (UUID receiver : objective.getReceivers())
+        {
+            try
+            {
+                String currentPlayerObjective = sentObjectives.get(receiver);
+
+                if (currentPlayerObjective != null && objective.getName().equals(currentPlayerObjective))
+                {
+                    Object connection = getPlayerConnection(receiver);
+
+                    sendScore(connection, objective, newLine, score);
+                    deleteScore(connection, objective, oldLine);
+                }
+                else
+                {
+                    send(receiver, objective);
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * Tells the given player to destroy the previously sent objective, if it exists.
      *
      * @param player The UUID of the player to clear.
