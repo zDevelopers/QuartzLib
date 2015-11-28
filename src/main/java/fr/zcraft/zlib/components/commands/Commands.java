@@ -72,10 +72,7 @@ public class Commands extends ZLibComponent
     
     static public void register(String name, Class<? extends Command> ... commandsClasses)
     {
-        final CommandGroup commandGroup = new CommandGroup(new String[] {name}, commandsClasses);
-        commandGroup.register(plugin);
-
-        commandGroups.add(commandGroup);
+        register(new String[] {name}, commandsClasses);
     }
     
     static public boolean execute(CommandSender sender, String commandName, String[] args)
