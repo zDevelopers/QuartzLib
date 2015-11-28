@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.commands;
 
+import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 
 import java.io.IOException;
@@ -81,7 +82,7 @@ public class HelpCommand extends Command
         if(!command.canExecute(sender))
             warning("You do not have the permission to use this command.");
         
-        String message = "§l§6 ||== ImageOnMap help ==||\n" + 
+        String message = "§l§6 ||== " + ZLib.getPlugin().getName() +  " help ==||\n" + 
                 "§l§6 |Usage : §r" + command.getUsageString();
         
         try
