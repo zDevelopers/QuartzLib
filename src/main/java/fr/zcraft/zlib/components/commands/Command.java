@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
 import fr.zcraft.zlib.core.ZLib;
+import fr.zcraft.zlib.tools.text.RawMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -193,9 +194,7 @@ abstract public class Command
     
     protected void tellRaw(String rawMessage) throws CommandException
     {
-        Player player = playerSender();
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), 
-                "tellraw " + player.getName() + " " + rawMessage);
+        RawMessage.send(playerSender(), rawMessage);
     }
     
     ///////////// Methods for autocompletion /////////////
