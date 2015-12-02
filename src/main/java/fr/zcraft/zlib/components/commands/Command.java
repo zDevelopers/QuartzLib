@@ -40,6 +40,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 abstract public class Command 
 {   
@@ -232,5 +233,64 @@ abstract public class Command
         
         return matches;
     }
-
+    
+    ///////////// Methods for parameters /////////////
+    
+    static private String invalidParameterString(int index, final String expected)
+    {
+        return "Argument #" + (index + 1) + " invalid : expected " + expected;
+    }
+    
+    static private String invalidParameterString(int index, final Object[] expected)
+    {
+        String[] expectedStrings = new String[expected.length];
+        
+        for(int i = expected.length; i --> 0;)
+        {
+            expectedStrings[i] = expected[i].toString().toLowerCase();
+        }
+        
+        String expectedString =  StringUtils.join(expectedStrings, ',');
+        
+        return "Argument #" + (index + 1) + " invalid : expected " + expectedString;
+    }
+    
+    protected int getIntegerParameter(int index) throws CommandException
+    {
+        try
+        {
+            return Integer.parseInt(args[index]);
+        }
+        catch(NumberFormatException e)
+        {
+            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "Integer"));
+        }
+    }
+    
+    protected float getFloatParameter(int index) throws CommandException
+    {
+        try
+        {
+            return Float.parseFloat(args[index]);
+        }
+        catch(NumberFormatException e)
+        {
+            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "Integer"));
+        }
+    }
+    
+    protected <T extends Enum> T getEnumParameter(int index, Class<T> enumType) throws CommandException
+    {
+        Enum[] enumValues = enumType.getEnumConstants();
+        String parameter = args[index].toLowerCase();
+        
+        for(Enum value : enumValues)
+        {
+            if(value.toString().toLowerCase().equals(parameter))
+                return (T) value;
+        }
+        
+        throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, enumValues));
+    }
+    
 }

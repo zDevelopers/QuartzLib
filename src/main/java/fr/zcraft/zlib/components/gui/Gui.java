@@ -156,6 +156,15 @@ public final class Gui extends ZLibComponent
         return (T) openGui;
     }
     
+    static public void update(Class<? extends GuiBase> guiClass)
+    {
+        for(GuiBase openGui : openGuis.values())
+        {
+            if(guiClass.isAssignableFrom(openGui.getClass()))
+                openGui.update();
+        }
+    }
+    
     static final void registerGuiOpen(Player player, GuiBase gui)
     {
         openGuis.put(player, gui);
