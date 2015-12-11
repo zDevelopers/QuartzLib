@@ -9,6 +9,9 @@ package fr.zcraft.zlib.components.configuration;
 import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.List;
+
+
 public class ConfigurationItem<T>
 {
     private final String fieldName;
@@ -35,6 +38,14 @@ public class ConfigurationItem<T>
     public boolean isDefined()
     {
         return getConfig().contains(fieldName);
+    }
+
+    public T set(T value)
+    {
+        T oldValue = get();
+
+        getConfig().set(fieldName, value);
+        return oldValue;
     }
     
     @Override
@@ -69,26 +80,34 @@ public class ConfigurationItem<T>
     {
         return ZLib.getPlugin().getConfig();
     }
-    
+
+    @SuppressWarnings("unchecked")
     static private <T> T get(String path, T defaultValue)
     {
-        if(defaultValue instanceof String)
+        if (defaultValue instanceof String)
             return (T) getConfig().getString(path, (String) defaultValue);
-        if(defaultValue instanceof Boolean)
+
+        else if (defaultValue instanceof Boolean)
             return (T) (Boolean) getConfig().getBoolean(path, (Boolean) defaultValue);
-        if(defaultValue instanceof Integer)
+
+        else if (defaultValue instanceof Integer)
             return (T) (Integer) getConfig().getInt(path, (Integer) defaultValue);
-        if(defaultValue instanceof Double)
+
+        else if (defaultValue instanceof Double)
             return (T) (Double) getConfig().getDouble(path, (Double) defaultValue);
-        if(defaultValue instanceof Long)
+
+        else if (defaultValue instanceof Long)
             return (T) (Long) getConfig().getLong(path, (Long) defaultValue);
+
+        else if (defaultValue instanceof List)
+            return (T) getConfig().getList(path, (List<?>) defaultValue);
         
-        return (T) getConfig().get(path, defaultValue);
+        else
+            return (T) getConfig().get(path, defaultValue);
     }
     
-    static public <T> ConfigurationItem<T> item(String fieldName, T defaultValue, String... depreceatedNames)
+    static public <T> ConfigurationItem<T> item(String fieldName, T defaultValue, String... deprecatedNames)
     {
-        return new ConfigurationItem(fieldName, defaultValue, depreceatedNames);
+        return new ConfigurationItem<>(fieldName, defaultValue, deprecatedNames);
     }
-    
 }
