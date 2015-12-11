@@ -32,13 +32,14 @@ package fr.zcraft.zlib.components.gui;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.PluginLogger;
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
 
 public final class Gui extends ZLibComponent
 {
@@ -75,8 +76,13 @@ public final class Gui extends ZLibComponent
         openGuis = null;
         guiListeners = null;
     }
-    
-    static protected final void registerListener(Class<? extends Listener> listenerClass)
+
+    /**
+     * Registers an events listener, if it was not registered before.
+     *
+     * @param listenerClass The listener's class to register. No-args constructor required.
+     */
+    static protected void registerListener(Class<? extends Listener> listenerClass)
     {
         if(guiListeners == null || guiListeners.containsKey(listenerClass))
             return;
@@ -103,7 +109,7 @@ public final class Gui extends ZLibComponent
      * @param parent The parent of the newly created GUI. Can be null.
      * @return The opened GUI.
      */
-    static public final <T extends GuiBase> T open(final Player owner, final T gui, final GuiBase parent)
+    static public <T extends GuiBase> T open(final Player owner, final T gui, final GuiBase parent)
     {
         GuiBase openGui = openGuis.get(owner);
         if(openGui != null) openGui.onClose();
@@ -127,7 +133,7 @@ public final class Gui extends ZLibComponent
      * @param gui The GUI.
      * @return The opened GUI.
      */
-    static public final <T extends GuiBase> T open(Player owner, T gui)
+    static public <T extends GuiBase> T open(Player owner, T gui)
     {
         return open(owner, gui, null);
     }
@@ -136,26 +142,58 @@ public final class Gui extends ZLibComponent
      * Closes any open GUI for a given player.
      * @param owner The player.
      */
-    static public final void close(Player owner)
+    static public void close(Player owner)
     {
         GuiBase openGui = openGuis.get(owner);
         if(openGui != null) openGui.close();
     }
-    
-    static public final GuiBase getOpenGui(HumanEntity entity)
+
+    /**
+     * Closes any GUI of this type (or subclass of it).
+     * @param guiClass The GUI class.
+     */
+    static public void close(Class<? extends GuiBase> guiClass)
+    {
+        for (GuiBase openGui : openGuis.values())
+        {
+            if (guiClass.isAssignableFrom(openGui.getClass()))
+                openGui.close();
+        }
+    }
+
+    /**
+     * Returns the currently open GUI for that player, or null if no GUI
+     * is open through this API.
+     *
+     * @param entity The GUI's viewer.
+     * @return the currently opened GUI.
+     */
+    static public GuiBase getOpenGui(HumanEntity entity)
     {
         if(!(entity instanceof Player)) return null;
         return openGuis.get((Player) entity);
     }
-    
-    static public final <T extends GuiBase> T getOpenGui(HumanEntity entity, Class<T> guiClass)
+
+    /**
+     * Returns the currently open GUI of the given type for that player, or
+     * {@code null} if no GUI of this type is open through this API.
+     *
+     * @param entity The GUI's viewer.
+     * @param guiClass The GUI class.
+     * @return the currently opened GUI.
+     */
+    static public <T extends GuiBase> T getOpenGui(HumanEntity entity, Class<T> guiClass)
     {
         GuiBase openGui = getOpenGui(entity);
         if(openGui == null) return null;
         if(!guiClass.isAssignableFrom(openGui.getClass())) return null;
         return (T) openGui;
     }
-    
+
+    /**
+     * Updates any GUI of this type (or subclass of it).
+     * @param guiClass The GUI class.
+     */
     static public void update(Class<? extends GuiBase> guiClass)
     {
         for(GuiBase openGui : openGuis.values())
@@ -164,16 +202,20 @@ public final class Gui extends ZLibComponent
                 openGui.update();
         }
     }
-    
-    static final void registerGuiOpen(Player player, GuiBase gui)
+
+    /**
+     * Registers a GUI as open for the given player.
+     */
+    static void registerGuiOpen(Player player, GuiBase gui)
     {
         openGuis.put(player, gui);
     }
-    
-    static final void registerGuiClose(GuiBase gui)
+
+    /**
+     * Registers a GUI as closed for the given player.
+     */
+    static void registerGuiClose(GuiBase gui)
     {
         openGuis.remove(gui.getPlayer());
     }
-    
-    
 }
