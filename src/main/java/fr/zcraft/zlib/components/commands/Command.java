@@ -33,6 +33,7 @@ package fr.zcraft.zlib.components.commands;
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.text.RawMessage;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -40,7 +41,6 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
 
 abstract public class Command 
 {   
@@ -185,7 +185,7 @@ abstract public class Command
     
     protected void warning(String message)
     {
-        info(sender, message);
+        warning(sender, message);
     }
     
     protected void error(String message) throws CommandException
