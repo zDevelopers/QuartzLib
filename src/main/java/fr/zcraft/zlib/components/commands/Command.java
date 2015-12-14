@@ -263,7 +263,19 @@ abstract public class Command
         }
         catch(NumberFormatException e)
         {
-            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "Integer"));
+            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "integer"));
+        }
+    }
+
+    protected double getDoubleParameter(int index) throws CommandException
+    {
+        try
+        {
+            return Double.parseDouble(args[index]);
+        }
+        catch(NumberFormatException e)
+        {
+            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "integer or decimal value"));
         }
     }
     
@@ -275,7 +287,42 @@ abstract public class Command
         }
         catch(NumberFormatException e)
         {
-            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "Integer"));
+            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "integer or decimal value"));
+        }
+    }
+
+    protected long getLongParameter(int index) throws CommandException
+    {
+        try
+        {
+            return Long.parseLong(args[index]);
+        }
+        catch(NumberFormatException e)
+        {
+            throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "integer"));
+        }
+    }
+
+    protected boolean getBooleanParameter(int index) throws CommandException
+    {
+        switch (args[index].toLowerCase().trim())
+        {
+            case "yes":
+            case "y":
+            case "on":
+            case "true":
+            case "1":
+                return true;
+
+            case "no":
+            case "n":
+            case "off":
+            case "false":
+            case "0":
+                return false;
+
+            default:
+                throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "Boolean (yes/no)"));
         }
     }
     
