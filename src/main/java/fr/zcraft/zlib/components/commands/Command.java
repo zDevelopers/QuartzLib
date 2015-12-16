@@ -177,6 +177,16 @@ abstract public class Command
     {
         info(sender, message);
     }
+
+    static protected void success(CommandSender sender, String message)
+    {
+        sender.sendMessage("§a" + message);
+    }
+
+    protected void success(String message)
+    {
+        info(sender, message);
+    }
     
     static protected void warning(CommandSender sender, String message)
     {
