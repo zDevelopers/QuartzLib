@@ -471,7 +471,7 @@ abstract public class ExplorerGui<T> extends ActionGui
      */
     protected ItemStack getEmptyViewItem() 
     { 
-        return GuiUtils.makeItem(Material.BARRIER, "Empty", "There's nothing to see here"); 
+        return GuiUtils.makeItem(Material.BARRIER, ChatColor.RED + "Empty", ChatColor.GRAY + "There's nothing to see here");
     }
     
     private ItemStack getPickedUpItem(ExplorerGuiEvent event)
