@@ -358,6 +358,9 @@ abstract public class ActionGui extends InventoryGui
      */
     private Method getActionHandler(Class<?> klass, String name)
     {
+        if (name == null || name.isEmpty())
+            return null;
+
         do
         {
             GuiAction actionAnnotation;
