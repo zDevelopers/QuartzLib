@@ -444,8 +444,6 @@ public abstract class Sidebar
 
         Integer score = biggestScore - lineIndex;
 
-        PluginLogger.info("Sidebar height: {0} - Updated score: {1} - Line index: {2}", biggestScore, score, lineIndex);
-
         // Then we need the old line at this score.
         String oldLine = null;
         for (Map.Entry<String, Integer> scoreEntry : new HashMap<>(objective.getScores()).entrySet())
