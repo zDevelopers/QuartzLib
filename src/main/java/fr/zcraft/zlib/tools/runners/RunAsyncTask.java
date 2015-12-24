@@ -47,8 +47,8 @@ public final class RunAsyncTask
 	/**
 	 * Returns a task that will run asynchronously on the next server tick.
 	 *
-	 * <b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b>
+	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+	 * assure the thread-safety of asynchronous tasks.</b></p>
 	 *
 	 * @param runnable The task to be run.
 	 *
@@ -62,8 +62,8 @@ public final class RunAsyncTask
 	/**
 	 * Returns a task that will run asynchronously after the specified number of server ticks.
 	 *
-	 * <b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b>
+	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+	 * assure the thread-safety of asynchronous tasks.</b></p>
 	 *
 	 * @param runnable The task to be run.
 	 * @param delay    The ticks to wait before running the task.
@@ -79,8 +79,8 @@ public final class RunAsyncTask
 	 * Returns a task that will repeatedly run asynchronously until cancelled, starting after the
 	 * specified number of server ticks.
 	 *
-	 * <b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b>
+	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+	 * assure the thread-safety of asynchronous tasks.</b></p>
 	 *
 	 * @param runnable The task to be run.
 	 * @param wait     The ticks to wait before running the task.
