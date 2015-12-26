@@ -49,7 +49,7 @@ import java.util.List;
 /**
  * Various utility methods for GUIs.
  */
-abstract public class GuiUtils
+public final class GuiUtils
 {
 	static private Method addItemFlagsMethod = null;
 	static private Object[] itemFlagValues = null;
@@ -76,6 +76,8 @@ abstract public class GuiUtils
 			PluginLogger.error("Exception occurred while looking for the ItemFlag API.", e);
 		}
 	}
+
+	private GuiUtils() {}
 
 	/**
 	 * Hides all the item attributes of the given {@link ItemMeta}.
@@ -186,6 +188,45 @@ abstract public class GuiUtils
 		itemStack.setItemMeta(meta);
 		return itemStack;
 	}
+
+
+	static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
+	{
+		if (inventory1 == inventory2)
+		{
+			return true;
+		}
+
+		else if (inventory1 == null || inventory2 == null
+				|| inventory1.getSize() != inventory2.getSize()
+				|| inventory1.getType() != inventory2.getType()
+				|| !inventory1.getName().equals(inventory2.getName())
+				|| !inventory1.getTitle().equals(inventory2.getTitle()))
+		{
+			return false;
+		}
+
+		else
+		{
+			for (int slot = 0; slot < inventory1.getSize(); slot++)
+			{
+				ItemStack item1 = inventory1.getItem(slot);
+				ItemStack item2 = inventory2.getItem(slot);
+
+				if (item1 == null || item2 == null)
+					if (item1 == item2)
+						continue;
+					else
+						return false;
+
+				if (!item1.equals(item2))
+					return false;
+			}
+
+			return true;
+		}
+	}
+
 
 	/**
 	 * Implements a bukkit runnable that updates an inventory slot later.

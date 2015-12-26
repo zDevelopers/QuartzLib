@@ -30,11 +30,16 @@
 
 package fr.zcraft.zlib.components.gui;
 
-import org.bukkit.*;
-import org.bukkit.entity.*;
-import org.bukkit.event.*;
-import org.bukkit.event.inventory.*;
-import org.bukkit.inventory.*;
+import fr.zcraft.zlib.tools.runners.RunTask;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 
 /**
  * This class provides the basic needs for chest-type GUIs.
@@ -125,9 +130,19 @@ abstract public class InventoryGui extends GuiBase
     {
         if(!isOpen()) return;
         
-        //If close() is called manually, not from InventoryCloseEvent
-        if(getPlayer().getOpenInventory().equals(inventory))
-            getPlayer().closeInventory();
+        // If close() is called manually, not from InventoryCloseEvent
+        // Ran on the next tick because it's unsafe to call Player.closeInventory() from an
+        // InventoryEvent.
+        RunTask.nextTick(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                final InventoryView openInventoryView = getPlayer().getOpenInventory();
+                if (openInventoryView != null && GuiUtils.sameInventories(inventory, openInventoryView.getTopInventory()))
+                    getPlayer().closeInventory();
+            }
+        });
         
         super.close();
     }
