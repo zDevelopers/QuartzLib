@@ -44,6 +44,8 @@ public final class RunTask
 {
 	private static BukkitScheduler scheduler = Bukkit.getScheduler();
 
+	private RunTask() {}
+
 	/**
 	 * Returns a task that will run on the next server tick.
 	 *

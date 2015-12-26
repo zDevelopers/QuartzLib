@@ -40,10 +40,12 @@ import org.bukkit.entity.Player;
  *
  * <p>This tool uses the /tellraw command to send the messages. If the JSON is not correctly
  * formatted, the message will not be sent and a Runtime exception containing the exception throw by
- * the vanilla /tellraw command will be thrown.
+ * the vanilla /tellraw command will be thrown.</p>
  */
-public class RawMessage
+public final class RawMessage
 {
+    private RawMessage() {}
+
     /**
      * Sends a raw JSON message to the given player.
      *

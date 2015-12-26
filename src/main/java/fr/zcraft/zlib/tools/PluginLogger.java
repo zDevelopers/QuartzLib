@@ -25,10 +25,12 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-abstract public class PluginLogger 
+public final class PluginLogger
 {
     static private Thread mainThread;
     static private HashMap<Thread, PluginThreadLogger> loggers;
+
+    private PluginLogger() {}
     
     static public void init()
     {

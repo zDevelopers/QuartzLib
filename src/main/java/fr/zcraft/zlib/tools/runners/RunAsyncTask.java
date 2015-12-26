@@ -44,6 +44,8 @@ public final class RunAsyncTask
 {
 	private static BukkitScheduler scheduler = Bukkit.getScheduler();
 
+	private RunAsyncTask() {}
+
 	/**
 	 * Returns a task that will run asynchronously on the next server tick.
 	 *

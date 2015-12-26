@@ -41,7 +41,7 @@ import java.lang.reflect.Method;
  *
  * @author Amaury Carrade
  */
-public class NMSNetwork
+public final class NMSNetwork
 {
     private final static Class<?> craftPlayerClass;
     private final static Class<?> packetClass;
@@ -60,6 +60,8 @@ public class NMSNetwork
             throw new IncompatibleMinecraftVersionException("Cannot load classes needed to send network packets", e);
         }
     }
+
+    private NMSNetwork() {}
 
     /**
      * Returns the player's connection, frequently used to send packets.

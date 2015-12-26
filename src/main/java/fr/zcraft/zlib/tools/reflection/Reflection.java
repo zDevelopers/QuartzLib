@@ -43,8 +43,10 @@ import java.lang.reflect.Method;
  * @author ProkopyL
  * @author Amaury Carrade (documentation only).
  */
-abstract public class Reflection
+public final class Reflection
 {
+    private Reflection() {}
+
     /**
      * Returns the Bukkit's current version, as read in the Bukkit's package name.
      *
