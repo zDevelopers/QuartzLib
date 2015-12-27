@@ -30,9 +30,8 @@
 
 package fr.zcraft.zlib.components.gui;
 
-import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
-import org.bukkit.Bukkit;
+import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -73,7 +72,7 @@ public final class GuiUtils
 		}
 		catch (InvocationTargetException e)
 		{
-			PluginLogger.error("Exception occurred while looking for the ItemFlag API.", e);
+			PluginLogger.error("Exception occurred while looking for the ItemFlag API.", e.getCause());
 		}
 	}
 
@@ -91,9 +90,13 @@ public final class GuiUtils
 		{
 			addItemFlagsMethod.invoke(meta, itemFlagValues);
 		}
-		catch (IllegalAccessException | InvocationTargetException ex)
+		catch (IllegalAccessException ex)
 		{
-			PluginLogger.error("Exception occurred while invoking the ItemMeta.addItemFlags method.", ex);
+			PluginLogger.error("IllegalAccessException caught while invoking the ItemMeta.addItemFlags method.", ex);
+		}
+		catch (InvocationTargetException ex)
+		{
+			PluginLogger.error("Exception occurred while invoking the ItemMeta.addItemFlags method.", ex.getCause());
 		}
 	}
 
@@ -108,8 +111,7 @@ public final class GuiUtils
 	 */
 	static public void setItemLater(InventoryGui gui, int slot, ItemStack item)
 	{
-		Bukkit.getScheduler().scheduleSyncDelayedTask(ZLib.getPlugin(),
-				new CreateDisplayItemTask(gui.getInventory(), item, slot));
+		RunTask.nextTick(new CreateDisplayItemTask(gui.getInventory(), item, slot));
 	}
 
 	/**
@@ -190,6 +192,13 @@ public final class GuiUtils
 	}
 
 
+	/**
+	 * Checks if these inventories are equal.
+	 *
+	 * @param inventory1 The first inventory.
+	 * @param inventory2 The other inventory.
+	 * @return {@code true} if the two inventories are the same one.
+	 */
 	static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
 	{
 		if (inventory1 == inventory2)
@@ -253,6 +262,5 @@ public final class GuiUtils
 				((Player) player).updateInventory();
 			}
 		}
-
 	}
 }

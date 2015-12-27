@@ -30,23 +30,23 @@
 
 package fr.zcraft.zlib.components.gui;
 
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import java.util.Collections;
 
 
 /**
  * This class implements an exploration GUI, allowing users to see a set of data
- * in a paginated view, and to manipulate it or get it (if the
- * {@link fr.moribus.imageonmap.guiproko.core.ExplorerGui.Mode#CREATIVE Creative} mode
- * is enabled for this GUI — enabled by default).
+ * in a paginated view, and to manipulate it or get it (if the {@link Mode#CREATIVE creative}
+ * mode is enabled for this GUI — enabled by default).
  *
  * This GUI supports both one- and two-dimensional contents; two-dimensional content is
  * represented by a one-dimension list and a width, or by {@link #getViewItem(int, int)}
@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @param <T> The type of data this GUI will display.
  *
- * @author ProkopyL (main) and Amaury Carrade
+ * @author ProkopyL and Amaury Carrade
  */
 abstract public class ExplorerGui<T> extends ActionGui
 {
@@ -502,8 +502,7 @@ abstract public class ExplorerGui<T> extends ActionGui
 
     /**
      * Returns the stack the players will get when they try to take an item from
-     * the GUI, in {@link fr.moribus.imageonmap.guiproko.core.ExplorerGui.Mode#CREATIVE}
-     * mode.
+     * the GUI, in {@link Mode#CREATIVE creative} mode.
      *
      * @param data The picked-up piece of data.
      * @return The stack to pick-up (or {@code null} to cancel the pick-up).
