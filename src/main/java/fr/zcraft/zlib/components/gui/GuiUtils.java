@@ -181,11 +181,12 @@ public final class GuiUtils
 	static public ItemStack makeItem(ItemStack itemStack, String title, List<String> loreLines)
 	{
 		ItemMeta meta = itemStack.getItemMeta();
-		meta.setDisplayName(title);
-		meta.setLore(loreLines);
 
-		if (itemStack.getType().equals(Material.MAP))
-			hideItemAttributes(meta);
+		if (title != null)
+			meta.setDisplayName(title);
+
+		if (loreLines != null)
+			meta.setLore(loreLines);
 
 		itemStack.setItemMeta(meta);
 		return itemStack;
