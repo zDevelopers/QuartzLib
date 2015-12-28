@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
+import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,9 +82,10 @@ public class HelpCommand extends Command
         
         if(!command.canExecute(sender))
             warning("You do not have the permission to use this command.");
-        
-        String message = "§l§6 ||== " + ZLib.getPlugin().getName() +  " help ==||\n" + 
-                "§l§6 |Usage : §r" + command.getUsageString();
+
+        String message = (sender instanceof Player ? "\n" : "");
+        message += "§6\u2503§l " + ZLib.getPlugin().getName() +  " help for /" + command.getCommandGroup().getUsualName() + " " + command.getName() + "\n";
+        message += "§l§6\u2503 Usage: §r" + command.getUsageString();
         
         try
         {
@@ -116,26 +118,26 @@ public class HelpCommand extends Command
         InputStream stream = getClass().getClassLoader().getResourceAsStream(fileName);
         if(stream == null) return "";
         
-	Scanner scanner = new Scanner(stream);
+	    Scanner scanner = new Scanner(stream);
         
         while (scanner.hasNextLine()) 
         {
             String line = scanner.nextLine();
-            result.append("§l§9 |§r").append(line).append("\n");
+            result.append("§l§9\u2503 §r").append(line).append("\n");
         }
  
         scanner.close();
  
-	return result.toString().trim();
+	    return result.toString().trim();
     }
     
-            
+
     @Override
     protected List<String> complete() throws CommandException
     {
         if(args.length != 1) return null;
         
-        ArrayList<String> matches = new ArrayList<String>();
+        ArrayList<String> matches = new ArrayList<>();
         
         for(Command command : commandGroup.getCommands())
         {
@@ -145,5 +147,4 @@ public class HelpCommand extends Command
         
         return matches;
     }
-  
 }
