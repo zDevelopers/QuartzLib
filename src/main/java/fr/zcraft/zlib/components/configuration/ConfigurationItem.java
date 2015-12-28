@@ -52,6 +52,14 @@ public class ConfigurationItem<T>
     }
 
     /**
+     * @return the path in the configuration file.
+     */
+    public String getFieldName()
+    {
+        return fieldName;
+    }
+
+    /**
      * @return {@code true} if a value is explicitly set in the configuration file.
      */
     public boolean isDefined()
@@ -87,6 +95,8 @@ public class ConfigurationItem<T>
     {
         T oldValue = get();
         getConfig().set(fieldName, value);
+
+        Configuration.triggerCallback(this);
 
         if (save)
             Configuration.save();

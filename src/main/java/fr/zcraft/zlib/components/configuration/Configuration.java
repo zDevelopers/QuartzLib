@@ -19,6 +19,7 @@
 package fr.zcraft.zlib.components.configuration;
 
 import fr.zcraft.zlib.core.ZLib;
+import fr.zcraft.zlib.tools.Callback;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public abstract class Configuration
 {
     /* ===== Static API ===== */
     static private ConfigurationItem[] items;
+    static private Callback<ConfigurationItem<?>> updateCallback;
     
     static public void init(Class configurationClass)
     {
@@ -52,6 +54,11 @@ public abstract class Configuration
     {
         ZLib.getPlugin().saveConfig();
     }
+
+    static public void registerConfigurationUpdateCallback(Callback<ConfigurationItem<?>> callback)
+    {
+        updateCallback = callback;
+    }
     
     static private void loadDefaultValues()
     {
@@ -64,5 +71,9 @@ public abstract class Configuration
         
         if(affected) save();
     }
-    
+
+    static void triggerCallback(ConfigurationItem<?> configurationItem)
+    {
+        if (updateCallback != null) updateCallback.call(configurationItem);
+    }
 }
