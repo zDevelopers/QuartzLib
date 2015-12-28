@@ -185,7 +185,7 @@ abstract public class Command
 
     protected void success(String message)
     {
-        info(sender, message);
+        success(sender, message);
     }
     
     static protected void warning(CommandSender sender, String message)
