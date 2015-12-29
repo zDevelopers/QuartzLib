@@ -82,10 +82,13 @@ public final class GuiUtils
 	 * Hides all the item attributes of the given {@link ItemMeta}.
 	 *
 	 * @param meta The {@link ItemMeta} to hide attributes from.
+	 * @return The same item meta. The modification is applied by reference, the stack is returned for
+	 * convenience reasons.
 	 */
-	static public void hideItemAttributes(ItemMeta meta)
+	static public ItemMeta hideItemAttributes(ItemMeta meta)
 	{
-		if (addItemFlagsMethod == null) return;
+		if (addItemFlagsMethod == null) return meta;
+
 		try
 		{
 			addItemFlagsMethod.invoke(meta, itemFlagValues);
@@ -98,6 +101,27 @@ public final class GuiUtils
 		{
 			PluginLogger.error("Exception occurred while invoking the ItemMeta.addItemFlags method.", ex.getCause());
 		}
+
+		return meta;
+	}
+
+	/**
+	 * Hides all the item attributes of the given {@link ItemStack}.
+	 *
+	 * <p>Warning: this will update the ItemMeta, clearing the effects of, as example,
+	 * {@link fr.zcraft.zlib.tools.items.GlowEffect}.</p>
+	 *
+	 * @param stack The {@link ItemStack} to hide attributes from.
+	 * @return The same item stack. The modification is applied by reference, the stack is returned for
+	 * convenience reasons.
+	 */
+	static public ItemStack hideItemAttributes(ItemStack stack)
+	{
+		ItemMeta meta = stack.getItemMeta();
+		hideItemAttributes(meta);
+		stack.setItemMeta(meta);
+
+		return stack;
 	}
 
 
