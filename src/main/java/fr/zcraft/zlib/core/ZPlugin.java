@@ -73,6 +73,6 @@ public abstract class ZPlugin extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-		ZLib.unloadComponents();
+		ZLib.exit();
 	}
 }

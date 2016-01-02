@@ -41,7 +41,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public abstract class ZLib
 {
     static private JavaPlugin plugin;
-    static private final Set<ZLibComponent> loadedComponents = new CopyOnWriteArraySet<>();
+    static private Set<ZLibComponent> loadedComponents;
 
 
     /**
@@ -57,6 +57,7 @@ public abstract class ZLib
     static public void init(JavaPlugin plugin)
     {
         ZLib.plugin = plugin;
+        ZLib.loadedComponents = new CopyOnWriteArraySet<>();
 
         PluginLogger.init();
     }
@@ -78,13 +79,13 @@ public abstract class ZLib
     }
 
     /**
-     * Unloads all the registered components.
+     * Unloads all the registered components and the core tools used.
      *
      * This method is automatically called when the plugin is unloaded.
      *
      * @throws IllegalStateException if the ZLib was not initialized.
      */
-    static void unloadComponents()
+    static void exit()
     {
         checkInitialized();
 
@@ -94,6 +95,11 @@ public abstract class ZLib
         }
 
         loadedComponents.clear();
+
+        PluginLogger.exit();
+
+        plugin = null;
+        loadedComponents = null;
     }
 
     /**
