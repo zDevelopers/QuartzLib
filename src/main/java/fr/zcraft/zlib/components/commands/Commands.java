@@ -54,12 +54,14 @@ public class Commands extends ZLibComponent
         init();
     }
 
-    static public void registerShortcut(String shortcutCommandName, Class<? extends Command> commandClass, String ... names)
+    static public void registerShortcut(String commandGroupName, Class<? extends Command> commandClass, String ... shortcutNames)
     {
-        CommandGroup group = getMatchingCommandGroup(shortcutCommandName);
-        if(group == null) throw new IllegalArgumentException("Invalid command name : " + shortcutCommandName);
+        CommandGroup group = getMatchingCommandGroup(commandGroupName);
+        if(group == null) throw new IllegalArgumentException("Invalid command group name : " + commandGroupName);
+        CommandGroup newCommandGroup = new CommandGroup(group, commandClass, shortcutNames);
         
-        commandGroups.add(new CommandGroup(group, commandClass, names));
+        newCommandGroup.register(plugin);
+        commandGroups.add(newCommandGroup);
     }
     
     static public void register(String[] names, Class<? extends Command> ... commandsClasses)
