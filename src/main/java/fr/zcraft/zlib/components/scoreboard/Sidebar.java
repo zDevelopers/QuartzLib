@@ -1,5 +1,5 @@
 /*
- * Copyright or © or Copr. ZLib contributors (2015)
+ * Copyright or © or Copr. ZLib contributors (2015 - 2016)
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
@@ -33,7 +33,6 @@ import com.google.common.collect.ImmutableSet;
 import fr.zcraft.zlib.components.scoreboard.sender.ObjectiveSender;
 import fr.zcraft.zlib.components.scoreboard.sender.SidebarObjective;
 import fr.zcraft.zlib.core.ZLib;
-import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

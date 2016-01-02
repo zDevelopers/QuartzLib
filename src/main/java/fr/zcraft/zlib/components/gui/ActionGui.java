@@ -1,5 +1,5 @@
 /*
- * Copyright or © or Copr. ZLib contributors (2015)
+ * Copyright or © or Copr. ZLib contributors (2015 - 2016)
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
@@ -31,13 +31,18 @@
 package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.tools.PluginLogger;
-import org.bukkit.*;
-import org.bukkit.event.inventory.*;
-import org.bukkit.inventory.*;
-import org.bukkit.inventory.meta.*;
+import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class implements an action-based GUI.
