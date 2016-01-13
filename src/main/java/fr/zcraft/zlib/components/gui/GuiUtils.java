@@ -221,7 +221,7 @@ public final class GuiUtils
 
 
 	/**
-	 * Generates a lore list based on the given text, cutting it into lines of 40 characters or
+	 * Generates a lore list based on the given text, cutting it into lines of 28 characters or
 	 * less.
 	 *
 	 * @param text The text.
@@ -230,7 +230,7 @@ public final class GuiUtils
 	 */
 	static public List<String> generateLore(String text)
 	{
-		return generateLore(text, 40);
+		return generateLore(text, 28);
 	}
 
 	/**
