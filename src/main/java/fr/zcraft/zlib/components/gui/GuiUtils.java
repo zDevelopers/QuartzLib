@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.runners.RunTask;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -41,7 +42,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -214,6 +217,59 @@ public final class GuiUtils
 
 		itemStack.setItemMeta(meta);
 		return itemStack;
+	}
+
+
+	/**
+	 * Generates a lore list based on the given text, cutting it into lines of 40 characters or
+	 * less.
+	 *
+	 * @param text The text.
+	 *
+	 * @return The lore lines.
+	 */
+	static public List<String> generateLore(String text)
+	{
+		return generateLore(text, 40);
+	}
+
+	/**
+	 * Generates a lore list based on the given text, cutting it into lines of {@code lineLength}
+	 * characters or less.
+	 *
+	 * @param text       The text.
+	 * @param lineLength The maximal length of a line.
+	 *
+	 * @return The lore lines.
+	 */
+	static public List<String> generateLore(String text, int lineLength)
+	{
+		if (text.length() <= lineLength)
+			return Collections.singletonList(text);
+
+		String[] words = text.split(" ");
+		List<String> lore = new ArrayList<>();
+
+		String currentLine = "";
+		for (String word : words)
+		{
+			currentLine += word;
+			if (currentLine.length() > lineLength)
+			{
+				lore.add(currentLine);
+				currentLine = ChatColor.getLastColors(currentLine); // It's important to preserve the formatting
+			}
+			else
+			{
+				currentLine += " ";
+			}
+		}
+
+		// Don't forget the last line...
+		if (!ChatColor.stripColor(currentLine.trim()).isEmpty())
+			lore.add(currentLine);
+
+		return lore;
 	}
 
 
