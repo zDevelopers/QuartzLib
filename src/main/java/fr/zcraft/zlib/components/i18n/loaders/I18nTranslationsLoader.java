@@ -33,7 +33,6 @@ import fr.zcraft.zlib.components.i18n.loaders.gettext.GettextPOLoader;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.Map;
 
 
 /**
@@ -53,19 +52,27 @@ public abstract class I18nTranslationsLoader
     /**
      * Translates a string into the given locale.
      *
-     * @param toTranslate The sentence to translate.
+     * @param messageId The sentence to translate.
      *
      * @return The translated sentence. {@code null} if the sentence is not translated into this
      * locale.
      */
-    public abstract String translate(String toTranslate);
+    public abstract Translation translate(String messageId);
 
     /**
-     * Returns all loaded translations for a given locale.
-     *
-     * @return The translations loaded for this locale, in a map: {@code original → translated}.
+     * @return The last translator.
      */
-    public abstract Map<String, String> getTranslations();
+    public abstract String getLastTranslator();
+
+    /**
+     * @return The name of the translation team.
+     */
+    public abstract String getTranslationTeam();
+
+    /**
+     * @return The person to contact if there is an error in the translations.
+     */
+    public abstract String getReportErrorsTo();
 
 
     /**

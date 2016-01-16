@@ -29,6 +29,8 @@
  */
 package fr.zcraft.zlib.components.i18n.loaders.gettext;
 
+import fr.zcraft.zlib.components.i18n.loaders.Translation;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,9 +59,9 @@ public class POFile
 
     private Set<Translation> translations = new HashSet<>();
 
-    private String lastTranslator = "";
-    private String translationTeam = "";
-    private String reportErrorsTo = "";
+    private String lastTranslator = null;
+    private String translationTeam = null;
+    private String reportErrorsTo = null;
 
     private Integer pluralCount = 2;
     private String pluralFormScript = "";
@@ -390,59 +392,6 @@ public class POFile
     public String getPluralFormScript()
     {
         return pluralFormScript;
-    }
-
-
-    /**
-     * Represents a translation.
-     */
-    public class Translation
-    {
-        private String original;
-        private final String originalPlural;
-        private String context;
-        private List<String> translations;
-
-        Translation(String original, String originalPlural, String context, List<String> translations)
-        {
-            this.original = original;
-            this.originalPlural = originalPlural;
-            this.context = context;
-            this.translations = translations;
-        }
-
-        /**
-         * @return The original, untranslated, string.
-         */
-        public String getOriginal()
-        {
-            return original;
-        }
-
-        /**
-         * @return The original, untranslated, plural form.
-         */
-        public String getOriginalPlural()
-        {
-            return originalPlural;
-        }
-
-        /**
-         * @return The translation context; {@code null} if no context was set. Note that an empty
-         * context string and a {@code null} one do not mean the same thing.
-         */
-        public String getContext()
-        {
-            return context;
-        }
-
-        /**
-         * @return All the translations available.
-         */
-        public List<String> getTranslations()
-        {
-            return translations;
-        }
     }
 
 

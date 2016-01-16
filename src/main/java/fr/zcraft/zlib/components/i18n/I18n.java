@@ -462,13 +462,13 @@ public class I18n extends ZLibComponent
 
         if (primaryLocale != null && (loader = translationsLoaders.get(primaryLocale)) != null)
         {
-            translated = loader.translate(toTranslate);
+            translated = loader.translate(toTranslate).getTranslations().get(0);
             usedLocale = loader.getLocale();
         }
 
         if (translated == null && fallbackLocale != null && (loader = translationsLoaders.get(fallbackLocale)) != null)
         {
-            translated = loader.translate(toTranslate);
+            translated = loader.translate(toTranslate).getTranslations().get(0);
             usedLocale = loader.getLocale();
         }
 
@@ -531,5 +531,64 @@ public class I18n extends ZLibComponent
                 .replace("{ci}", noticeColor)
                 .replace("{cs}", successColor)
                 .replace("{cst}", statusColor);
+    }
+
+
+
+    /* **  METADATA METHODS  ** */
+
+    /**
+     * @return the primary locale set, or {@code null} if unset.
+     */
+    public static Locale getPrimaryLocale()
+    {
+        return primaryLocale;
+    }
+
+    /**
+     * @return the fallback locale set, or {@code null} if unset.
+     */
+    public static Locale getFallbackLocale()
+    {
+        return fallbackLocale;
+    }
+
+    /**
+     * Retrieves the last translator for a locale.
+     *
+     * @param locale A locale.
+     *
+     * @return The last translator for this locale, or null if either this locale is not loader or a
+     * last translator is not available.
+     */
+    public static String getLastTranslator(Locale locale)
+    {
+        return translationsLoaders.containsKey(locale) ? translationsLoaders.get(locale).getLastTranslator() : null;
+    }
+
+    /**
+     * Retrieves the translation team for a locale.
+     *
+     * @param locale A locale.
+     *
+     * @return The last translator for this locale, or null if either this locale is not loader or a
+     * translation team is not available.
+     */
+    public static String getTranslationTeam(Locale locale)
+    {
+        return translationsLoaders.containsKey(locale) ? translationsLoaders.get(locale).getTranslationTeam() : null;
+    }
+
+    /**
+     * Retrieves the person the error reports have to be sent to, for a locale.
+     *
+     * @param locale A locale.
+     *
+     * @return The receiver of the error reports for this locale, or null if either this locale is
+     * not loader or a receiver is not available.
+     */
+    public static String getReportErrorsTo(Locale locale)
+    {
+        return translationsLoaders.containsKey(locale) ? translationsLoaders.get(locale).getReportErrorsTo() : null;
     }
 }

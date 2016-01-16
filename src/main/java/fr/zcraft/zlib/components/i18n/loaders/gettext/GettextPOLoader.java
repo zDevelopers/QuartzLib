@@ -30,6 +30,7 @@
 package fr.zcraft.zlib.components.i18n.loaders.gettext;
 
 import fr.zcraft.zlib.components.i18n.loaders.I18nTranslationsLoader;
+import fr.zcraft.zlib.components.i18n.loaders.Translation;
 import fr.zcraft.zlib.tools.PluginLogger;
 
 import java.io.File;
@@ -49,7 +50,7 @@ public class GettextPOLoader extends I18nTranslationsLoader
     /**
      * Extracted source to translation map, for performances purposes.
      */
-    private final Map<String, String> simpleTranslations = new HashMap<>();
+    private final Map<String, Translation> translations = new HashMap<>();
 
 
     public GettextPOLoader(Locale locale, File file)
@@ -66,10 +67,9 @@ public class GettextPOLoader extends I18nTranslationsLoader
             source = new POFile(file);
             source.parse();
 
-            // TODO support for plural forms. Later.
-            for (POFile.Translation translation : source.getTranslations())
+            for (Translation translation : source.getTranslations())
             {
-                simpleTranslations.put(translation.getOriginal(), translation.getTranslations().get(0));
+                translations.put(translation.getOriginal(), translation);
             }
         }
         catch (FileNotFoundException e)
@@ -85,17 +85,29 @@ public class GettextPOLoader extends I18nTranslationsLoader
     }
 
     @Override
-    public String translate(String toTranslate)
+    public Translation translate(String messageId)
     {
         if (source == null)
             return null;
 
-        return simpleTranslations.get(toTranslate);
+        return translations.get(messageId);
     }
 
     @Override
-    public Map<String, String> getTranslations()
+    public String getLastTranslator()
     {
-        return simpleTranslations;
+        return source != null ? source.getLastTranslator() : null;
+    }
+
+    @Override
+    public String getTranslationTeam()
+    {
+        return source != null ? source.getTranslationTeam() : null;
+    }
+
+    @Override
+    public String getReportErrorsTo()
+    {
+        return source != null ? source.getReportErrorsTo() : null;
     }
 }
