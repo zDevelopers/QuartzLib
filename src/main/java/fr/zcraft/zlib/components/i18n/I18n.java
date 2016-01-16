@@ -428,9 +428,13 @@ public class I18n extends ZLibComponent
 
 
         if (loader == null)
+        {
             throw new UnsupportedLocaleException(locale);
+        }
         else
+        {
             translationsLoaders.put(locale, loader);
+        }
     }
 
 

@@ -27,9 +27,14 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.components.i18n.loaders;
+package fr.zcraft.zlib.components.i18n.loaders.gettext;
+
+import fr.zcraft.zlib.components.i18n.loaders.I18nTranslationsLoader;
+import fr.zcraft.zlib.tools.PluginLogger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -39,26 +44,58 @@ import java.util.Map;
  */
 public class GettextPOLoader extends I18nTranslationsLoader
 {
-    protected GettextPOLoader(Locale locale, File file)
+    private POFile source = null;
+
+    /**
+     * Extracted source to translation map, for performances purposes.
+     */
+    private final Map<String, String> simpleTranslations = new HashMap<>();
+
+
+    public GettextPOLoader(Locale locale, File file)
     {
         super(locale, file);
+
+        load();
     }
 
-    @Override
-    public void load()
+    private void load()
     {
+        try
+        {
+            source = new POFile(file);
+            source.parse();
 
+            // TODO support for plural forms. Later.
+            for (POFile.Translation translation : source.getTranslations())
+            {
+                simpleTranslations.put(translation.getOriginal(), translation.getTranslations().get(0));
+            }
+        }
+        catch (FileNotFoundException e)
+        {
+            PluginLogger.error("Cannot load the {0} translations file.", e, file.getAbsolutePath());
+            source = null;
+        }
+        catch (POFile.CannotParsePOException e)
+        {
+            PluginLogger.error("Cannot parse the {0} translations file.", e, file.getAbsolutePath());
+            source = null;
+        }
     }
 
     @Override
     public String translate(String toTranslate)
     {
-        return null;
+        if (source == null)
+            return null;
+
+        return simpleTranslations.get(toTranslate);
     }
 
     @Override
     public Map<String, String> getTranslations()
     {
-        return null;
+        return simpleTranslations;
     }
 }

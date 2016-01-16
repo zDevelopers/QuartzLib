@@ -29,6 +29,8 @@
  */
 package fr.zcraft.zlib.components.i18n.loaders;
 
+import fr.zcraft.zlib.components.i18n.loaders.gettext.GettextPOLoader;
+
 import java.io.File;
 import java.util.Locale;
 import java.util.Map;
@@ -42,17 +44,11 @@ public abstract class I18nTranslationsLoader
     protected final Locale locale;
     protected final File file;
 
-    protected I18nTranslationsLoader(Locale locale, File file)
+    public I18nTranslationsLoader(Locale locale, File file)
     {
         this.locale = locale;
         this.file = file;
     }
-
-
-    /**
-     * Called when the translations have to be loaded in the system.
-     */
-    public abstract void load();
 
     /**
      * Translates a string into the given locale.
@@ -70,6 +66,7 @@ public abstract class I18nTranslationsLoader
      * @return The translations loaded for this locale, in a map: {@code original → translated}.
      */
     public abstract Map<String, String> getTranslations();
+
 
     /**
      * @return The Locale loaded by this loader.
@@ -93,7 +90,7 @@ public abstract class I18nTranslationsLoader
         String[] fileNameParts = file.getName().split("\\.");
         String fileExtension = fileNameParts[fileNameParts.length - 1].toLowerCase();
 
-        switch (fileExtension)
+        switch (fileExtension.toLowerCase())
         {
             case "po":
                 return new GettextPOLoader(locale, file);
