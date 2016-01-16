@@ -483,7 +483,12 @@ public class I18n extends ZLibComponent
 
         MessageFormat formatter = new MessageFormat(translated, usedLocale);
 
-        return formatter.format(parameters);
+        // Removes non-breaking spaces, as Minecraft ignores them (breaking texts regardless of their presence) and often badly displays
+        // them (dashed square with NBSP inside).
+        return formatter.format(parameters)
+                .replace("\u00A0", " ").replace("\u2007", " ").replace("\u202F", " ")  // Non-breaking spaces
+                .replace("\u2009", " ")                                                // Thin space
+                .replace("\u2060", "");                                                // “WORD-JOINER” non-breaking space (zero-width)
     }
 
     /**
