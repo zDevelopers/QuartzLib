@@ -32,13 +32,103 @@ package fr.zcraft.zlib.components.i18n;
 /**
  * A shortcut to translate texts.
  *
- * Use {@code I.t("text", arg1, arg2)}, {@code I._("text", arg1, arg2)}, or statically import {@code
- * I._} and use {@code _("text", arg1, arg2)} to translate something.
+ * Use {@code I.t("text", ...)}, or statically import {@code I.t} and use {@code t("text", ...)} to
+ * translate something.
+ *
+ *
+ * <h3>The parameters</h3>
+ *
+ * Translated string accept parameters in the following format: {@code {0}}, {@code {1}}, etc. These
+ * tokens are replaced with the given parameters at runtime; the first parameter replaces the {@code
+ * {0}} token, the second one, {@code {1}}, and so on.
+ *
+ * Other parameters related options are available; see {@linkplain java.text.MessageFormat the
+ * {@code MessageFormat} documentation} for more details.
+ *
+ *
+ * <h3>Extracting strings from the source with {@code xgettext}</h3>
+ *
+ * Give the following parameters to extract these strings to a {@code .po} file with {@code xgettext}:
+ *
+ * <pre>
+ *     -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3"
+ *    ___ ___________________________________________________ ___________________________________________
+ *    Rst                 Traditional imports                                Static imports
+ * </pre>
+ *
+ * Example:
+ *
+ * <pre>
+ *     xgettext -c -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" --from-code=utf-8 --output=lang.pot *.java
+ * </pre>
  */
 public class I
 {
+    /**
+     * Translates the string.
+     *
+     * @param text       The string to translate.
+     * @param parameters The parameters. See the class description for details.
+     *
+     * @return The translated string, with parameters incorporated.
+     */
     public static String t(String text, Object... parameters)
     {
-        return I18n.translate(text, parameters);
+        return I18n.translate(null, text, null, null, parameters);
+    }
+
+    /**
+     * Translates the string with a plural.
+     *
+     * @param singular   The singular version of the string.
+     * @param plural     The plural version of the string.
+     * @param count      The items count, used to choose the plural form according to the language
+     *                   plural rules.
+     * @param parameters The parameters. See the class description for details.
+     *
+     * @return The translated string, with parameters incorporated, chosen according to the language
+     * plural rules.
+     */
+    public static String tn(String singular, String plural, Integer count, Object... parameters)
+    {
+        return I18n.translate(null, singular, plural, count, parameters);
+    }
+
+    /**
+     * Translates the string in the given context.
+     *
+     * <p>The context is used when you have two identical strings to translate that may be
+     * translated differently according to the context.</p>
+     *
+     * @param context    The context.
+     * @param text       The string to translate.
+     * @param parameters The parameters. See the class description for details.
+     *
+     * @return The translated string, with parameters incorporated.
+     */
+    public static String tc(String context, String text, Object... parameters)
+    {
+        return I18n.translate(context, text, null, null, parameters);
+    }
+
+    /**
+     * Translates the string in the given context, with a plural.
+     *
+     * <p>The context is used when you have two identical strings to translate that may be
+     * translated differently according to the context.</p>
+     *
+     * @param context    The context.
+     * @param singular   The singular version of the string.
+     * @param plural     The plural version of the string.
+     * @param count      The items count, used to choose the plural form according to the language
+     *                   plural rules.
+     * @param parameters The parameters. See the class description for details.
+     *
+     * @return The translated string, with parameters incorporated, chosen according to the language
+     * plural rules.
+     */
+    public static String tcn(String context, String singular, String plural, Integer count, Object... parameters)
+    {
+        return I18n.translate(context, singular, plural, count, parameters);
     }
 }

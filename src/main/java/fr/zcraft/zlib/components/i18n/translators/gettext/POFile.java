@@ -27,9 +27,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.components.i18n.loaders.gettext;
+package fr.zcraft.zlib.components.i18n.translators.gettext;
 
-import fr.zcraft.zlib.components.i18n.loaders.Translation;
+import fr.zcraft.zlib.components.i18n.translators.Translation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -334,12 +334,17 @@ public class POFile
                             pluralFormScript = parts[1];
 
                             if (pluralFormScript.endsWith(";"))
-                                pluralFormScript = pluralFormScript.substring(0, pluralFormScript.length() - 2);
+                                pluralFormScript = pluralFormScript.substring(0, pluralFormScript.length() - 1);
+
+                            // Converts “plural=<script>” to “<script>”
+                            if (pluralFormScript.contains("="))
+                                pluralFormScript = pluralFormScript.split("=")[1];
                         }
                         catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored)
                         {
                             // Well, invalid.
                         }
+                        break;
                 }
             }
         }

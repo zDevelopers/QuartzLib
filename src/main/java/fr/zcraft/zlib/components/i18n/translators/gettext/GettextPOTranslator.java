@@ -27,33 +27,40 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.components.i18n.loaders.gettext;
+package fr.zcraft.zlib.components.i18n.translators.gettext;
 
-import fr.zcraft.zlib.components.i18n.loaders.I18nTranslationsLoader;
-import fr.zcraft.zlib.components.i18n.loaders.Translation;
+import fr.zcraft.zlib.components.i18n.translators.Translation;
+import fr.zcraft.zlib.components.i18n.translators.Translator;
 import fr.zcraft.zlib.tools.PluginLogger;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 
 /**
  * Loads Gettext .po files (uncompiled).
  */
-public class GettextPOLoader extends I18nTranslationsLoader
+public class GettextPOTranslator extends Translator
 {
     private POFile source = null;
 
     /**
-     * Extracted source to translation map, for performances purposes.
+     * A script engine used to compute plural rules.
+     *
+     * The official documentation mentions that the plural determination script is in C format, but
+     * the JavaScript format is the same for these scripts (containing only basic mathematics and
+     * ternary operators), excepted for the booleans, but this case is handled manually.
+     *
+     * @see #getPluralIndex(Integer)
      */
-    private final Map<String, Translation> translations = new HashMap<>();
+    private ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
 
 
-    public GettextPOLoader(Locale locale, File file)
+    public GettextPOTranslator(Locale locale, File file)
     {
         super(locale, file);
 
@@ -69,7 +76,7 @@ public class GettextPOLoader extends I18nTranslationsLoader
 
             for (Translation translation : source.getTranslations())
             {
-                translations.put(translation.getOriginal(), translation);
+                registerTranslation(translation);
             }
         }
         catch (FileNotFoundException e)
@@ -85,12 +92,27 @@ public class GettextPOLoader extends I18nTranslationsLoader
     }
 
     @Override
-    public Translation translate(String messageId)
+    protected Integer getPluralIndex(Integer count)
     {
-        if (source == null)
-            return null;
+        try
+        {
+            scriptEngine.put("n", count);
+            Object rawPluralIndex = scriptEngine.eval(source.getPluralFormScript());
 
-        return translations.get(messageId);
+            // If the index is a boolean, as some po files use the C handling of booleans, we convert them
+            // into the appropriate numbers.
+            // Else, we try to convert the output to an integer.
+            Integer pluralIndex = rawPluralIndex instanceof Boolean ? (((Boolean) rawPluralIndex) ? 1 : 0) : (rawPluralIndex instanceof Number ? ((Number) rawPluralIndex).intValue() : Integer.valueOf(rawPluralIndex.toString()));
+            if (pluralIndex <= source.getPluralCount())
+                return pluralIndex;
+            else
+                return 0;
+        }
+        catch (ScriptException | NumberFormatException e)
+        {
+            PluginLogger.error("Invalid plural script for language {0}: “{1}”", e, getLocale(), source.getPluralFormScript());
+            return 0;
+        }
     }
 
     @Override

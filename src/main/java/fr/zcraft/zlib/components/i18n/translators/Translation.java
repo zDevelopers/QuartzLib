@@ -27,7 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.components.i18n.loaders;
+package fr.zcraft.zlib.components.i18n.translators;
 
 import java.util.List;
 

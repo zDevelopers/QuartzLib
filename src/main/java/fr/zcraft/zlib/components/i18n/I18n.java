@@ -30,7 +30,7 @@
 package fr.zcraft.zlib.components.i18n;
 
 import com.google.common.base.Strings;
-import fr.zcraft.zlib.components.i18n.loaders.I18nTranslationsLoader;
+import fr.zcraft.zlib.components.i18n.translators.Translator;
 import fr.zcraft.zlib.components.i18n.utils.FileUtils;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
@@ -61,7 +61,7 @@ public class I18n extends ZLibComponent
     private final static String ALWAYS_OVERWRITE_FILE = ".overwrite";
     private final static String BACKUP_DIRECTORY = "backups";
 
-    private static Map<Locale, I18nTranslationsLoader> translationsLoaders = new ConcurrentHashMap<>();
+    private static Map<Locale, Translator> translators = new ConcurrentHashMap<>();
 
     private static Locale primaryLocale = null;
     private static Locale fallbackLocale = null;
@@ -76,7 +76,7 @@ public class I18n extends ZLibComponent
     private static String statusColor = ChatColor.GRAY.toString();
     private static String commandColor = ChatColor.GOLD.toString();
 
-    private static Boolean filesWrote = false;
+    private static Boolean filesWritten = false;
 
 
     @Override
@@ -258,10 +258,10 @@ public class I18n extends ZLibComponent
      */
     private static void writeFiles()
     {
-        if (filesWrote)
+        if (filesWritten)
             return;
 
-        filesWrote = true;
+        filesWritten = true;
 
 
         File serverDirectory = new File(ZLib.getPlugin().getDataFolder(), i18nDirectory);
@@ -387,7 +387,7 @@ public class I18n extends ZLibComponent
     {
         writeFiles();
 
-        I18nTranslationsLoader loader = null;
+        Translator loader = null;
 
         // The files names checked to find the translation file for this locale
         List<String> checkedFileNames = Arrays.asList(
@@ -419,7 +419,7 @@ public class I18n extends ZLibComponent
             {
                 if (lowerCaseFileName.startsWith(checkedFileName))
                 {
-                    loader = I18nTranslationsLoader.getInstance(locale, file);
+                    loader = Translator.getInstance(locale, file);
                     if (loader != null)
                         break filesLoop;
                 }
@@ -433,7 +433,7 @@ public class I18n extends ZLibComponent
         }
         else
         {
-            translationsLoaders.put(locale, loader);
+            translators.put(locale, loader);
         }
     }
 
@@ -448,33 +448,43 @@ public class I18n extends ZLibComponent
      * <p> Tries to use the primary locale; fallbacks to the fallback locale if the string cannot be
      * translated; fallbacks to the input text if the string still cannot be translated. </p>
      *
-     * @param toTranslate The string to translate.
-     * @param parameters  The parameters, replacing values like {@code {0}} in the translated
-     *                    string.
+     * @param context         The translation context. {@code null} if no context defined.
+     * @param messageId       The string to translate.
+     * @param messageIdPlural The plural version of the string to translate. {@code null} if this
+     *                        translation does not have a plural form.
+     * @param count           The count of items to use to choose the singular or plural form.
+     *                        {@code null} if this translation does not have a plural form.
+     * @param parameters      The parameters, replacing values like {@code {0}} in the translated
+     *                        string.
      *
      * @return The translated text, with the parameters replaced by their values.
      */
-    public static String translate(String toTranslate, Object... parameters)
+    public static String translate(String context, String messageId, String messageIdPlural, Integer count, Object... parameters)
     {
         String translated = null;
-        I18nTranslationsLoader loader;
+        Translator translator;
         Locale usedLocale = Locale.getDefault();
 
-        if (primaryLocale != null && (loader = translationsLoaders.get(primaryLocale)) != null)
+        if (primaryLocale != null && (translator = translators.get(primaryLocale)) != null)
         {
-            translated = loader.translate(toTranslate).getTranslations().get(0);
-            usedLocale = loader.getLocale();
+            translated = translator.translate(context, messageId, messageIdPlural, count);
+            usedLocale = translator.getLocale();
         }
 
-        if (translated == null && fallbackLocale != null && (loader = translationsLoaders.get(fallbackLocale)) != null)
+        if (translated == null && fallbackLocale != null && (translator = translators.get(fallbackLocale)) != null)
         {
-            translated = loader.translate(toTranslate).getTranslations().get(0);
-            usedLocale = loader.getLocale();
+            translated = translator.translate(context, messageId, messageIdPlural, count);
+            usedLocale = translator.getLocale();
         }
 
         if (translated == null)
         {
-            translated = toTranslate;
+            // We use english rules to handle plurals, in this case.
+            if (count != null && count != 1 && messageIdPlural != null)
+                translated = messageIdPlural;
+            else
+                translated = messageId;
+
             usedLocale = primaryLocale != null ? primaryLocale : (fallbackLocale != null ? fallbackLocale : Locale.getDefault());
         }
 
@@ -563,7 +573,7 @@ public class I18n extends ZLibComponent
      */
     public static String getLastTranslator(Locale locale)
     {
-        return translationsLoaders.containsKey(locale) ? translationsLoaders.get(locale).getLastTranslator() : null;
+        return translators.containsKey(locale) ? translators.get(locale).getLastTranslator() : null;
     }
 
     /**
@@ -576,7 +586,7 @@ public class I18n extends ZLibComponent
      */
     public static String getTranslationTeam(Locale locale)
     {
-        return translationsLoaders.containsKey(locale) ? translationsLoaders.get(locale).getTranslationTeam() : null;
+        return translators.containsKey(locale) ? translators.get(locale).getTranslationTeam() : null;
     }
 
     /**
@@ -589,6 +599,6 @@ public class I18n extends ZLibComponent
      */
     public static String getReportErrorsTo(Locale locale)
     {
-        return translationsLoaders.containsKey(locale) ? translationsLoaders.get(locale).getReportErrorsTo() : null;
+        return translators.containsKey(locale) ? translators.get(locale).getReportErrorsTo() : null;
     }
 }
