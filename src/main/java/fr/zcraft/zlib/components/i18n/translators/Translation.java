@@ -42,11 +42,11 @@ public class Translation
     private String context;
     private List<String> translations;
 
-    public Translation(String original, String originalPlural, String context, List<String> translations)
+    public Translation(String context, String original, String originalPlural, List<String> translations)
     {
+        this.context = context;
         this.original = original;
         this.originalPlural = originalPlural;
-        this.context = context;
         this.translations = translations;
     }
 

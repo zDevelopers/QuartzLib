@@ -289,7 +289,7 @@ public class POFile
             if (msgstr.isEmpty() || msgstr.get(0).trim().isEmpty())
                 return;
 
-            translations.add(new Translation(msgid, msgid_plural, msgctxt, msgstr));
+            translations.add(new Translation(msgctxt, msgid, msgid_plural, msgstr));
         }
 
         // Metadata

@@ -30,6 +30,7 @@
 package fr.zcraft.zlib.components.i18n.translators;
 
 import fr.zcraft.zlib.components.i18n.translators.gettext.GettextPOTranslator;
+import fr.zcraft.zlib.components.i18n.translators.yaml.YAMLTranslator;
 
 import java.io.File;
 import java.util.Locale;
@@ -193,6 +194,10 @@ public abstract class Translator
         {
             case "po":
                 return new GettextPOTranslator(locale, file);
+
+            case "yml":
+            case "yaml":
+                return new YAMLTranslator(locale, file);
 
             default:
                 return null;
