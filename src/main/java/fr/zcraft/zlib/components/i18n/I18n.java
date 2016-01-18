@@ -113,7 +113,7 @@ public class I18n extends ZLibComponent
         try
         {
             loadLocale(locale);
-            fallbackLocale = locale;
+            primaryLocale = locale;
         }
         catch (UnsupportedLocaleException e)
         {
@@ -488,13 +488,15 @@ public class I18n extends ZLibComponent
             usedLocale = primaryLocale != null ? primaryLocale : (fallbackLocale != null ? fallbackLocale : Locale.getDefault());
         }
 
+
         if (userFriendlyFormatting)
             translated = replaceFormattingCodes(translated);
 
-        MessageFormat formatter = new MessageFormat(translated, usedLocale);
+        // We replace « ' » with « '' » to escape single quotes, so the formatter leave them alive
+        MessageFormat formatter = new MessageFormat(translated.replace("'", "''"), usedLocale);
 
-        // Removes non-breaking spaces, as Minecraft ignores them (breaking texts regardless of their presence) and often badly displays
-        // them (dashed square with NBSP inside).
+        // We remove non-breaking spaces, as Minecraft ignores them (breaking texts regardless of their presence) and
+        // often badly displays them (dashed square with NBSP inside).
         return formatter.format(parameters)
                 .replace("\u00A0", " ").replace("\u2007", " ").replace("\u202F", " ")  // Non-breaking spaces
                 .replace("\u2009", " ")                                                // Thin space
@@ -573,7 +575,14 @@ public class I18n extends ZLibComponent
      */
     public static String getLastTranslator(Locale locale)
     {
-        return translators.containsKey(locale) ? translators.get(locale).getLastTranslator() : null;
+        try
+        {
+            return translators.get(locale).getLastTranslator();
+        }
+        catch (NullPointerException e)  // Handles both null and unavailable locale
+        {
+            return null;
+        }
     }
 
     /**
@@ -586,7 +595,14 @@ public class I18n extends ZLibComponent
      */
     public static String getTranslationTeam(Locale locale)
     {
-        return translators.containsKey(locale) ? translators.get(locale).getTranslationTeam() : null;
+        try
+        {
+            return translators.get(locale).getTranslationTeam();
+        }
+        catch (NullPointerException e)  // Handles both null and unavailable locale
+        {
+            return null;
+        }
     }
 
     /**
@@ -599,6 +615,13 @@ public class I18n extends ZLibComponent
      */
     public static String getReportErrorsTo(Locale locale)
     {
-        return translators.containsKey(locale) ? translators.get(locale).getReportErrorsTo() : null;
+        try
+        {
+            return translators.get(locale).getReportErrorsTo();
+        }
+        catch (NullPointerException e)  // Handles both null and unavailable locale
+        {
+            return null;
+        }
     }
 }
