@@ -32,23 +32,26 @@ package fr.zcraft.zlib.components.i18n;
 /**
  * A shortcut to translate texts.
  *
- * Use {@code I.t("text", ...)}, or statically import {@code I.t} and use {@code t("text", ...)} to
- * translate something.
+ * <p>Use {@code I.t("text", ...)}, or statically import {@code I.t} and use {@code t("text", ...)} to
+ * translate something.</p>
  *
  *
  * <h3>The parameters</h3>
  *
- * Translated string accept parameters in the following format: {@code {0}}, {@code {1}}, etc. These
+ * <p>Translated string accept parameters in the following format: {@code {0}}, {@code {1}}, etc. These
  * tokens are replaced with the given parameters at runtime; the first parameter replaces the {@code
- * {0}} token, the second one, {@code {1}}, and so on.
+ * {0}} token, the second one, {@code {1}}, and so on.</p>
  *
- * Other parameters related options are available; see {@linkplain java.text.MessageFormat the
- * {@code MessageFormat} documentation} for more details.
+ * <p>Other parameters related options are available; see {@linkplain java.text.MessageFormat the
+ * {@code MessageFormat} documentation} for more details.</p>
+ *
+ * <p>Note that the escaping behavior of the {@code '} character presented in the linked documentation
+ * above <strong>does not apply</strong> to these translated texts, for convenience reasons.</p>
  *
  *
  * <h3>Extracting strings from the source with {@code xgettext}</h3>
  *
- * Give the following parameters to extract these strings to a {@code .po} file with {@code xgettext}:
+ * <p>Give the following parameters to extract these strings to a {@code .po} file with {@code xgettext}:</p>
  *
  * <pre>
  *     -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3"
@@ -56,10 +59,13 @@ package fr.zcraft.zlib.components.i18n;
  *    Rst                 Traditional imports                                Static imports
  * </pre>
  *
- * Example:
+ * <p>Example:</p>
  *
  * <pre>
  *     xgettext -c -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" --from-code=utf-8 --output=lang.pot *.java
+ *
+ *     # Or, recursively
+ *     find . -iname "*.java" | xargs xgettext -c -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" --from-code=utf-8 --output=lang.pot
  * </pre>
  */
 public class I
