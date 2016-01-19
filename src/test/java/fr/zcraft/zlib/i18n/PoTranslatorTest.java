@@ -77,6 +77,13 @@ public class PoTranslatorTest
     }
 
     @Test
+    public void testQuoteEscapement()
+    {
+        Assert.assertEquals("Quotes badly escaped", "Ce n'est qu'un \"toaster\"", translator.translate(null, "It's just a \"toaster\"", null, null));
+        Assert.assertNull("Raw escaped quotes retrieved", translator.translate(null, "It's just a \\\"toaster\\\"", null, null));
+    }
+
+    @Test
     public void testContexts()
     {
         Assert.assertEquals("Bad translation with context", "{gold}{bold}Cuit", translator.translate("sidebar", "{gold}{bold}Cooked", null, null));

@@ -75,8 +75,8 @@ public class POParserTest
     @Test
     public void testTranslationsCount()
     {
-        Assert.assertFalse("Translations from PO file missing", po.getTranslations().size() < 8);
-        Assert.assertFalse("Translations from PO file in a too high count", po.getTranslations().size() > 8);
+        Assert.assertFalse("Translations from PO file missing", po.getTranslations().size() < 12);
+        Assert.assertFalse("Translations from PO file in a too high count", po.getTranslations().size() > 12);
     }
 
     @Test
@@ -116,6 +116,40 @@ public class POParserTest
                     Assert.assertEquals("Bad translations count for single translation with empty context", 1, translation.getTranslations().size());
                     Assert.assertEquals("Bad translation with empty context", "  Toast no. {0}", translation.getTranslations().get(0));
                     Assert.assertEquals("Bad empty context", "", translation.getContext());
+                    break;
+
+                case "It's just a \"toaster\"":
+                    Assert.assertEquals("Bad translations count with escaped quotes", 1, translation.getTranslations().size());
+                    Assert.assertEquals("Bad translation with escaped quotes", "Ce n'est qu'un \"toaster\"", translation.getTranslations().get(0));
+                    Assert.assertFalse("Translation retrieved with raw escaped quotes", "Ce n'est qu'un \\\"toaster\\\"".equals(translation.getTranslations().get(0)));
+                    break;
+
+                case "It's just a \\\"toaster\\\"":
+                    Assert.fail("Translation retrieved from raw escaped quotes");
+                    break;
+
+                case "Multi-lines message":
+                    Assert.assertEquals("Bad translations count for multi-lines messages", 1, translation.getTranslations().size());
+                    Assert.assertEquals("Bad translations for multi-lines messages", "Message multi-ligne", translation.getTranslations().get(0));
+                    break;
+
+                case "Multi-lines message with trailing space":
+                    Assert.assertEquals("Bad translations count for multi-lines messages", 1, translation.getTranslations().size());
+                    Assert.assertEquals("Bad translations for multi-lines messages", "Message multi-ligne avec une espace séparatrice explicite", translation.getTranslations().get(0));
+                    break;
+
+                case "Multi-lines message  with multiple trailing spaces":
+                    Assert.assertEquals("Bad translations count for multi-lines messages with multiple trailing spaces", 1, translation.getTranslations().size());
+                    Assert.assertEquals("Bad translations for multi-lines messages with multiple trailing spaces", "Message  multi-ligne avec plusieurs espaces séparatrices explicites", translation.getTranslations().get(0));
+                    Assert.assertFalse("Bad translations for multi-lines messages with multiple trailing spaces: trailing spaces skipped", "Message multi-ligne avec plusieurs espaces séparatrices explicites".equals(translation.getTranslations().get(0)));
+                    break;
+
+                case "Multi-lines message with multiple trailing spaces":
+                    Assert.fail("Bad translations for multi-lines messages with multiple trailing spaces: trailing spaces skipped in messageId");
+                    break;
+
+                case "Multi-lines message  with trailing space":
+                    Assert.fail("Bad translations for multi-lines messages with one trailing spaces: trailing spaces duplicated in messageId");
                     break;
             }
         }
