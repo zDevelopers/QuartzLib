@@ -1,0 +1,14 @@
+author: "Amaury Carrade"
+team: "Amaury Carrade"
+reports: "AmauryCarrade"
+
+keys:
+    greetings:
+        hi: "Hi there"
+        how: "How are you?"
+    toast: "♨ Toaster! ♨"
+
+other_context:
+    greetings:
+        hi: "Hi!"
+    toast: "♨ Toaster ♨"

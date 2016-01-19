@@ -1,0 +1,59 @@
+# Testing data for the PO parser and translator
+# Copyright (C) 2015 zLib contributors
+# This file is distributed under the CeCILL-B license.
+#
+#, fuzzy
+msgid   ""
+msgstr  "Project-Id-Version: fr.zcraft.zlib\n"
+        "Report-Msgid-Bugs-To: AmauryCarrade\n"
+        "POT-Creation-Date: 2016-01-15 23:46+0100\n"
+        "PO-Revision-Date: 2016-01-16 04:04+0100\n"
+        "Last-Translator: Amaury Carrade\n"
+        "Language-Team: Amaury Carrade\n"
+        "Language: fr_FR\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=2; plural=n>1;\n"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:75
+msgctxt "sidebar"
+msgid   "{darkgreen}{bold}Cook"
+msgstr  "{darkgreen}{bold}Cuisinier"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:78
+msgctxt "sidebar"
+msgid   "{yellow}{bold}Inside the toaster"
+msgstr  "{yellow}{bold}Dans le toaster"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:81
+msgctxt "sidebar"
+msgid   "{gold}{bold}Cooked"
+msgstr  "{gold}{bold}Cuit"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:90
+msgctxt "sidebar"
+msgid   "{red}{bold}♨ Toaster ♨"
+msgstr  "{red}{bold}♨ Toaster ♨"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:93
+msgctxt "sidebar"
+msgid   "{blue}Toaster"
+msgstr  "{blue}Toaster"
+
+#: fr/zcraft/ztoaster/commands/AddCommand.java:63
+#, java-format
+msgid   "One toast added."
+msgid_plural "{0} toasts added."
+msgstr[0]  "Un toast ajouté."
+msgstr[1]  "{0} toasts ajoutés."#. Output of the command /toaster list, without toasts.
+
+#: fr/zcraft/ztoaster/commands/ListCommand.java:74
+msgid   "There are no toasts here ..."
+msgstr  "Il n'y a pas de toasts ici..."
+
+#: fr/zcraft/ztoaster/commands/ListCommand.java:79
+#, java-format
+msgctxt ""
+msgid   "  Toast #{0}"
+msgstr  "  Toast no. {0}"

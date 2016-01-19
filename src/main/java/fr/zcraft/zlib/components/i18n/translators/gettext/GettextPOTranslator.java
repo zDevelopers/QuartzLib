@@ -92,7 +92,7 @@ public class GettextPOTranslator extends Translator
     }
 
     @Override
-    protected Integer getPluralIndex(Integer count)
+    public Integer getPluralIndex(Integer count)
     {
         try
         {

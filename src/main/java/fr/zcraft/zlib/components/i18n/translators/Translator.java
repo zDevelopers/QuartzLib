@@ -117,7 +117,7 @@ public abstract class Translator
      *
      * @return The translation index to use for this count.
      */
-    protected Integer getPluralIndex(Integer count)
+    public Integer getPluralIndex(Integer count)
     {
         return 0;
     }
