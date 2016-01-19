@@ -30,6 +30,7 @@
 package fr.zcraft.zlib.components.i18n.translators;
 
 import fr.zcraft.zlib.components.i18n.translators.gettext.GettextPOTranslator;
+import fr.zcraft.zlib.components.i18n.translators.properties.PropertiesTranslator;
 import fr.zcraft.zlib.components.i18n.translators.yaml.YAMLTranslator;
 
 import java.io.File;
@@ -50,7 +51,7 @@ public abstract class Translator
      * An empty value cannot be used because an empty context is not the same as no context, and some applications
      * may use them.
      */
-    private final static String NO_CONTEXT_KEY = UUID.randomUUID().toString();
+    protected final static String NO_CONTEXT_KEY = UUID.randomUUID().toString();
 
     protected final Locale locale;
     protected final File file;
@@ -167,9 +168,18 @@ public abstract class Translator
         contextMap.put(translation.getOriginal(), translation);
     }
 
-
-
-    private String getContextKey(String context)
+    /**
+     * Returns the key to use in the translation map for the given context. Must be consistent:
+     * multiple calls with the same context must return the same value.
+     *
+     * <p>The default implementation returns the context, or a randomly generated no-context key if
+     * the context is null.</p>
+     *
+     * @param context The context. May be {@code null}.
+     *
+     * @return The key to use. Cannot be {@code null}.
+     */
+    protected String getContextKey(String context)
     {
         return context != null ? context : NO_CONTEXT_KEY;
     }
@@ -198,6 +208,10 @@ public abstract class Translator
             case "yml":
             case "yaml":
                 return new YAMLTranslator(locale, file);
+
+            case "properties":
+            case "class":
+                return new PropertiesTranslator(locale, file);
 
             default:
                 return null;

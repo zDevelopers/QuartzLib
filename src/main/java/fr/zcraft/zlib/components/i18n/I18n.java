@@ -152,6 +152,14 @@ public class I18n extends ZLibComponent
     }
 
     /**
+     * @return The name of the subdirectory where the translations are stored. Default: "i18n".
+     */
+    public static String getI18nDirectory()
+    {
+        return i18nDirectory;
+    }
+
+    /**
      * Sets the plugin's JAR file. Required if you don't use {@link ZPlugin}.
      *
      * @param jarFile A reference to the plugin's JAR file.

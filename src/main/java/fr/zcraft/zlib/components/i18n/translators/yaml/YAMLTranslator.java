@@ -45,11 +45,20 @@ import java.util.Map;
 /**
  * Loads translations stored in a YAML file.
  *
- * <p>This translator <strong>does not</strong> support plurals. If plurals are used, the first
- * string will always be used, and the other, ignored.</p>
+ * <ul>
  *
- * <p>This translator <strong>does</strong> support contexts. The context is the superkey in the
- * YAML structure (see below). Without context, the default one is {@code keys}.</p>
+ *     <li>
+ *         This translator <strong>does not</strong> support plurals. If plurals are used, the first
+ *         string will always be used, and the other, ignored.
+ *     </li>
+ *
+ *     <li>
+ *         This translator <strong>does</strong> support contexts. The context is the superkey in the
+ *         YAML structure (see below). Without context, the default one is {@code keys}.
+ *     </li>
+ *
+ * </ul>
+ *
  *
  * <h3>YAML structure</h3>
  *

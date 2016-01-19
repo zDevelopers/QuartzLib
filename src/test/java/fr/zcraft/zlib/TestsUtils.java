@@ -47,7 +47,7 @@ public class TestsUtils
     public static File tempResource(String name) throws IOException
     {
         InputStream inputStream = getResource(name);
-        File tempFile = File.createTempFile("zlib-unit-tests-", null);
+        File tempFile = File.createTempFile("zlib-unit-tests-" + name.replace(".", "-"), null);
 
         OutputStream outputStream = new FileOutputStream(tempFile);
 
