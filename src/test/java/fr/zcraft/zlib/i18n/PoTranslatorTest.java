@@ -101,5 +101,10 @@ public class PoTranslatorTest
         Assert.assertNull("Non-null translation from unknown messageId, without context, with plural (plural)", translator.translate(null, "Unknown translation", "Unknown translations", 2));
         Assert.assertNull("Non-null translation from unknown messageId, with context, with plural (singular)", translator.translate("context", "Unknown translation", "Unknown translations", 0));
         Assert.assertNull("Non-null translation from unknown messageId, with context, with plural (plural)", translator.translate("context", "Unknown translation", "Unknown translations", 2));
+
+        Assert.assertNull("Translation retrieved from bad context (null)", translator.translate(null, "{darkgreen}{bold}Cook", null, null));
+        Assert.assertNull("Translation retrieved from bad context (non-null)", translator.translate("sidebar", "There are no toasts here ...", null, null));
+        Assert.assertNull("Translation retrieved from bad context (empty)", translator.translate("", "{blue}Toaster", null, null));
+        Assert.assertNull("Translation retrieved from bad context (unknown)", translator.translate("unknown-context", "{blue}Toaster", null, null));
     }
 }

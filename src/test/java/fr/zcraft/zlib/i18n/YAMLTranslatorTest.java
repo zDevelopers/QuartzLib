@@ -103,5 +103,9 @@ public class YAMLTranslatorTest
         Assert.assertNull("Non-null translation from unknown messageId, without context, with plural (plural, should be ignored)", translator.translate(null, "unknown.translation", "unknown.translations", 2));
         Assert.assertNull("Non-null translation from unknown messageId, with context, with plural (singular)", translator.translate("context", "unknown.translation", "unknown.translations", 0));
         Assert.assertNull("Non-null translation from unknown messageId, with context, with plural (plural, should be ignored)", translator.translate("context", "unknown.translation", "unknown.translations", 2));
+
+        Assert.assertNull("Translation retrieved from bad context (null)", translator.translate(null, "greetings.fine", null, null));
+        Assert.assertNull("Translation retrieved from bad context (non-null)", translator.translate("other_context", "greetings.how", null, null));
+        Assert.assertNull("Translation retrieved from bad context (unknown)", translator.translate("unknown_context", "greetings.how", null, null));
     }
 }

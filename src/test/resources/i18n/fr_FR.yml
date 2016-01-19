@@ -11,4 +11,5 @@ keys:
 other_context:
     greetings:
         hi: "Hi!"
+        fine: "Fine?"
     toast: "♨ Toaster ♨"
