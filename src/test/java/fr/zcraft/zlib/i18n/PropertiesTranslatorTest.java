@@ -30,8 +30,10 @@
 package fr.zcraft.zlib.i18n;
 
 import fr.zcraft.zlib.TestsUtils;
+import fr.zcraft.zlib.components.i18n.translators.Translator;
 import fr.zcraft.zlib.components.i18n.translators.properties.PropertiesTranslator;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,11 +42,18 @@ import java.util.Locale;
 
 public class PropertiesTranslatorTest
 {
-    private final PropertiesTranslator translator;
+    private final Translator translator;
 
     public PropertiesTranslatorTest() throws IOException
     {
-        translator = new PropertiesTranslator(Locale.FRANCE, TestsUtils.tempResource("i18n/fr_FR.properties"));
+        translator = Translator.getInstance(Locale.FRANCE, TestsUtils.tempResource("i18n/fr_FR.properties"));
+    }
+
+    @Test
+    @Before
+    public void testTranslatorTypeFromFileName()
+    {
+        Assert.assertEquals("Translator instance badly loaded from file name", PropertiesTranslator.class, translator.getClass());
     }
 
     @Test

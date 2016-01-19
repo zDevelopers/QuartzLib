@@ -30,8 +30,10 @@
 package fr.zcraft.zlib.i18n;
 
 import fr.zcraft.zlib.TestsUtils;
+import fr.zcraft.zlib.components.i18n.translators.Translator;
 import fr.zcraft.zlib.components.i18n.translators.yaml.YAMLTranslator;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,11 +42,18 @@ import java.util.Locale;
 
 public class YAMLTranslatorTest
 {
-    private final YAMLTranslator translator;
+    private final Translator translator;
 
     public YAMLTranslatorTest() throws IOException
     {
-        translator = new YAMLTranslator(Locale.FRANCE, TestsUtils.tempResource("i18n/fr_FR.yml"));
+        translator = Translator.getInstance(Locale.FRANCE, TestsUtils.tempResource("i18n/fr_FR.yml"));
+    }
+
+    @Test
+    @Before
+    public void testTranslatorTypeFromFileName()
+    {
+        Assert.assertEquals("Translator instance badly loaded from file name", YAMLTranslator.class, translator.getClass());
     }
 
     @Test

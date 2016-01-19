@@ -30,8 +30,10 @@
 package fr.zcraft.zlib.i18n;
 
 import fr.zcraft.zlib.TestsUtils;
+import fr.zcraft.zlib.components.i18n.translators.Translator;
 import fr.zcraft.zlib.components.i18n.translators.gettext.GettextPOTranslator;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,11 +42,18 @@ import java.util.Locale;
 
 public class PoTranslatorTest
 {
-    private final GettextPOTranslator translator;
+    private final Translator translator;
 
     public PoTranslatorTest() throws IOException
     {
-        translator = new GettextPOTranslator(Locale.FRANCE, TestsUtils.tempResource("i18n/fr_FR.po"));
+        translator = Translator.getInstance(Locale.FRANCE, TestsUtils.tempResource("i18n/fr_FR.po"));
+    }
+
+    @Test
+    @Before
+    public void testTranslatorTypeFromFileName()
+    {
+        Assert.assertEquals("Translator instance badly loaded from file name", GettextPOTranslator.class, translator.getClass());
     }
 
     @Test

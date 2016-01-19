@@ -46,8 +46,13 @@ public class TestsUtils
 
     public static File tempResource(String name) throws IOException
     {
+        String[] fileNameParts = name.split("\\.");
+        String extension = null;
+        if (fileNameParts.length >= 2)
+            extension = fileNameParts[fileNameParts.length - 1];
+
         InputStream inputStream = getResource(name);
-        File tempFile = File.createTempFile("zlib-unit-tests-" + name.replace(".", "-"), null);
+        File tempFile = File.createTempFile("zlib-unit-tests-" + name.replace(".", "-"), ".tmp" + (extension != null ? "." + extension : ""));
 
         OutputStream outputStream = new FileOutputStream(tempFile);
 
