@@ -80,3 +80,16 @@ msgid   "Multi-lines "
 " message with multiple trailing spaces"
 msgstr  "Message "
 " multi-ligne avec plusieurs espaces séparatrices explicites"
+
+#: src/main/java/eu/carrade/amaury/UHCReloaded/borders/BorderManager.java:426
+msgid ""
+"{gray}It will shrink by one block every {0} second(s) until {1} blocks in "
+"diameter."
+msgstr ""
+"{gray}Elle réduira d'un bloc toutes les {0} seconde(s) jusqu'à atteindre "
+"{1} blocs de diamètre."
+
+#msgid "{gray}When clicked, a sign will open; write the name of the team inside."
+#msgstr ""
+#"{gray}Cliquez ici pour ouvrir un panneau, et écrivez le nom de l'équipe "
+#"dedans."

@@ -75,8 +75,8 @@ public class POParserTest
     @Test
     public void testTranslationsCount()
     {
-        Assert.assertFalse("Translations from PO file missing", po.getTranslations().size() < 12);
-        Assert.assertFalse("Translations from PO file in a too high count", po.getTranslations().size() > 12);
+        Assert.assertFalse("Translations from PO file missing", po.getTranslations().size() < 13);
+        Assert.assertFalse("Translations from PO file in a too high count", po.getTranslations().size() > 13);
     }
 
     @Test
@@ -151,6 +151,13 @@ public class POParserTest
                 case "Multi-lines message  with trailing space":
                     Assert.fail("Bad translations for multi-lines messages with one trailing spaces: trailing spaces duplicated in messageId");
                     break;
+
+                case " {gray}It will shrink by one block every {0} second(s) until {1} blocks in diameter.":
+                    Assert.fail("Bad translation for multi-line messages with empty lines: a trailing space was incorrectly added");
+                    break;
+
+                case "{gray}When clicked, a sign will open; write the name of the team inside.":
+                    Assert.fail("Translation with commented out msgid and msgstr retrieved");
             }
         }
     }
