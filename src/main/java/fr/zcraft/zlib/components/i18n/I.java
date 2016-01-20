@@ -86,6 +86,10 @@ public class I
     /**
      * Translates the string with a plural.
      *
+     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
+     *
      * @param singular   The singular version of the string.
      * @param plural     The plural version of the string.
      * @param count      The items count, used to choose the plural form according to the language
@@ -122,6 +126,10 @@ public class I
      *
      * <p>The context is used when you have two identical strings to translate that may be
      * translated differently according to the context.</p>
+     *
+     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
      *
      * @param context    The context.
      * @param singular   The singular version of the string.
