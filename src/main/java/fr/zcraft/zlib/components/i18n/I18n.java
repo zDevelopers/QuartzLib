@@ -69,14 +69,16 @@ public class I18n extends ZLibComponent
     private static String i18nDirectory = "i18n";
     private static JarFile jarFile = null;
 
-    private static Boolean userFriendlyFormatting = true;
+    private static boolean userFriendlyFormatting = true;
     private static String errorColor = ChatColor.RED.toString();
     private static String noticeColor = ChatColor.WHITE.toString();
     private static String successColor = ChatColor.GREEN.toString();
     private static String statusColor = ChatColor.GRAY.toString();
     private static String commandColor = ChatColor.GOLD.toString();
 
-    private static Boolean filesWritten = false;
+    private static boolean addCountToParameters = true;
+
+    private static boolean filesWritten = false;
 
 
     @Override
@@ -205,7 +207,7 @@ public class I18n extends ZLibComponent
      * @see #setStatusColor(String)
      * @see #setCommandColor(String)
      */
-    public static void setUserFriendlyFormatting(Boolean userFriendlyFormatting)
+    public static void setUserFriendlyFormatting(boolean userFriendlyFormatting)
     {
         I18n.userFriendlyFormatting = userFriendlyFormatting;
     }
@@ -253,6 +255,18 @@ public class I18n extends ZLibComponent
     public static void setCommandColor(String commandColor)
     {
         I18n.commandColor = Strings.nullToEmpty(commandColor);
+    }
+
+    /**
+     * @param addCountToParameters if {@code true}, when a translation method with plurals is called
+     *                             without object parameters (the ones replacing {@code {0}}, {@code
+     *                             {1}}...), the count is added as the first (and only) parameter, as
+     *                             it will likely be used in the string and this avoid giving it twice.
+     *                             Default: {@code true}.
+     */
+    public static void addCountToParameters(boolean addCountToParameters)
+    {
+        I18n.addCountToParameters = addCountToParameters;
     }
 
 
@@ -456,6 +470,11 @@ public class I18n extends ZLibComponent
      * <p> Tries to use the primary locale; fallbacks to the fallback locale if the string cannot be
      * translated; fallbacks to the input text if the string still cannot be translated. </p>
      *
+     * <p> The count is likely to be used in the string, so if, for a translation with plurals, only
+     * a count is given, this count is also interpreted as a parameter (the first and only one, {@code
+     * {0}}). If this behavior annoys you, you can disable it using {@link
+     * #addCountToParameters(boolean)}. </p>
+     *
      * @param context         The translation context. {@code null} if no context defined.
      * @param messageId       The string to translate.
      * @param messageIdPlural The plural version of the string to translate. {@code null} if this
@@ -472,6 +491,13 @@ public class I18n extends ZLibComponent
         String translated = null;
         Translator translator;
         Locale usedLocale = Locale.getDefault();
+
+        // Simplifies the programmer's work. The count is likely to be used in the string, so if,
+        // for a translation with plurals, only a count is given, this count is also interpreted as
+        // a parameter (the first and only one, {0}).
+        if (addCountToParameters && count != null && (parameters == null || parameters.length == 0))
+            parameters = new Object[] {count};
+
 
         if (primaryLocale != null && (translator = translators.get(primaryLocale)) != null)
         {
@@ -517,7 +543,7 @@ public class I18n extends ZLibComponent
      * @param text The input text.
      *
      * @return The text with formatters replaced.
-     * @see #setUserFriendlyFormatting(Boolean) for details about the codes.
+     * @see #setUserFriendlyFormatting(boolean) for details about the codes.
      */
     private static String replaceFormattingCodes(String text)
     {
