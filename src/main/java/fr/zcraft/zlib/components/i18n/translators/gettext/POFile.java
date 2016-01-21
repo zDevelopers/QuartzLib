@@ -152,14 +152,7 @@ public class POFile
                         String value = extractTokenValue(line);
                         String currentTokenValue = tokens.get(lastToken);
 
-                        // If a space is already present somewhere, we just concatenate the two values;
-                        // else, we add a space, as two strings in two different lines are different
-                        // words for the translators, and we don't blame him or her for a forgotten
-                        // space. This does not apply if one of the strings is empty.
-                        if (currentTokenValue.endsWith(" ") || value.startsWith(" ") || currentTokenValue.isEmpty() || value.isEmpty())
-                            tokens.put(lastToken, currentTokenValue + value);
-                        else
-                            tokens.put(lastToken, currentTokenValue + " " + value);
+                        tokens.put(lastToken, currentTokenValue + value);
                     }
 
                     // Beginning of a new token
