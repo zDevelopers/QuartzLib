@@ -27,67 +27,59 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.core;
+package fr.zcraft.zlib.components.i18n.translators;
 
-import fr.zcraft.zlib.tools.PluginLogger;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.IOException;
-import java.util.jar.JarFile;
+import java.util.List;
 
 
 /**
- * The base class of any plugin using the ZLib.
- *
- * To use the ZLib, you have to use this class instead of {@link JavaPlugin}, and to add calls to
- * the {@code super} methods of {@link JavaPlugin#onEnable()} and {@link JavaPlugin#onDisable()} (if
- * you use them).
+ * Represents a translation.
  */
-public abstract class ZPlugin extends JavaPlugin
+public class Translation
 {
-	@Override
-	public void onLoad()
-	{
-		ZLib.init(this);
-	}
+    private String original;
+    private final String originalPlural;
+    private String context;
+    private List<String> translations;
 
-	/**
-	 * Load the given ZLib's components.
-	 *
-	 * @param components The base classes of the components to load.
-	 */
-	@SafeVarargs
-	public final void loadComponents(Class<? extends ZLibComponent>... components)
-	{
-		for (Class<? extends ZLibComponent> componentClass : components)
-		{
-			try
-			{
-				ZLib.loadComponent(componentClass.newInstance());
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
-			}
-		}
-	}
+    public Translation(String context, String original, String originalPlural, List<String> translations)
+    {
+        this.context = context;
+        this.original = original;
+        this.originalPlural = originalPlural;
+        this.translations = translations;
+    }
 
-	@Override
-	public void onDisable()
-	{
-		ZLib.exit();
-	}
+    /**
+     * @return The original, untranslated, string.
+     */
+    public String getOriginal()
+    {
+        return original;
+    }
 
-	public JarFile getJarFile()
-	{
-		try
-		{
-			return new JarFile(getFile());
-		}
-		catch (IOException e)
-		{
-			PluginLogger.error("Unable to load JAR file {0}", e, getFile().getAbsolutePath());
-			return null;
-		}
-	}
+    /**
+     * @return The original, untranslated, plural form.
+     */
+    public String getOriginalPlural()
+    {
+        return originalPlural;
+    }
+
+    /**
+     * @return The translation context; {@code null} if no context was set. Note that an empty
+     * context string and a {@code null} one do not mean the same thing.
+     */
+    public String getContext()
+    {
+        return context;
+    }
+
+    /**
+     * @return All the translations available.
+     */
+    public List<String> getTranslations()
+    {
+        return translations;
+    }
 }

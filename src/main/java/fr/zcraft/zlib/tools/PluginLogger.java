@@ -101,6 +101,11 @@ public final class PluginLogger
     {
         log(Level.SEVERE, message, ex, args);
     }
+
+    static public void error(String message, Object... args)
+    {
+        log(Level.SEVERE, message, args);
+    }
     
     static private Logger getLogger()
     {

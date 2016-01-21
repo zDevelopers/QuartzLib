@@ -1,0 +1,95 @@
+# Testing data for the PO parser and translator
+# Copyright (C) 2015 zLib contributors
+# This file is distributed under the CeCILL-B license.
+#
+#, fuzzy
+msgid   ""
+msgstr  "Project-Id-Version: fr.zcraft.zlib\n"
+        "Report-Msgid-Bugs-To: AmauryCarrade\n"
+        "POT-Creation-Date: 2016-01-15 23:46+0100\n"
+        "PO-Revision-Date: 2016-01-16 04:04+0100\n"
+        "Last-Translator: Amaury Carrade\n"
+        "Language-Team: Amaury Carrade\n"
+        "Language: fr_FR\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=2; plural=n>1;\n"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:75
+msgctxt "sidebar"
+msgid   "{darkgreen}{bold}Cook"
+msgstr  "{darkgreen}{bold}Cuisinier"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:78
+msgctxt "sidebar"
+msgid   "{yellow}{bold}Inside the toaster"
+msgstr  "{yellow}{bold}Dans le toaster"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:81
+msgctxt "sidebar"
+msgid   "{gold}{bold}Cooked"
+msgstr  "{gold}{bold}Cuit"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:90
+msgctxt "sidebar"
+msgid   "{red}{bold}♨ Toaster ♨"
+msgstr  "{red}{bold}♨ Toaster ♨"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:93
+msgctxt "sidebar"
+msgid   "{blue}Toaster"
+msgstr  "{blue}Toaster"
+
+#: fr/zcraft/ztoaster/commands/AddCommand.java:63
+#, java-format
+msgid   "One toast added."
+msgid_plural "{0} toasts added."
+msgstr[0]  "Un toast ajouté."
+msgstr[1]  "{0} toasts ajoutés."#. Output of the command /toaster list, without toasts.
+
+#: fr/zcraft/ztoaster/commands/ListCommand.java:74
+msgid   "There are no toasts here ..."
+msgstr  "Il n'y a pas de toasts ici..."
+
+#: fr/zcraft/ztoaster/commands/ListCommand.java:79
+#, java-format
+msgctxt ""
+msgid   "  Toast #{0}"
+msgstr  "  Toast no. {0}"
+
+#: fr/zcraft/ztoaster/Nowhere.java:4269
+msgid   "It's just a \"toaster\""
+msgstr  "Ce n'est qu'un \"toaster\""
+
+
+#: fr/zcraft/ztoaster/Nowhere.java:1984
+msgid   "Multi-lines"
+"message"
+msgstr  "Message"
+"multi-ligne"
+
+#: fr/zcraft/ztoaster/Nowhere.java:1984
+msgid   "Multi-lines "
+"message with trailing space"
+msgstr  "Message"
+" multi-ligne avec une espace séparatrice explicite"
+
+#: fr/zcraft/ztoaster/Nowhere.java:1337
+msgid   "Multi-lines "
+" message with multiple trailing spaces"
+msgstr  "Message "
+" multi-ligne avec plusieurs espaces séparatrices explicites"
+
+#: src/main/java/eu/carrade/amaury/UHCReloaded/borders/BorderManager.java:426
+msgid ""
+"{gray}It will shrink by one block every {0} second(s) until {1} blocks in "
+"diameter."
+msgstr ""
+"{gray}Elle réduira d'un bloc toutes les {0} seconde(s) jusqu'à atteindre "
+"{1} blocs de diamètre."
+
+#msgid "{gray}When clicked, a sign will open; write the name of the team inside."
+#msgstr ""
+#"{gray}Cliquez ici pour ouvrir un panneau, et écrivez le nom de l'équipe "
+#"dedans."

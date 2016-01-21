@@ -27,67 +27,43 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.core;
+package fr.zcraft.zlib;
 
-import fr.zcraft.zlib.tools.PluginLogger;
-import org.bukkit.plugin.java.JavaPlugin;
-
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.jar.JarFile;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 
-/**
- * The base class of any plugin using the ZLib.
- *
- * To use the ZLib, you have to use this class instead of {@link JavaPlugin}, and to add calls to
- * the {@code super} methods of {@link JavaPlugin#onEnable()} and {@link JavaPlugin#onDisable()} (if
- * you use them).
- */
-public abstract class ZPlugin extends JavaPlugin
+public class TestsUtils
 {
-	@Override
-	public void onLoad()
-	{
-		ZLib.init(this);
-	}
+    public static InputStream getResource(String name)
+    {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return loader.getResourceAsStream(name);
+    }
 
-	/**
-	 * Load the given ZLib's components.
-	 *
-	 * @param components The base classes of the components to load.
-	 */
-	@SafeVarargs
-	public final void loadComponents(Class<? extends ZLibComponent>... components)
-	{
-		for (Class<? extends ZLibComponent> componentClass : components)
-		{
-			try
-			{
-				ZLib.loadComponent(componentClass.newInstance());
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
-			}
-		}
-	}
+    public static File tempResource(String name) throws IOException
+    {
+        String[] fileNameParts = name.split("\\.");
+        String extension = null;
+        if (fileNameParts.length >= 2)
+            extension = fileNameParts[fileNameParts.length - 1];
 
-	@Override
-	public void onDisable()
-	{
-		ZLib.exit();
-	}
+        InputStream inputStream = getResource(name);
+        File tempFile = File.createTempFile("zlib-unit-tests-" + name.replace(".", "-"), ".tmp" + (extension != null ? "." + extension : ""));
 
-	public JarFile getJarFile()
-	{
-		try
-		{
-			return new JarFile(getFile());
-		}
-		catch (IOException e)
-		{
-			PluginLogger.error("Unable to load JAR file {0}", e, getFile().getAbsolutePath());
-			return null;
-		}
-	}
+        OutputStream outputStream = new FileOutputStream(tempFile);
+
+        int read;
+        byte[] bytes = new byte[1024];
+
+        while ((read = inputStream.read(bytes)) != -1)
+        {
+            outputStream.write(bytes, 0, read);
+        }
+
+        return tempFile;
+    }
 }

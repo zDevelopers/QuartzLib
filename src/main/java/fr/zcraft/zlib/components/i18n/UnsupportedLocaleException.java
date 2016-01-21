@@ -27,67 +27,15 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.core;
+package fr.zcraft.zlib.components.i18n;
 
-import fr.zcraft.zlib.tools.PluginLogger;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.IOException;
-import java.util.jar.JarFile;
+import java.util.Locale;
 
 
-/**
- * The base class of any plugin using the ZLib.
- *
- * To use the ZLib, you have to use this class instead of {@link JavaPlugin}, and to add calls to
- * the {@code super} methods of {@link JavaPlugin#onEnable()} and {@link JavaPlugin#onDisable()} (if
- * you use them).
- */
-public abstract class ZPlugin extends JavaPlugin
+public class UnsupportedLocaleException extends IllegalArgumentException
 {
-	@Override
-	public void onLoad()
-	{
-		ZLib.init(this);
-	}
-
-	/**
-	 * Load the given ZLib's components.
-	 *
-	 * @param components The base classes of the components to load.
-	 */
-	@SafeVarargs
-	public final void loadComponents(Class<? extends ZLibComponent>... components)
-	{
-		for (Class<? extends ZLibComponent> componentClass : components)
-		{
-			try
-			{
-				ZLib.loadComponent(componentClass.newInstance());
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
-			}
-		}
-	}
-
-	@Override
-	public void onDisable()
-	{
-		ZLib.exit();
-	}
-
-	public JarFile getJarFile()
-	{
-		try
-		{
-			return new JarFile(getFile());
-		}
-		catch (IOException e)
-		{
-			PluginLogger.error("Unable to load JAR file {0}", e, getFile().getAbsolutePath());
-			return null;
-		}
-	}
+    public UnsupportedLocaleException(Locale locale)
+    {
+        super("Unsupported locale " + locale);
+    }
 }
