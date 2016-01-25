@@ -32,7 +32,6 @@ package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
-import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +82,7 @@ public class HelpCommand extends Command
         if(!command.canExecute(sender))
             warning("You do not have the permission to use this command.");
 
-        String message = (sender instanceof Player ? "\n" : "");
+        String message = "\n";
         message += "§6\u2503§l " + ZLib.getPlugin().getName() +  " help for /" + command.getCommandGroup().getUsualName() + " " + command.getName() + "\n";
         message += "§l§6\u2503 Usage: §r" + command.getUsageString();
         
