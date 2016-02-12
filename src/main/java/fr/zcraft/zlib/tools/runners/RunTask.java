@@ -31,6 +31,7 @@ package fr.zcraft.zlib.tools.runners;
 
 import fr.zcraft.zlib.core.ZLib;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -82,5 +83,46 @@ public final class RunTask
 	public static BukkitTask timer(Runnable runnable, long wait, long period)
 	{
 		return scheduler.runTaskTimer(ZLib.getPlugin(), runnable, wait, period);
+	}
+
+
+	/**
+	 * Returns a task that will run on the next server tick.
+	 *
+	 * @param runnable The task to be run.
+	 *
+	 * @return The BukkitTask that will run.
+	 */
+	public static BukkitTask nextTick(BukkitRunnable runnable)
+	{
+		return runnable.runTask(ZLib.getPlugin());
+	}
+
+	/**
+	 * Returns a task that will run after the specified number of server ticks.
+	 *
+	 * @param runnable The task to be run.
+	 * @param delay    The ticks to wait before running the task.
+	 *
+	 * @return The BukkitTask that will run.
+	 */
+	public static BukkitTask later(BukkitRunnable runnable, long delay)
+	{
+		return runnable.runTaskLater(ZLib.getPlugin(), delay);
+	}
+
+	/**
+	 * Returns a task that will repeatedly run until cancelled, starting after the specified number
+	 * of server ticks.
+	 *
+	 * @param runnable The task to be run.
+	 * @param wait     The ticks to wait before running the task.
+	 * @param period   The ticks to wait between runs
+	 *
+	 * @return The BukkitTask that will run.
+	 */
+	public static BukkitTask timer(BukkitRunnable runnable, long wait, long period)
+	{
+		return runnable.runTaskTimer(ZLib.getPlugin(), wait, period);
 	}
 }
