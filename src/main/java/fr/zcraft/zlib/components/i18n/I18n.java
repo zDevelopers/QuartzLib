@@ -36,6 +36,7 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.core.ZPlugin;
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.ChatColor;
 
 import java.io.BufferedWriter;
@@ -53,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.bukkit.entity.Player;
 
 
 public class I18n extends ZLibComponent
@@ -61,7 +63,7 @@ public class I18n extends ZLibComponent
     private final static String ALWAYS_OVERWRITE_FILE = ".overwrite";
     private final static String BACKUP_DIRECTORY = "backups";
 
-    private static Map<Locale, Translator> translators = new ConcurrentHashMap<>();
+    private final static Map<Locale, Translator> translators = new ConcurrentHashMap<>();
 
     private static Locale primaryLocale = null;
     private static Locale fallbackLocale = null;
@@ -268,12 +270,61 @@ public class I18n extends ZLibComponent
     {
         I18n.addCountToParameters = addCountToParameters;
     }
-
-
+    
+    /**
+     * Return the locale used by the player's client.
+     * @param player The player
+     * @return The player's client locale.
+     */
+    public static Locale getPlayerLocale(Player player)
+    {
+        try
+        {
+            Object playerHandle = Reflection.call(player, "getHandle");
+            String localeName = (String) Reflection.getFieldValue(playerHandle, "locale");
+            String[] splittedLocale = localeName.split("[_\\-]", 2);
+            return new Locale(splittedLocale[0], splittedLocale[1]);
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
+    }
 
     /* **  TRANSLATIONS LOADING METHODS  ** */
-
-
+    
+    /**
+     * Fetches the closest translator for the given local, and stores it in the
+     * translator cache.
+     * 
+     * @param locale The locale
+     * @return The closest translator that could be found.
+     */
+    private static Translator getClosestTranslator(Locale locale)
+    {
+        Translator translator = null;
+        
+        if(locale == null) return null;
+        
+        if(translators.containsKey(locale))
+            return translators.get(locale);
+        
+        for(Locale curLocale : translators.keySet())
+        {
+            if(curLocale.getLanguage().equals(locale.getLanguage()))
+                translator = translators.get(curLocale);
+            
+            if(curLocale.getCountry().equals(locale.getCountry()))
+                break;
+        }
+        
+        if(translator == null) translator = translators.get(I18n.primaryLocale);
+        if(translator == null) translator = translators.get(I18n.fallbackLocale);
+        
+        translators.put(locale, translator);
+        return translator;
+    }
+    
     /**
      * Writes the translation files in the plugin storage directory, and updates the files if
      * needed.
@@ -463,18 +514,19 @@ public class I18n extends ZLibComponent
 
     /* **  TRANSLATION METHODS  ** */
 
-
     /**
-     * Translates the given string.
+     * Translates the given string using the given locale.
      *
-     * <p> Tries to use the primary locale; fallbacks to the fallback locale if the string cannot be
-     * translated; fallbacks to the input text if the string still cannot be translated. </p>
+     * <p> If the given locale is null, tries to use the primary locale; 
+     * fallbacks to the fallback locale if the string cannot be translated; 
+     * fallbacks to the input text if the string still cannot be translated. </p>
      *
      * <p> The count is likely to be used in the string, so if, for a translation with plurals, only
      * a count is given, this count is also interpreted as a parameter (the first and only one, {@code
      * {0}}). If this behavior annoys you, you can disable it using {@link
      * #addCountToParameters(boolean)}. </p>
      *
+     * @param locale          The locale to use to translate the string.
      * @param context         The translation context. {@code null} if no context defined.
      * @param messageId       The string to translate.
      * @param messageIdPlural The plural version of the string to translate. {@code null} if this
@@ -486,10 +538,10 @@ public class I18n extends ZLibComponent
      *
      * @return The translated text, with the parameters replaced by their values.
      */
-    public static String translate(String context, String messageId, String messageIdPlural, Integer count, Object... parameters)
+    public static String translate(Locale locale, String context, String messageId, String messageIdPlural, Integer count, Object... parameters)
     {
         String translated = null;
-        Translator translator;
+        Translator translator = null;
         Locale usedLocale = Locale.getDefault();
 
         // Simplifies the programmer's work. The count is likely to be used in the string, so if,
@@ -498,13 +550,18 @@ public class I18n extends ZLibComponent
         if (addCountToParameters && count != null && (parameters == null || parameters.length == 0))
             parameters = new Object[] {count};
 
-
-        if (primaryLocale != null && (translator = translators.get(primaryLocale)) != null)
+        if(locale != null && (translator = getClosestTranslator(locale)) != null)
         {
             translated = translator.translate(context, messageId, messageIdPlural, count);
             usedLocale = translator.getLocale();
         }
-
+        
+        if (translated == null && primaryLocale != null && (translator = translators.get(primaryLocale)) != null)
+        {
+            translated = translator.translate(context, messageId, messageIdPlural, count);
+            usedLocale = translator.getLocale();
+        }
+        
         if (translated == null && fallbackLocale != null && (translator = translators.get(fallbackLocale)) != null)
         {
             translated = translator.translate(context, messageId, messageIdPlural, count);
@@ -536,7 +593,34 @@ public class I18n extends ZLibComponent
                 .replace("\u2009", " ")                                                // Thin space
                 .replace("\u2060", "");                                                // “WORD-JOINER” non-breaking space (zero-width)
     }
-
+    
+    /**
+     * Translates the given string.
+     *
+     * <p> Tries to use the primary locale; fallbacks to the fallback locale if the string cannot be
+     * translated; fallbacks to the input text if the string still cannot be translated. </p>
+     *
+     * <p> The count is likely to be used in the string, so if, for a translation with plurals, only
+     * a count is given, this count is also interpreted as a parameter (the first and only one, {@code
+     * {0}}). If this behavior annoys you, you can disable it using {@link
+     * #addCountToParameters(boolean)}. </p>
+     *
+     * @param context         The translation context. {@code null} if no context defined.
+     * @param messageId       The string to translate.
+     * @param messageIdPlural The plural version of the string to translate. {@code null} if this
+     *                        translation does not have a plural form.
+     * @param count           The count of items to use to choose the singular or plural form.
+     *                        {@code null} if this translation does not have a plural form.
+     * @param parameters      The parameters, replacing values like {@code {0}} in the translated
+     *                        string.
+     *
+     * @return The translated text, with the parameters replaced by their values.
+     */
+    public static String translate(String context, String messageId, String messageIdPlural, Integer count, Object... parameters)
+    {
+        return translate(null, context, messageId, messageIdPlural, count, parameters);
+    }
+    
     /**
      * Replaces some formatting codes into system codes.
      *

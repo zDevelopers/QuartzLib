@@ -30,6 +30,8 @@
 
 package fr.zcraft.zlib.components.gui;
 
+import fr.zcraft.zlib.components.i18n.I18n;
+import java.util.Locale;
 import org.bukkit.entity.Player;
 
 abstract public class GuiBase 
@@ -38,6 +40,11 @@ abstract public class GuiBase
      * The player this Gui instance is associated to.
      */
     private Player player;
+    
+    /**
+     * The locale used by the player this Gui instance is associated to.
+     */
+    private Locale playerLocale;
     
     /**
      * The parent of this GUI (if any).
@@ -111,6 +118,7 @@ abstract public class GuiBase
     protected void open(Player player)
     {
         this.player = player;
+        this.playerLocale = I18n.getPlayerLocale(player);
         Gui.registerGuiOpen(player, this);
         update();
         open = true;
@@ -133,6 +141,9 @@ abstract public class GuiBase
     
     /** @return The player this Gui instance is associated to. */
     protected final Player getPlayer() { return player; }
+    
+    /** @return The locale used by the player this Gui instance is associated to. */
+    protected final Locale getPlayerLocale() { return playerLocale; }
     
     protected boolean checkImmune()
     {
