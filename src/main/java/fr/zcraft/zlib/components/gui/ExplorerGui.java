@@ -545,14 +545,14 @@ abstract public class ExplorerGui<T> extends ActionGui
             case "up":
                 title = canUse ? "Go up" : "Top page";
 
-                newPage = currentPageY + 1;
+                newPage = currentPageY - 1;
                 lastPage = getVerticalPageCount();
                 break;
 
             case "down":
                 title = canUse ? "Go down" : "Bottom page";
 
-                newPage = currentPageY - 1;
+                newPage = currentPageY + 1;
                 lastPage = getVerticalPageCount();
                 break;
 
