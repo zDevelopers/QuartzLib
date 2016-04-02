@@ -84,7 +84,12 @@ public final class PluginLogger
     
     static public void warning(String message, Throwable ex)
     {
-        warning(message + " : " + ex.getMessage());
+        log(Level.WARNING, message, ex);
+    }
+    
+    static public void warning(String message, Throwable ex, Object... args)
+    {
+        log(Level.WARNING, message, ex, args);
     }
     
     static public void error(String message)
