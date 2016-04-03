@@ -155,10 +155,12 @@ abstract public class Command
     public String build(String... args)
     {
         String command = "/" + commandGroup.getUsualName() + " " + commandName;
-        if(args.length > 0)
+        
+        for(String arg : args)
         {
-            command += " " + String.join(" ", args);
+            command += " " + arg;
         }
+        
         return command;
     }
     
