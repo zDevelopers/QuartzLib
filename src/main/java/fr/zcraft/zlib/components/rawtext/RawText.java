@@ -30,10 +30,108 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
+import com.google.common.base.CaseFormat;
+import java.util.Set;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.json.simple.JSONObject;
+
 public class RawText extends RawTextPart<RawText>
 {
     public RawText(String text)
     {
         super(text);
+    }
+    
+    static public String toStyleName(ChatColor color)
+    {
+        switch(color)
+        {
+            case RESET: 
+                throw new IllegalArgumentException("Control code 'RESET' is not a valid style");
+            case MAGIC:
+                return "obfuscated";
+            default:
+                return color.name().toLowerCase();
+        }
+    }
+    
+    static public JSONObject toJSON(ItemStack item)
+    {
+        JSONObject obj = new JSONObject();
+        
+        obj.put("id", item.getType().toString());
+        obj.put("Damage", item.getData().getData());
+        
+        JSONObject itemTag = new JSONObject();
+        
+        JSONObject displayTag = toJSON(item.getItemMeta());
+        if(!displayTag.isEmpty())
+            itemTag.put("Display", displayTag);
+        
+        byte itemFlags = toJSON(item.getItemMeta().getItemFlags());
+        if(itemFlags > 0)
+            itemTag.put("HideFlags", itemFlags);
+        
+        if(!itemTag.isEmpty())
+            obj.put("tag", itemTag);
+        
+        return obj;
+    }
+    
+    static public JSONObject toJSON(ItemMeta meta)
+    {
+        JSONObject obj = new JSONObject();
+        
+        if(meta.hasDisplayName())
+            obj.put("Name", meta.getDisplayName());
+        if(meta.hasLore())
+            obj.put("Lore", meta.getLore());
+        
+        return obj;
+    }
+    
+    static public byte toJSON(Set<ItemFlag> itemFlags)
+    {
+        byte flags = 0;
+        
+        for(ItemFlag flag : itemFlags)
+        {
+            switch(flag)
+            {
+                case HIDE_ENCHANTS:
+                    flags += 1; break;
+                case HIDE_ATTRIBUTES: 
+                    flags += 1 << 1; break;
+                case HIDE_UNBREAKABLE:
+                    flags += 1 << 2; break;
+                case HIDE_DESTROYS:
+                    flags += 1 << 3; break;
+                case HIDE_PLACED_ON:
+                    flags += 1 << 4; break;
+                case HIDE_POTION_EFFECTS:
+                    flags += 1 << 5; break;
+            }
+        }
+        
+        return flags;
+    }
+    
+    static public JSONObject toJSON(Entity entity)
+    {
+        JSONObject obj = new JSONObject();
+        
+        String name = entity.getCustomName();
+        if(name == null || name.isEmpty())
+            name = entity.getName();
+        
+        obj.put("name", name);
+        obj.put("type", CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, entity.getType().toString()));
+        obj.put("id", entity.getUniqueId().toString());
+        
+        return obj;
     }
 }

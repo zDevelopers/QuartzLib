@@ -31,15 +31,16 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
+import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.components.commands.Command;
 import fr.zcraft.zlib.components.commands.Commands;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
+import org.bukkit.Statistic;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
@@ -159,19 +160,29 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return hover(ActionHover.SHOW_TEXT, hoverText.build());
     }
     
+    private String enumCamel(Enum enumValue)
+    {
+        return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, enumValue.toString());
+    }
+    
     public T hover(Achievement achievement)
     {
-        throw new NotImplementedException();
+        return hover(ActionHover.SHOW_ACHIEVEMENT, "achievement." + enumCamel(achievement));
+    }
+    
+    public T hover(Statistic statistic)
+    {
+        return hover(ActionHover.SHOW_ACHIEVEMENT, "stat." + enumCamel(statistic));
     }
     
     public T hover(ItemStack item)
     {
-        throw new NotImplementedException();
+        return hover(ActionHover.SHOW_ITEM, RawText.toJSON(item).toJSONString());
     }
     
     public T hover(Entity entity)
     {
-        throw new NotImplementedException();
+        return hover(ActionHover.SHOW_ENTITY, RawText.toJSON(entity).toJSONString());
     }
     
     private T click(ActionClick action, String value)
@@ -224,19 +235,6 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return this;
     }
     
-    static public String toStyleName(ChatColor color)
-    {
-        switch(color)
-        {
-            case RESET: 
-                throw new IllegalArgumentException("Control code 'RESET' is not a valid style");
-            case MAGIC:
-                return "obfuscated";
-            default:
-                return color.name().toLowerCase();
-        }
-    }
-    
     static private JSONObject actionToJSON(Enum action, Object value)
     {
         JSONObject obj = new JSONObject();
@@ -261,7 +259,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         }
         
         if(color != null)
-            obj.put("color", toStyleName(color));
+            obj.put("color", RawText.toStyleName(color));
         
         if(bold) obj.put("bold", true);
         if(italic) obj.put("italic", true);

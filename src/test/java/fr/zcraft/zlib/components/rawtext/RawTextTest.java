@@ -35,7 +35,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import junit.framework.Assert;
+import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
+import org.bukkit.Statistic;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -166,6 +168,26 @@ public class RawTextTest
         RawText textSuggest = new RawText("test")
             .suggest("hello");
         assertJSON(textSuggest, SUGGEST_TEST);
+    }
+    
+    @Test
+    public void hoverAchievementTest()
+    {
+        final String HOVER_ACHIEVEMENT_TEST = "{\"text\":\"test\",\"hoverEvent\":{\"action\":\"show_achievement\",\"value\":\"achievement.theEnd\"}}";
+        RawText text = new RawText("test")
+            .hover(Achievement.THE_END);
+        
+        assertJSON(text, HOVER_ACHIEVEMENT_TEST);
+    }
+    
+    @Test
+    public void hoverStatisticTest()
+    {
+        final String HOVER_STATISTIC_TEST = "{\"text\":\"test\",\"hoverEvent\":{\"action\":\"show_achievement\",\"value\":\"stat.walkOneCm\"}}";
+        RawText text = new RawText("test")
+            .hover(Statistic.WALK_ONE_CM);
+        
+        assertJSON(text, HOVER_STATISTIC_TEST);
     }
     
     
