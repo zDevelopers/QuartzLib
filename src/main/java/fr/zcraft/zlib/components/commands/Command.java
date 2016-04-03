@@ -31,6 +31,7 @@
 package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
+import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.text.RawMessage;
 import org.apache.commons.lang.StringUtils;
@@ -42,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-abstract public class Command 
+abstract public class Command
 {   
     protected CommandGroup commandGroup;
     protected String commandName;
@@ -151,6 +152,16 @@ abstract public class Command
         return false;
     }
     
+    public String build(String... args)
+    {
+        String command = "/" + commandGroup.getUsualName() + " " + commandName;
+        if(args.length > 0)
+        {
+            command += " " + String.join(" ", args);
+        }
+        return command;
+    }
+    
     
     ///////////// Common methods for commands /////////////
     
@@ -206,6 +217,11 @@ abstract public class Command
     protected void tellRaw(String rawMessage) throws CommandException
     {
         RawMessage.send(playerSender(), rawMessage);
+    }
+    
+    protected void send(RawText text)
+    {
+        RawMessage.send(sender, text);
     }
     
     ///////////// Methods for autocompletion /////////////

@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.components.commands;
 
+import com.sun.istack.internal.Nullable;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import org.bukkit.command.CommandSender;
@@ -90,6 +91,18 @@ public class Commands extends ZLibComponent
         CommandGroup commandGroup = getMatchingCommandGroup(commandName);
         if(commandGroup == null) return new ArrayList<String>();
         return commandGroup.tabComplete(sender, args);
+    }
+    
+    @Nullable
+    static public Command getCommandInfo(Class<? extends Command> commandClass)
+    {
+        Command command = null;
+        for(CommandGroup commandGroup : commandGroups)
+        {
+            command = commandGroup.getCommandInfo(commandClass);
+            if(command != null) break;
+        }
+        return command;
     }
     
     static private CommandGroup getMatchingCommandGroup(String commandName)

@@ -29,9 +29,11 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandException;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 
@@ -46,6 +48,31 @@ public final class RawMessage
 {
     private RawMessage() {}
 
+    /**
+     * Sends raw text to the given command sender.
+     * 
+     * <p>If the command sender is a Player, the JSON representation is used (using tellraw).
+     * Otherwise, the message is converted to formatted text and is sent normally.</p>
+     *
+     * @param commandSender  The receiver of the message.
+     * @param text The JSON message.
+     *
+     * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
+     *                          the message).
+     */
+    public static void send(CommandSender commandSender, RawText text)
+    {
+        if(commandSender instanceof Player)
+        {
+            send((Player) commandSender, text.toJSONString());
+        }
+        else
+        {
+            commandSender.sendMessage(text.toFormattedText());
+        }
+    }
+    
+    
     /**
      * Sends a raw JSON message to the given player.
      *
