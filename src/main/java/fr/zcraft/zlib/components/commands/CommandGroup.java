@@ -30,7 +30,6 @@
 
 package fr.zcraft.zlib.components.commands;
 
-import com.sun.istack.internal.Nullable;
 import fr.zcraft.zlib.tools.PluginLogger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandExecutor;
@@ -250,7 +249,6 @@ public class CommandGroup implements TabCompleter, CommandExecutor
         return null;
     }
     
-    @Nullable
     public Command getCommandInfo(Class<? extends Command> commandClass)
     {
         for(Command command : commands)
