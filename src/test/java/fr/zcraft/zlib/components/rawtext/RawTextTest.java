@@ -199,4 +199,32 @@ public class RawTextTest
         
         assertJSON(text, MAP_DELETE_MESSAGE);
     }
+    
+    @Test
+    public void plainTextTest()
+    {
+        final String PLAIN_TEXT = "Hello world !";
+        
+        RawText text = new RawText("Hello ")
+            .then("world")
+            .then(" !")
+            .build();
+        
+        Assert.assertEquals(PLAIN_TEXT, text.toPlainText());
+    }
+    
+    @Test
+    public void formattedTextTest()
+    {
+        final String FORMATTED_TEXT = ChatColor.RED + "" + ChatColor.BOLD + "Hello " + ChatColor.RESET 
+                + ChatColor.BLUE +"world" + ChatColor.RESET;
+        
+        RawText text = new RawText("Hello ")
+                .style(ChatColor.RED, ChatColor.BOLD)
+            .then("world")
+                .color(ChatColor.BLUE)
+            .build();
+        
+        Assert.assertEquals(FORMATTED_TEXT, text.toFormattedText());
+    }
 }

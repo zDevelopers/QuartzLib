@@ -31,6 +31,8 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
+import fr.zcraft.zlib.components.commands.Command;
+import fr.zcraft.zlib.components.commands.Commands;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -186,6 +188,14 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return click(ActionClick.RUN_COMMAND, command);
     }
     
+    public T command(Class<? extends Command> command, String... args)
+    {
+        Command commandInfo = Commands.getCommandInfo(command);
+        if(commandInfo == null)
+            throw new IllegalArgumentException("Unknown command");
+        return command(commandInfo.build(args));
+    }
+    
     public T uri(String uri) throws URISyntaxException
     {
         return uri(new URI(uri));
@@ -272,6 +282,49 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     public String toJSONString()
     {
         return toJSON().toJSONString();
+    }
+    
+    public String toPlainText()
+    {
+        StringBuilder buf = new StringBuilder();
+        writePlainText(buf);
+        return buf.toString();
+    }
+    
+    private void writePlainText(StringBuilder buf)
+    {
+        buf.append(text);
+        
+        for(RawTextPart subPart : this)
+        {
+            subPart.writePlainText(buf);
+        }
+    }
+    
+    public String toFormattedText()
+    {
+        StringBuilder buf = new StringBuilder();
+        writeFormattedText(buf);
+        return buf.toString();
+    }
+    
+    private void writeFormattedText(StringBuilder buf)
+    {
+        if(color != null) buf.append(color);
+        if(bold) buf.append(ChatColor.BOLD);
+        if(italic) buf.append(ChatColor.ITALIC);
+        if(underline) buf.append(ChatColor.UNDERLINE);
+        if(strikethrough) buf.append(ChatColor.STRIKETHROUGH);
+        if(obfuscated) buf.append(ChatColor.MAGIC);
+        
+        buf.append(text);
+        buf.append(ChatColor.RESET);
+        
+        for(RawTextPart subPart : this)
+        {
+            subPart.writeFormattedText(buf);
+        }
+        
     }
 
     @Override
