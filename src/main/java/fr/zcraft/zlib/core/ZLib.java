@@ -36,13 +36,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 
 public abstract class ZLib
 {
     static private JavaPlugin plugin;
     static private Set<ZLibComponent> loadedComponents;
-
+    
+    static private ZLibListener listener;
 
     /**
      * Initializes the ZLibrary.
@@ -71,7 +75,14 @@ public abstract class ZLib
     static void loadComponent(ZLibComponent component) throws IllegalStateException
     {
         checkInitialized();
-
+        
+        //Make sure any loaded component will be correctly unloaded.
+        if(listener == null)
+        {
+            ZLib.listener = new ZLibListener();
+            Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+        }
+        
         if(loadedComponents.add(component))
         {
             component.setEnabled(true);
@@ -96,10 +107,8 @@ public abstract class ZLib
 
         loadedComponents.clear();
 
-        PluginLogger.exit();
-
-        plugin = null;
         loadedComponents = null;
+        listener = null;
     }
 
     /**
@@ -146,6 +155,16 @@ public abstract class ZLib
     static private void checkInitialized() throws IllegalStateException
     {
         if(plugin == null)
-            throw new IllegalStateException("Assertion failed: ZLib is not correctly inizialized");
+            throw new IllegalStateException("Assertion failed: ZLib is not correctly inizialized. Make sure ZLib.init() or ZPlugin.onLoad() is correctly called.");            
+    }
+    
+    static private class ZLibListener implements Listener
+    {
+        @EventHandler
+        public void onPluginDisable(PluginDisableEvent event)
+        {
+            if(plugin == event.getPlugin())
+                exit();
+        }
     }
 }
