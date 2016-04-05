@@ -151,7 +151,7 @@ public class RawTextTest
     {
         final String URL_TEST = "{\"text\":\"test\", \"clickEvent\": {\"action\": \"open_url\", \"value\": \"https://www.zcraft.fr\"} }";
         final String COMMAND_TEST = "{\"text\":\"test\", \"clickEvent\": {\"action\": \"run_command\", \"value\": \"/say hi\"} }";
-        final String SUGGEST_TEST = "{\"text\":\"test\", \"clickEvent\": {\"action\": \"suggest\", \"value\": \"hello\"} }";
+        final String SUGGEST_TEST = "{\"text\":\"test\", \"clickEvent\": {\"action\": \"suggest_command\", \"value\": \"hello\"} }";
     
         RawText textUrl = new RawText("test")
             .uri("https://www.zcraft.fr");

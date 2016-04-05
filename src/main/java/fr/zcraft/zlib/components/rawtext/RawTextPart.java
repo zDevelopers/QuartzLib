@@ -53,7 +53,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     {
         OPEN_URL,
         RUN_COMMAND,
-        SUGGEST
+        SUGGEST_COMMAND
     }
     
     static private enum ActionHover
@@ -219,7 +219,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     
     public T suggest(String suggestion)
     {
-        return click(ActionClick.SUGGEST, suggestion);
+        return click(ActionClick.SUGGEST_COMMAND, suggestion);
     }
     
     public RawText build()

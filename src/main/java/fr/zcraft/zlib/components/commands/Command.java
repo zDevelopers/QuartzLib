@@ -119,6 +119,10 @@ abstract public class Command
         return result;
     }
     
+    public String getUsageParameters()
+    {
+        return usageParameters;
+    }
     
     public String getUsageString()
     {
