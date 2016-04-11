@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.gui;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -54,17 +55,11 @@ public final class Gui extends ZLibComponent
      */
     static private HashMap<Class<? extends Listener>, Listener> guiListeners = null;
     
-    /**
-     * The plugin that uses the GUI API.
-     */
-    static private Plugin plugin = null;
-    
     @Override
     protected void onEnable()
     {
         openGuis = new HashMap<>();
         guiListeners = new HashMap<>();
-        Gui.plugin = ZLib.getPlugin();
         GuiUtils.init();
     }
     
@@ -93,7 +88,7 @@ public final class Gui extends ZLibComponent
             constructor.setAccessible(true);
             Listener listener = constructor.newInstance();
             guiListeners.put(listenerClass, listener);
-            plugin.getServer().getPluginManager().registerEvents(listener, plugin);
+            ZLib.registerEvents(listener);
         }
         catch(Throwable ex)
         {
@@ -115,13 +110,13 @@ public final class Gui extends ZLibComponent
         if(openGui != null) openGui.onClose();
         if(parent != null) ((GuiBase)gui).setParent(parent);
         
-         Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
-                @Override
-                public void run()
-                {
-                    ((GuiBase)gui).open(owner);/* JAVA GENERICS Y U NO WORK */
-                }
-            }, 0);
+        RunTask.later(new Runnable() {
+            @Override
+            public void run()
+            {
+                ((GuiBase)gui).open(owner);/* JAVA GENERICS Y U NO WORK */
+            }
+        }, 0);
         
         return gui;
     }

@@ -79,8 +79,7 @@ public abstract class ZLib
         //Make sure any loaded component will be correctly unloaded.
         if(listener == null)
         {
-            ZLib.listener = new ZLibListener();
-            Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+            ZLib.listener = registerEvents(new ZLibListener());
         }
         
         if(loadedComponents.add(component))
@@ -145,6 +144,18 @@ public abstract class ZLib
     static public boolean isInitialized()
     {
         return plugin != null;
+    }
+    
+    /**
+     * Registers an event listener for the plugin currently using the library, and returns it.
+     * @param <T> The type of the listener.
+     * @param listener The listener to register.
+     * @return The registered listener.
+     */
+    static public <T extends Listener> T registerEvents(T listener)
+    {
+        Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+        return listener;
     }
 
     /**
