@@ -120,7 +120,20 @@ public class GlowEffect extends EnchantmentWrapper
         Enchantment glow = getGlow();
         if (glow != null) item.removeEnchantment(glow);
     }
-
+    
+    /**
+     * Returns if the give item has the glowing effect applied to it.
+     * @param item The item.
+     * @return if the give item has the glowing effect applied to it.
+     */
+    public static boolean hasGlow(ItemStack item)
+    {
+        if(item == null) return false;
+        
+        Enchantment glow = getGlow();
+        if(glow != null) return item.getEnchantmentLevel(glow) > 0;
+        return false;
+    }
 
     /* **  Enchantment properties overwritten  ** */
 

@@ -59,7 +59,7 @@ public final class GuiUtils
 	/**
 	 * Initializes the GUI utilities. This method must be called on plugin enabling.
 	 */
-	static public void init()
+	static void init()
 	{
 		try
 		{

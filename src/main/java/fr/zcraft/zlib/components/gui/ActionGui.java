@@ -31,6 +31,7 @@
 package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -133,6 +134,18 @@ abstract public class ActionGui extends InventoryGui
     protected void action(String name, int slot, Material material)
     {
         action(name, slot, GuiUtils.makeItem(material));
+    }
+    
+    /**
+     * Creates a new action, and adds it to the GUI.
+     *
+     * @param name The identifier of the action.
+     * @param slot The slot the action will be placed on.
+     * @param item The item used to represent the action.
+     */
+    protected void action(String name, int slot, ItemStackBuilder item)
+    {
+        action(name, slot, item.item());
     }
     
     /**
