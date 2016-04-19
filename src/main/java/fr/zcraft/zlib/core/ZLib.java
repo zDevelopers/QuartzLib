@@ -84,6 +84,8 @@ public abstract class ZLib
         
         if(loadedComponents.add(component))
         {
+            if(component instanceof Listener)
+                registerEvents((Listener) component);
             component.setEnabled(true);
         }
     }
