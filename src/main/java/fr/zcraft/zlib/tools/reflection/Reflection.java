@@ -318,6 +318,7 @@ public final class Reflection
      * Creates and returns an instance of the given class, passing the given parameters to the
      * appropriate constructor.
      *
+     * @param <T>        The type of the object to be instanciated.
      * @param hClass     The class to be instantiated.
      * @param parameters The parameters to be passed to the constructor. This also determines which
      *                   constructor will be called.
@@ -338,11 +339,11 @@ public final class Reflection
      *                                   to an enum type.
      * @throws InvocationTargetException if an exception is thrown in the constructor.
      */
-    static public Object instantiate(Class hClass, Object... parameters)
+    static public <T> T instantiate(Class<T> hClass, Object... parameters)
             throws NoSuchMethodException, InstantiationException, 
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
-        Constructor constructor = hClass.getConstructor(getTypes(parameters));
+        Constructor<T> constructor = hClass.getConstructor(getTypes(parameters));
         return constructor.newInstance(parameters);
     }
 

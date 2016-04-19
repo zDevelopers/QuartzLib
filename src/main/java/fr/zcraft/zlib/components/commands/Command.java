@@ -175,6 +175,11 @@ abstract public class Command
     {
         throw new CommandException(this, Reason.INVALID_PARAMETERS, reason);
     }
+    
+    protected void throwNotAuthorized() throws CommandException
+    {
+        throw new CommandException(this, Reason.SENDER_NOT_AUTHORIZED);
+    }
         
     protected Player playerSender() throws CommandException
     {
@@ -370,6 +375,18 @@ abstract public class Command
         }
         
         throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, enumValues));
+    }
+    
+    protected Player getPlayerParameter(int index) throws CommandException
+    {
+        String parameter = args[index];
+        
+        for(Player player : Bukkit.getOnlinePlayers())
+        {
+            if(player.getName().equals(parameter)) return player;
+        }
+        
+        throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "player name"));
     }
     
 }

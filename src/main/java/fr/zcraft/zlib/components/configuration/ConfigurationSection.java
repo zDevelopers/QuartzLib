@@ -30,69 +30,45 @@
 
 package fr.zcraft.zlib.components.configuration;
 
-import fr.zcraft.zlib.core.ZLib;
-import fr.zcraft.zlib.core.ZLibComponent;
-import fr.zcraft.zlib.tools.Callback;
-
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class Configuration extends ZLibComponent
+public class ConfigurationSection extends ConfigurationItem<Map<String,Object>>
 {
-    /* ===== Static API ===== */
-    static private ConfigurationItem[] items;
-    static private Callback<ConfigurationItem<?>> updateCallback;
     
-    @Override
-    protected void onEnable() 
+    protected ConfigurationSection()
     {
-        init(this.getClass());
+        this(null);
     }
     
-    static public void init(Class configurationClass)
+    private ConfigurationSection(String fieldName, String... deprecatedNames)
     {
-        ArrayList<ConfigurationItem> itemsList = new ArrayList<>();
+        super(fieldName, new HashMap<String, Object>(),deprecatedNames);
+    }
+    
+    @Override
+    boolean init()
+    {
+        boolean affected = false;
         
-        for(Field field : configurationClass.getFields())
+        for(Field field : this.getClass().getFields())
         {
             if(ConfigurationItem.class.isAssignableFrom(field.getType()))
             {
                 try 
                 {
-                    itemsList.add((ConfigurationItem) field.get(null));
+                    ConfigurationItem item = (ConfigurationItem) field.get(this);
+                    item.setParent(this);
+                    
+                    if(item.init()) affected = true;
                 }
                 catch(Exception ex){}
             }
         }
         
-        items = itemsList.toArray(new ConfigurationItem[itemsList.size()]);
-        loadDefaultValues();
-    }
-    
-    static public void save()
-    {
-        ZLib.getPlugin().saveConfig();
+        return affected;
     }
 
-    static public void registerConfigurationUpdateCallback(Callback<ConfigurationItem<?>> callback)
-    {
-        updateCallback = callback;
-    }
-    
-    static private void loadDefaultValues()
-    {
-        boolean affected = false;
-        
-        for(ConfigurationItem configField : items)
-        {
-            if(configField.init()) affected = true;
-        }
-        
-        if(affected) save();
-    }
-
-    static void triggerCallback(ConfigurationItem<?> configurationItem)
-    {
-        if (updateCallback != null) updateCallback.call(configurationItem);
-    }
 }

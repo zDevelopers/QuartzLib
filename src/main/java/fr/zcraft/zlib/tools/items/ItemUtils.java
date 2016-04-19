@@ -31,6 +31,7 @@ package fr.zcraft.zlib.tools.items;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -78,6 +79,19 @@ abstract public class ItemUtils
             item.setAmount(amount - 1);
         }
         return item;
+    }
+    
+    static public void give(Player player, ItemStack item)
+    {
+        if (!player.getInventory().addItem(item).isEmpty())
+        {
+            // Inventory was full
+            player.getWorld().dropItem(player.getLocation(), item);
+        }
+        else
+        {
+            player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 0.2f, 1.8f);
+        }
     }
     
     static public ItemStack setDisplayName(ItemStack item, String displayName)
