@@ -33,11 +33,9 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.runners.RunTask;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -60,7 +58,6 @@ public final class Gui extends ZLibComponent
     {
         openGuis = new HashMap<>();
         guiListeners = new HashMap<>();
-        GuiUtils.init();
     }
     
     @Override
@@ -173,6 +170,7 @@ public final class Gui extends ZLibComponent
      * Returns the currently open GUI of the given type for that player, or
      * {@code null} if no GUI of this type is open through this API.
      *
+     * @param <T> The type of the GUI.
      * @param entity The GUI's viewer.
      * @param guiClass The GUI class.
      * @return the currently opened GUI.

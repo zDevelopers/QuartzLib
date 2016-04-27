@@ -31,7 +31,6 @@
 package fr.zcraft.zlib.components.configuration;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class ConfigurationSection extends ConfigurationItem<Map<String,Object>>
     @Override
     boolean init()
     {
-        boolean affected = false;
+        boolean affected = super.init();
         
         for(Field field : this.getClass().getFields())
         {

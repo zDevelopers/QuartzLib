@@ -29,13 +29,15 @@
  */
 package fr.zcraft.zlib.core;
 
+import org.bukkit.plugin.Plugin;
+
 /**
  * This abstract class represents a zLib component that needs to be loaded and/or unloaded.
  */
 public abstract class ZLibComponent
 {
 	private boolean enabled = false;
-
+        
 
 	/**
 	 * Called when this component is enabled, while the parent plugin is itself enabled.
@@ -75,4 +77,13 @@ public abstract class ZLibComponent
 	{
 		return enabled;
 	}
+        
+        /**
+         * 
+         * @return The plugin owning this component.
+         */
+        protected Plugin getPlugin()
+        {
+                return ZLib.getPlugin();
+        }
 }

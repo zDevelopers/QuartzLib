@@ -30,7 +30,8 @@
 
 package fr.zcraft.zlib.components.gui;
 
-import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.items.InventoryUtils;
+import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -40,8 +41,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,59 +52,17 @@ import java.util.List;
  */
 public final class GuiUtils
 {
-	static private Method addItemFlagsMethod = null;
-	static private Object[] itemFlagValues = null;
-
-	/**
-	 * Initializes the GUI utilities. This method must be called on plugin enabling.
-	 */
-	static void init()
-	{
-		try
-		{
-			Class<?> itemFlagClass = Class.forName("org.bukkit.inventory.ItemFlag");
-			Method valuesMethod = itemFlagClass.getDeclaredMethod("values");
-			itemFlagValues = (Object[]) valuesMethod.invoke(null);
-			addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagClass);
-			addItemFlagsMethod.setAccessible(true);
-		}
-		catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e)
-		{
-			// Not supported :c
-		}
-		catch (InvocationTargetException e)
-		{
-			PluginLogger.error("Exception occurred while looking for the ItemFlag API.", e.getCause());
-		}
-	}
-
-	private GuiUtils() {}
-
 	/**
 	 * Hides all the item attributes of the given {@link ItemMeta}.
 	 *
+         * @deprecated 
 	 * @param meta The {@link ItemMeta} to hide attributes from.
 	 * @return The same item meta. The modification is applied by reference, the stack is returned for
 	 * convenience reasons.
 	 */
 	static public ItemMeta hideItemAttributes(ItemMeta meta)
 	{
-		if (addItemFlagsMethod == null) return meta;
-
-		try
-		{
-			addItemFlagsMethod.invoke(meta, itemFlagValues);
-		}
-		catch (IllegalAccessException ex)
-		{
-			PluginLogger.error("IllegalAccessException caught while invoking the ItemMeta.addItemFlags method.", ex);
-		}
-		catch (InvocationTargetException ex)
-		{
-			PluginLogger.error("Exception occurred while invoking the ItemMeta.addItemFlags method.", ex.getCause());
-		}
-
-		return meta;
+            return ItemUtils.hideItemAttributes(meta);
 	}
 
 	/**
@@ -114,17 +71,14 @@ public final class GuiUtils
 	 * <p>Warning: this will update the ItemMeta, clearing the effects of, as example,
 	 * {@link fr.zcraft.zlib.tools.items.GlowEffect}.</p>
 	 *
+         * @deprecated 
 	 * @param stack The {@link ItemStack} to hide attributes from.
 	 * @return The same item stack. The modification is applied by reference, the stack is returned for
 	 * convenience reasons.
 	 */
 	static public ItemStack hideItemAttributes(ItemStack stack)
 	{
-		ItemMeta meta = stack.getItemMeta();
-		hideItemAttributes(meta);
-		stack.setItemMeta(meta);
-
-		return stack;
+            return ItemUtils.hideItemAttributes(stack);
 	}
 
 
@@ -276,45 +230,14 @@ public final class GuiUtils
 	/**
 	 * Checks if these inventories are equal.
 	 *
+         * @deprecated Use InventoryUtils.sameInventories() instead.
 	 * @param inventory1 The first inventory.
 	 * @param inventory2 The other inventory.
 	 * @return {@code true} if the two inventories are the same one.
 	 */
 	static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
 	{
-		if (inventory1 == inventory2)
-		{
-			return true;
-		}
-
-		else if (inventory1 == null || inventory2 == null
-				|| inventory1.getSize() != inventory2.getSize()
-				|| inventory1.getType() != inventory2.getType()
-				|| !inventory1.getName().equals(inventory2.getName())
-				|| !inventory1.getTitle().equals(inventory2.getTitle()))
-		{
-			return false;
-		}
-
-		else
-		{
-			for (int slot = 0; slot < inventory1.getSize(); slot++)
-			{
-				ItemStack item1 = inventory1.getItem(slot);
-				ItemStack item2 = inventory2.getItem(slot);
-
-				if (item1 == null || item2 == null)
-					if (item1 == item2)
-						continue;
-					else
-						return false;
-
-				if (!item1.equals(item2))
-					return false;
-			}
-
-			return true;
-		}
+                return InventoryUtils.sameInventories(inventory1, inventory2);
 	}
 
 

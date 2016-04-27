@@ -30,15 +30,17 @@
 
 package fr.zcraft.zlib.tools.items;
 
-import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.components.rawtext.RawTextPart;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Colorable;
+import org.bukkit.material.MaterialData;
 
 /**
  * This class contains helpers to create or edit very customized ItemStacks using the builder pattern.
@@ -55,6 +57,8 @@ public class ItemStackBuilder
     
     private boolean glowing = false;
     private boolean hideAttributes = false;
+    
+    private DyeColor dye = null;
     
     /**
      * Creates a new ItemStackBuilder.
@@ -110,6 +114,15 @@ public class ItemStackBuilder
         
         newItemStack.setDurability(data);
         
+        if(dye != null)
+        {
+            MaterialData materialData = newItemStack.getData();
+            if(!(materialData instanceof Colorable))
+                throw new IllegalStateException("Unable to apply dye : item is not colorable.");
+            
+            ((Colorable)materialData).setColor(dye);
+        }
+        
         ItemMeta meta = newItemStack.getItemMeta();
         
         if(title != null)
@@ -119,7 +132,7 @@ public class ItemStackBuilder
             meta.setLore(loreLines);
         
         if(hideAttributes)
-            GuiUtils.hideItemAttributes(meta);
+            ItemUtils.hideItemAttributes(meta);
         
         newItemStack.setItemMeta(meta);
         
@@ -141,6 +154,17 @@ public class ItemStackBuilder
             throw new IllegalStateException("Material has already been defined.");
         
         this.material = material;
+        return this;
+    }
+    
+    /**
+     * Defines the amount of the ItemStack.
+     * @param amount the amount.
+     * @return 
+     */
+    public ItemStackBuilder amount(int amount)
+    {
+        this.amount = amount;
         return this;
     }
     
@@ -261,6 +285,18 @@ public class ItemStackBuilder
     }
     
     /**
+     * Adds a glow effect (a factice enchantment) to the ItemStack.
+     * This can only be called once, otherwise an IllegalStateException will be thrown.
+     * @param glow If the glow effect has to be applied. If false, nothing will be done.
+     * @return 
+     */
+    public ItemStackBuilder glow(boolean glow)
+    {
+        if(glow) glow();
+        return this;
+    }
+    
+    /**
      * Hides all of the attribute lines of the ItemStack.
      * This can only be called once, otherwise an IllegalStateException will be thrown.
      * @return 
@@ -282,6 +318,20 @@ public class ItemStackBuilder
     public ItemStackBuilder data(short data)
     {
         this.data = data;
+        return this;
+    }
+    
+    /**
+     * Sets the dye color of the ItemStack.
+     * If the item is not colorable, an IllegalStateException will be thrown 
+     * when making the item.
+     * Setting this value will override damage/data values.
+     * @param dye The dye color for the item.
+     * @return 
+     */
+    public ItemStackBuilder dye(DyeColor dye)
+    {
+        this.dye = dye;
         return this;
     }
     

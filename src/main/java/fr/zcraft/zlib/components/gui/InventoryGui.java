@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.gui;
 
+import fr.zcraft.zlib.tools.items.InventoryUtils;
 import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -139,7 +140,7 @@ abstract public class InventoryGui extends GuiBase
             public void run()
             {
                 final InventoryView openInventoryView = getPlayer().getOpenInventory();
-                if (openInventoryView != null && GuiUtils.sameInventories(inventory, openInventoryView.getTopInventory()))
+                if (openInventoryView != null && InventoryUtils.sameInventories(inventory, openInventoryView.getTopInventory()))
                     getPlayer().closeInventory();
             }
         });

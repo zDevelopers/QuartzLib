@@ -32,6 +32,7 @@ package fr.zcraft.zlib.core;
 
 import com.google.common.collect.ImmutableSet;
 import fr.zcraft.zlib.tools.PluginLogger;
+import java.util.ArrayList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
@@ -44,6 +45,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 public abstract class ZLib
 {
     static private JavaPlugin plugin;
+    static private final ArrayList<Class<? extends ZLibComponent>> componentsToLoad = new ArrayList<>();
     static private Set<ZLibComponent> loadedComponents;
     
     static private ZLibListener listener;
@@ -62,8 +64,13 @@ public abstract class ZLib
     {
         ZLib.plugin = plugin;
         ZLib.loadedComponents = new CopyOnWriteArraySet<>();
-
+        
         PluginLogger.init();
+        
+        for(Class<? extends ZLibComponent> component : componentsToLoad)
+        {
+            loadComponent(component);
+        }
     }
 
     /**
@@ -72,7 +79,7 @@ public abstract class ZLib
      * @param component The component to load.
      * @throws IllegalStateException if the zLib was not initialized.
      */
-    static void loadComponent(ZLibComponent component) throws IllegalStateException
+    static <T extends ZLibComponent> T loadComponent(T component) throws IllegalStateException
     {
         checkInitialized();
         
@@ -87,6 +94,37 @@ public abstract class ZLib
             if(component instanceof Listener)
                 registerEvents((Listener) component);
             component.setEnabled(true);
+        }
+        
+        return component;
+    }
+    
+    /**
+     * Tries to load a given component.
+     * @param <T> The type of the component.
+     * @param componentClass The component's class.
+     * @return The component instance, or null if instanciation failed.
+     */
+    static public <T extends ZLibComponent> T loadComponent(Class<T> componentClass)
+    {
+        if(!isInitialized())
+        {
+            componentsToLoad.add(componentClass);
+            return null;
+        }
+        
+        try
+        {
+            return loadComponent(componentClass.newInstance());
+        }
+        catch (InstantiationException | IllegalAccessException e)
+        {
+            PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
+            return null;
+        }
+        catch (NoClassDefFoundError e)
+        {
+            return null;
         }
     }
 
@@ -110,7 +148,6 @@ public abstract class ZLib
 
         loadedComponents = null;
         listener = null;
-        plugin = null;
     }
 
     /**

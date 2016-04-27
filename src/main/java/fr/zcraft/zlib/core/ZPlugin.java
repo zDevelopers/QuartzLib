@@ -61,15 +61,19 @@ public abstract class ZPlugin extends JavaPlugin
     {
         for (Class<? extends ZLibComponent> componentClass : components)
         {
-            try
-            {
-                ZLib.loadComponent(componentClass.newInstance());
-            }
-            catch (InstantiationException | IllegalAccessException e)
-            {
-                PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
-            }
+            ZLib.loadComponent(componentClass);
         }
+    }
+    
+    /**
+     * Tries to load a given component.
+     * @param <T> The type of the component.
+     * @param componentClass The component's class.
+     * @return The component instance, or null if instanciation failed.
+     */
+    public <T extends ZLibComponent> T loadComponent(Class<T> componentClass)
+    {
+        return ZLib.loadComponent(componentClass);
     }
 
     public JarFile getJarFile()
