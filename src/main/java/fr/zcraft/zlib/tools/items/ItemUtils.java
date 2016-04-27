@@ -270,6 +270,16 @@ abstract public class ItemUtils
     }
     
     /**
+     * Drops the item at the given location.
+     * @param location The location to drop the item at.
+     * @param item The item to drop.
+     */
+    static public void drop(Location location, ItemStack item)
+    {
+        location.getWorld().dropItem(location, item);
+    }
+    
+    /**
      * Naturally "drops" the item at the given location.
      * @param location The location to drop the item at.
      * @param item The item to drop.
@@ -286,24 +296,43 @@ abstract public class ItemUtils
      */
     static public void dropNaturallyLater(Location location, ItemStack item)
     {
-        RunTask.nextTick(new DropLaterTask(location, item));
+        RunTask.nextTick(new DropLaterTask(location, item, true));
+    }
+    
+    /**
+     * Drops the item at the given location, at the next server tick.
+     * @param location The location to drop the item at.
+     * @param item The item to drop.
+     */
+    static public void dropLater(Location location, ItemStack item)
+    {
+        RunTask.nextTick(new DropLaterTask(location, item, false));
     }
     
     static private class DropLaterTask implements Runnable
     {
         private final Location location;
         private final ItemStack item;
+        private final boolean naturally;
         
-        public DropLaterTask(Location location, ItemStack item)
+        public DropLaterTask(Location location, ItemStack item, boolean naturally)
         {
             this.location = location;
             this.item = item;
+            this.naturally = naturally;
         }
         
         @Override
         public void run()
         {
-            dropNaturally(location, item);
+            if(naturally)
+            {
+                dropNaturally(location, item);
+            }
+            else
+            {
+                drop(location, item);
+            }
         }
     }
 }
