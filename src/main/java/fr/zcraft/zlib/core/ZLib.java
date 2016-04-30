@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 
@@ -196,6 +197,15 @@ public abstract class ZLib
     {
         Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
         return listener;
+    }
+    
+    /**
+     * Unregisters the given event listener from all events it is subscribed to.
+     * @param listener The listener to unregister.
+     */
+    static public void unregisterEvents(Listener listener)
+    {
+        HandlerList.unregisterAll(listener);
     }
 
     /**

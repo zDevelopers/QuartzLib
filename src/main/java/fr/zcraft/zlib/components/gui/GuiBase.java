@@ -31,8 +31,10 @@
 package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.components.i18n.I18n;
+import fr.zcraft.zlib.core.ZLib;
 import java.util.Locale;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
 abstract public class GuiBase 
 {
@@ -50,6 +52,11 @@ abstract public class GuiBase
      * The parent of this GUI (if any).
      */
     private GuiBase parent;
+    
+    /**
+     * The event listener for this GUI.
+     */
+    private Listener listener;
     
     /**
      * If the inventory is currently open.
@@ -108,11 +115,15 @@ abstract public class GuiBase
      */
     protected void onAfterUpdate() {}
     
+    protected Listener getEventListener() {return null;}
+    
     protected void onClose()
     {
         if(open == false) return;
         open = false;
         Gui.registerGuiClose(this);
+        if(listener != null)
+            ZLib.unregisterEvents(listener);
     }
     
     protected void open(Player player)
@@ -121,6 +132,9 @@ abstract public class GuiBase
         this.playerLocale = I18n.getPlayerLocale(player);
         Gui.registerGuiOpen(player, this);
         update();
+        if(listener == null) listener = getEventListener();
+        if(listener != null)
+            ZLib.registerEvents(listener);
         open = true;
     }
     

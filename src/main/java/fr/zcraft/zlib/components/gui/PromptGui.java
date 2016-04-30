@@ -34,6 +34,7 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.Callback;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import fr.zcraft.zlib.tools.world.WorldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -48,6 +49,9 @@ import org.bukkit.event.block.SignChangeEvent;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 
 public class PromptGui extends GuiBase
 {
@@ -114,7 +118,6 @@ public class PromptGui extends GuiBase
     public PromptGui(Callback<String> callback)
     {
         super();
-        Gui.registerListener(PromptGuiListener.class);
         if(!isAvailable()) throw new IllegalStateException("Sign-based prompt GUI are not available");
         this.callback = callback;
     }
@@ -125,7 +128,9 @@ public class PromptGui extends GuiBase
         super.open(player);
         
         signLocation = findAvailableLocation(player);
-        Block block = player.getWorld().getBlockAt(signLocation);
+        //Ugly workaround for spigot still applying physics in spigot 1.9.2+
+        signLocation.getWorld().getBlockAt(signLocation.clone().add(0, -1, 0)).setType(Material.GLASS);
+        Block block = signLocation.getWorld().getBlockAt(signLocation);
         block.setType(Material.SIGN_POST, false);
         final Sign sign = (Sign) block.getState();
         setSignContents(sign, contents);
@@ -153,8 +158,9 @@ public class PromptGui extends GuiBase
     @Override
     protected void onClose()
     {
-        Block block = getPlayer().getWorld().getBlockAt(signLocation);
+        Block block = signLocation.getWorld().getBlockAt(signLocation);
         block.setType(Material.AIR);
+        signLocation.getWorld().getBlockAt(signLocation.clone().add(0, -1, 0)).setType(Material.AIR);
         super.onClose();
     }
     
@@ -236,7 +242,7 @@ public class PromptGui extends GuiBase
         
         for(int i = 1; i --> -1;)
         {
-            for(int j = 1; j --> -1;)
+            for(int j = 1; j --> -2;)
             {
                 for(int k = 1; k --> -1;)
                 {
@@ -251,14 +257,16 @@ public class PromptGui extends GuiBase
         return true;
     }
     
-    static private final class PromptGuiListener implements Listener
+    @Override
+    protected Listener getEventListener() { return new PromptGuiListener(); }
+    
+    private final class PromptGuiListener implements Listener
     {
         @EventHandler
         public void onSignChange(SignChangeEvent event)
         {
-            PromptGui gui = Gui.getOpenGui(event.getPlayer(), PromptGui.class);
-            if(gui == null) return;
-            gui.validate(event.getLines());
+            if(event.getPlayer() != getPlayer()) return;
+            validate(event.getLines());
         }
     }
 }
