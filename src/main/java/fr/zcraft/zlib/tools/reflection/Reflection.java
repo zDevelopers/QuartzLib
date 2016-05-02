@@ -35,6 +35,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -315,9 +317,30 @@ public final class Reflection
     }
     
     /**
+     * Returns if a given class has a method matching the given parameters.
+     * @param hClass The class.
+     * @param name The name of the method to look for
+     * @param parameterTypes The parameter types to look for
+     * @return If the method exists in the given class, or not
+     */
+    static public boolean hasMethod(Class hClass, String name, Class... parameterTypes)
+    {
+        try
+        {
+            hClass.getMethod(name, parameterTypes);
+        }
+        catch (NoSuchMethodException | SecurityException ex)
+        {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * Creates and returns an instance of the given class, passing the given parameters to the
      * appropriate constructor.
      *
+     * @param <T>        The type of the object to be instanciated.
      * @param hClass     The class to be instantiated.
      * @param parameters The parameters to be passed to the constructor. This also determines which
      *                   constructor will be called.
@@ -338,11 +361,11 @@ public final class Reflection
      *                                   to an enum type.
      * @throws InvocationTargetException if an exception is thrown in the constructor.
      */
-    static public Object instantiate(Class hClass, Object... parameters)
+    static public <T> T instantiate(Class<T> hClass, Object... parameters)
             throws NoSuchMethodException, InstantiationException, 
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
-        Constructor constructor = hClass.getConstructor(getTypes(parameters));
+        Constructor<T> constructor = hClass.getConstructor(getTypes(parameters));
         return constructor.newInstance(parameters);
     }
 
@@ -356,7 +379,7 @@ public final class Reflection
      * @return an array with the types of the items in the original array.
      */
     static public Class[] getTypes(Object[] objects)
-        {
+    {
         Class[] types = new Class[objects.length];
         for (int i = 0; i < objects.length; i++)
         {

@@ -622,8 +622,7 @@ public abstract class Sidebar
     public static void init()
     {
         updateLoggedInPlayers();
-
-        Bukkit.getPluginManager().registerEvents(new OnlinePlayersListener(), ZLib.getPlugin());
+        ZLib.registerEvents(new OnlinePlayersListener());
     }
 
     /**

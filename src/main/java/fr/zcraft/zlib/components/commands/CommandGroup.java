@@ -249,6 +249,18 @@ public class CommandGroup implements TabCompleter, CommandExecutor
         return null;
     }
     
+    public Command getCommandInfo(Class<? extends Command> commandClass)
+    {
+        for(Command command : commands)
+        {
+            if(command.getClass().equals(commandClass))
+            {
+                return command;
+            }
+        }
+        return null;
+    }
+    
     public boolean matches(String name)
     {
         name = name.toLowerCase();

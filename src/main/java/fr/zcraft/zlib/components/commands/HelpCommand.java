@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.commands;
 
+import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 
@@ -38,6 +39,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import org.bukkit.ChatColor;
 
 @CommandInfo(name = "help", usageParameters = "<command name>")
 public class HelpCommand extends Command
@@ -57,16 +59,29 @@ public class HelpCommand extends Command
         
         String tCommandName;
         String tDescription;
+        RawText message;
         for(Command tCommand: commandGroup.getCommands())
         {
             if(!tCommand.canExecute(sender)) continue;
-            tCommandName = tCommand.getName();
-            tDescription = commandGroup.getDescription(tCommandName);
-            tCommandName = commandGroup.getUsualName() + " " + tCommandName;
-            if(tDescription == null)
-                sender.sendMessage("§6/" + tCommandName + "§r");
-            else
-                sender.sendMessage("§6/" + tCommandName + " : §r" + tDescription);
+            
+            tCommandName = "/" + commandGroup.getUsualName() + " " + tCommand.getName();
+            
+            message = new RawText(tCommandName)
+                .color(ChatColor.GOLD)
+                .suggest(tCommandName + " ")
+                .hover(new RawText(tCommand.getUsageString()));
+            
+            tDescription = commandGroup.getDescription(tCommand.getName());
+            
+            if(tDescription != null)
+            {
+                message.then(" : ")
+                    .color(ChatColor.GOLD)
+                .then(tDescription)
+                    .color(ChatColor.WHITE);
+            }
+            
+            send(message);
         }
     }
     

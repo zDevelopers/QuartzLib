@@ -27,63 +27,27 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.core;
+package fr.zcraft.zlib.tools.world;
 
-import org.bukkit.plugin.Plugin;
+import org.bukkit.Location;
 
 /**
- * This abstract class represents a zLib component that needs to be loaded and/or unloaded.
+ * Utility class for dealing with worlds and locations.
  */
-public abstract class ZLibComponent
+public class WorldUtils 
 {
-	private boolean enabled = false;
-        
-
-	/**
-	 * Called when this component is enabled, while the parent plugin is itself enabled.
-	 */
-	protected void onEnable() {}
-
-	/**
-	 * Called when this component is disabled, while the parent plugin is itself disabled.
-	 */
-	protected void onDisable() {}
-
-
-	/**
-	 * Enables (load) or disable (unload) this ZLib component.
-	 *
-	 * @param enabled {@code true} to enable the component.
-	 */
-	public void setEnabled(boolean enabled)
-	{
-		if(enabled == this.enabled)
-			return; // The state is not changed.
-
-		this.enabled = enabled;
-
-		if(enabled)
-			onEnable();
-		else
-			onDisable();
-	}
-
-	/**
-	 * Checks if this component is enabled or not.
-	 *
-	 * @return {@code true} if enabled.
-	 */
-	public boolean isEnabled()
-	{
-		return enabled;
-	}
-        
-        /**
-         * 
-         * @return The plugin owning this component.
-         */
-        protected Plugin getPlugin()
-        {
-                return ZLib.getPlugin();
-        }
+    /**
+     * Returns if the two given locations point to the same block, i.e if their
+     * block coordinates are equal.
+     * 
+     * @param loc1 The first location
+     * @param loc2 The second location
+     * @return True if the two given locations point to the same block.
+     */
+    static public boolean blockEquals(Location loc1, Location loc2)
+    {
+        return loc1.getBlockX() == loc2.getBlockX()
+                && loc1.getBlockY() == loc2.getBlockY()
+                && loc1.getBlockZ() == loc2.getBlockZ();
+    }
 }

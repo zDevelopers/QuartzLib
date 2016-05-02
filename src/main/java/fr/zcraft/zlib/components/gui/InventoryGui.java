@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.gui;
 
+import fr.zcraft.zlib.tools.items.InventoryUtils;
 import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -52,11 +53,6 @@ abstract public class InventoryGui extends GuiBase
     static protected final int MAX_INVENTORY_COLUMN_SIZE = 6;
     static protected final int MAX_INVENTORY_SIZE = INVENTORY_ROW_SIZE * MAX_INVENTORY_COLUMN_SIZE;
     static protected final int MAX_TITLE_LENGTH = 32;
-    
-    public InventoryGui()
-    {
-        Gui.registerListener(GuiListener.class);
-    }
     
     /**
      * The size of the inventory.
@@ -139,7 +135,7 @@ abstract public class InventoryGui extends GuiBase
             public void run()
             {
                 final InventoryView openInventoryView = getPlayer().getOpenInventory();
-                if (openInventoryView != null && GuiUtils.sameInventories(inventory, openInventoryView.getTopInventory()))
+                if (openInventoryView != null && InventoryUtils.sameInventories(inventory, openInventoryView.getTopInventory()))
                     getPlayer().closeInventory();
             }
         });
@@ -241,41 +237,40 @@ abstract public class InventoryGui extends GuiBase
     /** @return The underlying inventory, or null if the Gui has not been opened yet. */
     public Inventory getInventory() { return inventory; }
     
+    @Override
+    protected Listener getEventListener() { return new InventoryGuiListener(); }
+    
     /**
      * Implements a Bukkit listener for all GUI-related events.
      */
-    static private class GuiListener implements Listener
+    protected class InventoryGuiListener implements Listener
     {
         @EventHandler
         public void onInventoryDrag(InventoryDragEvent event)
         {
-            InventoryGui openGui = Gui.getOpenGui(event.getWhoClicked(), InventoryGui.class);
-            if(openGui == null) return;
-            
-            openGui.onDrag(event);
+            if(event.getWhoClicked() != getPlayer()) return;
+            onDrag(event);
         }
 
         @EventHandler
         public void onInventoryClick(InventoryClickEvent event)
         {
-            InventoryGui openGui = Gui.getOpenGui(event.getWhoClicked(), InventoryGui.class);
-            if(openGui == null) return;
+            if(event.getWhoClicked() != getPlayer()) return;
             
-            openGui.onClick(event);
+            onClick(event);
         }
         
         @EventHandler
         public void onInventoryClose(InventoryCloseEvent event)
         {
-            InventoryGui openGui = Gui.getOpenGui(event.getPlayer(), InventoryGui.class);
-            if(openGui == null) return;
+            if(event.getPlayer() != getPlayer()) return;
             
-            if(!event.getInventory().equals(openGui.inventory)) return;
+            if(!event.getInventory().equals(inventory)) return;
             
-            if(openGui.isOpen())
+            if(isOpen())
             {
-                if(openGui.checkImmune()) return;
-                openGui.close();
+                if(checkImmune()) return;
+                close();
             }
         }
     }

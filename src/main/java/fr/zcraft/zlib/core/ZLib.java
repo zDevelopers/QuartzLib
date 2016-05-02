@@ -32,17 +32,24 @@ package fr.zcraft.zlib.core;
 
 import com.google.common.collect.ImmutableSet;
 import fr.zcraft.zlib.tools.PluginLogger;
+import java.util.ArrayList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 
 public abstract class ZLib
 {
     static private JavaPlugin plugin;
+    static private final ArrayList<Class<? extends ZLibComponent>> componentsToLoad = new ArrayList<>();
     static private Set<ZLibComponent> loadedComponents;
-
+    
+    static private ZLibListener listener;
 
     /**
      * Initializes the ZLibrary.
@@ -58,8 +65,13 @@ public abstract class ZLib
     {
         ZLib.plugin = plugin;
         ZLib.loadedComponents = new CopyOnWriteArraySet<>();
-
+        
         PluginLogger.init();
+        
+        for(Class<? extends ZLibComponent> component : componentsToLoad)
+        {
+            loadComponent(component);
+        }
     }
 
     /**
@@ -68,13 +80,52 @@ public abstract class ZLib
      * @param component The component to load.
      * @throws IllegalStateException if the zLib was not initialized.
      */
-    static void loadComponent(ZLibComponent component) throws IllegalStateException
+    static <T extends ZLibComponent> T loadComponent(T component) throws IllegalStateException
     {
         checkInitialized();
-
+        
+        //Make sure any loaded component will be correctly unloaded.
+        if(listener == null)
+        {
+            ZLib.listener = registerEvents(new ZLibListener());
+        }
+        
         if(loadedComponents.add(component))
         {
+            if(component instanceof Listener)
+                registerEvents((Listener) component);
             component.setEnabled(true);
+        }
+        
+        return component;
+    }
+    
+    /**
+     * Tries to load a given component.
+     * @param <T> The type of the component.
+     * @param componentClass The component's class.
+     * @return The component instance, or null if instanciation failed.
+     */
+    static public <T extends ZLibComponent> T loadComponent(Class<T> componentClass)
+    {
+        if(!isInitialized())
+        {
+            componentsToLoad.add(componentClass);
+            return null;
+        }
+        
+        try
+        {
+            return loadComponent(componentClass.newInstance());
+        }
+        catch (InstantiationException | IllegalAccessException e)
+        {
+            PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
+            return null;
+        }
+        catch (NoClassDefFoundError e)
+        {
+            return null;
         }
     }
 
@@ -96,10 +147,8 @@ public abstract class ZLib
 
         loadedComponents.clear();
 
-        PluginLogger.exit();
-
-        plugin = null;
         loadedComponents = null;
+        listener = null;
     }
 
     /**
@@ -137,6 +186,27 @@ public abstract class ZLib
     {
         return plugin != null;
     }
+    
+    /**
+     * Registers an event listener for the plugin currently using the library, and returns it.
+     * @param <T> The type of the listener.
+     * @param listener The listener to register.
+     * @return The registered listener.
+     */
+    static public <T extends Listener> T registerEvents(T listener)
+    {
+        Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+        return listener;
+    }
+    
+    /**
+     * Unregisters the given event listener from all events it is subscribed to.
+     * @param listener The listener to unregister.
+     */
+    static public void unregisterEvents(Listener listener)
+    {
+        HandlerList.unregisterAll(listener);
+    }
 
     /**
      * Check wherever the ZLib is correctly initialized.
@@ -146,6 +216,16 @@ public abstract class ZLib
     static private void checkInitialized() throws IllegalStateException
     {
         if(plugin == null)
-            throw new IllegalStateException("Assertion failed: ZLib is not correctly inizialized");
+            throw new IllegalStateException("Assertion failed: ZLib is not correctly inizialized. Make sure ZLib.init() or ZPlugin.onLoad() is correctly called.");            
+    }
+    
+    static private class ZLibListener implements Listener
+    {
+        @EventHandler
+        public void onPluginDisable(PluginDisableEvent event)
+        {
+            if(plugin == event.getPlugin())
+                exit();
+        }
     }
 }

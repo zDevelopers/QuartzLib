@@ -41,7 +41,7 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public final class RunTask
 {
-	private static BukkitScheduler scheduler = Bukkit.getScheduler();
+	private static final BukkitScheduler scheduler = Bukkit.getScheduler();
 
 	private RunTask() {}
 

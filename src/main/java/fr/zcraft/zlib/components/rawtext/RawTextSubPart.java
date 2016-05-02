@@ -27,63 +27,18 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.core;
 
-import org.bukkit.plugin.Plugin;
+package fr.zcraft.zlib.components.rawtext;
 
-/**
- * This abstract class represents a zLib component that needs to be loaded and/or unloaded.
- */
-public abstract class ZLibComponent
+class RawTextSubPart extends RawTextPart<RawTextSubPart>
 {
-	private boolean enabled = false;
-        
-
-	/**
-	 * Called when this component is enabled, while the parent plugin is itself enabled.
-	 */
-	protected void onEnable() {}
-
-	/**
-	 * Called when this component is disabled, while the parent plugin is itself disabled.
-	 */
-	protected void onDisable() {}
-
-
-	/**
-	 * Enables (load) or disable (unload) this ZLib component.
-	 *
-	 * @param enabled {@code true} to enable the component.
-	 */
-	public void setEnabled(boolean enabled)
-	{
-		if(enabled == this.enabled)
-			return; // The state is not changed.
-
-		this.enabled = enabled;
-
-		if(enabled)
-			onEnable();
-		else
-			onDisable();
-	}
-
-	/**
-	 * Checks if this component is enabled or not.
-	 *
-	 * @return {@code true} if enabled.
-	 */
-	public boolean isEnabled()
-	{
-		return enabled;
-	}
-        
-        /**
-         * 
-         * @return The plugin owning this component.
-         */
-        protected Plugin getPlugin()
-        {
-                return ZLib.getPlugin();
-        }
+    public RawTextSubPart(String text)
+    {
+        super(text);
+    }
+    
+    public RawTextSubPart(String text, RawTextPart parent)
+    {
+        super(text, parent);
+    }
 }
