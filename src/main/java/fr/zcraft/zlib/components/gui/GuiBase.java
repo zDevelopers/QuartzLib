@@ -95,10 +95,22 @@ abstract public class GuiBase
      */
     protected void close(boolean immune)
     {
-        onClose();
+        registerClose();
         
         if(parent != null)
            Gui.open(player, parent).setImmune(immune);
+    }
+    
+    void registerClose()
+    {
+        if(open == false) return;
+        open = false;
+        Gui.registerGuiClose(this);
+        
+        if(listener != null)
+            ZLib.unregisterEvents(listener);
+        
+        onClose();
     }
     
     /* ===== Protected API ===== */
@@ -117,14 +129,7 @@ abstract public class GuiBase
     
     protected Listener getEventListener() {return null;}
     
-    protected void onClose()
-    {
-        if(open == false) return;
-        open = false;
-        Gui.registerGuiClose(this);
-        if(listener != null)
-            ZLib.unregisterEvents(listener);
-    }
+    protected void onClose() {}
     
     protected void open(Player player)
     {

@@ -104,7 +104,7 @@ public final class Gui extends ZLibComponent
     static public <T extends GuiBase> T open(final Player owner, final T gui, final GuiBase parent)
     {
         GuiBase openGui = openGuis.get(owner);
-        if(openGui != null) openGui.onClose();
+        if(openGui != null) openGui.registerClose();
         if(parent != null) ((GuiBase)gui).setParent(parent);
         
         RunTask.later(new Runnable() {
