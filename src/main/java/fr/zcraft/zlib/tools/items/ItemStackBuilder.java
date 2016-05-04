@@ -32,8 +32,6 @@ package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.components.rawtext.RawTextPart;
-import java.util.ArrayList;
-import java.util.Arrays;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -41,6 +39,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Colorable;
 import org.bukkit.material.MaterialData;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class contains helpers to create or edit very customized ItemStacks using the builder pattern.
@@ -53,7 +55,7 @@ public class ItemStackBuilder
     private short data = 0;
     
     private RawTextPart title = null;
-    private final ArrayList<String> loreLines = new ArrayList<>();
+    private final List<String> loreLines = new ArrayList<>();
     
     private boolean glowing = false;
     private boolean hideAttributes = false;
@@ -228,6 +230,17 @@ public class ItemStackBuilder
     public ItemStackBuilder lore(String... lines)
     {
         loreLines.addAll(Arrays.asList(lines));
+        return this;
+    }
+
+    /**
+     * Adds one or more lines of lore to the ItemStack.
+     * @param lines The lines of lore.
+     * @return
+     */
+    public ItemStackBuilder lore(List<String> lines)
+    {
+        loreLines.addAll(lines);
         return this;
     }
     
