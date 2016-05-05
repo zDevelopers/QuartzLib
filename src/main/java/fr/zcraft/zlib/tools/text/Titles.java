@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
 import fr.zcraft.zlib.tools.reflection.NMSNetwork;
 import fr.zcraft.zlib.tools.reflection.Reflection;
@@ -120,7 +121,34 @@ public final class Titles
      */
     public static void displayTitle(Player player, int fadeIn, int stay, int fadeOut, String title, String subtitle)
     {
-        displayRawTitle(player, fadeIn, stay, fadeOut, "{\"text\": \"" + title.replace("\"", "\\\"") + "\"}", "{\"text\": \"" + subtitle.replace("\"", "\\\"") + "\"}");
+        displayRawTitle(
+                player, fadeIn, stay, fadeOut,
+                "{\"text\": \"" + (title != null ? title.replace("\"", "\\\"") : "") + "\"}",
+                "{\"text\": \"" + (subtitle != null ? subtitle.replace("\"", "\\\"") : "") + "\"}"
+        );
+    }
+
+    /**
+     * Displays a title to the given player.
+     *
+     * @param player   The receiver of the title.
+     * @param fadeIn   The fade-in time, in ticks.
+     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     *                 ticks).
+     * @param fadeOut  The fade-out time, in ticks.
+     * @param title    The text of the title. {@code null} if you don't want to display a title.
+     * @param subtitle The text of the subtitle. {@code null} if you don't want to display a
+     *                 subtitle.
+     *
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
+     */
+    public static void displayTitle(Player player, int fadeIn, int stay, int fadeOut, RawText title, RawText subtitle)
+    {
+        displayRawTitle(
+                player, fadeIn, stay, fadeOut,
+                title != null ? title.toJSONString() : "{\"text\": \"\"}",
+                subtitle != null ? subtitle.toJSONString() : "{\"text\": \"\"}"
+        );
     }
 
     /**
@@ -164,6 +192,27 @@ public final class Titles
      * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
     public static void broadcastTitle(int fadeIn, int stay, int fadeOut, String title, String subtitle)
+    {
+        for (Player player : Bukkit.getOnlinePlayers())
+        {
+            displayTitle(player, fadeIn, stay, fadeOut, title, subtitle);
+        }
+    }
+
+    /**
+     * Displays a title to the whole server.
+     *
+     * @param fadeIn   The fade-in time, in ticks.
+     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     *                 ticks).
+     * @param fadeOut  The fade-out time, in ticks.
+     * @param title    The text of the title. {@code null} if you don't want to display a title.
+     * @param subtitle The text of the subtitle. {@code null} if you don't want to display a
+     *                 subtitle.
+     *
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
+     */
+    public static void broadcastTitle(int fadeIn, int stay, int fadeOut, RawText title, RawText subtitle)
     {
         for (Player player : Bukkit.getOnlinePlayers())
         {

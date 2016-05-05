@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.tools.reflection.NMSNetwork;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.Bukkit;
@@ -102,6 +103,80 @@ public final class MessageSender
             return false;
         }
 
+        return sendJSONMessage(receiver, "{\"text\": \"" + message.replace("\"", "\\\"") + "\"}", type);
+    }
+
+    /**
+     * Sends a message.
+     *
+     * @param receiver The receiver of the message.
+     * @param message  The message to be sent.
+     * @param type     The message's type.
+     *
+     * @return {@code false} if an error occurred while sending the message.<br />
+     * If this happens:
+     * <ul>
+     *     <li>
+     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *         MessageSender.MessageType#SYSTEM SYSTEM}, and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *         sendMessage} method was used as a fallback;
+     *     </li>
+     *     <li>
+     *         or the message's type was {@link
+     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *     </li>
+     * </ul>
+     */
+    public static boolean sendMessage(Player receiver, RawText message, MessageType type)
+    {
+        if (receiver == null || message == null) return false;
+
+        // Fallback to sendMessage if a problem occurs.
+        if (!enabled)
+        {
+            if (type != MessageType.ACTION_BAR)
+                receiver.sendMessage(message.toFormattedText());
+
+            return false;
+        }
+
+        return sendJSONMessage(receiver, message.toJSONString(), type);
+    }
+
+    /**
+     * Sends a message.
+     *
+     * @param receiver The receiver of the message.
+     * @param json  The JSON message to be sent.
+     * @param type     The message's type.
+     *
+     * @return {@code false} if an error occurred while sending the message.<br />
+     * If this happens:
+     * <ul>
+     *     <li>
+     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *         MessageSender.MessageType#SYSTEM SYSTEM}, and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *         sendMessage} method was used as a fallback;
+     *     </li>
+     *     <li>
+     *         or the message's type was {@link
+     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *     </li>
+     * </ul>
+     */
+    public static boolean sendJSONMessage(Player receiver, String json, MessageType type)
+    {
+        if (receiver == null || json == null) return false;
+
+        // Fallback to sendMessage if a problem occurs.
+        if (!enabled)
+        {
+            if (type != MessageType.ACTION_BAR)
+                receiver.sendMessage(json);
+
+            return false;
+        }
+
 
         if (type == null) type = MessageType.SYSTEM;
 
@@ -111,12 +186,12 @@ public final class MessageSender
 
             if (nmsVersion.equalsIgnoreCase("v1_8_R1") || !nmsVersion.startsWith("v1_8_"))
             {
-                Object baseComponent = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", "{\"text\": \"" + message + "\"}"));
+                Object baseComponent = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", json));
                 chatPacket = Reflection.instantiate(packetPlayOutChatClass, baseComponent, type.getMessagePositionByte());
             }
             else
             {
-                Object componentText = Reflection.instantiate(chatComponentTextClass, message);
+                Object componentText = Reflection.instantiate(chatComponentTextClass, json);
                 chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
             }
 
@@ -128,7 +203,7 @@ public final class MessageSender
             e.printStackTrace();
 
             if (type != MessageType.ACTION_BAR)
-                receiver.sendMessage(message);
+                receiver.sendMessage(json);
 
             return false;
         }
@@ -158,9 +233,63 @@ public final class MessageSender
      */
     public static boolean sendMessage(UUID receiver, String message, MessageType type)
     {
+        return message != null && sendJSONMessage(receiver, "{\"text\": \"" + message.replace("\"", "\\\"") + "\"}", type);
+    }
+
+    /**
+     * Sends a message.
+     *
+     * @param receiver The UUId of the receiver of the message.
+     * @param message  The message to be sent.
+     * @param type     The message's type.
+     *
+     * @return {@code false} if no player with the given UUID is currently logged in, or if an error
+     * occurred while sending the message.<br />
+     * If this happens:
+     * <ul>
+     *     <li>
+     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *         MessageSender.MessageType#SYSTEM SYSTEM}, and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *         sendMessage} method was used as a fallback;
+     *     </li>
+     *     <li>
+     *         or the message's type was {@link
+     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *     </li>
+     * </ul>
+     */
+    public static boolean sendMessage(UUID receiver, RawText message, MessageType type)
+    {
+        return message != null && sendJSONMessage(receiver, message.toJSONString(), type);
+    }
+
+    /**
+     * Sends a message.
+     *
+     * @param receiver The UUId of the receiver of the message.
+     * @param json  The message to be sent.
+     * @param type     The message's type.
+     *
+     * @return {@code false} if no player with the given UUID is currently logged in, or if an error
+     * occurred while sending the message.<br />
+     * If this happens:
+     * <ul>
+     *     <li>
+     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *         MessageSender.MessageType#SYSTEM SYSTEM}, and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *         sendMessage} method was used as a fallback;
+     *     </li>
+     *     <li>
+     *         or the message's type was {@link
+     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *     </li>
+     * </ul>
+     */
+    public static boolean sendJSONMessage(UUID receiver, String json, MessageType type)
+    {
         Player player = Bukkit.getPlayer(receiver);
 
-        return !(player == null || !player.isOnline()) && sendMessage(player, message, type);
+        return !(player == null || !player.isOnline()) && sendMessage(player, json, type);
     }
 
 
@@ -197,6 +326,43 @@ public final class MessageSender
      * called as a fallback.
      */
     public static boolean sendChatMessage(UUID receiver, String message)
+    {
+        return sendMessage(receiver, message, MessageType.CHAT);
+    }
+
+    /**
+     * Sends a chat message, like a message in the main channel or a private message.
+     *
+     * A message of this kind will be hidden if the « Show chat » option is set to « commands only
+     * ».
+     *
+     * @param receiver The receiver of the message.
+     * @param message  The message.
+     *
+     * @return {@code false} if an error occurred while sending the message. If this happens, the
+     * {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
+     * automatically called as a fallback.
+     */
+    public static boolean sendChatMessage(Player receiver, RawText message)
+    {
+        return sendMessage(receiver, message, MessageType.CHAT);
+    }
+
+    /**
+     * Sends a chat message, like a message in the main channel or a private message.
+     *
+     * A message of this kind will be hidden if the « Show chat » option is set to « commands only
+     * ».
+     *
+     * @param receiver The UUID of the receiver of the message.
+     * @param message  The message.
+     *
+     * @return {@code false} if no player with the given UUID is currently logged in, or if an error
+     * occurred while sending the message. If this happens, the {@link
+     * org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
+     * called as a fallback.
+     */
+    public static boolean sendChatMessage(UUID receiver, RawText message)
     {
         return sendMessage(receiver, message, MessageType.CHAT);
     }
@@ -240,6 +406,44 @@ public final class MessageSender
     }
 
     /**
+     * Sends a system message, like the result of a command.
+     *
+     * It is technically equivalent to call {@link org.bukkit.command.CommandSender#sendMessage(String)
+     * receiver.sendMessage(message)}, but this method uses packets directly.
+     *
+     * @param receiver The receiver of the message.
+     * @param message  The message.
+     *
+     * @return {@code false} if an error occurred while sending the message. If this happens, the
+     * {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
+     * automatically called as a fallback.
+     */
+    public static boolean sendSystemMessage(Player receiver, RawText message)
+    {
+        return sendMessage(receiver, message, MessageType.SYSTEM);
+    }
+
+    /**
+     * Sends a system message, like the result of a command.
+     *
+     * It is technically equivalent to call {@link org.bukkit.command.CommandSender#sendMessage(String)
+     * Bukkit.getPlayer(receiver).sendMessage(message)}, but this method uses packets directly and
+     * don't fail with an NPE (returns false) if the player is not logged in.
+     *
+     * @param receiver The receiver of the message.
+     * @param message  The message.
+     *
+     * @return {@code false} if no player with the given UUID is currently logged in, or if an error
+     * occurred while sending the message. If this happens, the {@link
+     * org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
+     * called as a fallback.
+     */
+    public static boolean sendSystemMessage(UUID receiver, RawText message)
+    {
+        return sendMessage(receiver, message, MessageType.SYSTEM);
+    }
+
+    /**
      * Sends a temporary message displayed above the hotbar during approximately three seconds.
      *
      * @param receiver The receiver of the message.
@@ -269,6 +473,40 @@ public final class MessageSender
      * @see ActionBar
      */
     public static boolean sendActionBarMessage(UUID receiver, String message)
+    {
+        return sendMessage(receiver, message, MessageType.ACTION_BAR);
+    }
+
+    /**
+     * Sends a temporary message displayed above the hotbar during approximately three seconds.
+     *
+     * @param receiver The receiver of the message.
+     * @param message  The message.
+     *
+     * @return {@code false} if an error occurred while sending the message. If this happens, the
+     * message is not sent at all. Such an error is likely to be caused by an incompatible Bukkit
+     * version.
+     *
+     * @see ActionBar
+     */
+    public static boolean sendActionBarMessage(Player receiver, RawText message)
+    {
+        return sendMessage(receiver, message, MessageType.ACTION_BAR);
+    }
+
+    /**
+     * Sends a temporary message displayed above the hotbar during approximately three seconds.
+     *
+     * @param receiver The receiver of the message.
+     * @param message  The message.
+     *
+     * @return {@code false} if no player with the given UUID is currently logged in, or if an error
+     * occurred while sending the message. If this happens, the message is not sent at all. Such an
+     * error is likely to be caused by an incompatible Bukkit version.
+     *
+     * @see ActionBar
+     */
+    public static boolean sendActionBarMessage(UUID receiver, RawText message)
     {
         return sendMessage(receiver, message, MessageType.ACTION_BAR);
     }
