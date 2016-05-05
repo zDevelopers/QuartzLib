@@ -31,11 +31,19 @@
 package fr.zcraft.zlib.components.configuration;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-public class ConfigurationSection extends ConfigurationItem<Map<String,Object>>
+public class ConfigurationSection 
+        extends ConfigurationItem<Map> 
+        implements Map<String, ConfigurationItem>,
+        Iterable<ConfigurationItem>
 {
+    private final HashMap<String, ConfigurationItem> items = new HashMap<String, ConfigurationItem>();
     
     protected ConfigurationSection()
     {
@@ -44,14 +52,13 @@ public class ConfigurationSection extends ConfigurationItem<Map<String,Object>>
     
     private ConfigurationSection(String fieldName, String... deprecatedNames)
     {
-        super(fieldName, new HashMap<String, Object>(),deprecatedNames);
+        super(fieldName, null, Map.class, deprecatedNames);
     }
-    
+
     @Override
-    boolean init()
+    void init()
     {
-        boolean affected = super.init();
-        
+        super.init();
         for(Field field : this.getClass().getFields())
         {
             if(ConfigurationItem.class.isAssignableFrom(field.getType()))
@@ -60,14 +67,110 @@ public class ConfigurationSection extends ConfigurationItem<Map<String,Object>>
                 {
                     ConfigurationItem item = (ConfigurationItem) field.get(this);
                     item.setParent(this);
-                    
-                    if(item.init()) affected = true;
+                    item.init();
+                    items.put(field.getName().toUpperCase(), item);
                 }
                 catch(Exception ex){}
             }
         }
+    }
+    
+    @Override
+    boolean validate()
+    {
+        boolean isValid = true;
         
-        return affected;
+        for(ConfigurationItem item : items.values())
+        {
+            if(!item.validate())
+                isValid = false;
+        }
+        
+        return isValid;
+    }
+            
+    
+    @Override
+    public Map<String, Object> get()
+    {
+        return getConfig().getConfigurationSection(getFieldName()).getValues(true);
     }
 
+    @Override
+    public int size()
+    {
+        return items.size();
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        return items.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(Object key)
+    {
+        return items.containsKey(key.toString().toUpperCase());
+    }
+
+    @Override
+    public boolean containsValue(Object value)
+    {
+        return items.containsValue(value);
+    }
+
+    @Override
+    public ConfigurationItem get(Object key)
+    {
+        return items.get(key.toString().toUpperCase());
+    }
+
+    @Override
+    public ConfigurationItem put(String key, ConfigurationItem value)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ConfigurationItem remove(Object key)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends ConfigurationItem> m)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear()
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<String> keySet()
+    {
+        return Collections.unmodifiableSet(items.keySet());
+    }
+
+    @Override
+    public Collection<ConfigurationItem> values()
+    {
+        return Collections.unmodifiableCollection(items.values());
+    }
+
+    @Override
+    public Set<Entry<String, ConfigurationItem>> entrySet()
+    {
+        return Collections.unmodifiableSet(items.entrySet());
+    }
+
+    @Override
+    public Iterator<ConfigurationItem> iterator()
+    {
+        return items.values().iterator();
+    }
 }

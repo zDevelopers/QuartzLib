@@ -32,9 +32,8 @@ package fr.zcraft.zlib.components.configuration;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import java.util.ArrayList;
 import org.bukkit.configuration.file.FileConfiguration;
-
-import java.util.List;
 
 
 /**
@@ -48,18 +47,30 @@ public class ConfigurationItem<T>
     T defaultValue;
     String[] deprecatedNames;
     
+    private Class<T> valueType;
+    
     private ConfigurationItem parent;
 
+    
+    protected ConfigurationItem(String fieldName, T defaultValue, String ... deprecatedNames)
+    {
+        this(fieldName, defaultValue, defaultValue == null ? null : (Class<T>) defaultValue.getClass(), deprecatedNames);
+    }
+    
     /**
      * @param fieldName The path of the field in the {@code config.yml} file.
      * @param defaultValue The default value if this is not defined.
-     * @param deprecatedNames A list of deprecated names to migrate the old values automatically.
+     * @param valueType The type of the value of this configurationItem, if it
+     * can't be deduced from the defaultValue.
+     * @param deprecatedNames A list of deprecated names to migrate the old
+     * values automatically.
      */
-    public ConfigurationItem(String fieldName, T defaultValue, String ... deprecatedNames)
+    public ConfigurationItem(String fieldName, T defaultValue, Class<T> valueType, String... deprecatedNames)
     {
         this.fieldName = fieldName;
         this.defaultValue = defaultValue;
         this.deprecatedNames = deprecatedNames;
+        this.valueType = valueType;
     }
 
     /**
@@ -67,7 +78,14 @@ public class ConfigurationItem<T>
      */
     public T get()
     {
-        return get(getFieldName(), defaultValue);
+        try
+        {
+            return getValue(getRawValue());
+        }
+        catch (ConfigurationParseException ex)
+        {
+            return defaultValue;
+        }
     }
 
     /**
@@ -86,6 +104,25 @@ public class ConfigurationItem<T>
         if(parent != null)
             return parent.getFieldName() + '.' + fieldName;
         return fieldName;
+    }
+    
+    public String[] getDeprecatedFieldNames()
+    {
+        if(parent == null)
+            return deprecatedNames;
+        
+        ArrayList<String> allNames = new ArrayList<>();
+        
+        
+        for(String parentName : parent.getDeprecatedFieldNames())
+        {
+            for(String deprecatedName : deprecatedNames)
+            {
+                allNames.add(parentName + "." + deprecatedName);
+            }
+        }
+        
+        return allNames.toArray(new String[allNames.size()]);
     }
 
     /**
@@ -120,7 +157,7 @@ public class ConfigurationItem<T>
      *
      * @return The previously stored value.
      */
-    public T set(T value, Boolean save)
+    public T set(T value, boolean save)
     {
         T oldValue = get();
         getConfig().set(getFieldName(), value);
@@ -139,14 +176,31 @@ public class ConfigurationItem<T>
         return get().toString();
     }
     
-    boolean init()
+    boolean validate()
     {
-        boolean affected = false;
-        
+        try
+        {
+            getValue(getRawValue());
+            return true;
+        }
+        catch (ConfigurationParseException ex)
+        {
+            PluginLogger.warning("Invalid value for field ''{0}'' : ''{1}''.", getFieldName(), ex.getValue());
+            PluginLogger.warning("\tReason : {0}", ex.getMessage());
+            return false;
+        }
+    }
+    
+    protected T getValue(Object object) throws ConfigurationParseException
+    {
+        return ConfigurationValueHandlers.handleValue(getRawValue(), valueType);
+    }
+    
+    void init()
+    {
         if(!isDefined())
         {
             getConfig().set(getFieldName(), defaultValue);
-            affected = true;
         }
         
         for(String deprecatedName : deprecatedNames)
@@ -155,10 +209,8 @@ public class ConfigurationItem<T>
             {
                 getConfig().set(getFieldName(), getConfig().get(deprecatedName));
                 getConfig().set(deprecatedName, null);
-                affected = true;
             }
         }
-        return affected;
     }
     
     void setParent(ConfigurationItem parent)
@@ -166,37 +218,25 @@ public class ConfigurationItem<T>
         this.parent = parent;
     }
     
-    static private FileConfiguration getConfig()
+    static protected FileConfiguration getConfig()
     {
         return ZLib.getPlugin().getConfig();
     }
-
-    @SuppressWarnings("unchecked")
-    static <T> T get(String path, T defaultValue)
+    
+    protected Object getRawValue()
     {
-        if (defaultValue instanceof String)
-            return (T) getConfig().getString(path, (String) defaultValue);
-
-        else if (defaultValue instanceof Boolean)
-            return (T) (Boolean) getConfig().getBoolean(path, (Boolean) defaultValue);
-
-        else if (defaultValue instanceof Integer)
-            return (T) (Integer) getConfig().getInt(path, (Integer) defaultValue);
-
-        else if (defaultValue instanceof Double)
-            return (T) (Double) getConfig().getDouble(path, (Double) defaultValue);
-
-        else if (defaultValue instanceof Long)
-            return (T) (Long) getConfig().getLong(path, (Long) defaultValue);
-
-        else if (defaultValue instanceof List)
-            return (T) getConfig().getList(path, (List<?>) defaultValue);
+        Object value = getConfig().get(getFieldName());
+        if(value != null) return value;
         
-        else
-            return (T) getConfig().get(path, defaultValue);
+        for(String deprecatedName : getDeprecatedFieldNames())
+        {
+            value = getConfig().get(deprecatedName);
+            if(value != null) return value;
+        }
+        return null;
     }
 
-    
+    @Deprecated
     static public <T> ConfigurationItem<T> item(String fieldName)
     {
         return item(fieldName, null);
@@ -217,6 +257,21 @@ public class ConfigurationItem<T>
         return new ConfigurationItem<>(fieldName, defaultValue, deprecatedNames);
     }
     
+    /**
+     * Utility method to construct a configuration item.
+     *
+     * @param fieldName The path of the field in the {@code config.yml} file.
+     * @param type The default value if this is not defined.
+     * @param deprecatedNames A list of deprecated names to migrate the old values automatically.
+     * @param <T> The type of the stored value.
+     *
+     * @return A ready-to-use configuration item.
+     */
+    static public <T> ConfigurationItem<T> item(String fieldName, Class<T> type, String... deprecatedNames)
+    {
+        return new ConfigurationItem<>(fieldName, null, type, deprecatedNames);
+    }
+    
     static public <T extends ConfigurationSection> T section(String fieldName, Class<T> sectionClass, String... deprecatedNames)
     {
         T section;
@@ -232,5 +287,10 @@ public class ConfigurationItem<T>
             throw new RuntimeException(ex);
         }
         return section;
+    }
+    
+    static public <T> ConfigurationList<T> list(String fieldName, Class<T> type, String... deprecatedNames)
+    {
+        return new ConfigurationList<>(fieldName, new ArrayList<T>(), type, deprecatedNames);
     }
 }

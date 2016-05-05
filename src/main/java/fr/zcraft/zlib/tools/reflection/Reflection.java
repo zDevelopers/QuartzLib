@@ -35,8 +35,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -333,6 +331,45 @@ public final class Reflection
         {
             return false;
         }
+        return true;
+    }
+    
+    static public Method findMethod(Class hClass, String name, Class... parameterTypes)
+    {
+        return findMethod(hClass, name, 0, parameterTypes);
+    }
+    
+    static public Method findMethod(Class hClass, String name, int modifiers, Class... parameterTypes)
+    {
+        methods: for(Method method : hClass.getMethods())
+        {
+            if(!method.getName().equals(name)) continue;
+            if(!hasModifiers(method.getModifiers(), modifiers)) continue;
+            if(parameterTypes.length != method.getParameterCount()) continue;
+            
+            for(Class paramType : method.getParameterTypes())
+            {
+                if(!paramType.isAssignableFrom(hClass))
+                    continue methods;
+            }
+            
+            return method;
+        }
+        
+        return null;
+    }
+    
+    static public boolean hasModifiers(int modifiers, int requiredModifiers)
+    {
+        for(int bit = Integer.SIZE; bit --> 0;)
+        {
+            int modifier = 1 << bit;
+            boolean modifierRequired = (requiredModifiers & modifier) != 0;
+            boolean modifierPresent = (modifiers & modifier) != 0;
+            
+            if(modifierRequired && !modifierPresent) return false;
+        }
+        
         return true;
     }
     

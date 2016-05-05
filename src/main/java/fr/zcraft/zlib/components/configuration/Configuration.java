@@ -33,6 +33,7 @@ package fr.zcraft.zlib.components.configuration;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.Callback;
+import fr.zcraft.zlib.tools.PluginLogger;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -67,6 +68,11 @@ public abstract class Configuration extends ZLibComponent
         
         items = itemsList.toArray(new ConfigurationItem[itemsList.size()]);
         loadDefaultValues();
+        
+        if(!validate())
+        {
+            PluginLogger.warning("Some configuration values are invalid. Please check your configuration file.");
+        }
     }
     
     static public void save()
@@ -81,14 +87,23 @@ public abstract class Configuration extends ZLibComponent
     
     static private void loadDefaultValues()
     {
-        boolean affected = false;
+        for(ConfigurationItem configField : items)
+        {
+            configField.init();
+        }
+    }
+    
+    static private boolean validate()
+    {
+        boolean isValid = true;
         
         for(ConfigurationItem configField : items)
         {
-            if(configField.init()) affected = true;
+            if(!configField.validate())
+                isValid = false;
         }
         
-        if(affected) save();
+        return isValid;
     }
 
     static void triggerCallback(ConfigurationItem<?> configurationItem)
