@@ -32,58 +32,63 @@ package fr.zcraft.zlib.core;
 import org.bukkit.plugin.Plugin;
 
 /**
- * This abstract class represents a zLib component that needs to be loaded and/or unloaded.
+ * This abstract class represents a zLib component that needs to be loaded
+ * and/or unloaded.
  */
 public abstract class ZLibComponent
 {
-	private boolean enabled = false;
-        
+    private boolean enabled = false;
 
-	/**
-	 * Called when this component is enabled, while the parent plugin is itself enabled.
-	 */
+    /**
+     * Called when this component is enabled, while the parent plugin is itself
+     * enabled.
+     */
 	protected void onEnable() {}
 
-	/**
-	 * Called when this component is disabled, while the parent plugin is itself disabled.
-	 */
+    /**
+     * Called when this component is disabled, while the parent plugin is itself
+     * disabled.
+     */
 	protected void onDisable() {}
 
+    /**
+     * Enables (load) or disable (unload) this ZLib component.
+     *
+     * @param enabled {@code true} to enable the component.
+     */
+    public void setEnabled(boolean enabled)
+    {
+        if(enabled == this.enabled)
+            return; // The state is not changed.
 
-	/**
-	 * Enables (load) or disable (unload) this ZLib component.
-	 *
-	 * @param enabled {@code true} to enable the component.
-	 */
-	public void setEnabled(boolean enabled)
-	{
-		if(enabled == this.enabled)
-			return; // The state is not changed.
+        this.enabled = enabled;
 
-		this.enabled = enabled;
-
-		if(enabled)
-			onEnable();
-		else
-			onDisable();
-	}
-
-	/**
-	 * Checks if this component is enabled or not.
-	 *
-	 * @return {@code true} if enabled.
-	 */
-	public boolean isEnabled()
-	{
-		return enabled;
-	}
-        
-        /**
-         * 
-         * @return The plugin owning this component.
-         */
-        protected Plugin getPlugin()
+        if (enabled)
         {
-                return ZLib.getPlugin();
+            onEnable();
         }
+        else
+        {
+            onDisable();
+        }
+    }
+
+    /**
+     * Checks if this component is enabled or not.
+     *
+     * @return {@code true} if enabled.
+     */
+    public boolean isEnabled()
+    {
+        return enabled;
+    }
+
+    /**
+     *
+     * @return The plugin owning this component.
+     */
+    protected Plugin getPlugin()
+    {
+        return ZLib.getPlugin();
+    }
 }

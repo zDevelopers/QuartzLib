@@ -449,4 +449,11 @@ public final class Reflection
 
         return null;
     }
+    
+    static public <T> Class<T> getDeclaringClass(T value)
+    {
+        if(value == null) return null;
+        if(value instanceof Enum) return ((Enum)value).getDeclaringClass();
+        return (Class<T>) value.getClass();
+    }
 }

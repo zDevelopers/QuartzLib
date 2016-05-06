@@ -54,7 +54,7 @@ public class ConfigurationItem<T>
     
     protected ConfigurationItem(String fieldName, T defaultValue, String ... deprecatedNames)
     {
-        this(fieldName, defaultValue, defaultValue == null ? null : (Class<T>) defaultValue.getClass(), deprecatedNames);
+        this(fieldName, defaultValue, Reflection.getDeclaringClass(defaultValue), deprecatedNames);
     }
     
     /**

@@ -59,6 +59,7 @@ public class ConfigurationList<T> extends ConfigurationItem<List<T>> implements 
         ArrayList<T> newList = new ArrayList<>(rawList.size());
         for(Object val : rawList)
         {
+            if(val == null) continue;
             newList.add(ConfigurationValueHandlers.handleValue(val, itemType));
         }
         

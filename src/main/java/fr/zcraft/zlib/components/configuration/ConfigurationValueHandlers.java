@@ -33,10 +33,13 @@ package fr.zcraft.zlib.components.configuration;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IllformedLocaleException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.bukkit.util.Vector;
 
 public abstract class ConfigurationValueHandlers 
 {
@@ -78,7 +81,16 @@ public abstract class ConfigurationValueHandlers
         
         Method handler = valueHandlers.get(klass);
         if(handler == null) 
-            throw new UnsupportedOperationException("Unsupported configuration type : " + klass.getName());
+        {
+            if(Enum.class.isAssignableFrom(klass))
+            {
+                return handleEnumValue(obj, klass);
+            }
+            else
+            {
+                throw new UnsupportedOperationException("Unsupported configuration type : " + klass.getName());
+            }
+        }
         
         try
         {
@@ -96,6 +108,8 @@ public abstract class ConfigurationValueHandlers
             throw new RuntimeException("Error while calling handler for type " + klass.getName(), ex.getCause());
         }
     }
+    
+    /* ===== Value Handlers ===== */
     
     @ConfigurationValueHandler({Boolean.class, boolean.class})
     static public boolean handleBoolValue(Object obj) throws ConfigurationParseException 
@@ -211,5 +225,67 @@ public abstract class ConfigurationValueHandlers
         {
             throw new ConfigurationParseException("Illegal language tag : " + ex.getMessage(), obj);
         }
+    }
+    
+    static public <T> T handleEnumValue(Object obj, Class<T> enumClass) throws ConfigurationParseException
+    {
+        String strValue = obj.toString().toUpperCase().replace(' ', '_').replace('-', '_');
+        
+        try
+        {
+            return (T) Enum.valueOf((Class<Enum>) enumClass, strValue);
+        }
+        catch(IllegalArgumentException ex)
+        {
+            throw new ConfigurationParseException("Illegal enum value for type " + enumClass.getName(), obj);
+        }
+    }
+    
+    @ConfigurationValueHandler
+    static public Vector handleBukkitVectorValue(Object obj) throws ConfigurationParseException 
+    {
+        if(obj instanceof List)
+        {
+            return handleBukkitVectorValue((List) obj);
+        }
+        else if(obj instanceof Map)
+        {
+            return handleBukkitVectorValue((Map) obj);
+        }
+        else
+        {
+            return handleBukkitVectorValue(obj.toString());
+        }
+    }
+    
+    static public Vector handleBukkitVectorValue(String str) throws ConfigurationParseException
+    {
+        return handleBukkitVectorValue(Arrays.asList(str.split(",")));
+    }
+    
+    static public Vector handleBukkitVectorValue(List list) throws ConfigurationParseException 
+    {
+        if(list.size() < 2)
+            throw new ConfigurationParseException("Not enough values, at least 2 (x,z) are required.", list);
+        if(list.size() > 3)
+            throw new ConfigurationParseException("Too many values, at most 3 (x,y,z) can be used.", list);
+        
+        if(list.size() == 2)
+        {
+            return new Vector(handleDoubleValue(list.get(0)), 0, handleDoubleValue(list.get(1)));
+        }
+        else
+        {
+            return new Vector(handleDoubleValue(list.get(0)), handleDoubleValue(list.get(1)), handleDoubleValue(list.get(2)));
+        }
+    }
+    
+    static public Vector handleBukkitVectorValue(Map map) throws ConfigurationParseException
+    {
+        double x = map.containsKey("x") ? handleDoubleValue(map.get("x")) : 0;
+        double y = map.containsKey("y") ? handleDoubleValue(map.get("y")) : 0;
+        double z = map.containsKey("z") ? handleDoubleValue(map.get("z")) : 0;
+        
+        return new Vector(x, y, z);
     }
 }
