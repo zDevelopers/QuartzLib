@@ -35,6 +35,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 
 /**
@@ -456,5 +459,41 @@ public final class Reflection
         if(value == null) return null;
         if(value instanceof Enum) return ((Enum)value).getDeclaringClass();
         return (Class<T>) value.getClass();
+    }
+    
+    static public Class getClosestType(Class reference, Collection<Class> candidates)
+    {
+        ArrayList<Class> remainingCandidates = new ArrayList(candidates);
+        
+        
+        //Remove incompatible candidates
+        for(Class klass : candidates)
+        {
+            if(!klass.isAssignableFrom(reference))
+                remainingCandidates.remove(klass);
+        }
+        
+        
+        if(remainingCandidates.isEmpty()) return null;
+        if(remainingCandidates.size() == 1) return remainingCandidates.get(0);
+        
+        
+        Class currentBest = remainingCandidates.get(0);
+        //Find best candidate
+        for(Class klass : remainingCandidates)
+        {
+            if(klass == currentBest) continue;
+            if(currentBest.isAssignableFrom(klass))
+            {
+                currentBest = klass;
+            }
+        }
+        
+        return currentBest;
+    }
+    
+    static public Class getClosestType(Class reference, Class... candidates)
+    {
+        return getClosestType(reference, Arrays.asList(candidates));
     }
 }

@@ -43,7 +43,7 @@ import org.bukkit.util.Vector;
 
 public abstract class ConfigurationValueHandlers 
 {
-    static private final Map<Class, Method> valueHandlers = new HashMap<>();
+    static private final Map<Class, ValueHandler> valueHandlers = new HashMap<>();
     
     static {
         registerHandlers(ConfigurationValueHandlers.class);
@@ -60,52 +60,70 @@ public abstract class ConfigurationValueHandlers
             if(annotation == null) continue;
             if(annotation.value().length == 0)
             {
-                valueHandlers.put(method.getReturnType(), method);
+                addHandler(method.getReturnType(), method);
             }
             else
             {
                 for(Class klass : annotation.value())
                 {
-                    valueHandlers.put(klass, method);
+                    addHandler(klass, method);
                 }
             }
         }
     }
     
-    static public <T> T handleValue(Object obj, Class<T> klass) throws ConfigurationParseException
+    static private void addHandler(Class returnType, Method method)
+    {
+        ValueHandler handler = valueHandlers.get(returnType);
+        
+        if(handler == null)
+        {
+            handler = new ValueHandler(returnType);
+            valueHandlers.put(returnType, handler);
+        }
+        
+        Class[] parameterTypes = method.getParameterTypes();
+        if(parameterTypes.length != 1)
+            throw new IllegalArgumentException("Illegal value handler method '" + method.getName() + "' : method has to take one argument.");
+        
+        handler.addHandler(parameterTypes[0], method);
+    }
+    
+    
+    static public <T> T handleValue(Object obj, Class<T> outputType) throws ConfigurationParseException
     {
         if(obj == null) return null;
-        if(klass == null) return (T) obj;//yolocast, strongly deprecated
+        if(outputType == null) return (T) obj;//yolocast, strongly deprecated
         
-        if(klass.isAssignableFrom(obj.getClass())) return (T) obj;
+        if(outputType.isAssignableFrom(obj.getClass())) return (T) obj;
         
-        Method handler = valueHandlers.get(klass);
+        ValueHandler handler = valueHandlers.get(outputType);
         if(handler == null) 
         {
-            if(Enum.class.isAssignableFrom(klass))
+            if(Enum.class.isAssignableFrom(outputType))
             {
-                return handleEnumValue(obj, klass);
+                return handleEnumValue(obj, outputType);
             }
             else
             {
-                throw new UnsupportedOperationException("Unsupported configuration type : " + klass.getName());
+                throw new UnsupportedOperationException("Unsupported configuration type : " + outputType.getName());
             }
         }
         
         try
         {
-            return (T) handler.invoke(null, obj);
+            return (T) handler.handleValue(obj);
         }
         catch (IllegalAccessException | IllegalArgumentException ex)
         {
-            throw new RuntimeException("Unable to call handler for type " + klass.getName(), ex);
+            throw new RuntimeException("Unable to call handler for type " + outputType.getName(), ex);
         }
         catch (InvocationTargetException ex)
         {
             if(ex.getCause() instanceof ConfigurationParseException)
                 throw (ConfigurationParseException) ex.getCause();
             
-            throw new RuntimeException("Error while calling handler for type " + klass.getName(), ex.getCause());
+            throw new RuntimeException("Error while calling handler for type " + outputType.getName(), ex.getCause());
         }
     }
     
@@ -242,27 +260,12 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public Vector handleBukkitVectorValue(Object obj) throws ConfigurationParseException 
-    {
-        if(obj instanceof List)
-        {
-            return handleBukkitVectorValue((List) obj);
-        }
-        else if(obj instanceof Map)
-        {
-            return handleBukkitVectorValue((Map) obj);
-        }
-        else
-        {
-            return handleBukkitVectorValue(obj.toString());
-        }
-    }
-    
     static public Vector handleBukkitVectorValue(String str) throws ConfigurationParseException
     {
         return handleBukkitVectorValue(Arrays.asList(str.split(",")));
     }
     
+    @ConfigurationValueHandler
     static public Vector handleBukkitVectorValue(List list) throws ConfigurationParseException 
     {
         if(list.size() < 2)
@@ -280,6 +283,7 @@ public abstract class ConfigurationValueHandlers
         }
     }
     
+    @ConfigurationValueHandler
     static public Vector handleBukkitVectorValue(Map map) throws ConfigurationParseException
     {
         double x = map.containsKey("x") ? handleDoubleValue(map.get("x")) : 0;
