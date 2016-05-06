@@ -41,7 +41,7 @@ import java.lang.reflect.Method;
  * A set of tools to simplify reflective operations on Bukkit and the Native Minecraft Server.
  *
  * @author ProkopyL
- * @author Amaury Carrade (documentation only).
+ * @author Amaury Carrade
  */
 public final class Reflection
 {
@@ -311,6 +311,7 @@ public final class Reflection
             throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         Method method = hClass.getMethod(name, getTypes(parameters));
+        method.setAccessible(true);
         return method.invoke(instance, parameters);
     }
     
