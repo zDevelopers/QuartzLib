@@ -29,8 +29,9 @@
  */
 package fr.zcraft.zlib.components.i18n;
 
-import java.util.Locale;
 import org.bukkit.entity.Player;
+
+import java.util.Locale;
 
 /**
  * A shortcut to translate texts.
@@ -57,18 +58,19 @@ import org.bukkit.entity.Player;
  * <p>Give the following parameters to extract these strings to a {@code .po} file with {@code xgettext}:</p>
  *
  * <pre>
- *     -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3"
- *    ___ ___________________________________________________ ___________________________________________
- *    Rst                 Traditional imports                                Static imports
+ *     # Lines: reset, with traditional imports and with static ones.
+ *     -k
+ *     -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"I.sendT:2" -k"I.sendTn:2,3" -k"I.sendTc:2c,3" -k"I.sendTcn:2c,3,4"
+ *     -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" -k"sendT:2" -k"sendTn:2,3" -k"sendTc:2c,3" -k"sendTcn:2c,3,4"
  * </pre>
  *
  * <p>Example:</p>
  *
  * <pre>
- *     xgettext -c -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" --from-code=utf-8 --output=lang.pot *.java
+ *     xgettext -c -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"I.sendT:2" -k"I.sendTn:2,3" -k"I.sendTc:2c,3" -k"I.sendTcn:2c,3,4" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" -k"sendT:2" -k"sendTn:2,3" -k"sendTc:2c,3" -k"sendTcn:2c,3,4" --from-code=utf-8 --output=lang.pot *.java
  *
  *     # Or, recursively
- *     find . -iname "*.java" | xargs xgettext -c -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" --from-code=utf-8 --output=lang.pot
+ *     find . -iname "*.java" | xargs xgettext -c -k -k"I.t" -k"I.tn:1,2" -k"I.tc:1c,2" -k"I.tcn:1c,2,3" -k"I.sendT:2" -k"I.sendTn:2,3" -k"I.sendTc:2c,3" -k"I.sendTcn:2c,3,4" -k"t" -k"tn:1,2" -k"tc:1c,2" -k"tcn:1c,2,3" -k"sendT:2" -k"sendTn:2,3" -k"sendTc:2c,3" -k"sendTcn:2c,3,4" --from-code=utf-8 --output=lang.pot
  * </pre>
  */
 public class I
@@ -89,9 +91,9 @@ public class I
     /**
      * Translates the string with a plural.
      *
-     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * <p>The count is likely to be used in the string, so if only a count is given, this count is
      * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
-     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}.</p>
      *
      * @param singular   The singular version of the string.
      * @param plural     The plural version of the string.
@@ -130,9 +132,9 @@ public class I
      * <p>The context is used when you have two identical strings to translate that may be
      * translated differently according to the context.</p>
      *
-     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * <p>The count is likely to be used in the string, so if only a count is given, this count is
      * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
-     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}.</p>
      *
      * @param context    The context.
      * @param singular   The singular version of the string.
@@ -166,9 +168,9 @@ public class I
     /**
      * Translates the string with a plural using the given locale.
      *
-     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * <p>The count is likely to be used in the string, so if only a count is given, this count is
      * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
-     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}.</p>
      *
      * @param locale     The locale to use to translate the string.
      * @param singular   The singular version of the string.
@@ -209,9 +211,9 @@ public class I
      * <p>The context is used when you have two identical strings to translate that may be
      * translated differently according to the context.</p>
      *
-     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * <p>The count is likely to be used in the string, so if only a count is given, this count is
      * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
-     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}.</p>
      *
      * @param locale     The locale to use to translate the string.
      * @param context    The context.
@@ -245,9 +247,9 @@ public class I
     /**
      * Translates the string with a plural and sends it to the given player.
      *
-     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * <p>The count is likely to be used in the string, so if only a count is given, this count is
      * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
-     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}.</p>
      *
      * @param player     The player to send the message to.
      * @param singular   The singular version of the string.
@@ -285,9 +287,9 @@ public class I
      * <p>The context is used when you have two identical strings to translate that may be
      * translated differently according to the context.</p>
      *
-     * <p> The count is likely to be used in the string, so if only a count is given, this count is
+     * <p>The count is likely to be used in the string, so if only a count is given, this count is
      * also interpreted as a parameter (the first and only one, {@code {0}}). If this behavior annoys
-     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}. </p>
+     * you, you can disable it using {@link I18n#addCountToParameters(boolean)}.</p>
      *
      * @param player     The player to send the message to.
      * @param context    The context.
