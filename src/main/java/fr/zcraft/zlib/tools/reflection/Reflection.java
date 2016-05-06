@@ -346,7 +346,7 @@ public final class Reflection
         {
             if(!method.getName().equals(name)) continue;
             if(!hasModifiers(method.getModifiers(), modifiers)) continue;
-            if(parameterTypes.length != method.getParameterCount()) continue;
+            if(parameterTypes.length != method.getParameters().length) continue;
             
             for(Class paramType : method.getParameterTypes())
             {
