@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
 import fr.zcraft.zlib.tools.reflection.NMSNetwork;
 import fr.zcraft.zlib.tools.reflection.Reflection;
@@ -89,7 +90,29 @@ public final class ListHeaderFooter
      */
     public static void sendListHeaderFooter(Player player, String header, String footer)
     {
-        sendRawListHeaderFooter(player, "{\"text\": \"" + header.replace("\"", "\\\"") + "\"}", "{\"text\": \"" + footer.replace("\"", "\\\"") + "\"}");
+        sendRawListHeaderFooter(
+                player,
+                "{\"text\": \"" + (header != null ? header.replace("\"", "\\\"") : "") + "\"}",
+                "{\"text\": \"" + (footer != null ? footer.replace("\"", "\\\"") : "") + "\"}"
+        );
+    }
+
+    /**
+     * Sends the player list headers and footers to the given player.
+     *
+     * @param player The receiver of the header & footers.
+     * @param header The header.
+     * @param footer The footer.
+     *
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
+     */
+    public static void sendListHeaderFooter(Player player, RawText header, RawText footer)
+    {
+        sendRawListHeaderFooter(
+                player,
+                header != null ? header.toJSONString() : "{\"text\": \"\"}",
+                footer != null ? footer.toJSONString() : "{\"text\": \"\"}"
+        );
     }
 
     /**
@@ -130,6 +153,22 @@ public final class ListHeaderFooter
      * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
     public static void sendListHeaderFooter(String header, String footer)
+    {
+        for (Player player : Bukkit.getOnlinePlayers())
+        {
+            sendListHeaderFooter(player, header, footer);
+        }
+    }
+
+    /**
+     * Sends the player list headers and footers to the whole server.
+     *
+     * @param header The header.
+     * @param footer The footer.
+     *
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
+     */
+    public static void sendListHeaderFooter(RawText header, RawText footer)
     {
         for (Player player : Bukkit.getOnlinePlayers())
         {

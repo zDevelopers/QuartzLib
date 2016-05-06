@@ -34,10 +34,6 @@ package fr.zcraft.zlib.components.rawtext;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.components.commands.Command;
 import fr.zcraft.zlib.components.commands.Commands;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
 import org.bukkit.Statistic;
@@ -46,6 +42,11 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<RawTextPart>, JSONAware
 {
@@ -106,7 +107,8 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     public T color(ChatColor color)
     {
         if(this.color != null) throw new IllegalStateException("Color already set.");
-        if(color == null || !color.isColor()) 
+        if(color == null) return (T)this;
+        if(!color.isColor())
             throw new IllegalArgumentException("Invalid color.");
         this.color = color;
         
@@ -115,6 +117,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     
     public T style(ChatColor style)
     {
+        if(style == null) return (T)this;
         if(style.isColor())
             return this.color(style);
         
