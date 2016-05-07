@@ -46,18 +46,18 @@ public final class Gui extends ZLibComponent
      * A map of all the currently open GUIs, associated to the HumanEntity
      * that requested it.
      */
-    static private HashMap<Player, GuiBase> openGuis = null;
+    private static final HashMap<Player, GuiBase> openGuis = new HashMap<>();
     
     /**
      * A map of all the currently registered GUIs listeners.
      */
-    static private HashMap<Class<? extends Listener>, Listener> guiListeners = null;
+    private static final HashMap<Class<? extends Listener>, Listener> guiListeners = new HashMap<>();
     
     @Override
     protected void onEnable()
     {
-        openGuis = new HashMap<>();
-        guiListeners = new HashMap<>();
+        openGuis.clear();
+        guiListeners.clear();
     }
     
     @Override
@@ -65,8 +65,6 @@ public final class Gui extends ZLibComponent
     {
         openGuis.clear();
         guiListeners.clear();
-        openGuis = null;
-        guiListeners = null;
     }
 
     /**
@@ -76,7 +74,7 @@ public final class Gui extends ZLibComponent
      */
     static protected void registerListener(Class<? extends Listener> listenerClass)
     {
-        if(guiListeners == null || guiListeners.containsKey(listenerClass))
+        if(guiListeners.containsKey(listenerClass))
             return;
         
         try
