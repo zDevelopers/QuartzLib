@@ -214,6 +214,8 @@ public final class UUIDFetcher
 			throw new IOException("Invalid response from server, unable to parse received JSON : " + ex.toString());
 		}
 
+                if(array == null) return uuidMap;
+                
 		for (Object profile : array)
 		{
 			JSONObject jsonProfile = (JSONObject) profile;
@@ -270,6 +272,7 @@ public final class UUIDFetcher
 		for (String name : remainingNames)
 		{
 			user = fetchOriginalUUID(name);
+                        if(user == null) continue;
 			uuids.put(name, user.uuid);
 			Thread.sleep(timeBetweenRequests);
 		}
@@ -301,7 +304,9 @@ public final class UUIDFetcher
 		{
 			throw new IOException("Invalid response from server, unable to parse received JSON : " + ex.toString());
 		}
-
+                
+                if(object == null) return null;
+                
 		User user = new User();
 		user.name = (String) object.get("name");
 		user.uuid = fromMojangUUID((String) object.get("id"));
@@ -376,7 +381,7 @@ public final class UUIDFetcher
 	private static Object readResponse(HttpURLConnection connection) throws IOException, ParseException
 	{
             if(connection.getResponseCode() == 204)
-                return new JSONArray();
+                return null;
             
             return new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
 	}
