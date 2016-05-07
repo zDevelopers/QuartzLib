@@ -113,7 +113,7 @@ public final class UUIDFetcher
 		final List<String> nameCollection = Collections.singletonList(name);
 
 		final Map<String, UUID> uuid = fetch(nameCollection);
-		if (uuid.size() == 0)
+		if (uuid.isEmpty())
 			fetchRemaining(nameCollection, uuid);
 
 		return uuid.get(name);
@@ -375,7 +375,10 @@ public final class UUIDFetcher
 	 */
 	private static Object readResponse(HttpURLConnection connection) throws IOException, ParseException
 	{
-		return new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
+            if(connection.getResponseCode() == 204)
+                return new JSONArray();
+            
+            return new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
 	}
 
 	/**
