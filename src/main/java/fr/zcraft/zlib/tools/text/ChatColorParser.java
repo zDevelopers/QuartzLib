@@ -30,11 +30,12 @@
 
 package fr.zcraft.zlib.tools.text;
 
+import org.bukkit.ChatColor;
+
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import org.bukkit.ChatColor;
 
 public class ChatColorParser implements Iterator<ChatColoredString>, Iterable<ChatColoredString>
 {
@@ -76,6 +77,10 @@ public class ChatColorParser implements Iterator<ChatColoredString>, Iterable<Ch
         ChatColoredString currentString = nextString;
         nextString = fetchNextPos();
         return currentString;
+    }
+
+    public void remove() {
+        throw new UnsupportedOperationException("remove");
     }
 
     @Override
