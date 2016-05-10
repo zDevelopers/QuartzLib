@@ -33,6 +33,7 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.bukkit.configuration.file.FileConfiguration;
 
 
@@ -292,5 +293,10 @@ public class ConfigurationItem<T>
     static public <T> ConfigurationList<T> list(String fieldName, Class<T> type, String... deprecatedNames)
     {
         return new ConfigurationList<>(fieldName, new ArrayList<T>(), type, deprecatedNames);
+    }
+    
+    static public <K,V> ConfigurationMap<K,V> map(String field, Class<K> keyType, Class<V> valueType, String... deprecatedNames)
+    {
+        return new ConfigurationMap<>(field, new HashMap<K,V>(), keyType, valueType, deprecatedNames);
     }
 }
