@@ -84,6 +84,12 @@ public class ChatColorParser implements Iterator<ChatColoredString>, Iterable<Ch
         return this;
     }
     
+    @Override
+    public void remove() 
+    {
+        throw new UnsupportedOperationException("remove");
+    }
+    
     private ChatColor getCurrentColor()
     {
         ChatColor color = ChatColor.getByChar(string.charAt(currentPos + 1));

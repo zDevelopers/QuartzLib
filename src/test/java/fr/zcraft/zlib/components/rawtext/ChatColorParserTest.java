@@ -32,34 +32,13 @@ package fr.zcraft.zlib.components.rawtext;
 
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
 import org.bukkit.ChatColor;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ChatColorParserTest 
 {
-    /*static private <T> void assertContainsOnly(Set<T> set, T... comparison)
-    {
-        assertContainsConly(set, Arrays.asList(comparison));
-    }
-    
-    static private <T> void assertContainsConly(Set<T> set, Collection<T> comparison)
-    {
-        if(!set.containsAll(comparison)) 
-            Assert.fail("Input set does not contain all required elements : " + set + ", required : " + comparison);
-        
-        set = new HashSet(set);
-        set.removeAll(comparison);
-        
-        if(!set.isEmpty())
-            Assert.fail("Input set does not only contain only required elements : " + set + ", required : " + comparison);
-    }*/
-    
     @Test
     public void helloWorldTest()
     {
