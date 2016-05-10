@@ -65,11 +65,28 @@ public class ConfigurationMap<K, V> extends ConfigurationItem<Map<K, V>> impleme
         {
             if(entry == null) continue;
             if(entry.getKey() == null || entry.getValue() == null) continue;
-            newMap.put(ConfigurationValueHandlers.handleValue(entry.getKey(), keyType),
-                    ConfigurationValueHandlers.handleValue(entry.getValue(), valueType));
+            newMap.put(ConfigurationValueHandlers.handleValue(entry.getKey(), keyType, null, null),
+                    ConfigurationValueHandlers.handleValue(entry.getValue(), valueType, this, entry.getKey().toString()));
         }
         
         return newMap;
+    }
+    
+    @Override
+    boolean validate()
+    {
+        boolean isValid = super.validate();
+        
+        if(ConfigurationSection.class.isAssignableFrom(valueType))
+        {
+            for(Object value : values())
+            {
+                if(!((ConfigurationSection) value).validate())
+                    isValid = false;
+            }
+        }
+        
+        return isValid;
     }
 
     @Override

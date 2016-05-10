@@ -30,6 +30,8 @@
 
 package fr.zcraft.zlib.components.configuration;
 
+import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -39,6 +41,7 @@ import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.util.Vector;
 
 public abstract class ConfigurationValueHandlers 
@@ -90,7 +93,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     
-    static public <T> T handleValue(Object obj, Class<T> outputType) throws ConfigurationParseException
+    static public <T> T handleValue(Object obj, Class<T> outputType, ConfigurationItem parent, String tag) throws ConfigurationParseException
     {
         if(obj == null) return null;
         if(outputType == null) return (T) obj;//yolocast, strongly deprecated
@@ -103,6 +106,10 @@ public abstract class ConfigurationValueHandlers
             if(Enum.class.isAssignableFrom(outputType))
             {
                 return handleEnumValue(obj, outputType);
+            }
+            else if(ConfigurationSection.class.isAssignableFrom(outputType))
+            {
+                return (T) handleConfigurationItemValue(obj, outputType, parent, tag);
             }
             else
             {
@@ -257,6 +264,31 @@ public abstract class ConfigurationValueHandlers
         {
             throw new ConfigurationParseException("Illegal enum value for type " + enumClass.getName(), obj);
         }
+    }
+    
+    static public <T> ConfigurationSection handleConfigurationItemValue(Object obj, Class<T> sectionClass, ConfigurationItem parent, String tag) throws ConfigurationParseException
+    {
+        if(!(obj instanceof Map || obj instanceof MemorySection))
+            throw new ConfigurationParseException("Dictionary expected", obj);
+        
+        if(parent == null || tag == null)
+            throw new UnsupportedOperationException("ConfigurationSection values cannot be used here.");
+        
+        ConfigurationSection section;
+        try
+        {
+            section = (ConfigurationSection) Reflection.instantiate(sectionClass);
+            section.fieldName = tag;
+            section.setParent(parent);
+            section.init();
+        }
+        catch(Exception ex)
+        {
+            PluginLogger.warning("Unable to instanciate configuration field '{0}' of type '{1}'", ex, tag, sectionClass.getName());
+            throw new RuntimeException(ex);
+        }
+        
+        return section;
     }
     
     @ConfigurationValueHandler

@@ -33,6 +33,7 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -81,7 +82,10 @@ public class ConfigurationItem<T>
     {
         try
         {
-            return getValue(getRawValue());
+            T value = getValue(getRawValue());
+            if(value == null) 
+                return defaultValue;
+            return value;
         }
         catch (ConfigurationParseException ex)
         {
@@ -109,17 +113,22 @@ public class ConfigurationItem<T>
     
     public String[] getDeprecatedFieldNames()
     {
-        if(parent == null)
-            return deprecatedNames;
-        
         ArrayList<String> allNames = new ArrayList<>();
         
+        allNames.add(getFieldName());
         
-        for(String parentName : parent.getDeprecatedFieldNames())
+        if(parent == null)
         {
-            for(String deprecatedName : deprecatedNames)
+            allNames.addAll(Arrays.asList(deprecatedNames));
+        }
+        else
+        {
+            for(String parentName : parent.getDeprecatedFieldNames())
             {
-                allNames.add(parentName + "." + deprecatedName);
+                for(String deprecatedName : deprecatedNames)
+                {
+                    allNames.add(parentName + "." + deprecatedName);
+                }
             }
         }
         
@@ -186,7 +195,7 @@ public class ConfigurationItem<T>
         }
         catch (ConfigurationParseException ex)
         {
-            PluginLogger.warning("Invalid value for field ''{0}'' : ''{1}''.", getFieldName(), ex.getValue());
+            PluginLogger.warning("Invalid value for configuration field ''{0}'' : ''{1}''.", getFieldName(), ex.getValue());
             PluginLogger.warning("\tReason : {0}", ex.getMessage());
             return false;
         }
@@ -194,25 +203,10 @@ public class ConfigurationItem<T>
     
     protected T getValue(Object object) throws ConfigurationParseException
     {
-        return ConfigurationValueHandlers.handleValue(getRawValue(), valueType);
+        return ConfigurationValueHandlers.handleValue(getRawValue(), valueType, null, null);
     }
     
-    void init()
-    {
-        if(!isDefined())
-        {
-            getConfig().set(getFieldName(), defaultValue);
-        }
-        
-        for(String deprecatedName : deprecatedNames)
-        {
-            if(getConfig().contains(deprecatedName))
-            {
-                getConfig().set(getFieldName(), getConfig().get(deprecatedName));
-                getConfig().set(deprecatedName, null);
-            }
-        }
-    }
+    void init() {}
     
     void setParent(ConfigurationItem parent)
     {

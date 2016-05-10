@@ -60,12 +60,12 @@ public class ConfigurationList<T> extends ConfigurationItem<List<T>> implements 
         for(Object val : rawList)
         {
             if(val == null) continue;
-            newList.add(ConfigurationValueHandlers.handleValue(val, itemType));
+            newList.add(ConfigurationValueHandlers.handleValue(val, itemType, null, null));
         }
         
         return newList;
     }
-
+    
     @Override
     public int size()
     {
