@@ -56,11 +56,21 @@ public final class MessageSender
             iChatBaseComponentClass = Reflection.getMinecraftClassByName("IChatBaseComponent");
             packetPlayOutChatClass = Reflection.getMinecraftClassByName("PacketPlayOutChat");
 
-            // We only support 1.8+
-            if (nmsVersion.equalsIgnoreCase("v1_8_R1"))
+            // TODO centralize the chat serialization mechanisms
+            try
+            {
                 chatSerializerClass = Reflection.getMinecraftClassByName("ChatSerializer");
-            else
+            }
+            catch (ClassNotFoundException e)
+            {
+                chatSerializerClass = Reflection.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
+            }
+
+            // We only support 1.8+
+            if (!nmsVersion.equalsIgnoreCase("v1_8_R1"))
+            {
                 chatComponentTextClass = Reflection.getMinecraftClassByName("ChatComponentText");
+            }
         }
         catch (Exception e)
         {
@@ -497,7 +507,17 @@ public final class MessageSender
             }
             else
             {
-                Object componentText = Reflection.instantiate(chatComponentTextClass, content);
+                Object componentText;
+
+                if (type.isJSON())
+                {
+                    componentText = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", content));
+                }
+                else
+                {
+                    componentText = Reflection.instantiate(chatComponentTextClass, content);
+                }
+
                 chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
             }
 
