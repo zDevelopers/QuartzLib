@@ -30,6 +30,8 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
+import fr.zcraft.zlib.tools.text.ChatColorParser;
+import fr.zcraft.zlib.tools.text.ChatColoredString;
 import com.google.common.base.CaseFormat;
 import java.util.Set;
 import org.bukkit.ChatColor;
@@ -44,6 +46,40 @@ public class RawText extends RawTextPart<RawText>
     public RawText(String text)
     {
         super(text);
+    }
+    
+    static public RawText fromFormattedString(char delimiter, String str)
+    {
+        return fromFormattedString(new ChatColorParser(delimiter, str));
+    }
+    
+    static public RawText fromFormattedString(String str)
+    {
+        return fromFormattedString(new ChatColorParser(str));
+    }
+    
+    static private RawText fromFormattedString(ChatColorParser parser)
+    {
+        RawTextPart text = null;
+        
+        for(ChatColoredString coloredString : parser)
+        {
+            if(text == null)
+            {
+                text = new RawText(coloredString.getString());
+            }
+            else
+            {
+                text = text.then(coloredString.getString());
+            }
+            
+            text.style(coloredString.getModifiers());
+        }
+        
+        if(text == null)
+            throw new IllegalArgumentException("Invalid input string");
+        
+        return text.build();
     }
     
     static public String toStyleName(ChatColor color)

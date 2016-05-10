@@ -190,7 +190,6 @@ public class RawTextTest
         assertJSON(text, HOVER_STATISTIC_TEST);
     }
     
-    
     @Test
     public void mapDeleteTest()
     {
@@ -248,5 +247,15 @@ public class RawTextTest
             .build();
         
         Assert.assertEquals(FORMATTED_TEXT, text.toFormattedText());
+    }
+    
+    @Test
+    public void fromFormattedTextTest()
+    {
+        final String HELLOWORLD_TEST = "{\"text\":\"Hello\", \"color\":\"red\", \"extra\":[{\"text\":\" world !\", \"color\":\"green\"}]}";
+        
+        RawText text = RawText.fromFormattedString(ChatColor.RED + "Hello" + ChatColor.GREEN + " world !");
+        
+        assertJSON(text, HELLOWORLD_TEST);
     }
 }

@@ -149,6 +149,15 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return (T)this;
     }
     
+    public T style(Iterable<ChatColor> styles)
+    {
+        for(ChatColor style : styles)
+        {
+            style(style);
+        }
+        return (T)this;
+    }
+    
     private T hover(ActionHover action, Object object)
     {
         if(actionHover != null)
