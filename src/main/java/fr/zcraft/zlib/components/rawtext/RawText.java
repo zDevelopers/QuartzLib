@@ -30,20 +30,23 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
-import fr.zcraft.zlib.tools.text.ChatColorParser;
-import fr.zcraft.zlib.tools.text.ChatColoredString;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
-import java.util.Set;
+import fr.zcraft.zlib.tools.text.ChatColorParser;
+import fr.zcraft.zlib.tools.text.ChatColoredString;
 import org.bukkit.ChatColor;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import java.util.Map;
+import java.util.Set;
 
 public class RawText extends RawTextPart<RawText>
 {
@@ -122,9 +125,10 @@ public class RawText extends RawTextPart<RawText>
         
         
         String displayTag = toJSONString(item.getItemMeta());
+        String enchantments = toJSONString(item.getItemMeta().getEnchants());
         byte itemFlags = toJSON(item.getItemMeta().getItemFlags());
         
-        if(itemFlags > 0 || displayTag != null)
+        if(itemFlags > 0 || displayTag != null || enchantments != null)
         {
             str.append(",tag:{");
             if(itemFlags > 0)
@@ -140,6 +144,14 @@ public class RawText extends RawTextPart<RawText>
                     str.append(",");
                 str.append("display:");
                 str.append(displayTag);
+            }
+
+            if (enchantments != null)
+            {
+                if (itemFlags > 0 || displayTag != null)
+                    str.append(",");
+                str.append("ench:");
+                str.append(enchantments);
             }
             
             str.append("}");
@@ -175,6 +187,26 @@ public class RawText extends RawTextPart<RawText>
         if(!meta.hasLore() && !meta.hasDisplayName())
             return null;
         
+        return str.toString();
+    }
+
+    static public String toJSONString(Map<Enchantment, Integer> enchants)
+    {
+        if (enchants.size() == 0)
+            return null;
+
+        StringBuilder str = new StringBuilder("[");
+
+        for (Map.Entry<Enchantment, Integer> enchantment : enchants.entrySet())
+        {
+            str.append("{")
+                    .append("id:").append(enchantment.getKey().getId()).append(",")
+                    .append("lvl:").append(enchantment.getValue())
+                    .append("},");
+        }
+
+        str.append("]");
+
         return str.toString();
     }
     

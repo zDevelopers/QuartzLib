@@ -33,17 +33,19 @@ import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.runners.RunTask;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Random;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-//import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Random;
+
+//import org.bukkit.Sound;
 
 /**
  * Utility class for dealing with items and inventories.
@@ -213,7 +215,7 @@ abstract public class ItemUtils
     }
     
     /**
-     * Emulates the item inthe player loosing durability as if the given player was using it.
+     * Emulates the item in the player loosing durability as if the given player was using it.
      * If the player is in creative mode, the item won't be damaged at all.
      * The Unbreaking enchantments are taken into account.
      * The player's inventory is also updated, if needed.
@@ -241,13 +243,26 @@ abstract public class ItemUtils
 
         player.updateInventory();
     }
-    
+
+    /**
+     * Breaks the item currently in the hand of the player.
+     *
+     * @param player The player.
+     * @param hand The hand to retrieve the item from. This will always be the main hand if
+     *             the Bukkit build don't support dual-wielding.
+     */
     static public void breakItemInHand(Player player, DualWielding hand)
     {
         DualWielding.setItemInHand(player, hand, new ItemStack(Material.AIR));
         //player.playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 1);
     }
-    
+
+    /**
+     * Breaks the given item if it is found in one of the player's hands.
+     *
+     * @param player The player.
+     * @param item The item to break.
+     */
     static public void breakItemInHand(Player player, ItemStack item)
     {
         breakItemInHand(player, DualWielding.getHoldingHand(player, item));
@@ -272,7 +287,16 @@ abstract public class ItemUtils
     }
     
     static private String getI18nNameMethodName = null;
-    
+
+    /**
+     * Returns the name of the method used to retrieve the I18N key of the name
+     * of an item from a NMS ItemStack.
+     *
+     * @param item An item stack.
+     * @return The name of the method. This result is cached.
+     *
+     * @throws NMSException
+     */
     static private String getI18nNameMethod(ItemStack item) throws NMSException
     {
         if(getI18nNameMethodName != null) return getI18nNameMethodName;
@@ -299,16 +323,24 @@ abstract public class ItemUtils
                 return getI18nNameMethodName;
             }
             
-            throw new NMSException("Unable to retreive Minecraft I18n name : no method found");
+            throw new NMSException("Unable to retrieve Minecraft I18n name: no method found");
         }
         catch (Exception ex)
         {
-            throw new NMSException("Unable to retreive Minecraft I18n name", ex); 
+            throw new NMSException("Unable to retrieve Minecraft I18n name", ex);
         }
     }
     
     static private Method registryLookupMethod = null;
-    
+
+    /**
+     * Retrieves the method used to lookup the Minecraft internal item registry,
+     * used to get the internal names of the Minecraft items (like {@code minecraft.stone}.
+     *
+     * @return The method. This result is cached.
+     *
+     * @throws NMSException
+     */
     static private Method getRegistryLookupMethod() throws NMSException
     {
         if(registryLookupMethod != null) return registryLookupMethod;
@@ -351,26 +383,48 @@ abstract public class ItemUtils
             throw new NMSException("Unable to retreive Minecraft ID", ex); 
         }
     }
-    
+
+    /**
+     * Returns the Minecraft internal ID of an ItemStack.
+     * <p>
+     *     As example, the ID of a {@link Material#STONE Material.STONE} item is {@code minecraft.stone}.
+     *     This ID is needed to include items in JSON-formatted messages.
+     * </p>
+     *
+     * @param item An item.
+     * @return The Minecraft name of this item.
+     *
+     * @throws NMSException
+     */
     static public String getMinecraftId(ItemStack item) throws NMSException
     {
         try
         {
-            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            Class<?> CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
             Object itemStackHandle = CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
             Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
-            Class MinecraftItem = Reflection.getMinecraftClassByName("Item");
+            Class<?> MinecraftItem = Reflection.getMinecraftClassByName("Item");
             Object ItemsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
             
             Object minecraftKey = getRegistryLookupMethod().invoke(ItemsRegistry, minecraftItem);
             
-            return minecraftKey.toString();        }
+            return minecraftKey.toString();
+        }
         catch(Exception ex)
         {
-            throw new NMSException("Unable to retreive Minecraft ID", ex);
+            throw new NMSException("Unable to retrieve Minecraft ID for an ItemStack", ex);
         }
     }
-    
+
+    /**
+     * Retrieves the key to use in the {@code translate} property of a JSON message to translate
+     * the name of the given ItemStack.
+     *
+     * @param item An item.
+     * @return The I18N key for this item.
+     *
+     * @throws NMSException
+     */
     static public String getI18nName(ItemStack item) throws NMSException
     {
         try
@@ -382,7 +436,7 @@ abstract public class ItemUtils
         }
         catch(Exception ex)
         {
-            throw new NMSException("Unable to retreive Minecraft I18n name", ex);
+            throw new NMSException("Unable to retrieve Minecraft I18n name", ex);
         }
     }
     
