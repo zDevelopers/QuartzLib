@@ -42,7 +42,11 @@ import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.bukkit.enchantments.Enchantment;
 
 /**
  * This class contains helpers to create or edit very customized ItemStacks using the builder pattern.
@@ -59,6 +63,8 @@ public class ItemStackBuilder
     
     private boolean glowing = false;
     private boolean hideAttributes = false;
+    
+    private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
     
     private DyeColor dye = null;
     
@@ -140,6 +146,8 @@ public class ItemStackBuilder
         
         if(glowing)
             GlowEffect.addGlow(newItemStack);
+        
+        newItemStack.addUnsafeEnchantments(enchantments);
         
         return newItemStack;
     }
@@ -306,6 +314,21 @@ public class ItemStackBuilder
     public ItemStackBuilder glow(boolean glow)
     {
         if(glow) glow();
+        return this;
+    }
+    
+    public ItemStackBuilder enchant(Enchantment enchantment, int level)
+    {
+        enchantments.put(enchantment, level);
+        return this;
+    }
+    
+    public ItemStackBuilder enchant(Map<Enchantment, Integer> enchantments)
+    {
+        for(Entry<Enchantment, Integer> entry : enchantments.entrySet())
+        {
+            enchant(entry.getKey(), entry.getValue());
+        }
         return this;
     }
     

@@ -32,12 +32,10 @@ package fr.zcraft.zlib.components.configuration;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.bukkit.configuration.MemorySection;
 
 public class ConfigurationMap<K, V> extends ConfigurationItem<Map<K, V>> implements Map<K,V>, Iterable<Entry<K,V>>
 {
@@ -56,20 +54,7 @@ public class ConfigurationMap<K, V> extends ConfigurationItem<Map<K, V>> impleme
     {
         if(value == null) return null;
         
-        if(!(value instanceof MemorySection)) 
-            throw new ConfigurationParseException("Dictionary expected", value);
-        
-        Map<String, Object> rawMap = ((MemorySection) value).getValues(false);
-        HashMap<K,V> newMap = new HashMap<>();
-        for(Entry entry : rawMap.entrySet())
-        {
-            if(entry == null) continue;
-            if(entry.getKey() == null || entry.getValue() == null) continue;
-            newMap.put(ConfigurationValueHandlers.handleValue(entry.getKey(), keyType, null, null),
-                    ConfigurationValueHandlers.handleValue(entry.getValue(), valueType, this, entry.getKey().toString()));
-        }
-        
-        return newMap;
+        return ConfigurationValueHandlers.handleMapValue(value, keyType, valueType, this);
     }
     
     @Override

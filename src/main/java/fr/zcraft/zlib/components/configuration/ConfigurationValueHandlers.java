@@ -45,6 +45,7 @@ import java.util.Locale;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -315,6 +316,40 @@ public abstract class ConfigurationValueHandlers
         return newList;
     }
     
+    static <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType) throws ConfigurationParseException
+    {
+        return handleMapValue(value, keyType, valueType, null);
+    }
+    
+    static <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType, ConfigurationItem parent) throws ConfigurationParseException
+    {
+        Map<String, Object> rawMap;
+        
+        if(value instanceof Map)
+        {
+            rawMap = (Map) value;
+        }
+        else if(value instanceof MemorySection)
+        {
+            rawMap = ((MemorySection) value).getValues(false);
+        }
+        else
+        {
+            throw new ConfigurationParseException("Dictionary expected", value);
+        }
+        
+        HashMap<K,V> newMap = new HashMap<>();
+        for(Map.Entry entry : rawMap.entrySet())
+        {
+            if(entry == null) continue;
+            if(entry.getKey() == null || entry.getValue() == null) continue;
+            newMap.put(ConfigurationValueHandlers.handleValue(entry.getKey(), keyType, null, null),
+                    ConfigurationValueHandlers.handleValue(entry.getValue(), valueType, parent, entry.getKey().toString()));
+        }
+        
+        return newMap;
+    }
+    
     @ConfigurationValueHandler
     static public Vector handleBukkitVectorValue(String str) throws ConfigurationParseException
     {
@@ -350,6 +385,14 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
+    static public Enchantment handleEnchantmentValue(String value) throws ConfigurationParseException
+    {
+        Enchantment enchantment = Enchantment.getByName(value.toUpperCase());
+        if(enchantment == null) throw new ConfigurationParseException("Invalid enchantment name", value);
+        return enchantment;
+    }
+    
+    @ConfigurationValueHandler
     static public ItemStack handleItemStackValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("type"))
@@ -375,6 +418,9 @@ public abstract class ConfigurationValueHandlers
         if(map.containsKey("hideAttributes"))
             if(handleBoolValue(map.get("hideAttributes")))
                 item.hideAttributes();
+        
+        if(map.containsKey("enchantments"))
+            item.enchant(handleMapValue(map.get("enchantments"), Enchantment.class, Integer.class));
         
         return item.item();
     }
