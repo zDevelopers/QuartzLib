@@ -31,17 +31,21 @@
 package fr.zcraft.zlib.components.configuration;
 
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public abstract class ConfigurationValueHandlers 
@@ -254,6 +258,8 @@ public abstract class ConfigurationValueHandlers
     
     static public <T> T handleEnumValue(Object obj, Class<T> enumClass) throws ConfigurationParseException
     {
+        if(obj == null) return null;
+        
         String strValue = obj.toString().toUpperCase().replace(' ', '_').replace('-', '_');
         
         try
@@ -268,6 +274,8 @@ public abstract class ConfigurationValueHandlers
     
     static public <T> ConfigurationSection handleConfigurationItemValue(Object obj, Class<T> sectionClass, ConfigurationItem parent, String tag) throws ConfigurationParseException
     {
+        if(obj == null) return null;
+        
         if(!(obj instanceof Map || obj instanceof MemorySection))
             throw new ConfigurationParseException("Dictionary expected", obj);
         
@@ -289,6 +297,22 @@ public abstract class ConfigurationValueHandlers
         }
         
         return section;
+    }
+    
+    static public <T> List<T> handleListValue(Object value, Class<T> itemType) throws ConfigurationParseException
+    {
+        if(!(value instanceof List)) 
+            throw new ConfigurationParseException("List expected", value);
+        
+        List rawList = (List) value;
+        ArrayList<T> newList = new ArrayList<>(rawList.size());
+        for(Object val : rawList)
+        {
+            if(val == null) continue;
+            newList.add(handleValue(val, itemType, null, null));
+        }
+        
+        return newList;
     }
     
     @ConfigurationValueHandler
@@ -323,5 +347,35 @@ public abstract class ConfigurationValueHandlers
         double z = map.containsKey("z") ? handleDoubleValue(map.get("z")) : 0;
         
         return new Vector(x, y, z);
+    }
+    
+    @ConfigurationValueHandler
+    static public ItemStack handleItemStackValue(Map map) throws ConfigurationParseException
+    {
+        if(!map.containsKey("type"))
+            throw new ConfigurationParseException("Key 'type' required.", map);
+        
+        Material material = handleEnumValue(map.get("type"), Material.class);
+        int amount = map.containsKey("amount") ? handleIntValue(map.get("amount")) : 1;
+        
+        ItemStackBuilder item = new ItemStackBuilder(material, amount);
+        
+        if(map.containsKey("data"))
+            item.data(handleShortValue(map.get("data")));
+        
+        if(map.containsKey("title"))
+            item.title(map.get("title").toString());
+        
+        if(map.containsKey("lore"))
+            item.lore(handleListValue(map.get("lore"), String.class));
+        
+        if(map.containsKey("glow"))
+            item.glow(handleBoolValue(map.get("glow")));
+        
+        if(map.containsKey("hideAttributes"))
+            if(handleBoolValue(map.get("hideAttributes")))
+                item.hideAttributes();
+        
+        return item.item();
     }
 }

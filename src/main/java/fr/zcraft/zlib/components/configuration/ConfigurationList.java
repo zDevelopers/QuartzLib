@@ -52,18 +52,7 @@ public class ConfigurationList<T> extends ConfigurationItem<List<T>> implements 
     {
         if(value == null) return null;
         
-        if(!(value instanceof List)) 
-            throw new ConfigurationParseException("List expected", value);
-        
-        List rawList = (List) value;
-        ArrayList<T> newList = new ArrayList<>(rawList.size());
-        for(Object val : rawList)
-        {
-            if(val == null) continue;
-            newList.add(ConfigurationValueHandlers.handleValue(val, itemType, null, null));
-        }
-        
-        return newList;
+        return ConfigurationValueHandlers.handleListValue(value, itemType);
     }
     
     @Override

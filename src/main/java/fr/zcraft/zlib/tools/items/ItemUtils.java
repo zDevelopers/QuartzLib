@@ -357,7 +357,7 @@ abstract public class ItemUtils
         try
         {
             Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            Object itemStackHandle =CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+            Object itemStackHandle = CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
             Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
             Class MinecraftItem = Reflection.getMinecraftClassByName("Item");
             Object ItemsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
@@ -376,7 +376,7 @@ abstract public class ItemUtils
         try
         {
             Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            Object itemStackHandle = Reflection.getFieldValue(CraftItemStack, item, "handle");
+            Object itemStackHandle = CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
             Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
             return (String) Reflection.call(minecraftItem, getI18nNameMethod(item), itemStackHandle);
         }

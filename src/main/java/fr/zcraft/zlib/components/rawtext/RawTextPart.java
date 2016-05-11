@@ -34,6 +34,9 @@ package fr.zcraft.zlib.components.rawtext;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.components.commands.Command;
 import fr.zcraft.zlib.components.commands.Commands;
+import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.items.ItemUtils;
+import fr.zcraft.zlib.tools.reflection.NMSException;
 import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
 import org.bukkit.Statistic;
@@ -65,7 +68,9 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         SHOW_ENTITY
     }
     
-    private final String text;
+    private String text;
+    private boolean translate = false;
+    
     private final RawTextPart parent;
     private final ArrayList<RawTextPart> extra = new ArrayList<>();
     
@@ -84,6 +89,11 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     private ActionHover actionHover = null;
     private Object actionHoverValue = null;
     
+    RawTextPart()
+    {
+        this(null);
+    }
+    
     RawTextPart(String text)
     {
         this(text, null);
@@ -95,6 +105,11 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         this.parent = parent;
     }
     
+    public RawTextPart then()
+    {
+        return then(null);
+    }
+    
     public RawTextPart then(String text)
     {
         RawTextPart root = getRoot();
@@ -102,6 +117,39 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         
         root.extra.add(newPart);
         return newPart;
+    }
+    
+    public T text(String text)
+    {
+        this.text = text;
+        this.translate = false;
+        
+        return (T)this;
+    }
+    
+    public T translate(String text)
+    {
+        this.text = text;
+        this.translate = true;
+        
+        return (T)this;
+    }
+    
+    public T translate(ItemStack item)
+    {
+        String trName;
+        
+        try
+        {
+            trName = ItemUtils.getI18nName(item) + ".name";
+        }
+        catch(NMSException ex)
+        {
+            PluginLogger.warning("Exception while retreiving item i18n key", ex);
+            trName = "item." + item.getType().toString().toLowerCase() + ".name";
+        }
+        
+        return translate(trName);
     }
     
     public T color(ChatColor color)
@@ -258,7 +306,14 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     public JSONObject toJSON()
     {
         JSONObject obj = new JSONObject();
-        obj.put("text", text);
+        if(translate)
+        {
+            obj.put("translate", text);
+        }
+        else
+        {
+            obj.put("text", text);
+        }
         
         if(!extra.isEmpty())
         {
