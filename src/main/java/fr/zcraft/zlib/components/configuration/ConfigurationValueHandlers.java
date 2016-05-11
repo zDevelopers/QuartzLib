@@ -47,6 +47,8 @@ import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
 public abstract class ConfigurationValueHandlers 
@@ -401,7 +403,17 @@ public abstract class ConfigurationValueHandlers
         Material material = handleEnumValue(map.get("type"), Material.class);
         int amount = map.containsKey("amount") ? handleIntValue(map.get("amount")) : 1;
         
-        ItemStackBuilder item = new ItemStackBuilder(material, amount);
+        ItemStackBuilder item;
+        
+        if(material.equals(Material.POTION))
+        {
+            Potion potion = handlePotionValue(map);
+            item = new ItemStackBuilder(potion.toItemStack(amount));
+        }
+        else
+        {
+            item = new ItemStackBuilder(material, amount);
+        }
         
         if(map.containsKey("data"))
             item.data(handleShortValue(map.get("data")));
@@ -423,5 +435,19 @@ public abstract class ConfigurationValueHandlers
             item.enchant(handleMapValue(map.get("enchantments"), Enchantment.class, Integer.class));
         
         return item.item();
+    }
+    
+    @ConfigurationValueHandler
+    static public Potion handlePotionValue(Map map) throws ConfigurationParseException
+    {
+        if(!map.containsKey("effect"))
+            throw new ConfigurationParseException("Potion effect is required.", map);
+        
+        PotionType type = handleEnumValue(map.get("effect"), PotionType.class);
+        int level = map.containsKey("level") ? handleByteValue(map.get("level")) : 1;
+        boolean splash = map.containsKey("splash") ? handleBoolValue(map.get("splash")) : false;
+        boolean extended = map.containsKey("extended") ? handleBoolValue(map.get("extended")) : false;
+        
+        return new Potion(type, level, splash, extended);
     }
 }
