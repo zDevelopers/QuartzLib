@@ -30,6 +30,8 @@
 package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.reflection.NMSException;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.runners.RunTask;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -267,6 +269,121 @@ abstract public class ItemUtils
         }
 
         return 0;
+    }
+    
+    static private String getI18nNameMethodName = null;
+    
+    static private String getI18nNameMethod(ItemStack item) throws NMSException
+    {
+        if(getI18nNameMethodName != null) return getI18nNameMethodName;
+        
+        try
+        {
+            Class MinecraftItem = Reflection.getMinecraftClassByName("Item");
+            Class MinecraftItemStack = Reflection.getMinecraftClassByName("ItemStack");
+            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            Object itemStackHandle = CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+            Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
+            
+            for(Method method : MinecraftItem.getMethods())
+            {
+                if(!String.class.equals(method.getReturnType())) continue;
+                Class[] params = method.getParameterTypes();
+                if(params.length != 1) continue;
+                if(!MinecraftItemStack.equals(params[0])) continue;
+                String result = (String) Reflection.call(minecraftItem, method.getName(), itemStackHandle);
+                if(result == null) continue;
+                if(!(result.startsWith("item.") || result.startsWith("tile."))) continue;
+                
+                getI18nNameMethodName = method.getName();
+                return getI18nNameMethodName;
+            }
+            
+            throw new NMSException("Unable to retreive Minecraft I18n name : no method found");
+        }
+        catch (Exception ex)
+        {
+            throw new NMSException("Unable to retreive Minecraft I18n name", ex); 
+        }
+    }
+    
+    static private Method registryLookupMethod = null;
+    
+    static private Method getRegistryLookupMethod() throws NMSException
+    {
+        if(registryLookupMethod != null) return registryLookupMethod;
+        
+        try
+        {
+            Class MinecraftItem = Reflection.getMinecraftClassByName("Item");
+            Object MaterialsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
+            
+            Method getMethod = null;
+            
+            for(Method method : MaterialsRegistry.getClass().getMethods())
+            {
+                if(!"get".equals(method.getName())) continue;
+                if(method.getParameters().length != 1) continue;
+                
+                getMethod = method;
+                break;
+            }
+            
+            if(getMethod == null)
+                throw new NMSException("Method RegistryMaterials.get() not found."); 
+            
+            for(Method method : MaterialsRegistry.getClass().getMethods())
+            {
+                if(method.getParameters().length != 1) continue;
+                if("get".equals(method.getName())) continue;
+                
+                if(!method.getGenericReturnType().equals(getMethod.getGenericParameterTypes()[0])) continue;
+                if(!method.getGenericParameterTypes()[0].equals(getMethod.getGenericReturnType())) continue;
+                
+                registryLookupMethod = method;
+                return registryLookupMethod;
+            }
+            
+            throw new NMSException("Method RegistryMaterials.lookup() not found."); 
+        }
+        catch (Exception ex)
+        {
+            throw new NMSException("Unable to retreive Minecraft ID", ex); 
+        }
+    }
+    
+    static public String getMinecraftId(ItemStack item) throws NMSException
+    {
+        try
+        {
+            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            Object itemStackHandle =CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+            Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
+            Class MinecraftItem = Reflection.getMinecraftClassByName("Item");
+            Object ItemsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
+            
+            Object minecraftKey = getRegistryLookupMethod().invoke(ItemsRegistry, minecraftItem);
+            
+            return minecraftKey.toString();        }
+        catch(Exception ex)
+        {
+            throw new NMSException("Unable to retreive Minecraft ID", ex);
+        }
+    }
+    
+    static public String getI18nName(ItemStack item) throws NMSException
+    {
+        try
+        {
+            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            Object itemStackHandle = Reflection.getFieldValue(CraftItemStack, item, "handle");
+            Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
+            return (String) Reflection.call(minecraftItem, getI18nNameMethod(item), itemStackHandle);
+        }
+        catch(Exception ex)
+        {
+            throw new NMSException("Unable to retreive Minecraft I18n name", ex);
+        }
     }
     
     /**

@@ -189,7 +189,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     
     public T hover(ItemStack item)
     {
-        return hover(ActionHover.SHOW_ITEM, RawText.toJSON(item).toJSONString());
+        return hover(ActionHover.SHOW_ITEM, RawText.toJSONString(item));
     }
     
     public T hover(Entity entity)

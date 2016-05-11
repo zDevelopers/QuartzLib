@@ -33,12 +33,16 @@ package fr.zcraft.zlib.components.rawtext;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
 import com.google.common.base.CaseFormat;
+import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.items.ItemUtils;
+import fr.zcraft.zlib.tools.reflection.NMSException;
 import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class RawText extends RawTextPart<RawText>
@@ -95,39 +99,83 @@ public class RawText extends RawTextPart<RawText>
         }
     }
     
-    static public JSONObject toJSON(ItemStack item)
+    //Mojang does not support strict JSON ...........
+    static public String toJSONString(ItemStack item)
     {
-        JSONObject obj = new JSONObject();
+        StringBuilder str = new StringBuilder("{");
         
-        obj.put("id", item.getType().toString());
-        obj.put("Damage", item.getData().getData());
+        str.append("id:\"");
+        try
+        {
+            str.append(ItemUtils.getMinecraftId(item));
+        }
+        catch (NMSException ex)
+        {
+            PluginLogger.warning("NMS Exception while parsing ItemStack to JSON String", ex);
+            str.append(item.getTypeId());
+        }
+        str.append("\"");
         
-        JSONObject itemTag = new JSONObject();
+        str.append(",Damage:\"");
+        str.append(item.getData().getData());
+        str.append("\"");
         
-        JSONObject displayTag = toJSON(item.getItemMeta());
-        if(!displayTag.isEmpty())
-            itemTag.put("Display", displayTag);
         
+        String displayTag = toJSONString(item.getItemMeta());
         byte itemFlags = toJSON(item.getItemMeta().getItemFlags());
-        if(itemFlags > 0)
-            itemTag.put("HideFlags", itemFlags);
         
-        if(!itemTag.isEmpty())
-            obj.put("tag", itemTag);
+        if(itemFlags > 0 || displayTag != null)
+        {
+            str.append(",tag:{");
+            if(itemFlags > 0)
+            {
+                str.append("HideFlags:\"");
+                str.append(itemFlags);
+                str.append("\"");
+            }
+            
+            if(displayTag != null)
+            {
+                if(itemFlags > 0)
+                    str.append(",");
+                str.append("display:");
+                str.append(displayTag);
+            }
+            
+            str.append("}");
+        }
         
-        return obj;
+        str.append("}");
+        
+        return str.toString();
     }
     
-    static public JSONObject toJSON(ItemMeta meta)
+    static public String toJSONString(ItemMeta meta)
     {
-        JSONObject obj = new JSONObject();
+        StringBuilder str = new StringBuilder("{");
         
         if(meta.hasDisplayName())
-            obj.put("Name", meta.getDisplayName());
+        {
+            str.append("Name:\"");
+            str.append(meta.getDisplayName());
+            str.append("\"");
+        }
         if(meta.hasLore())
-            obj.put("Lore", meta.getLore());
+        {
+            if(meta.hasDisplayName())
+                str.append(',');
+            str.append("Lore:");
+            JSONArray lore = new JSONArray();
+            lore.addAll(meta.getLore());
+            str.append(lore.toJSONString());
+        }
         
-        return obj;
+        str.append("}");
+        
+        if(!meta.hasLore() && !meta.hasDisplayName())
+            return null;
+        
+        return str.toString();
     }
     
     static public byte toJSON(Set<ItemFlag> itemFlags)

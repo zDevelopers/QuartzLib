@@ -125,6 +125,7 @@ public class ConfigurationItem<T>
         {
             for(String parentName : parent.getDeprecatedFieldNames())
             {
+                allNames.add(parentName + "." + fieldName);
                 for(String deprecatedName : deprecatedNames)
                 {
                     allNames.add(parentName + "." + deprecatedName);
