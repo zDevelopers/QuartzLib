@@ -175,7 +175,7 @@ public class RawTextTest
     {
         final String HOVER_ACHIEVEMENT_TEST = "{\"text\":\"test\",\"hoverEvent\":{\"action\":\"show_achievement\",\"value\":\"achievement.theEnd\"}}";
         RawText text = new RawText("test")
-            .hover(Achievement.THE_END);
+            .hover(Achievement.END_PORTAL);
         
         assertJSON(text, HOVER_ACHIEVEMENT_TEST);
     }

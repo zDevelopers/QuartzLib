@@ -227,7 +227,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     
     public T hover(Achievement achievement)
     {
-        return hover(ActionHover.SHOW_ACHIEVEMENT, "achievement." + enumCamel(achievement));
+        return hover(ActionHover.SHOW_ACHIEVEMENT, "achievement." + RawText.getI18nKey(achievement));
     }
     
     public T hover(Statistic statistic)
