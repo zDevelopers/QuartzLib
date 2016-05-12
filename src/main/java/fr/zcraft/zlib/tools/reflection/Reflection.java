@@ -35,9 +35,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -338,29 +340,73 @@ public final class Reflection
         return true;
     }
     
-    static public Method findMethod(Class hClass, String name, Class... parameterTypes)
+    static public Method findMethod(Class hClass, String name, Type... parameterTypes)
     {
-        return findMethod(hClass, name, 0, parameterTypes);
+        return findMethod(hClass, name, null, 0, parameterTypes);
     }
     
-    static public Method findMethod(Class hClass, String name, int modifiers, Class... parameterTypes)
+    static public Method findMethod(Class hClass, String name, int modifiers, Type... parameterTypes)
     {
+        return findMethod(hClass, name, null, modifiers, parameterTypes);
+    }
+    
+    static public Method findMethod(Class hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
+    {
+        List<Method> methods = findAllMethods(hClass, name, returnType, modifiers, parameterTypes);
+        
+        if(methods.isEmpty()) return null;
+        
+        return methods.get(0);
+    }
+    
+    static public List<Method> findAllMethods(Class hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
+    {
+        List<Method> methods = new ArrayList<>();
+        
         methods: for(Method method : hClass.getMethods())
         {
-            if(!method.getName().equals(name)) continue;
+            if(!nameMatches(method.getName(), name)) continue;
             if(!hasModifiers(method.getModifiers(), modifiers)) continue;
-            if(parameterTypes.length != method.getParameterTypes().length) continue;
+            if(returnType != null && !typeIsAssignableFrom(method.getGenericReturnType(), returnType)) continue;
             
-            for(Class paramType : method.getParameterTypes())
+            Type[] methodTypes = method.getGenericParameterTypes();
+            if(parameterTypes.length != methodTypes.length) continue;
+            
+            for(int i = 0; i < methodTypes.length; ++i)
             {
-                if(!paramType.isAssignableFrom(hClass))
+                if(parameterTypes[i] == null) continue;
+                if(!typeIsAssignableFrom(parameterTypes[i], methodTypes[i]))
                     continue methods;
             }
             
-            return method;
+            methods.add(method);
         }
         
-        return null;
+        return methods;
+    }
+    
+    static private boolean nameMatches(String methodName, String pattern)
+    {
+        if(pattern == null) return true;
+        
+        if(pattern.startsWith("!"))
+        {
+            return !pattern.equals(methodName);
+        }
+        else
+        {
+            return pattern.equals(methodName);
+        }
+    }
+    
+    static public boolean typeIsAssignableFrom(Type source, Type destination)
+    {
+        if(source instanceof Class && destination instanceof Class)
+        {
+            return ((Class)destination).isAssignableFrom((Class) source);
+        }
+        
+        return source.equals(destination);
     }
     
     static public boolean hasModifiers(int modifiers, int requiredModifiers)

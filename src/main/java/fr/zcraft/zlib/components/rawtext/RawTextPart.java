@@ -141,7 +141,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         
         try
         {
-            trName = ItemUtils.getI18nName(item) + ".name";
+            trName = ItemUtils.getI18nName(item);
         }
         catch(NMSException ex)
         {

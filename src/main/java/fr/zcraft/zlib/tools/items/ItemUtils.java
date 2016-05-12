@@ -43,7 +43,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Random;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.Potion;
 
 //import org.bukkit.Sound;
 
@@ -309,15 +312,11 @@ abstract public class ItemUtils
             Object itemStackHandle = CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
             Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
             
-            for(Method method : MinecraftItem.getMethods())
+            for(Method method : Reflection.findAllMethods(MinecraftItem, null, String.class, 0, MinecraftItemStack))
             {
-                if(!String.class.equals(method.getReturnType())) continue;
-                Class[] params = method.getParameterTypes();
-                if(params.length != 1) continue;
-                if(!MinecraftItemStack.equals(params[0])) continue;
                 String result = (String) Reflection.call(minecraftItem, method.getName(), itemStackHandle);
                 if(result == null) continue;
-                if(!(result.startsWith("item.") || result.startsWith("tile."))) continue;
+                if(!(result.startsWith("item.") || result.startsWith("tile.") || result.startsWith("potion."))) continue;
                 
                 getI18nNameMethodName = method.getName();
                 return getI18nNameMethodName;
@@ -350,33 +349,22 @@ abstract public class ItemUtils
             Class MinecraftItem = Reflection.getMinecraftClassByName("Item");
             Object MaterialsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
             
-            Method getMethod = null;
-            
-            for(Method method : MaterialsRegistry.getClass().getMethods())
-            {
-                if(!"get".equals(method.getName())) continue;
-                if(method.getParameters().length != 1) continue;
-                
-                getMethod = method;
-                break;
-            }
+            Method getMethod = Reflection.findMethod(MaterialsRegistry.getClass(), "get", (Type) null);
             
             if(getMethod == null)
                 throw new NMSException("Method RegistryMaterials.get() not found."); 
             
-            for(Method method : MaterialsRegistry.getClass().getMethods())
-            {
-                if(method.getParameters().length != 1) continue;
-                if("get".equals(method.getName())) continue;
-                
-                if(!method.getGenericReturnType().equals(getMethod.getGenericParameterTypes()[0])) continue;
-                if(!method.getGenericParameterTypes()[0].equals(getMethod.getGenericReturnType())) continue;
-                
-                registryLookupMethod = method;
-                return registryLookupMethod;
-            }
+            registryLookupMethod = Reflection.findMethod(
+                    MaterialsRegistry.getClass(), 
+                    "!get", 
+                    getMethod.getGenericParameterTypes()[0], 
+                    0,
+                    getMethod.getGenericReturnType());
             
-            throw new NMSException("Method RegistryMaterials.lookup() not found."); 
+            if(registryLookupMethod == null)
+                throw new NMSException("Method RegistryMaterials.lookup() not found."); 
+            
+            return registryLookupMethod;
         }
         catch (Exception ex)
         {
@@ -400,9 +388,8 @@ abstract public class ItemUtils
     {
         try
         {
-            Class<?> CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            Object itemStackHandle = CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
-            Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
+            Object craftItemStack = asNMSCopy(item);
+            Object minecraftItem = Reflection.getFieldValue(craftItemStack, "item");
             Class<?> MinecraftItem = Reflection.getMinecraftClassByName("Item");
             Object ItemsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
             
@@ -427,17 +414,73 @@ abstract public class ItemUtils
      */
     static public String getI18nName(ItemStack item) throws NMSException
     {
+        if(item.getItemMeta() instanceof PotionMeta) return getI18nPotionName(item);
+        
         try
         {
-            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            Object itemStackHandle = CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
-            Object minecraftItem = Reflection.getFieldValue(itemStackHandle, "item");
-            return (String) Reflection.call(minecraftItem, getI18nNameMethod(item), itemStackHandle);
+            Object craftItemStack = asNMSCopy(item);
+            Object minecraftItem = Reflection.getFieldValue(craftItemStack, "item");
+            return Reflection.call(minecraftItem, getI18nNameMethod(item), craftItemStack) + ".name";
         }
         catch(Exception ex)
         {
             throw new NMSException("Unable to retrieve Minecraft I18n name", ex);
         }
+    }
+    
+    static public Object asNMSCopy(ItemStack item) throws NMSException
+    {
+        try
+        {
+            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            return CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+        }
+        catch(Exception ex)
+        {
+            throw new NMSException("Unable to retreive NMS copy", ex);
+        }
+    }
+    
+    static private String getI18nPotionName(ItemStack item) throws NMSException
+    {
+        String potionKey = getI18nPotionKey(item);
+        
+        try
+        {
+            Class PotionUtil = Reflection.getMinecraftClassByName("PotionUtil");
+            Class PotionRegistry = Reflection.getMinecraftClassByName("PotionRegistry");
+            Class ItemStackClass = Reflection.getMinecraftClassByName("ItemStack");
+            Object registry = Reflection.findMethod(PotionUtil, null, PotionRegistry, 0, ItemStackClass).invoke(null, asNMSCopy(item));
+            
+            return (String) Reflection.findMethod(PotionRegistry, null, String.class, 0, String.class).invoke(registry, potionKey);
+        }
+        catch(Exception ex)
+        {
+            throw new NMSException("Unable to retrieve Minecraft I18n name", ex);
+        }
+    }
+    
+    static private String getI18nPotionKey(ItemStack item)
+    {
+        switch(item.getType().name())
+        {
+            case "SPLASH_POTION":
+                return "splash_potion.effect.";
+            case "LINGERING_POTION":
+                return "lingering_potion.effect.";
+            case "POTION":
+                break;
+            default: 
+                return "potion.effect";
+        }
+        
+        Potion potion = Potion.fromItemStack(item);
+        
+        if(potion.isSplash())
+        {
+            return "splash_potion.effect.";
+        }
+        return "potion.effect.";
     }
     
     /**
