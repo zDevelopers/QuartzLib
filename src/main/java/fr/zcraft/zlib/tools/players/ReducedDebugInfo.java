@@ -50,10 +50,10 @@ import java.util.UUID;
 /**
  * Enables or disables reduced debug infos for a player.
  */
-public final class ReducedDebugInfos
+public final class ReducedDebugInfo
 {
-    private static final byte ENABLE_REDUCED_DEBUG_INFOS = 22;
-    private static final byte DISABLE_REDUCED_DEBUG_INFOS = 23;
+    private static final byte ENABLE_REDUCED_DEBUG_INFO = 22;
+    private static final byte DISABLE_REDUCED_DEBUG_INFO = 23;
 
 
     private static boolean enabled;
@@ -100,7 +100,7 @@ public final class ReducedDebugInfos
     }
 
     /**
-     * Enables or disables reduced debug infos for the given player.
+     * Enables or disables reduced debug info for the given player.
      *
      * <p>Note that this will only be guaranteed effective on Notchian clients,
      * as modded ones can choose to ignore the packet.</p>
@@ -130,7 +130,7 @@ public final class ReducedDebugInfos
             final Object handle = NMSNetwork.getPlayerHandle(player);
 
             final Constructor<?> packetConstructor = packetPlayOutEntityStatusClass.getConstructor(entityClass, byte.class);
-            final Object packet = packetConstructor.newInstance(handle, reduce ? ENABLE_REDUCED_DEBUG_INFOS : DISABLE_REDUCED_DEBUG_INFOS);
+            final Object packet = packetConstructor.newInstance(handle, reduce ? ENABLE_REDUCED_DEBUG_INFO : DISABLE_REDUCED_DEBUG_INFO);
 
             NMSNetwork.sendPacket(NMSNetwork.getPlayerConnection(handle), packet);
 
