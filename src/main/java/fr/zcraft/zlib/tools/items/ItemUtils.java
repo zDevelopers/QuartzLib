@@ -441,6 +441,21 @@ abstract public class ItemUtils
         }
     }
     
+    static public Object getNMSItemStack(ItemStack item) throws NMSException
+    {
+        try
+        {
+            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            if(CraftItemStack.isAssignableFrom(item.getClass()))
+                return Reflection.getFieldValue(CraftItemStack, item, "handle");
+            return CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+        }
+        catch(Exception ex)
+        {
+            throw new NMSException("Unable to retreive NMS copy", ex);
+        }
+    }
+    
     static private String getI18nPotionName(ItemStack item) throws NMSException
     {
         String potionKey = getI18nPotionKey(item);

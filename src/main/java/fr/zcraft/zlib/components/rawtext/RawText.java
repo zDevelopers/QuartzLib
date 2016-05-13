@@ -33,17 +33,18 @@ package fr.zcraft.zlib.components.rawtext;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
+import fr.zcraft.zlib.tools.nbt.NBT;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
 import java.util.EnumMap;
+import java.util.HashMap;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.Map;
@@ -104,138 +105,54 @@ public class RawText extends RawTextPart<RawText>
         }
     }
     
-    //Mojang does not support strict JSON ...........
     static public String toJSONString(ItemStack item)
     {
-        StringBuilder str = new StringBuilder("{");
+        Map<String, Object> itemData = new HashMap<String, Object>();
         
-        str.append("id:\"");
         try
         {
-            str.append(ItemUtils.getMinecraftId(item));
+            itemData.put("id", ItemUtils.getMinecraftId(item));
         }
         catch (NMSException ex)
         {
             PluginLogger.warning("NMS Exception while parsing ItemStack to JSON String", ex);
-            str.append(item.getTypeId());
+            itemData.put("id", item.getTypeId());
         }
-        str.append("\"");
         
-        str.append(",Damage:\"");
-        str.append(item.getData().getData());
-        str.append("\"");
-        
-        
-        String displayTag = toJSONString(item.getItemMeta());
-        String enchantments = toJSONString(item.getItemMeta().getEnchants());
-        byte itemFlags = toJSON(item.getItemMeta().getItemFlags());
-        
-        if(itemFlags > 0 || displayTag != null || enchantments != null)
+        itemData.put("Damage", item.getDurability());
+        try
         {
-            str.append(",tag:{");
-            if(itemFlags > 0)
-            {
-                str.append("HideFlags:\"");
-                str.append(itemFlags);
-                str.append("\"");
-            }
+            itemData.put("tag", NBT.fromItemStack(item));
+        }
+        catch (NMSException ex)
+        {
+            PluginLogger.warning("Unable to retrieve NBT data", ex);
+            Map<String, Object> tag = new HashMap();
             
-            if(displayTag != null)
-            {
-                if(itemFlags > 0)
-                    str.append(",");
-                str.append("display:");
-                str.append(displayTag);
-            }
-
-            if (enchantments != null)
-            {
-                if (itemFlags > 0 || displayTag != null)
-                    str.append(",");
-                str.append("ench:");
-                str.append(enchantments);
-            }
-            
-            str.append("}");
+            tag.put("display", NBT.fromItemMeta(item.getItemMeta()));
+            tag.put("ench", NBT.fromEnchantments(item.getEnchantments()));
+            tag.put("HideFlags", NBT.fromItemFlags(item.getItemMeta().getItemFlags()));
         }
         
-        str.append("}");
-        
-        return str.toString();
+        return NBT.toNBTJSONString(itemData);
     }
     
+    @Deprecated
     static public String toJSONString(ItemMeta meta)
     {
-        StringBuilder str = new StringBuilder("{");
-        
-        if(meta.hasDisplayName())
-        {
-            str.append("Name:\"");
-            str.append(meta.getDisplayName());
-            str.append("\"");
-        }
-        if(meta.hasLore())
-        {
-            if(meta.hasDisplayName())
-                str.append(',');
-            str.append("Lore:");
-            JSONArray lore = new JSONArray();
-            lore.addAll(meta.getLore());
-            str.append(lore.toJSONString());
-        }
-        
-        str.append("}");
-        
-        if(!meta.hasLore() && !meta.hasDisplayName())
-            return null;
-        
-        return str.toString();
+        return NBT.toNBTJSONString(NBT.fromItemMeta(meta));
     }
 
+    @Deprecated
     static public String toJSONString(Map<Enchantment, Integer> enchants)
     {
-        if (enchants.isEmpty())
-            return null;
-
-        StringBuilder str = new StringBuilder("[");
-
-        for (Map.Entry<Enchantment, Integer> enchantment : enchants.entrySet())
-        {
-            str.append("{")
-                    .append("id:").append(enchantment.getKey().getId()).append(",")
-                    .append("lvl:").append(enchantment.getValue())
-                    .append("},");
-        }
-
-        str.append("]");
-
-        return str.toString();
+        return NBT.toNBTJSONString(NBT.fromEnchantments(enchants));
     }
     
+    @Deprecated
     static public byte toJSON(Set<ItemFlag> itemFlags)
     {
-        byte flags = 0;
-        
-        for(ItemFlag flag : itemFlags)
-        {
-            switch(flag)
-            {
-                case HIDE_ENCHANTS:
-                    flags += 1; break;
-                case HIDE_ATTRIBUTES: 
-                    flags += 1 << 1; break;
-                case HIDE_UNBREAKABLE:
-                    flags += 1 << 2; break;
-                case HIDE_DESTROYS:
-                    flags += 1 << 3; break;
-                case HIDE_PLACED_ON:
-                    flags += 1 << 4; break;
-                case HIDE_POTION_EFFECTS:
-                    flags += 1 << 5; break;
-            }
-        }
-        
-        return flags;
+        return NBT.fromItemFlags(itemFlags);
     }
     
     static public JSONObject toJSON(Entity entity)

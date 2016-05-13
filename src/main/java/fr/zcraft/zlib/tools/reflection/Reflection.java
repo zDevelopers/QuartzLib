@@ -455,6 +455,16 @@ public final class Reflection
         Constructor<T> constructor = hClass.getConstructor(getTypes(parameters));
         return constructor.newInstance(parameters);
     }
+    
+    static public <T> Constructor findConstructor(Class<T> hClass, int parameterCount)
+    {
+        for(Constructor constructor: hClass.getConstructors())
+        {
+            if(constructor.getParameterTypes().length == parameterCount)
+                return constructor;
+        }
+        return null;
+    }
 
 
     /**
