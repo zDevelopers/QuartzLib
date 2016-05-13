@@ -43,10 +43,14 @@ import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
@@ -99,11 +103,20 @@ public abstract class ConfigurationValueHandlers
         handler.addHandler(parameterTypes[0], method);
     }
     
+    static public <T> T handleValue(Object obj, Class<T> outputType)  throws ConfigurationParseException
+    {
+        return handleValue(obj, outputType, null, null);
+    }
     
     static public <T> T handleValue(Object obj, Class<T> outputType, ConfigurationItem parent, String tag) throws ConfigurationParseException
     {
         if(obj == null) return null;
         if(outputType == null) return (T) obj;//yolocast, strongly deprecated
+        
+        if(obj instanceof MemorySection)
+        {
+            obj = ((MemorySection) obj).getValues(false);
+        }
         
         if(outputType.isAssignableFrom(obj.getClass())) return (T) obj;
         
@@ -318,12 +331,12 @@ public abstract class ConfigurationValueHandlers
         return newList;
     }
     
-    static <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType) throws ConfigurationParseException
+    static public <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType) throws ConfigurationParseException
     {
         return handleMapValue(value, keyType, valueType, null);
     }
     
-    static <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType, ConfigurationItem parent) throws ConfigurationParseException
+    static public <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType, ConfigurationItem parent) throws ConfigurationParseException
     {
         Map<String, Object> rawMap;
         
@@ -449,5 +462,68 @@ public abstract class ConfigurationValueHandlers
         boolean extended = map.containsKey("extended") ? handleBoolValue(map.get("extended")) : false;
         
         return new Potion(type, level, splash, extended);
+    }
+    
+    @ConfigurationValueHandler
+    static public DyeColor handleDyeColorValue(Integer value) throws ConfigurationParseException
+    {
+        DyeColor color = DyeColor.getByDyeData((byte) (int) value);
+        
+        if(color == null)
+            throw new ConfigurationParseException("Invalid dye color code", value);
+        
+        return color;
+    }
+    
+    static private Object getRawValue(Map map, String key)
+    {
+        Object value = null;
+        for(Object mapKey : map.keySet())
+        {
+            if(mapKey.toString().equalsIgnoreCase(key))
+                value = map.get(mapKey);
+        }
+        
+        return value;
+    }
+    
+    @ConfigurationValueHandler
+    static public BannerMeta handleBannerValue(Map map) throws ConfigurationParseException
+    {
+        BannerMeta banner = (BannerMeta) new ItemStack(Material.BANNER).getItemMeta();
+        DyeColor baseColor = getValue(map, "color", DyeColor.BLACK);
+        List patterns = getListValue(map, "patterns", new ArrayList(), Object.class);
+        
+        banner.setBaseColor(baseColor);
+        
+        for(Object rawPattern : patterns)
+        {
+            Map<String, Object> mapPattern = ConfigurationValueHandlers.handleMapValue(rawPattern, String.class, Object.class);
+            
+            DyeColor patternColor = getValue(mapPattern, "color", DyeColor.BLACK);
+            String patternName = getValue(mapPattern, "pattern", "");
+            banner.addPattern(new Pattern(patternColor, PatternType.getByIdentifier(patternName)));
+        }
+        
+        return banner;
+    }
+    
+    static public <T> T getValue(Map map, String key, T defaultValue) throws ConfigurationParseException
+    {
+        return getValue(map, key, defaultValue, (Class<T>) defaultValue.getClass());
+    }
+    
+    static public <T> T getValue(Map map, String key, T defaultValue, Class<T> valueType) throws ConfigurationParseException
+    {
+        Object rawValue = getRawValue(map, key);
+        if(rawValue == null) return defaultValue;
+        return handleValue(rawValue, valueType);
+    }
+    
+    static public <T> List<T> getListValue(Map map, String key, List<T> defaultValue, Class<T> valueType) throws ConfigurationParseException
+    {
+        Object rawValue = getRawValue(map, key);
+        if(rawValue == null) return defaultValue;
+        return handleListValue(rawValue, valueType);
     }
 }
