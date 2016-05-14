@@ -8,7 +8,6 @@ package fr.zcraft.zlib.tools.nbt;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -58,7 +57,7 @@ class NBTListWrapper implements List<Object>
     @Override
     public boolean contains(Object o)
     {
-        if(nmsNbtList == null) return true;
+        if(nmsNbtList == null) return false;
         return nmsNbtList.contains(NBT.fromNativeValue(o));
     }
 

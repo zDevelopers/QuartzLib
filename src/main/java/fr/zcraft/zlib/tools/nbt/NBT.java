@@ -60,7 +60,14 @@ public abstract class NBT
     static public Map<String, Object> fromItemStack(ItemStack item) throws NMSException
     {
         init();
-        return new NBTCompoundWrapper(getMcNBTCompound(item));
+        try
+        {
+            return new NBTCompoundWrapper(getMcNBTCompound(item));
+        }
+        catch(Exception ex)
+        {
+            throw new NMSException("Unable to retrieve NBT data", ex);
+        }
     }
     
     static public Map<String, Object> fromItemMeta(ItemMeta meta)
