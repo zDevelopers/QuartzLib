@@ -138,6 +138,8 @@ enum NBTType
     
     public Object getData(Object nmsNBTTag)
     {
+        if(nmsNBTTag == null)
+            return null;
         try
         {
             return Reflection.getFieldValue(nmsNBTTag, getNmsTagFieldName());

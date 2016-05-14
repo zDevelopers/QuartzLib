@@ -152,6 +152,8 @@ public final class Reflection
     static public Object getFieldValue(Object instance, String name) 
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
+        if(instance == null)
+            throw new IllegalArgumentException("Cannot infer object type : instance is null.");
         return getFieldValue(instance.getClass(), instance, name);
     }
     
@@ -213,6 +215,8 @@ public final class Reflection
     static public void setFieldValue(Object instance, String name, Object value) 
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
+        if(instance == null)
+            throw new IllegalArgumentException("Cannot infer object type : instance is null.");
         setFieldValue(instance.getClass(), instance, name, value);
     }
     
@@ -286,6 +290,8 @@ public final class Reflection
     static public Object call(Object instance, String name, Object... parameters)
             throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
+        if(instance == null)
+            throw new IllegalArgumentException("Cannot infer object type : instance is null.");
         return call(instance.getClass(), instance, name, parameters);
     }
     
