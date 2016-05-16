@@ -83,4 +83,5 @@ Either create a plugin as usual and add the zLib as explained below, or use [the
    mvn clean install
    ```
 
-You should also update your code so your main class extends [`ZPlugin`](https://jenkins.carrade.eu/job/zLib/javadoc/index.html?fr/zcraft/zlib/core/ZPlugin.html) instead of `JavaPlugin`. No other changes are required. This will allow you to use directly some useful methods to load your plugin's components.
+You should also update your code so your main class extends [`ZPlugin`](https://jenkins.carrade.eu/job/zLib/javadoc/index.html?fr/zcraft/zlib/core/ZPlugin.html) instead of `JavaPlugin`. No other changes are required. This will allow you to use directly some useful methods to load your plugin's components.  
+Check out [the wiki](https://github.com/zDevelopers/zLib/wiki/Installation) for more informations.
