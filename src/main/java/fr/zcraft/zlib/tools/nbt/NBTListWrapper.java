@@ -11,11 +11,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 class NBTListWrapper implements List<Object>
 {
     private final Object nmsNbtTag;
-    private final List<Object> nmsNbtList;
+    private List<Object> nmsNbtList;
     
     public NBTListWrapper(Object nmsListTag)
     {
@@ -27,22 +28,36 @@ class NBTListWrapper implements List<Object>
         this.nmsNbtTag = nmsListTag;
         this.nmsNbtList = nmsNbtList;
     }
+    
+    private List<Object> getNbtList()
+    {
+        if(nmsNbtList == null)
+        {
+            nmsNbtList = new ArrayList<Object>();
+            NBTType.TAG_COMPOUND.setData(nmsNbtTag, nmsNbtList);
+        }
+        
+        return nmsNbtList;
+    }
 
     @Override
     public int size()
     {
+        if(nmsNbtList == null) return 0;
         return nmsNbtList.size();
     }
 
     @Override
     public boolean isEmpty()
     {
+        if(nmsNbtList == null) return true;
         return nmsNbtList.isEmpty();
     }
 
     @Override
     public boolean contains(Object o)
     {
+        if(nmsNbtList == null) return false;
         return nmsNbtList.contains(NBT.fromNativeValue(o));
     }
 
@@ -62,25 +77,29 @@ class NBTListWrapper implements List<Object>
     public <T> T[] toArray(T[] a)
     {
         ArrayList<T> list = new ArrayList<T>(size());
-        list.addAll((List<T>) this);
+        if(nmsNbtList != null)
+            list.addAll((List<T>) this);
         return list.toArray(a);
     }
 
     @Override
     public boolean add(Object e)
     {
-        return nmsNbtList.add(NBT.fromNativeValue(e));
+        return getNbtList().add(NBT.fromNativeValue(e));
     }
 
     @Override
     public boolean remove(Object o)
     {
+        if(nmsNbtList == null) return false;
         return nmsNbtList.remove(NBT.fromNativeValue(o));
     }
 
     @Override
     public boolean containsAll(Collection<?> c)
     {
+        if(nmsNbtList == null) return false;
+        
         for(Object o : c)
         {
             if(!contains(o))
@@ -96,7 +115,7 @@ class NBTListWrapper implements List<Object>
         boolean changed = false;
         for(Object value : c)
         {
-            if(nmsNbtList.add(NBT.fromNativeValue(value)))
+            if(getNbtList().add(NBT.fromNativeValue(value)))
                 changed = true;
         }
         
@@ -119,6 +138,8 @@ class NBTListWrapper implements List<Object>
     @Override
     public boolean removeAll(Collection<?> c)
     {
+        if(nmsNbtList == null) return false;
+        
         boolean changed = false;
         for(Object value : c)
         {
@@ -132,6 +153,8 @@ class NBTListWrapper implements List<Object>
     @Override
     public boolean retainAll(Collection<?> c)
     {
+        if(nmsNbtList == null) return false;
+        
         boolean changed = false;
         
         for(Object value : this)
@@ -149,42 +172,52 @@ class NBTListWrapper implements List<Object>
     @Override
     public void clear()
     {
+        if(nmsNbtList == null) return;
+        
         nmsNbtList.clear();
     }
 
     @Override
     public Object get(int index)
     {
+        if(nmsNbtList == null)
+            throw new ArrayIndexOutOfBoundsException("NBT List is empty");
         return NBT.toNativeValue(nmsNbtList.get(index));
     }
 
     @Override
     public Object set(int index, Object element)
     {
-        return NBT.toNativeValue(nmsNbtList.set(index, NBT.fromNativeValue(element)));
+        return NBT.toNativeValue(getNbtList().set(index, NBT.fromNativeValue(element)));
     }
 
     @Override
     public void add(int index, Object element)
     {
-        nmsNbtList.add(index, NBT.fromNativeValue(element));
+        getNbtList().add(index, NBT.fromNativeValue(element));
     }
 
     @Override
     public Object remove(int index)
     {
+        if(nmsNbtList == null)
+            throw new IndexOutOfBoundsException("NBT List is empty");
         return NBT.toNativeValue(nmsNbtList.remove(index));
     }
 
     @Override
     public int indexOf(Object o)
     {
+        if(nmsNbtList == null)
+            return -1;
         return nmsNbtList.indexOf(NBT.fromNativeValue(o));
     }
 
     @Override
     public int lastIndexOf(Object o)
     {
+        if(nmsNbtList == null)
+            return -1;
         return nmsNbtList.lastIndexOf(NBT.fromNativeValue(o));
     }
 
@@ -197,76 +230,115 @@ class NBTListWrapper implements List<Object>
     @Override
     public ListIterator<Object> listIterator(int index)
     {
+        if (index < 0 || index > size())
+            throw new IndexOutOfBoundsException("Index is out of bounds : " + index);
+        
+        if(nmsNbtList == null)
+            return new NBTListWrapperIterator(null);
+        
         return new NBTListWrapperIterator(nmsNbtList.listIterator(index));
     }
 
     @Override
     public List<Object> subList(int fromIndex, int toIndex)
     {
+        if (fromIndex < 0 || fromIndex > size())
+            throw new IndexOutOfBoundsException("fromIndex is out of bounds : " + fromIndex);
+        
+        if (toIndex < 0 || toIndex > size())
+            throw new IndexOutOfBoundsException("toIndex is out of bounds : " + toIndex);
+        
+        if(nmsNbtList == null)
+            return new NBTListWrapper(nmsNbtTag, null);
+        
         return new NBTListWrapper(nmsNbtTag, nmsNbtList.subList(fromIndex, toIndex));
     }
     
     private class NBTListWrapperIterator implements ListIterator<Object>
     {
-        private final ListIterator<Object> iterator;
+        private ListIterator<Object> iterator;
         
         public NBTListWrapperIterator(ListIterator<Object> iterator)
         {
             this.iterator = iterator;
         }
         
+        private ListIterator<Object> getIterator()
+        {
+            if(iterator == null)
+            {
+                iterator = getNbtList().listIterator();
+            }
+            
+            return iterator;
+        }
+        
         @Override
         public boolean hasNext()
         {
+            if(iterator == null)
+                return false;
             return iterator.hasNext();
         }
 
         @Override
         public Object next()
         {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
             return NBT.toNativeValue(iterator.next());
         }
 
         @Override
         public boolean hasPrevious()
         {
+            if(iterator == null)
+                return false;
             return iterator.hasPrevious();
         }
 
         @Override
         public Object previous()
         {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
             return NBT.toNativeValue(iterator.previous());
         }
 
         @Override
         public int nextIndex()
         {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
             return iterator.nextIndex();
         }
 
         @Override
         public int previousIndex()
         {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
             return iterator.previousIndex();
         }
 
         @Override
         public void remove()
         {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
             iterator.remove();
         }
 
         @Override
         public void set(Object e)
         {
-            iterator.set(NBT.fromNativeValue(e));
+            getIterator().set(NBT.fromNativeValue(e));
         }
 
         @Override
         public void add(Object e)
         {
-            iterator.add(NBT.fromNativeValue(e));
+            getIterator().add(NBT.fromNativeValue(e));
         }
 
     }
