@@ -81,7 +81,7 @@ abstract public class ItemUtils
             {
                 addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagValues.getClass());
             }
-            System.out.println(addItemFlagsMethod.toGenericString());
+            
             addItemFlagsMethod.setAccessible(true);
         }
         catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e)
