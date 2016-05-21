@@ -73,7 +73,15 @@ abstract public class ItemUtils
             Class<?> itemFlagClass = Class.forName("org.bukkit.inventory.ItemFlag");
             Method valuesMethod = itemFlagClass.getDeclaredMethod("values");
             itemFlagValues = (Object[]) valuesMethod.invoke(null);
-            addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagClass);
+            try
+            {
+                addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagClass);
+            }
+            catch(NoSuchMethodException ex)
+            {
+                addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagValues.getClass());
+            }
+            
             addItemFlagsMethod.setAccessible(true);
         }
         catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e)
@@ -106,7 +114,7 @@ abstract public class ItemUtils
 
         try
         {
-            addItemFlagsMethod.invoke(meta, itemFlagValues);
+            addItemFlagsMethod.invoke(meta, new Object[]{itemFlagValues});
         }
         catch (IllegalAccessException ex)
         {

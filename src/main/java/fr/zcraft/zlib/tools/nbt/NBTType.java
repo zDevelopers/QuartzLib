@@ -30,11 +30,8 @@
 package fr.zcraft.zlib.tools.nbt;
 
 import fr.zcraft.zlib.tools.reflection.Reflection;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 enum NBTType
 {
@@ -189,7 +186,7 @@ enum NBTType
     {
         for(NBTType type : NBTType.values())
         {
-            if(type.type.equals(klass))
+            if(type.type.isAssignableFrom(klass))
                 return type;
         }
         
