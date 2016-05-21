@@ -27,7 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.tools.nbt;
+package fr.zcraft.zlib.components.nbt;
 
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.util.List;
@@ -35,29 +35,29 @@ import java.util.Map;
 
 enum NBTType
 {
-    TAG_END((byte) 0, Void.class, null),
-    TAG_BYTE((byte) 1, byte.class, "NBTTagByte"),
-    TAG_SHORT((byte) 2, short.class, "NBTTagShort"),
-    TAG_INT((byte) 3, int.class, "NBTTagInt"),
-    TAG_LONG((byte) 4, long.class, "NBTTagLong"),
-    TAG_FLOAT((byte) 5, float.class, "NBTTagFloat"),
-    TAG_DOUBLE((byte) 6, double.class, "NBTTagDouble"),
-    TAG_BYTE_ARRAY((byte) 7, byte[].class, "NBTTagByteArray"),
-    TAG_INT_ARRAY((byte) 11, int[].class, "NBTTagIntArray"),
-    TAG_STRING((byte) 8, String.class, "NBTTagString"),
-    TAG_LIST((byte) 9, List.class, "NBTTagList"),
-    TAG_COMPOUND((byte) 10, Map.class, "NBTTagCompound");
+    TAG_END((byte) 0, null, Void.class),
+    TAG_BYTE((byte) 1, "NBTTagByte", byte.class, Byte.class),
+    TAG_SHORT((byte) 2, "NBTTagShort", short.class, Short.class),
+    TAG_INT((byte) 3, "NBTTagInt", int.class, Integer.class),
+    TAG_LONG((byte) 4, "NBTTagLong", long.class, Long.class),
+    TAG_FLOAT((byte) 5, "NBTTagFloat", float.class, Float.class),
+    TAG_DOUBLE((byte) 6, "NBTTagDouble", double.class, Double.class),
+    TAG_BYTE_ARRAY((byte) 7, "NBTTagByteArray", byte[].class),
+    TAG_INT_ARRAY((byte) 11, "NBTTagIntArray", int[].class),
+    TAG_STRING((byte) 8, "NBTTagString", String.class),
+    TAG_LIST((byte) 9, "NBTTagList", List.class),
+    TAG_COMPOUND((byte) 10, "NBTTagCompound", Map.class);
 
     // Unique NBT id
     private final byte id;
-    private final Class type;
+    private final Class[] types;
     private final String nmsClassName;
     private Class nmsClass;
 
-    private NBTType(byte id, Class type, String nmsClassName)
+    private NBTType(byte id, String nmsClassName, Class... types)
     {
         this.id = id;
-        this.type = type;
+        this.types = types;
         this.nmsClassName = nmsClassName;
     }
 
@@ -74,9 +74,20 @@ enum NBTType
         }
     }
     
-    public Class getJavaType()
+    public Class[] getJavaTypes()
     {
-        return type;
+        return types;
+    }
+    
+    public boolean isAssignableFrom(Class otherType)
+    {
+        for(Class type : types)
+        {
+            if(type.isAssignableFrom(otherType))
+                return true;
+        }
+        
+        return false;
     }
     
     public int getId()
@@ -98,7 +109,7 @@ enum NBTType
         }
         catch(Exception ex)
         {
-            throw new RuntimeException("Unable to retrieve NBT tag class", ex);
+            throw new NBTException("Unable to retrieve NBT tag class", ex);
         }
         
         return nmsClass;
@@ -108,7 +119,7 @@ enum NBTType
     {
         if(value == null)
             throw new IllegalArgumentException("Contents of a tag cannot be null");
-        if(!type.isAssignableFrom(value.getClass()))
+        if(!isAssignableFrom(value.getClass()))
             throw new IllegalArgumentException("Invalid content type '" + value.getClass() + "' for tag : " + nmsClassName);
         
         try
@@ -118,10 +129,12 @@ enum NBTType
             {
                 case TAG_COMPOUND:
                     tag = Reflection.instantiate(getNMSClass());
-                    new NBTCompoundWrapper(tag).putAll((Map) value);
+                    new NBTCompound(tag).putAll((Map) value);
+                    break;
                 case TAG_LIST:
                     tag = Reflection.instantiate(getNMSClass());
-                    new NBTListWrapper(tag).addAll((List) value);
+                    new NBTList(tag).addAll((List) value);
+                    break;
                 default:
                     tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);
             }
@@ -129,7 +142,7 @@ enum NBTType
         }
         catch (Exception ex)
         {
-            throw new RuntimeException("Unable to create NBT tag", ex);
+            throw new NBTException("Unable to create NBT tag", ex);
         }
     }
     
@@ -143,7 +156,7 @@ enum NBTType
         }
         catch (Exception ex)
         {
-            throw new RuntimeException("Unable to retrieve NBT tag data", ex);
+            throw new NBTException("Unable to retrieve NBT tag data", ex);
         }
     }
     
@@ -155,7 +168,7 @@ enum NBTType
         }
         catch (Exception ex)
         {
-            throw new RuntimeException("Unable to set NBT tag data", ex);
+            throw new NBTException("Unable to set NBT tag data", ex);
         }
     }
     
@@ -178,7 +191,7 @@ enum NBTType
         }
         catch(Exception ex)
         {
-            throw new RuntimeException("Unable to retrieve type of nbt tag", ex);
+            throw new NBTException("Unable to retrieve type of nbt tag", ex);
         }
     }
     
@@ -186,7 +199,7 @@ enum NBTType
     {
         for(NBTType type : NBTType.values())
         {
-            if(type.type.isAssignableFrom(klass))
+            if(type.isAssignableFrom(klass))
                 return type;
         }
         

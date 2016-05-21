@@ -459,6 +459,7 @@ public final class Reflection
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         Constructor<T> constructor = hClass.getConstructor(getTypes(parameters));
+        constructor.setAccessible(true);
         return constructor.newInstance(parameters);
     }
     

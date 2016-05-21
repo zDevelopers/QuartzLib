@@ -1,0 +1,619 @@
+/*
+ * Copyright or © or Copr. ZLib contributors (2015 - 2016)
+ *
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
+ */
+
+package fr.zcraft.zlib.components.nbt;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+
+/**
+ * This class represents the NBT List tag type.
+ * 
+ * It implements all operations of {@link java.util.List}, as well as a few specific operations for NBT data.
+ */
+public class NBTList implements List<Object>
+{
+    private Object nmsNbtTag;
+    private List<Object> nmsNbtList;
+    
+    private final Object parent;
+    private final Object parentKey;
+    
+    /**
+     * Created a new empty NBT list.
+     * It is not linked to any item, therefore it is equivalent of using directly
+     * a {@link java.util.List}&lt;{@link java.lang.Object}&gt;.
+     */
+    public NBTList()
+    {
+        this(null, new ArrayList<>());
+    }
+    
+    NBTList(Object nmsListTag)
+    {
+        this(nmsListTag, (List<Object>) NBTType.TAG_LIST.getData(nmsListTag));
+    }
+    
+    private NBTList(Object nmsListTag, List<Object> nmsNbtList)
+    {
+        this.nmsNbtTag = nmsListTag;
+        this.nmsNbtList = nmsNbtList;
+        this.parent = null;
+        this.parentKey = null;
+    }
+    
+    NBTList(NBTCompound parent, String parentKey)
+    {
+        this.nmsNbtList = null;
+        this.nmsNbtTag = null;
+        this.parent = parent;
+        this.parentKey = parentKey;
+    }
+    
+    NBTList(NBTList parent, int index)
+    {
+        this.nmsNbtList = null;
+        this.nmsNbtTag = null;
+        this.parent = parent;
+        this.parentKey = index;
+    }
+    
+    private List<Object> getNbtList()
+    {
+        if(nmsNbtList == null)
+        {
+            nmsNbtList = new ArrayList<Object>();
+            if(nmsNbtTag != null)
+            {
+                NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
+            }
+            else
+            {
+                nmsNbtTag = NBTType.TAG_LIST.newTag(nmsNbtList);
+                if(parent != null && parentKey != null)
+                {
+                    if(parent instanceof NBTCompound)
+                    {
+                        ((NBTCompound)parent).put((String)parentKey, this);
+                    }
+                    else if(parent instanceof NBTList)
+                    {
+                        ((NBTList)parent).set((Integer)parentKey, this);
+                    }
+                }
+            }
+        }
+        
+        return nmsNbtList;
+    }
+
+    @Override
+    public int size()
+    {
+        if(nmsNbtList == null) return 0;
+        return nmsNbtList.size();
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        if(nmsNbtList == null) return true;
+        return nmsNbtList.isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o)
+    {
+        if(nmsNbtList == null) return false;
+        return nmsNbtList.contains(NBT.fromNativeValue(o));
+    }
+
+    @Override
+    public Iterator<Object> iterator()
+    {
+        return listIterator();
+    }
+
+    @Override
+    public Object[] toArray()
+    {
+        return toArray(new Object[]{});
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a)
+    {
+        ArrayList<T> list = new ArrayList<T>(size());
+        if(nmsNbtList != null)
+            list.addAll((List<T>) this);
+        return list.toArray(a);
+    }
+
+    @Override
+    public boolean add(Object e)
+    {
+        return getNbtList().add(NBT.fromNativeValue(e));
+    }
+
+    @Override
+    public boolean remove(Object o)
+    {
+        if(nmsNbtList == null) return false;
+        return nmsNbtList.remove(NBT.fromNativeValue(o));
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c)
+    {
+        if(nmsNbtList == null) return false;
+        
+        for(Object o : c)
+        {
+            if(!contains(o))
+                return false;
+        }
+        
+        return true;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Object> c)
+    {
+        boolean changed = false;
+        for(Object value : c)
+        {
+            if(getNbtList().add(NBT.fromNativeValue(value)))
+                changed = true;
+        }
+        
+        return changed;
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Object> c)
+    {
+        int i = 0;
+        for(Object o : c)
+        {
+            add(i + index, o);
+            ++i;
+        }
+        
+        return !c.isEmpty();
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c)
+    {
+        if(nmsNbtList == null) return false;
+        
+        boolean changed = false;
+        for(Object value : c)
+        {
+            if(remove(value))
+                changed = true;
+        }
+        
+        return changed;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c)
+    {
+        if(nmsNbtList == null) return false;
+        
+        boolean changed = false;
+        
+        for(Object value : this)
+        {
+            if(c.contains(value))
+            {
+                if(nmsNbtList.remove(value))
+                    changed = true;
+            }
+        }
+        
+        return changed;
+    }
+
+    @Override
+    public void clear()
+    {
+        if(nmsNbtList == null) return;
+        
+        nmsNbtList.clear();
+    }
+
+    @Override
+    public Object get(int index)
+    {
+        if(nmsNbtList == null)
+            throw new ArrayIndexOutOfBoundsException("NBT List is empty");
+        return NBT.toNativeValue(nmsNbtList.get(index));
+    }
+    
+    /**
+     * Returns the value at the specified position in this list, or the specified default value if this value is null. 
+     * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
+     * @param <T> The type to coerce the indexed value to.
+     * @param index The position
+     * @param defaultValue The default value.
+     * @return the value at the specified position in this list, or the specified default value if this value is null. 
+     */
+    public <T> T get(int index, T defaultValue)
+    {
+        try
+        {
+            Object value = get(index);
+            if(value == null) return defaultValue;
+            return (T) value;
+        }
+        catch(ClassCastException | NBTException ex)
+        {
+            return defaultValue;
+        }
+    }
+    
+    /**
+     * Returns the Compound tag at the specified index.
+     * If the value at the specified index is not a compound tag, a new empty tag
+     * is returned, and the existing value is overwritten if anything is added
+     * to the tag.
+     * @param index The index.
+     * @return the Compound tag at the specified index.
+     */
+    public NBTCompound getCompound(int index)
+    {
+        return get(index, new NBTCompound(this, index));
+    }
+    
+    /**
+     * Returns the Compound tag at the specified index.
+     * If the value at the specified index is not a compound tag, a new empty tag
+     * is returned, and the existing value is overwritten if anything is added
+     * to the tag.
+     * @param index The index.
+     * @return the Compound tag at the specified index.
+     */
+    public NBTList getList(int index)
+    {
+        return get(index, new NBTList(this, index));
+    }
+
+    @Override
+    public Object set(int index, Object element)
+    {
+        return NBT.toNativeValue(getNbtList().set(index, NBT.fromNativeValue(element)));
+    }
+
+    @Override
+    public void add(int index, Object element)
+    {
+        getNbtList().add(index, NBT.fromNativeValue(element));
+    }
+
+    @Override
+    public Object remove(int index)
+    {
+        if(nmsNbtList == null)
+            throw new IndexOutOfBoundsException("NBT List is empty");
+        return NBT.toNativeValue(nmsNbtList.remove(index));
+    }
+
+    @Override
+    public int indexOf(Object o)
+    {
+        if(nmsNbtList == null)
+            return -1;
+        return nmsNbtList.indexOf(NBT.fromNativeValue(o));
+    }
+
+    @Override
+    public int lastIndexOf(Object o)
+    {
+        if(nmsNbtList == null)
+            return -1;
+        return nmsNbtList.lastIndexOf(NBT.fromNativeValue(o));
+    }
+
+    @Override
+    public ListIterator<Object> listIterator()
+    {
+        return listIterator(0);
+    }
+
+    @Override
+    public ListIterator<Object> listIterator(int index)
+    {
+        if (index < 0 || index > size())
+            throw new IndexOutOfBoundsException("Index is out of bounds : " + index);
+        
+        if(nmsNbtList == null)
+            return new NBTListIterator(null);
+        
+        return new NBTListIterator(nmsNbtList.listIterator(index));
+    }
+
+    @Override
+    public NBTList subList(int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex > size())
+            throw new IndexOutOfBoundsException("fromIndex is out of bounds : " + fromIndex);
+        
+        if (toIndex < 0 || toIndex > size())
+            throw new IndexOutOfBoundsException("toIndex is out of bounds : " + toIndex);
+        
+        if(nmsNbtList == null)
+            return new NBTList(nmsNbtTag, null);
+        
+        return new NBTList(nmsNbtTag, nmsNbtList.subList(fromIndex, toIndex));
+    }
+    
+    /**
+     * Returns a new filtering iterator for the given type.
+     * This special iterator will iterate over the list, but will skip all
+     * values that cannot be coerced to the specified type.
+     * @param <T> The type the values need to be coerced to.
+     * @param klass The class the values need to be coerced to.
+     * @return The filtered iterable.
+     */
+    public <T> Iterable<T> filter(Class<T> klass)
+    {
+        return new NBTListFilterIterator<T>(listIterator());
+    }
+    
+    /**
+     * Returns a new filtering iterator for the given type.
+     * This special iterator will iterate over the list, but will skip all
+     * values that cannot be coerced to the specified type.
+     * @param <T> The type the values need to be coerced to.
+     * @param klass The class the values need to be coerced to.
+     * @param index The index to start the iteration at.
+     * @return The filtered iterator.
+     */
+    public <T> ListIterator<T> filter(Class<T> klass, int index)
+    {
+        return new NBTListFilterIterator<T>(listIterator(index));
+    }
+    
+    private class NBTListIterator implements ListIterator<Object>
+    {
+        private ListIterator<Object> iterator;
+        
+        public NBTListIterator(ListIterator<Object> iterator)
+        {
+            this.iterator = iterator;
+        }
+        
+        private ListIterator<Object> getIterator()
+        {
+            if(iterator == null)
+            {
+                iterator = getNbtList().listIterator();
+            }
+            
+            return iterator;
+        }
+        
+        @Override
+        public boolean hasNext()
+        {
+            if(iterator == null)
+                return false;
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Object next()
+        {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
+            return NBT.toNativeValue(iterator.next());
+        }
+
+        @Override
+        public boolean hasPrevious()
+        {
+            if(iterator == null)
+                return false;
+            return iterator.hasPrevious();
+        }
+
+        @Override
+        public Object previous()
+        {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
+            return NBT.toNativeValue(iterator.previous());
+        }
+
+        @Override
+        public int nextIndex()
+        {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
+            return iterator.nextIndex();
+        }
+
+        @Override
+        public int previousIndex()
+        {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
+            return iterator.previousIndex();
+        }
+
+        @Override
+        public void remove()
+        {
+            if(iterator == null)
+                throw new NoSuchElementException("NBT List is empty");
+            iterator.remove();
+        }
+
+        @Override
+        public void set(Object e)
+        {
+            getIterator().set(NBT.fromNativeValue(e));
+        }
+
+        @Override
+        public void add(Object e)
+        {
+            getIterator().add(NBT.fromNativeValue(e));
+        }
+
+    }
+    
+    private class NBTListFilterIterator<T> implements ListIterator<T>, Iterable<T>
+    {
+        private final ListIterator<Object> baseIterator;
+        private T previousItem;
+        private T nextItem;
+        
+        private int previousIndex;
+        private int nextIndex;
+        
+        public NBTListFilterIterator(ListIterator<Object> baseIterator)
+        {
+            this.baseIterator = baseIterator;
+            previousItem = null;
+            nextItem = fetchNext();
+        }
+        
+        @Override
+        public boolean hasNext()
+        {
+            return nextItem != null;
+        }
+
+        @Override
+        public T next()
+        {
+            if(nextItem == null)
+                throw new NoSuchElementException();
+            
+            previousItem = nextItem;
+            previousIndex = nextIndex;
+            nextItem = fetchNext();
+            return previousItem;
+        }
+        
+        private T fetchNext()
+        {
+            while(true)
+            {
+                if(!baseIterator.hasNext())
+                    return null;
+                try
+                {
+                    ++nextIndex;
+                    return (T) baseIterator.next();
+                }
+                catch(ClassCastException ex) {}
+            }
+        }
+        
+        private T fetchPrevious()
+        {
+            while(true)
+            {
+                if(!baseIterator.hasPrevious())
+                    return null;
+                try
+                {
+                    --previousIndex;
+                    return (T) baseIterator.previous();
+                }
+                catch(ClassCastException ex) {}
+            }
+        }
+
+        @Override
+        public Iterator<T> iterator()
+        {
+            return this;
+        }
+
+        @Override
+        public boolean hasPrevious()
+        {
+            return previousItem != null;
+        }
+
+        @Override
+        public T previous()
+        {
+            nextItem = previousItem;
+            previousItem = fetchPrevious();
+            return nextItem;
+        }
+
+        @Override
+        public int nextIndex()
+        {
+            if(!baseIterator.hasNext())
+                return -1;
+            return nextIndex;
+        }
+
+        @Override
+        public int previousIndex()
+        {
+            if(!baseIterator.hasPrevious())
+                return -1;
+            return previousIndex;
+        }
+
+        @Override
+        public void remove()
+        {
+            baseIterator.remove();
+        }
+
+        @Override
+        public void set(T e)
+        {
+            baseIterator.set(e);
+        }
+
+        @Override
+        public void add(T e)
+        {
+            baseIterator.add(e);
+        }
+        
+    }
+    
+}

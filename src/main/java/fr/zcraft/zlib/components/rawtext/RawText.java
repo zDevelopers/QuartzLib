@@ -33,7 +33,7 @@ package fr.zcraft.zlib.components.rawtext;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
-import fr.zcraft.zlib.tools.nbt.NBT;
+import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;

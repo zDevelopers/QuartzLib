@@ -28,7 +28,7 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.tools.nbt;
+package fr.zcraft.zlib.components.nbt;
 
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
@@ -44,10 +44,21 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+/**
+ * This class provides various utilities to manipulate NBT data.
+ */
 public abstract class NBT 
 {
     private NBT() {}
     
+    /**
+     * Returns the NBT JSON representation of the given object.
+     * This method returns a non-strict JSON representation of the object, 
+     * because minecraft (both client and server) can't deal with strict JSON
+     * for some item nbt tags.
+     * @param value The value to JSONify.
+     * @return the NBT JSON representation of the given object. 
+     */
     static public String toNBTJSONString(Object value)
     {
         StringBuilder sb = new StringBuilder();
@@ -57,12 +68,20 @@ public abstract class NBT
     
     /* ========== Item utilities ========== */
     
-    static public Map<String, Object> fromItemStack(ItemStack item) throws NMSException
+    /**
+     * Returns the NBT tag for the specified item.
+     * The tag is read-write, and any modification applied to it will also be
+     * applied to the item's NBT tag.
+     * @param item The item to get the tag from.
+     * @return the NBT tag for the specified item.
+     * @throws NMSException 
+     */
+    static public NBTCompound fromItemStack(ItemStack item) throws NMSException
     {
         init();
         try
         {
-            return new NBTCompoundWrapper(getMcNBTCompound(item));
+            return new NBTCompound(getMcNBTCompound(item));
         }
         catch(Exception ex)
         {
@@ -70,6 +89,13 @@ public abstract class NBT
         }
     }
     
+    /**
+     * Returns an NBT-like representation of the specified item meta.
+     * It is useful as a fallback if you need item data as an NBT format, but
+     * the actual NBT couldn't be retrieved for some reason.
+     * @param meta The item meta to get the data from.
+     * @return an NBT-like representation of the specified item meta.
+     */
     static public Map<String, Object> fromItemMeta(ItemMeta meta)
     {
         Map<String, Object> itemData = new HashMap<String, Object>();
@@ -83,6 +109,13 @@ public abstract class NBT
         return itemData;
     }
     
+    /**
+     * Returns an NBT-like representation of the specified enchantments.
+     * It is useful as a fallback if you need item data as an NBT format, but
+     * the actual NBT couldn't be retrieved for some reason.
+     * @param enchants the enchantment list to get the data from.
+     * @return an NBT-like representation of the specified enchantments.
+     */
     static public List<Map<String, Object>> fromEnchantments(Map<Enchantment, Integer> enchants)
     {
         List<Map<String, Object>> enchantList = new ArrayList<>();
@@ -98,6 +131,13 @@ public abstract class NBT
         return enchantList;
     }
     
+    /**
+     * Returns an NBT-like representation of the item flags (HideFlags).
+     * It is useful as a fallback if you need item data as an NBT format, but
+     * the actual NBT couldn't be retrieved for some reason.
+     * @param itemFlags item flag set to get the data from.
+     * @return an NBT-like representation of the item flags (HideFlags).
+     */
     static public byte fromItemFlags(Set<ItemFlag> itemFlags)
     {
         byte flags = 0;
@@ -162,20 +202,22 @@ public abstract class NBT
     
     static Object fromNativeValue(Object value)
     {
+        if(value == null) return null;
         NBTType type = NBTType.fromClass(value.getClass());
         return type.newTag(value);
     }
     
     static Object toNativeValue(Object nbtTag)
     {
+        if(nbtTag == null) return null;
         NBTType type = NBTType.fromNmsNbtTag(nbtTag);
         
         switch(type)
         {
             case TAG_COMPOUND:
-                return new NBTCompoundWrapper(nbtTag);
+                return new NBTCompound(nbtTag);
             case TAG_LIST:
-                return new NBTListWrapper(nbtTag);
+                return new NBTList(nbtTag);
             default:
                 return type.getData(nbtTag);
         }
