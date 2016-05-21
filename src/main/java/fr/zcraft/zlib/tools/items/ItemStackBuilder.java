@@ -30,11 +30,13 @@
 
 package fr.zcraft.zlib.tools.items;
 
+import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.components.rawtext.RawTextPart;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Colorable;
@@ -46,28 +48,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.bukkit.enchantments.Enchantment;
+
 
 /**
- * This class contains helpers to create or edit very customized ItemStacks using the builder pattern.
+ * This class contains helpers to create or edit very customized ItemStacks
+ * using the builder pattern.
  */
-public class ItemStackBuilder 
+public class ItemStackBuilder
 {
     private final ItemStack itemStack;
     private Material material = null;
     private int amount = 1;
     private short data = 0;
-    
+
     private RawTextPart title = null;
     private final List<String> loreLines = new ArrayList<>();
-    
+
     private boolean glowing = false;
     private boolean hideAttributes = false;
-    
+
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
-    
+
     private DyeColor dye = null;
-    
+
     /**
      * Creates a new ItemStackBuilder.
      */
@@ -76,20 +79,23 @@ public class ItemStackBuilder
         this.material = null;
         this.itemStack = null;
     }
-    
+
     /**
      * Creates a new ItemStackBuilder, and sets the material of the ItemStack.
-     * @param material 
+     *
+     * @param material This ItemStack's material.
      */
     public ItemStackBuilder(Material material)
     {
         this(material, 1);
     }
-    
+
     /**
-     * Creates a new ItemStackBuilder, and sets the material and amount of the ItemStack.
-     * @param material
-     * @param amount 
+     * Creates a new ItemStackBuilder, and sets the material and amount of the
+     * ItemStack.
+     *
+     * @param material This ItemStack's material.
+     * @param amount   This ItemStack's amount.
      */
     public ItemStackBuilder(Material material, int amount)
     {
@@ -97,10 +103,12 @@ public class ItemStackBuilder
         this.amount = amount;
         this.itemStack = null;
     }
-    
+
     /**
      * Creates a new ItemStackBuilder using an already existing ItemStack.
-     * @param itemStack 
+     *
+     * @param itemStack A base ItemStack to modify. This ItemStack will NOT be
+     *                  cloned!
      */
     public ItemStackBuilder(ItemStack itemStack)
     {
@@ -108,132 +116,145 @@ public class ItemStackBuilder
         this.material = null;
         this.amount = 0;
     }
-    
+
     /**
-     * Creates (or updates) the ItemStack, with all the previously provided parameters.
-     * @return The new ItemStack. It is NOT a copy of the previously provided ItemStack (if any).
+     * Creates (or updates) the ItemStack, with all the previously provided
+     * parameters.
+     *
+     * @return The new ItemStack. It is NOT a copy of the previously provided
+     * ItemStack (if any).
      */
     public ItemStack item()
     {
         ItemStack newItemStack = itemStack;
-        
-        if(newItemStack == null)
-           newItemStack = new ItemStack(material, amount);
-        
+
+        if (newItemStack == null)
+            newItemStack = new ItemStack(material, amount);
+
         newItemStack.setDurability(data);
-        
-        if(dye != null)
+
+        if (dye != null)
         {
             MaterialData materialData = newItemStack.getData();
-            if(!(materialData instanceof Colorable))
+            if (!(materialData instanceof Colorable))
                 throw new IllegalStateException("Unable to apply dye : item is not colorable.");
-            
-            ((Colorable)materialData).setColor(dye);
+
+            ((Colorable) materialData).setColor(dye);
         }
-        
+
         ItemMeta meta = newItemStack.getItemMeta();
-        
-        if(title != null)
+
+        if (title != null)
             meta.setDisplayName(ChatColor.RESET + title.build().toFormattedText());
-        
-        if(!loreLines.isEmpty())
+
+        if (!loreLines.isEmpty())
             meta.setLore(loreLines);
-        
-        if(hideAttributes)
+
+        if (hideAttributes)
             ItemUtils.hideItemAttributes(meta);
-        
+
         newItemStack.setItemMeta(meta);
-        
-        if(glowing)
+
+        if (glowing)
             GlowEffect.addGlow(newItemStack);
-        
+
         newItemStack.addUnsafeEnchantments(enchantments);
-        
+
         return newItemStack;
     }
-    
+
     /**
-     * Defines the material of the ItemStack.
-     * This can only be defined once, otherwise an IllegalStateException will be thrown.
-     * @param material 
-     * @return 
+     * Defines the material of the ItemStack. This can only be defined once,
+     * otherwise an IllegalStateException will be thrown.
+     *
+     * @param material The material
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder material(Material material)
     {
-        if(this.material != null)
+        if (this.material != null)
             throw new IllegalStateException("Material has already been defined.");
-        
+
         this.material = material;
         return this;
     }
-    
+
     /**
      * Defines the amount of the ItemStack.
-     * @param amount the amount.
-     * @return 
+     *
+     * @param amount The amount.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder amount(int amount)
     {
         this.amount = amount;
         return this;
     }
-    
+
     /**
-     * Defines the title of the ItemStack.
-     * This can only be defined once, otherwise an IllegalStateException will be thrown.
-     * @param text
-     * @return 
+     * Defines the title of the ItemStack. This can only be defined once,
+     * otherwise an IllegalStateException will be thrown.
+     *
+     * @param text The text of the title.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder title(RawTextPart text)
     {
-        if(this.title != null)
+        if (this.title != null)
             throw new IllegalStateException("Title has already been defined.");
-        
+
         this.title = text;
         return this;
     }
-    
+
     /**
-     * Sets the title of the ItemStack.
-     * If a text has already been defined, it will be appended to the already existing one.
+     * Sets the title of the ItemStack. If a text has already been defined, it
+     * will be appended to the already existing one.
+     *
      * @param color The color for this piece of text.
-     * @param texts The text. If several are provided, they will be all concatenated.
-     * @return 
+     * @param texts The text. If several are provided, they will be all
+     *              concatenated.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder title(ChatColor color, String... texts)
     {
         String text = arrayToString(texts);
-        
-        if(this.title == null)
-        {
+
+        if (this.title == null)
             this.title = new RawText(text);
-        }
         else
-        {
             this.title = this.title.then(text);
-        }
-        
-        if(color != null)
+
+        if (color != null)
             this.title.color(color);
-        
+
         return this;
     }
-    
+
     /**
-     * Sets the title of the ItemStack.
-     * If a text has already been defined, it will be appended to the already existing one.
-     * @param texts The text. If several strings are provided, they will be all concatenated.
-     * @return 
+     * Sets the title of the ItemStack. If a text has already been defined, it
+     * will be appended to the already existing one.
+     *
+     * @param texts The text. If several strings are provided, they will be all
+     *              concatenated.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder title(String... texts)
     {
         return title(null, texts);
     }
-    
+
     /**
      * Adds one or more lines of lore to the ItemStack.
+     *
      * @param lines The lines of lore.
-     * @return 
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder lore(String... lines)
     {
@@ -243,143 +264,242 @@ public class ItemStackBuilder
 
     /**
      * Adds one or more lines of lore to the ItemStack.
+     *
      * @param lines The lines of lore.
-     * @return
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder lore(List<String> lines)
     {
         loreLines.addAll(lines);
         return this;
     }
-    
+
     /**
      * Adds one line of lore to the ItemStack.
-     * @param text The line of lore. If several are provided, they will be all concatenated.
-     * @return 
+     *
+     * @param text The line of lore. If several are provided, they will be all
+     *             concatenated.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreLine(String...text)
+    public ItemStackBuilder loreLine(String... text)
     {
         return loreLine(null, text);
     }
-    
+
     /**
      * Adds one line of lore to the ItemStack.
+     *
      * @param color The color for this line of lore.
-     * @param text The line of lore. If several are provided, they will be all concatenated.
-     * @return 
+     * @param text  The line of lore. If several are provided, they will be all
+     *              concatenated.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreLine(ChatColor color, String...text)
+    public ItemStackBuilder loreLine(ChatColor color, String... text)
     {
-        if(color != null)
-        {
+        if (color != null)
             loreLines.add(color + arrayToString(text));
-        }
         else
-        {
             loreLines.add(arrayToString(text));
-        }
+
         return this;
     }
-    
+
     /**
      * Adds one line of lore to the ItemStack.
+     *
      * @param rawText The line of lore.
-     * @return 
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder loreLine(RawTextPart rawText)
     {
         return loreLine(rawText.toFormattedText());
     }
-    
+
     /**
-     * Adds a glow effect (a factice enchantment) to the ItemStack.
-     * This can only be called once, otherwise an IllegalStateException will be thrown.
-     * @return 
+     * Adds a line of lore and wraps it to lines of 28 characters, so the
+     * tooltip is not too large.
+     *
+     * @param text The text.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     * @see GuiUtils#generateLore(String)
+     */
+    public ItemStackBuilder longLore(String text)
+    {
+        return lore(GuiUtils.generateLore(text));
+    }
+
+    /**
+     * Adds a line of lore and wraps it to lines of {@code lineLength}
+     * characters, so the tooltip is not too large.
+     *
+     * @param text       The text.
+     * @param lineLength The max length of a line.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     * @see GuiUtils#generateLore(String, int)
+     */
+    public ItemStackBuilder longLore(String text, int lineLength)
+    {
+        return lore(GuiUtils.generateLore(text, lineLength));
+    }
+
+    /**
+     * Adds a line of lore and wraps it to lines of 28 characters, so the
+     * tooltip is not too large.
+     *
+     * @param color The color for this line of lore.
+     * @param text  The text.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     * @see GuiUtils#generateLore(String)
+     */
+    public ItemStackBuilder longLore(ChatColor color, String text)
+    {
+        return longLore(color + text);
+    }
+
+    /**
+     * Adds a line of lore and wraps it to lines of {@code lineLength}
+     * characters, so the tooltip is not too large.
+     *
+     * @param color      The color for this line of lore.
+     * @param text       The text.
+     * @param lineLength The max length of a line.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     * @see GuiUtils#generateLore(String, int)
+     */
+    public ItemStackBuilder longLore(ChatColor color, String text, int lineLength)
+    {
+        return longLore(color + text, lineLength);
+    }
+
+    /**
+     * Adds a glow effect (a fake enchantment) to the ItemStack. This can only
+     * be called once, otherwise an IllegalStateException will be thrown.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder glow()
     {
-        if(this.glowing)
+        if (this.glowing)
             throw new IllegalStateException("Glowing has already been set.");
-        
+
         this.glowing = true;
         return this;
     }
-    
+
     /**
-     * Adds a glow effect (a factice enchantment) to the ItemStack.
-     * This can only be called once, otherwise an IllegalStateException will be thrown.
-     * @param glow If the glow effect has to be applied. If false, nothing will be done.
-     * @return 
+     * Adds a glow effect (a fake enchantment) to the ItemStack. This can only
+     * be called once, otherwise an IllegalStateException will be thrown.
+     *
+     * @param glow If the glow effect has to be applied. If false, nothing will
+     *             be done.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder glow(boolean glow)
     {
-        if(glow) glow();
+        if (glow) glow();
         return this;
     }
-    
+
+    /**
+     * Enchants the ItemStack.
+     *
+     * @param enchantment The enchantment
+     * @param level       The enchantment level. The enchant is added with the
+     *                    unsafe method, so you can put any number here.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
     public ItemStackBuilder enchant(Enchantment enchantment, int level)
     {
         enchantments.put(enchantment, level);
         return this;
     }
-    
+
+    /**
+     * Enchants the ItemStack with all the enchantments in the given map.
+     *
+     * @param enchantments A map enchant → enchant level.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     * @see #enchant(Enchantment, int)
+     */
     public ItemStackBuilder enchant(Map<Enchantment, Integer> enchantments)
     {
-        for(Entry<Enchantment, Integer> entry : enchantments.entrySet())
+        for (Entry<Enchantment, Integer> entry : enchantments.entrySet())
         {
             enchant(entry.getKey(), entry.getValue());
         }
         return this;
     }
-    
+
     /**
-     * Hides all of the attribute lines of the ItemStack.
-     * This can only be called once, otherwise an IllegalStateException will be thrown.
-     * @return 
+     * Hides all of the attribute lines of the ItemStack. This can only be
+     * called once, otherwise an IllegalStateException will be thrown.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder hideAttributes()
     {
-        if(this.hideAttributes)
+        if (this.hideAttributes)
             throw new IllegalStateException("'Hidden attributes' has already been set.");
-        
+
         this.hideAttributes = true;
         return this;
     }
-    
+
     /**
      * Sets the data (= damage) value of the ItemStack.
-     * @param data
-     * @return 
+     *
+     * @param data The data value.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder data(short data)
     {
         this.data = data;
         return this;
     }
-    
+
     /**
-     * Sets the dye color of the ItemStack.
-     * If the item is not colorable, an IllegalStateException will be thrown 
-     * when making the item.
-     * Setting this value will override damage/data values.
+     * Sets the dye color of the ItemStack. If the item is not colorable, an
+     * IllegalStateException will be thrown when making the item. Setting this
+     * value will override damage/data values.
+     *
      * @param dye The dye color for the item.
-     * @return 
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
      */
     public ItemStackBuilder dye(DyeColor dye)
     {
         this.dye = dye;
         return this;
     }
-    
+
+    /**
+     * Concatenates a String[] to a single one.
+     *
+     * @param texts The Strings array.
+     *
+     * @return The concatenated string.
+     */
     private String arrayToString(String... texts)
     {
         StringBuilder builder = new StringBuilder();
-        
-        for(String text: texts)
+
+        for (String text : texts)
         {
             builder.append(text);
         }
-        
+
         return builder.toString();
     }
 }
