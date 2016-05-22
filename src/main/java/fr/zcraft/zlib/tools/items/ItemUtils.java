@@ -33,6 +33,7 @@ import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.runners.RunTask;
+import java.lang.reflect.Array;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -44,6 +45,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
@@ -96,6 +99,34 @@ abstract public class ItemUtils
         addItemFlagLoaded = true;
     }
 
+    static private Object getItemFlagValue(String flagName)
+    {
+        if(itemFlagValues == null) return null;
+        
+        for(Object value : itemFlagValues)
+        {
+            if(value.toString().equalsIgnoreCase(flagName))
+                return value;
+        }
+        
+        return null;
+    }
+    
+    static private Object[] getItemFlagsValues(String... flagsNames)
+    {
+        List flagsList = new ArrayList();
+        for(String flagName : flagsNames)
+        {
+            Object flag = getItemFlagValue(flagName);
+            if(flag != null)
+                flagsList.add(flag);
+        }
+        
+        
+        Object array = Array.newInstance(itemFlagValues[0].getClass(), flagsList.size());
+        return flagsList.toArray((Object[]) array);
+    }
+    
     /**
      * Hides all the item attributes of the given {@link ItemMeta}.
      *
@@ -106,7 +137,25 @@ abstract public class ItemUtils
     static public ItemMeta hideItemAttributes(ItemMeta meta)
     {
         if (!addItemFlagLoaded) init();
-        
+        return hideItemAttributes(meta, itemFlagValues);
+    }
+    
+    /**
+     * Hides the specified item attributes of the given {@link ItemMeta}.
+     *
+     * @param meta The {@link ItemMeta} to hide attributes from.
+     * @param itemFlagsNames The item flags to hide.
+     * @return The same item meta. The modification is applied by reference, the
+     * stack is returned for convenience reasons.
+     */
+    static public ItemMeta hideItemAttributes(ItemMeta meta, String... itemFlagsNames)
+    {
+        if (!addItemFlagLoaded) init();
+        return hideItemAttributes(meta, getItemFlagsValues(itemFlagsNames));
+    }
+    
+    static private ItemMeta hideItemAttributes(ItemMeta meta, Object[] itemFlags)
+    {
         if (addItemFlagsMethod == null)
         {
             return meta;
@@ -114,7 +163,7 @@ abstract public class ItemUtils
 
         try
         {
-            addItemFlagsMethod.invoke(meta, new Object[]{itemFlagValues});
+            addItemFlagsMethod.invoke(meta, new Object[]{itemFlags});
         }
         catch (IllegalAccessException ex)
         {

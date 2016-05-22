@@ -68,6 +68,7 @@ public class ItemStackBuilder
 
     private boolean glowing = false;
     private boolean hideAttributes = false;
+    private String[] hiddenAttributes = null;
 
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
@@ -153,7 +154,16 @@ public class ItemStackBuilder
             meta.setLore(loreLines);
 
         if (hideAttributes)
-            ItemUtils.hideItemAttributes(meta);
+        {
+            if(hiddenAttributes == null)
+            {
+                ItemUtils.hideItemAttributes(meta);
+            }
+            else
+            {
+                ItemUtils.hideItemAttributes(meta, hiddenAttributes);
+            }
+        }
 
         newItemStack.setItemMeta(meta);
 
@@ -482,6 +492,14 @@ public class ItemStackBuilder
             throw new IllegalStateException("'Hidden attributes' has already been set.");
 
         this.hideAttributes = true;
+        return this;
+    }
+    
+    public ItemStackBuilder hideAttributes(String... flagsNames)
+    {
+        hideAttributes();
+        this.hiddenAttributes = flagsNames;
+        
         return this;
     }
 
