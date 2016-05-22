@@ -109,15 +109,18 @@ public class RawText extends RawTextPart<RawText>
     {
         Map<String, Object> itemData = new HashMap<String, Object>();
         
+        String itemId = null;
         try
         {
-            itemData.put("id", ItemUtils.getMinecraftId(item));
+            itemId = ItemUtils.getMinecraftId(item);
         }
         catch (NMSException ex)
         {
             PluginLogger.warning("NMS Exception while parsing ItemStack to JSON String", ex);
-            itemData.put("id", item.getTypeId());
         }
+        
+        if(itemId == null) itemId = String.valueOf(item.getType().getId());
+        itemData.put("id", itemId);
         
         itemData.put("Damage", item.getDurability());
         try

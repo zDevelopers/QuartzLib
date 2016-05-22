@@ -45,7 +45,7 @@ import java.util.Set;
 public class NBTCompound implements Map<String, Object>
 {
     private Object nmsNbtTag;
-    private Map<String, Object> nmsNbtMap;
+    Map<String, Object> nmsNbtMap;
     
     private final Object parent;
     private final Object parentKey;
@@ -66,7 +66,14 @@ public class NBTCompound implements Map<String, Object>
     NBTCompound(Object nativeNBTTag)
     {
         this.nmsNbtTag = nativeNBTTag;
-        this.nmsNbtMap = (Map<String, Object>) NBTType.TAG_COMPOUND.getData(nmsNbtTag);
+        if(nativeNBTTag == null)
+        {
+            this.nmsNbtMap = new HashMap<String, Object>();
+        }
+        else
+        {
+            this.nmsNbtMap = (Map<String, Object>) NBTType.TAG_COMPOUND.getData(nmsNbtTag);
+        }
         this.parent = null;
         this.parentKey = null;
     }
@@ -99,6 +106,8 @@ public class NBTCompound implements Map<String, Object>
             else
             {
                 nmsNbtTag = NBTType.TAG_COMPOUND.newTag(nmsNbtMap);
+                NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtTag);
+                
                 if(parent != null && parentKey != null)
                 {
                     if(parent instanceof NBTCompound)
@@ -246,6 +255,12 @@ public class NBTCompound implements Map<String, Object>
             list.add(NBT.toNativeValue(value));
         }
         return list;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return NBT.toNBTJSONString(this);
     }
 
     @Override

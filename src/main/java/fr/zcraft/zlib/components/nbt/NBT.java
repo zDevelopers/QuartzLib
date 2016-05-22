@@ -190,6 +190,7 @@ public abstract class NBT
     static private Object getMcNBTCompound(ItemStack item) throws NMSException
     {
         Object mcItemStack = ItemUtils.getNMSItemStack(item);
+        if(mcItemStack == null) return null;
         try
         {
             return Reflection.getFieldValue(MC_ITEM_STACK, mcItemStack, "tag");

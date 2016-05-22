@@ -388,7 +388,8 @@ abstract public class ItemUtils
      * </p>
      *
      * @param item An item.
-     * @return The Minecraft name of this item.
+     * @return The Minecraft name of this item, or null if the item's material 
+     * is invalid.
      *
      * @throws NMSException
      */
@@ -397,6 +398,8 @@ abstract public class ItemUtils
         try
         {
             Object craftItemStack = asNMSCopy(item);
+            if(craftItemStack == null) return null;
+            
             Object minecraftItem = Reflection.getFieldValue(craftItemStack, "item");
             Class<?> MinecraftItem = Reflection.getMinecraftClassByName("Item");
             Object ItemsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
@@ -446,6 +449,19 @@ abstract public class ItemUtils
         catch(Exception ex)
         {
             throw new NMSException("Unable to retreive NMS copy", ex);
+        }
+    }
+    
+    static public Object asCraftCopy(ItemStack item) throws NMSException
+    {
+        try
+        {
+            Class CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            return CraftItemStack.getMethod("asCraftCopy", ItemStack.class).invoke(null, item);
+        }
+        catch(Exception ex)
+        {
+            throw new NMSException("Unable to retreive Craft copy", ex);
         }
     }
     

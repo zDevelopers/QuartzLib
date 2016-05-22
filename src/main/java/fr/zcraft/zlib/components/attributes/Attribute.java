@@ -155,7 +155,7 @@ public class Attribute
     
     /**
      * Returns the Minecraft NBT/JSON string representation of this attribute.
-     * See {@link fr.zcraft.zlib.tools.nbt.NBT#toNBTJSONString(java.lang.Object) } for more information.
+     * See {@link NBT#toNBTJSONString(java.lang.Object) } for more information.
      * @return the Minecraft NBT/JSON string representation of this attribute.
      */
     @Override

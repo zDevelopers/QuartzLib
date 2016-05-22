@@ -129,11 +129,25 @@ enum NBTType
             {
                 case TAG_COMPOUND:
                     tag = Reflection.instantiate(getNMSClass());
-                    new NBTCompound(tag).putAll((Map) value);
+                    if(value instanceof NBTCompound)
+                    {
+                        setData(tag, ((NBTCompound)value).nmsNbtMap);
+                    }
+                    else
+                    {
+                        new NBTCompound(tag).putAll((Map) value);
+                    }
                     break;
                 case TAG_LIST:
                     tag = Reflection.instantiate(getNMSClass());
-                    new NBTList(tag).addAll((List) value);
+                    if(value instanceof NBTList)
+                    {
+                        setData(tag, ((NBTList)value).nmsNbtList);
+                    }
+                    else
+                    {
+                        new NBTList(tag).addAll((List) value);
+                    }
                     break;
                 default:
                     tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);

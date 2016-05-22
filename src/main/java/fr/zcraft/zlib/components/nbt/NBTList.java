@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
 public class NBTList implements List<Object>
 {
     private Object nmsNbtTag;
-    private List<Object> nmsNbtList;
+    List<Object> nmsNbtList;
     
     private final Object parent;
     private final Object parentKey;
@@ -62,7 +62,7 @@ public class NBTList implements List<Object>
     
     NBTList(Object nmsListTag)
     {
-        this(nmsListTag, (List<Object>) NBTType.TAG_LIST.getData(nmsListTag));
+        this(null, nmsListTag == null ? new ArrayList<>() : (List<Object>) NBTType.TAG_LIST.getData(nmsListTag));
     }
     
     private NBTList(Object nmsListTag, List<Object> nmsNbtList)
@@ -101,6 +101,8 @@ public class NBTList implements List<Object>
             else
             {
                 nmsNbtTag = NBTType.TAG_LIST.newTag(nmsNbtList);
+                NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
+                
                 if(parent != null && parentKey != null)
                 {
                     if(parent instanceof NBTCompound)
@@ -405,6 +407,12 @@ public class NBTList implements List<Object>
     public <T> ListIterator<T> filter(Class<T> klass, int index)
     {
         return new NBTListFilterIterator<T>(listIterator(index));
+    }
+    
+    @Override
+    public String toString()
+    {
+        return NBT.toNBTJSONString(this);
     }
     
     private class NBTListIterator implements ListIterator<Object>

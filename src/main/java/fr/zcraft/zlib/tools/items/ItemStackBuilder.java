@@ -33,6 +33,8 @@ package fr.zcraft.zlib.tools.items;
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.components.rawtext.RawTextPart;
+import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.reflection.NMSException;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -161,6 +163,33 @@ public class ItemStackBuilder
         newItemStack.addUnsafeEnchantments(enchantments);
 
         return newItemStack;
+    }
+    
+    /**
+     * Creates (or updates) the ItemStack, with all the previously provided
+     * parameters, and returns it as a CraftItemStack (the Bukkit internal 
+     * ItemStack representation).
+     * 
+     * Unlike ItemStacks, CraftItemStacks are registered into NMS, and therefore
+     * will be able to hold NBT data (such as attributes and such).
+     * 
+     * Note that the returned ItemStack WILL be a copy of the previously 
+     * provided one (if any).
+     * 
+     * @return The new CraftItemStack.
+     */
+    public ItemStack craftItem()
+    {
+        ItemStack bukkitItem = item();
+        try
+        {
+            return (ItemStack) ItemUtils.asCraftCopy(item());
+        }
+        catch(NMSException ex)
+        {
+            PluginLogger.warning("CraftItem failed", ex);
+            return bukkitItem;
+        }
     }
 
     /**
