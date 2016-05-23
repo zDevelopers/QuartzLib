@@ -31,17 +31,18 @@
 package fr.zcraft.zlib.core;
 
 import com.google.common.collect.ImmutableSet;
+import fr.zcraft.zlib.components.events.FutureEvents;
 import fr.zcraft.zlib.tools.PluginLogger;
-import java.util.ArrayList;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public abstract class ZLib
 {
@@ -189,6 +190,8 @@ public abstract class ZLib
     
     /**
      * Registers an event listener for the plugin currently using the library, and returns it.
+     * This method also registers {@link fr.zcraft.zlib.components.events.FutureEventHandler future events}.
+     *
      * @param <T> The type of the listener.
      * @param listener The listener to register.
      * @return The registered listener.
@@ -196,6 +199,7 @@ public abstract class ZLib
     static public <T extends Listener> T registerEvents(T listener)
     {
         Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+        FutureEvents.registerFutureEvents(listener);
         return listener;
     }
     
