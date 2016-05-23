@@ -202,7 +202,7 @@ public abstract class ZLib
         FutureEvents.registerFutureEvents(listener);
         return listener;
     }
-    
+
     /**
      * Unregisters the given event listener from all events it is subscribed to.
      * @param listener The listener to unregister.

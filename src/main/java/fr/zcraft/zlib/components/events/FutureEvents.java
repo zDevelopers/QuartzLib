@@ -53,6 +53,19 @@ import java.util.Set;
 
 public final class FutureEvents
 {
+    /**
+     * Registers the future events in a listener.
+     *
+     * <p>This method will scan the methods of the given listener. To be registered as future events, the methods must:</p>
+     * <ul>
+     *     <li>be annotated with {@link FutureEventHandler @FutureEventHandler};</li>
+     *     <li>accept only one argument of type {@link WrappedEvent}.</li>
+     * </ul>
+     *
+     * <p>These listeners are unregistered the same way as Bukkit ones, with {@link HandlerList#unregisterAll(Listener)}.</p>
+     *
+     * @param listener The listener to register.
+     */
     public static void registerFutureEvents(final Listener listener)
     {
         if (!ZLib.isInitialized() || !ZLib.getPlugin().isEnabled())

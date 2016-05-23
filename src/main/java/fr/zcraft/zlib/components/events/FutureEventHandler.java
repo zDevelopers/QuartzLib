@@ -31,6 +31,7 @@ package fr.zcraft.zlib.components.events;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -39,22 +40,28 @@ import java.lang.annotation.Target;
 
 
 /**
- * Represents an event handler for a potentially non-existent event,
- * like an event added in 1.9 listened in a plugin for both 1.8 and 1.9.
+ * Represents an event handler for a potentially non-existent event, like an
+ * event added in 1.9 listened in a plugin for both 1.8 and 1.9.
  *
- * The listener will be called only if the event is available in the server.
+ * <p>The listener will be called only if the event is available in the
+ * server.</p>
  *
- * This can also be used for other plugins events.
+ * <p>This can also be used for other plugins events.</p>
+ *
+ * <p>This annotation goes on methods in {@link org.bukkit.event.Listener
+ * Listeners}; these methods MUST accept one argument of the type {@link
+ * WrappedEvent}. Listeners with this kind of methods must also be registered
+ * using {@link FutureEvents#registerFutureEvents(Listener)}.</p>
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention (RetentionPolicy.RUNTIME)
+@Target (ElementType.METHOD)
 public @interface FutureEventHandler
 {
     /**
      * The class name of the event to listen to.
      *
-     * The class will be loaded from the raw name at first; then if it fails,
-     * the class {@code org.bukkit.event.[given name]} will be tried.
+     * <p>The class will be loaded from the raw name at first; then if it fails,
+     * the class {@code org.bukkit.event.[given name]} will be tried.</p>
      */
     String event();
 
@@ -66,7 +73,8 @@ public @interface FutureEventHandler
     EventPriority priority() default EventPriority.NORMAL;
 
     /**
-     * {@code true} if this listener should not be called if the event was cancelled before.
+     * {@code true} if this listener should not be called if the event was
+     * cancelled before.
      *
      * @see EventHandler#ignoreCancelled()
      */
