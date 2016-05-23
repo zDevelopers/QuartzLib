@@ -102,6 +102,34 @@ public final class RawMessage
     }
 
     /**
+     * Broadcasts a raw JSON message to the server.
+     *
+     * @param text The message.
+     *
+     * @throws RuntimeException if a problem is encountered while sending the message.
+     */
+    public static void broadcast(RawText text)
+    {
+        send("@a", text.toJSONString());
+        Bukkit.getConsoleSender().sendMessage(text.toFormattedText());
+    }
+
+    /**
+     * Sends a raw JSON message to the given selector.
+     *
+     * @param selector The receiver(s) of the message. Spaces are disallowed. This has to be a valid
+     *                 Minecraft selector, like {@code @a}, or {@code @r[m=0]}.
+     * @param text  The JSON message.
+     *
+     * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
+     *                          the message).
+     */
+    public static void send(String selector, RawText text)
+    {
+        send(selector, text.toJSONString());
+    }
+
+    /**
      * Sends a raw JSON message to the given selector.
      *
      * @param selector The receiver(s) of the message. Spaces are disallowed. This has to be a valid
