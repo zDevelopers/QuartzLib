@@ -33,6 +33,20 @@ package fr.zcraft.zlib.components.configuration;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
+import org.bukkit.configuration.MemorySection;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionType;
+import org.bukkit.util.Vector;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -43,17 +57,6 @@ import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.block.banner.Pattern;
-import org.bukkit.block.banner.PatternType;
-import org.bukkit.configuration.MemorySection;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionType;
-import org.bukkit.util.Vector;
 
 public abstract class ConfigurationValueHandlers 
 {
@@ -387,6 +390,17 @@ public abstract class ConfigurationValueHandlers
         {
             return new Vector(handleDoubleValue(list.get(0)), handleDoubleValue(list.get(1)), handleDoubleValue(list.get(2)));
         }
+    }
+
+    @ConfigurationValueHandler
+    static public World handleBukkitWorldValue(String str) throws ConfigurationParseException
+    {
+        String worldName = str.trim();
+        for (World world : Bukkit.getWorlds())
+            if (world.getName().equalsIgnoreCase(worldName))
+                return world;
+
+        throw new ConfigurationParseException("World not found", str);
     }
     
     @ConfigurationValueHandler
