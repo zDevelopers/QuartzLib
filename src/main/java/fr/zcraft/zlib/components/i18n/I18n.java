@@ -271,6 +271,8 @@ public class I18n extends ZLibComponent
         I18n.addCountToParameters = addCountToParameters;
     }
     
+    static private boolean playerLocaleWarning = false;
+    
     /**
      * Return the locale used by the player's client.
      * @param player The player
@@ -287,7 +289,14 @@ public class I18n extends ZLibComponent
         }
         catch(Exception e)
         {
-            return null;
+            if(!playerLocaleWarning)
+            {
+                PluginLogger.warning("Could not retrieve locale for player {0}", e, player.getName());
+                playerLocaleWarning = true;
+            }
+            
+            if(primaryLocale != null) return primaryLocale;
+            return fallbackLocale;
         }
     }
 
