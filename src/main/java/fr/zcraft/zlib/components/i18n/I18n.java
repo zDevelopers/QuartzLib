@@ -88,6 +88,8 @@ public class I18n extends ZLibComponent
     {
         if (ZLib.getPlugin() instanceof ZPlugin)
             jarFile = ((ZPlugin) ZLib.getPlugin()).getJarFile();
+        
+        setFallbackLocale(Locale.getDefault());
     }
 
 
@@ -327,10 +329,10 @@ public class I18n extends ZLibComponent
                 break;
         }
         
-        if(translator == null) translator = translators.get(I18n.primaryLocale);
-        if(translator == null) translator = translators.get(I18n.fallbackLocale);
+        if(translator == null && I18n.primaryLocale != null) translator = translators.get(I18n.primaryLocale);
+        if(translator == null && I18n.fallbackLocale != null) translator = translators.get(I18n.fallbackLocale);
         
-        translators.put(locale, translator);
+        if(translator != null) translators.put(locale, translator);
         return translator;
     }
     
