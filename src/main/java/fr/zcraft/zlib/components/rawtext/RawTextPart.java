@@ -37,6 +37,7 @@ import fr.zcraft.zlib.components.commands.Commands;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.components.i18n.I18nText;
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import org.bukkit.Achievement;
@@ -294,6 +295,13 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     public T hover(ItemStack item)
     {
         return hover(ActionHover.SHOW_ITEM, RawText.toJSONString(item));
+    }
+    
+    public T hover(ItemStackBuilder item)
+    {
+        if(item.getLocale() != null)
+            item.locale(getLocale());
+        return hover(item.item());
     }
     
     public T hover(Entity entity)

@@ -31,7 +31,9 @@
 package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
+import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.components.i18n.I18n;
+import fr.zcraft.zlib.components.i18n.I18nText;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.text.RawMessage;
@@ -93,7 +95,7 @@ abstract public class Command
     
     public void execute(CommandSender sender, String[] args)
     {
-        this.sender = sender; this.args = args;
+        this.sender = sender; this.args = args; this.senderLocale = null;
         try
         {
             if(!canExecute(sender))
@@ -104,13 +106,13 @@ abstract public class Command
         {
             warning(ex.getReasonString());
         }
-        this.sender = null; this.args = null;
+        this.sender = null; this.args = null; this.senderLocale = null;
     }
     
     public List<String> tabComplete(CommandSender sender, String[] args)
     {
         List<String> result = null;
-        this.sender = sender; this.args = args;
+        this.sender = sender; this.args = args; this.senderLocale = null;
         try
         {
             if(canExecute(sender))
@@ -118,7 +120,7 @@ abstract public class Command
         }
         catch(CommandException ex){}
         
-        this.sender = null; this.args = null;
+        this.sender = null; this.args = null; this.senderLocale = null;
         if(result == null) result = new ArrayList<String>();
         return result;
     }
@@ -180,6 +182,11 @@ abstract public class Command
         throw new CommandException(this, Reason.INVALID_PARAMETERS, reason);
     }
     
+    protected void throwInvalidArgument(I18nText reason, Object... parameters) throws CommandException
+    {
+        throwInvalidArgument(I.t(getSenderLocale(), reason, parameters));
+    }
+    
     protected void throwNotAuthorized() throws CommandException
     {
         throw new CommandException(this, Reason.SENDER_NOT_AUTHORIZED);
@@ -194,6 +201,8 @@ abstract public class Command
     
     protected Locale getSenderLocale()
     {
+        if(sender == null) return null;
+        
         if(senderLocale != null) return senderLocale;
         
         if(sender instanceof Player) 
@@ -219,6 +228,11 @@ abstract public class Command
     {
         info(sender, message);
     }
+    
+    protected void info(I18nText message, Object... parameters)
+    {
+        info(I.t(getSenderLocale(), message, parameters));
+    }
 
     static protected void success(CommandSender sender, String message)
     {
@@ -228,6 +242,11 @@ abstract public class Command
     protected void success(String message)
     {
         success(sender, message);
+    }
+    
+    protected void success(I18nText message, Object... parameters)
+    {
+        success(I.t(getSenderLocale(), message, parameters));
     }
     
     static protected void warning(CommandSender sender, String message)
@@ -240,9 +259,19 @@ abstract public class Command
         warning(sender, message);
     }
     
+    protected void warning(I18nText message, Object... parameters)
+    {
+        warning(I.t(getSenderLocale(), message, parameters));
+    }
+    
     protected void error(String message) throws CommandException
     {
         throw new CommandException(this, Reason.COMMAND_ERROR, message);
+    }
+    
+    protected void error(I18nText message, Object... parameters) throws CommandException
+    {
+        error(I.t(getSenderLocale(), message, parameters));
     }
     
     protected void tellRaw(String rawMessage) throws CommandException

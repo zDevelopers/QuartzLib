@@ -635,6 +635,15 @@ public class ItemStackBuilder
         this.locale = locale;
         return this;
     }
+    
+    /**
+     * Retreives the locale assigned to this ItemStackBuilder
+     * @return the locale assigned to this ItemStackBuilder, or null if not defined.
+     */
+    public Locale getLocale()
+    {
+        return this.locale;
+    }
 
     /**
      * Concatenates a String[] to a single one.
