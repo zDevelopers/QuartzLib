@@ -647,9 +647,26 @@ public class I18n extends ZLibComponent
         return translate(null, context, messageId, messageIdPlural, count, parameters);
     }
     
+    /**
+     * Translates the given string.
+     *
+     * <p> Tries to use the primary locale; fallbacks to the fallback locale if the string cannot be
+     * translated; fallbacks to the input text if the string still cannot be translated. </p>
+     *
+     * <p> The count is likely to be used in the string, so if, for a translation with plurals, only
+     * a count is given, this count is also interpreted as a parameter (the first and only one, {@code
+     * {0}}). If this behavior annoys you, you can disable it using {@link
+     * #addCountToParameters(boolean)}. </p>
+     * @param locale          The locale to use to translate the string.
+     * @param text            The text to translate
+     * @param parameters      The parameters, replacing values like {@code {0}} in the translated
+     *                        string.
+     *
+     * @return The translated text, with the parameters replaced by their values.
+     */
     public static String translate(Locale locale, I18nText text, Object... parameters)
     {
-        return translate(null, text.getContext(), text.getMessageId(), text.getMessageId(), text.getCount(), parameters);
+        return translate(null, text.getContext(), text.getMessageId(), text.getPluralMessageId(), text.getCount(), parameters);
     }
     
     /**
