@@ -156,10 +156,11 @@ abstract public class ActionGui extends InventoryGui
      *
      * @param name The identifier of the action.
      * @param slot The slot the action will be placed on.
+     * @return an {@link fr.zcraft.zlib.tools.items.ItemStackBuilder} ItemStackBuilder to build the representing item
      */
-    protected void action(String name, int slot)
+    protected ItemStackBuilder action(String name, int slot)
     {
-        action(name, slot, (ItemStack) null);
+        return action(name, slot, (ItemStack) null);
     }
     
     /**
@@ -168,13 +169,19 @@ abstract public class ActionGui extends InventoryGui
      * @param name The identifier of the action.
      * @param slot The slot the action will be placed on.
      * @param item The item used to represent the action.
+     * @return an {@link fr.zcraft.zlib.tools.items.ItemStackBuilder} ItemStackBuilder to build the representing item, or null if it was already specified.
      */
-    protected void action(String name, int slot, ItemStack item)
+    protected ItemStackBuilder action(String name, int slot, ItemStack item)
     {
         if(slot > getSize() || slot < 0) 
             throw new IllegalArgumentException("Illegal slot ID");
         
-        action(new Action(name, slot, item, getActionHandler(guiClass, name)));
+        Action action = new Action(name, slot, item, getActionHandler(guiClass, name));
+        
+        action(action);
+        
+        if(item == null) return action.updateItem();
+        return null;
     }
     
     /**
@@ -227,6 +234,16 @@ abstract public class ActionGui extends InventoryGui
     protected void updateAction(String name, ItemStack item)
     {
         getAction(name).item = item;
+    }
+    
+    protected ItemStackBuilder updateAction(String name, Material material)
+    {
+        return updateAction(name).material(material);
+    }
+    
+    protected ItemStackBuilder updateAction(String name)
+    {
+        return getAction(name).updateItem();
     }
 
     /**
@@ -287,7 +304,7 @@ abstract public class ActionGui extends InventoryGui
     {
         for(Action action : actions.values())
         {
-            inventory.setItem(action.slot, action.item);
+            inventory.setItem(action.slot, action.getItem());
         }
     }
 
@@ -438,6 +455,9 @@ abstract public class ActionGui extends InventoryGui
          * The item this action will be represented by.
          */
         public ItemStack item;
+        
+        public ItemStackBuilder builder;
+        
         /**
          * The callback this action will call when triggered.
          */
@@ -449,6 +469,37 @@ abstract public class ActionGui extends InventoryGui
             this.slot = slot;
             this.item = item;
             this.callback = callback;
+            this.builder = null;
+        }
+        
+        public Action(String name, int slot, ItemStackBuilder builder, Method callback)
+        {
+            this.name = name;
+            this.slot = slot;
+            this.item = null;
+            this.callback = callback;
+            this.builder = builder;
+        }
+        
+        public ItemStack getItem()
+        {
+            if(item == null)
+            {
+                item = builder.item();
+            }
+            
+            return item;
+        }
+        
+        public ItemStackBuilder updateItem()
+        {
+            if(builder == null)
+            {
+                builder = new ItemStackBuilder(item);
+            }
+            
+            item = null;
+            return builder;
         }
     }
 }
