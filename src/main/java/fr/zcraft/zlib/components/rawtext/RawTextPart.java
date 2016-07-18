@@ -270,6 +270,9 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     
     public T hover(RawTextPart hoverText)
     {
+        if(hoverText.getLocale() == null)
+            hoverText.locale(getLocale());
+        
         return hover(ActionHover.SHOW_TEXT, hoverText.build());
     }
     
