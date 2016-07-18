@@ -30,6 +30,8 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
+import fr.zcraft.zlib.components.i18n.I18nText;
+
 class RawTextSubPart extends RawTextPart<RawTextSubPart>
 {
     public RawTextSubPart(String text)
@@ -37,8 +39,18 @@ class RawTextSubPart extends RawTextPart<RawTextSubPart>
         super(text);
     }
     
+    public RawTextSubPart(I18nText text)
+    {
+        super(text);
+    }
+    
     public RawTextSubPart(String text, RawTextPart parent)
     {
         super(text, parent);
+    }
+    
+    public RawTextSubPart(RawTextPart parent, I18nText text, Object... parameters)
+    {
+        super(parent, text, parameters);
     }
 }

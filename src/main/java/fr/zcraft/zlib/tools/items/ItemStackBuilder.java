@@ -168,7 +168,12 @@ public class ItemStackBuilder
         ItemMeta meta = newItemStack.getItemMeta();
 
         if (title != null)
+        {
+            if(title.getLocale() == null)
+                title.locale(locale);
+        
             meta.setDisplayName(ChatColor.RESET + title.build().toFormattedText());
+        }
 
         if (!loreLines.isEmpty())
             meta.setLore(loreLines);
@@ -260,7 +265,7 @@ public class ItemStackBuilder
     {
         if (this.title != null)
             throw new IllegalStateException("Title has already been defined.");
-
+        
         this.title = text;
         return this;
     }
@@ -412,6 +417,9 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder loreLine(RawTextPart rawText)
     {
+        if(rawText.getLocale() == null)
+            rawText.locale(locale);
+        
         return loreLine(rawText.toFormattedText());
     }
 

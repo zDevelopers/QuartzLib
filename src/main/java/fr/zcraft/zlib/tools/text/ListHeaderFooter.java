@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.i18n.I18n;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
 import fr.zcraft.zlib.tools.reflection.NMSNetwork;
@@ -37,6 +38,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
 
 
 /**
@@ -108,6 +110,17 @@ public final class ListHeaderFooter
      */
     public static void sendListHeaderFooter(Player player, RawText header, RawText footer)
     {
+        Locale playerLocale = null;
+        
+        if(header != null || footer != null)
+            playerLocale = I18n.getPlayerLocale(player);
+        
+        if(header != null && header.getLocale() != null)
+            header.locale(playerLocale);
+        
+        if(footer != null && footer.getLocale() != null)
+            footer.locale(playerLocale);
+        
         sendRawListHeaderFooter(
                 player,
                 header != null ? header.toJSONString() : "{\"text\": \"\"}",

@@ -34,6 +34,8 @@ package fr.zcraft.zlib.components.rawtext;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.components.commands.Command;
 import fr.zcraft.zlib.components.commands.Commands;
+import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zlib.components.i18n.I18nText;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
@@ -50,6 +52,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 
 public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<RawTextPart>, JSONAware
 {
@@ -68,7 +71,9 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         SHOW_ENTITY
     }
     
-    private String text;
+    private String text = null;
+    private I18nText i18nText = null;
+    private Object[] textParameters = null;
     private boolean translate = false;
     
     private final RawTextPart parent;
@@ -89,14 +94,21 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     private ActionHover actionHover = null;
     private Object actionHoverValue = null;
     
+    private Locale locale = null;
+    
     RawTextPart()
     {
-        this(null);
+        this((String) null);
     }
     
     RawTextPart(String text)
     {
         this(text, null);
+    }
+    
+    RawTextPart(I18nText text)
+    {
+        this(null, text);
     }
     
     RawTextPart(String text, RawTextPart parent)
@@ -105,9 +117,16 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         this.parent = parent;
     }
     
+    RawTextPart(RawTextPart parent, I18nText text, Object... parameters)
+    {
+        this.i18nText = text;
+        this.parent = parent;
+        this.textParameters = parameters;
+    }
+    
     public RawTextPart then()
     {
-        return then(null);
+        return then((String) null);
     }
     
     public RawTextPart then(String text)
@@ -119,10 +138,30 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return newPart;
     }
     
+    public RawTextPart then(I18nText text, Object... parameters)
+    {
+        RawTextPart root = getRoot();
+        RawTextPart newPart = new RawTextSubPart(root, text, parameters);
+        
+        root.extra.add(newPart);
+        return newPart;
+    }
+    
     public T text(String text)
     {
         this.text = text;
+        this.i18nText = null;
         this.translate = false;
+        
+        return (T)this;
+    }
+    
+    public T text(I18nText text, Object... parameters)
+    {
+        this.text = null;
+        this.i18nText = text;
+        this.translate = false;
+        this.textParameters = parameters;
         
         return (T)this;
     }
@@ -130,6 +169,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     public T translate(String text)
     {
         this.text = text;
+        this.i18nText = null;
         this.translate = true;
         
         return (T)this;
@@ -150,6 +190,19 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         }
         
         return translate(trName);
+    }
+    
+    public T locale(Locale locale)
+    {
+        this.locale = locale;
+        return (T)this;
+    }
+    
+    public Locale getLocale()
+    {
+        if(this.locale == null && this.parent != null)
+            return this.parent.getLocale();
+        return this.locale;
     }
     
     public T color(ChatColor color)
@@ -312,7 +365,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         }
         else
         {
-            obj.put("text", text);
+            obj.put("text", getText());
         }
         
         if(!extra.isEmpty())
@@ -358,7 +411,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     
     private void writePlainText(StringBuilder buf)
     {
-        buf.append(text);
+        buf.append(getText());
         
         for(RawTextPart subPart : this)
         {
@@ -382,14 +435,23 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         if(strikethrough) buf.append(ChatColor.STRIKETHROUGH);
         if(obfuscated) buf.append(ChatColor.MAGIC);
         
-        buf.append(text);
+        buf.append(getText());
         buf.append(ChatColor.RESET);
         
         for(RawTextPart subPart : this)
         {
             subPart.writeFormattedText(buf);
         }
+    }
+    
+    private String getText()
+    {
+        if(i18nText != null)
+        {
+            return I.t(getLocale(), i18nText, textParameters);
+        }
         
+        return text;
     }
 
     @Override

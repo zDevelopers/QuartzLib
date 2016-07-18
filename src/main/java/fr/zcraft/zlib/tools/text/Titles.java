@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.i18n.I18n;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.exceptions.IncompatibleMinecraftVersionException;
 import fr.zcraft.zlib.tools.reflection.NMSNetwork;
@@ -37,6 +38,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
 
 
 /**
@@ -144,6 +146,17 @@ public final class Titles
      */
     public static void displayTitle(Player player, int fadeIn, int stay, int fadeOut, RawText title, RawText subtitle)
     {
+        Locale playerLocale = null;
+        
+        if(title != null || subtitle != null)
+            playerLocale = I18n.getPlayerLocale(player);
+        
+        if(title != null && title.getLocale() != null)
+            title.locale(playerLocale);
+        
+        if(subtitle != null && subtitle.getLocale() != null)
+            subtitle.locale(playerLocale);
+        
         displayRawTitle(
                 player, fadeIn, stay, fadeOut,
                 title != null ? title.toJSONString() : "{\"text\": \"\"}",

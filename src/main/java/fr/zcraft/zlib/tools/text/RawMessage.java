@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.i18n.I18n;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.Bukkit;
@@ -64,6 +65,9 @@ public final class RawMessage
     {
         if(commandSender instanceof Player)
         {
+            if(text.getLocale() == null)
+                text.locale(I18n.getPlayerLocale((Player) commandSender));
+            
             send((Player) commandSender, text.toJSONString());
         }
         else

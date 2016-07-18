@@ -31,6 +31,7 @@
 package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
+import fr.zcraft.zlib.components.i18n.I18n;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.text.RawMessage;
@@ -42,6 +43,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 abstract public class Command
 {   
@@ -53,6 +55,8 @@ abstract public class Command
     
     protected CommandSender sender;
     protected String[] args;
+    
+    private Locale senderLocale;
     
     abstract protected void run() throws CommandException;
     
@@ -187,6 +191,22 @@ abstract public class Command
             throw new CommandException(this, Reason.COMMANDSENDER_EXPECTED_PLAYER);
         return (Player)sender;
     }
+    
+    protected Locale getSenderLocale()
+    {
+        if(senderLocale != null) return senderLocale;
+        
+        if(sender instanceof Player) 
+            senderLocale = I18n.getPlayerLocale((Player) sender);
+        
+        if(senderLocale == null)
+            senderLocale = I18n.getPrimaryLocale();
+        
+        if(senderLocale == null)
+            senderLocale = I18n.getFallbackLocale();
+        
+        return senderLocale;
+    }
         
     ///////////// Methods for command execution /////////////
     
@@ -232,6 +252,9 @@ abstract public class Command
     
     protected void send(RawText text)
     {
+        if(text.getLocale() == null)
+            text.locale(getSenderLocale());
+        
         RawMessage.send(sender, text);
     }
     

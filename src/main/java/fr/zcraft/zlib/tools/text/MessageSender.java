@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.text;
 
+import fr.zcraft.zlib.components.i18n.I18n;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.tools.reflection.NMSNetwork;
 import fr.zcraft.zlib.tools.reflection.Reflection;
@@ -131,6 +132,8 @@ public final class MessageSender
      */
     public static boolean sendMessage(Player receiver, RawText message, MessageType type)
     {
+        if(message.getLocale() != null)
+            message.locale(I18n.getPlayerLocale(receiver));
         return sendChatPacket(receiver, type.isJSON() ? message.toJSONString() : message.toFormattedText(), type);
     }
 
