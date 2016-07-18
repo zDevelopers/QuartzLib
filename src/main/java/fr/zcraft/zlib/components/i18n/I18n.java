@@ -647,6 +647,11 @@ public class I18n extends ZLibComponent
         return translate(null, context, messageId, messageIdPlural, count, parameters);
     }
     
+    public static String translate(Locale locale, I18nText text, Object... parameters)
+    {
+        return translate(null, text.getContext(), text.getMessageId(), text.getMessageId(), text.getCount(), parameters);
+    }
+    
     /**
      * Replaces some formatting codes into system codes.
      *

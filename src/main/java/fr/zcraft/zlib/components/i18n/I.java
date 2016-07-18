@@ -87,6 +87,16 @@ public class I
     {
         return I18n.translate(null, null, text, null, null, parameters);
     }
+    
+    public static String t(Locale locale, I18nText text, Object... parameters)
+    {
+        return I18n.translate(locale, text, parameters);
+    }
+    
+    public static String t(I18nText text, Object... parameters)
+    {
+        return t(null, text, parameters);
+    }
 
     /**
      * Translates the string with a plural.
@@ -305,4 +315,18 @@ public class I
         player.sendMessage(I18n.translate(I18n.getPlayerLocale(player), context, singular, plural, count, parameters));
     }
     
+    public static I18nText i(String messageId)
+    {
+        return i(messageId, null, null, null);
+    }
+    
+    public static I18nText i(String messageId, String pluralMessageId, Integer count)
+    {
+        return i(messageId, pluralMessageId, count, null);
+    }
+    
+    public static I18nText i(String messageId, String pluralMessageId, Integer count, String context)
+    {
+        return new I18nText(messageId, pluralMessageId, count, context);
+    }
 }
