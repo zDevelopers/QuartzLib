@@ -117,8 +117,12 @@ public class ItemStackBuilder
     {
         this.itemStack = itemStack;
         this.material = null;
-        this.amount = itemStack.getAmount();
-        this.data = itemStack.getDurability();
+        
+        if(itemStack != null)
+        {
+            this.amount = itemStack.getAmount();
+            this.data = itemStack.getDurability();
+        }
     }
 
     /**
