@@ -73,7 +73,7 @@ public class ItemStackBuilder
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
     private DyeColor dye = null;
-    
+
     /**
      * Creates a new ItemStackBuilder.
      */
