@@ -38,6 +38,7 @@ import fr.zcraft.zlib.core.ZPlugin;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -54,7 +55,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.bukkit.entity.Player;
 
 
 public class I18n extends ZLibComponent
@@ -282,8 +282,8 @@ public class I18n extends ZLibComponent
         {
             Object playerHandle = Reflection.call(player, "getHandle");
             String localeName = (String) Reflection.getFieldValue(playerHandle, "locale");
-            String[] splittedLocale = localeName.split("[_\\-]", 2);
-            return new Locale(splittedLocale[0], splittedLocale[1]);
+            String[] splitLocale = localeName.split("[_\\-]", 2);
+            return new Locale(splitLocale[0], splitLocale[1]);
         }
         catch(Exception e)
         {
@@ -298,7 +298,7 @@ public class I18n extends ZLibComponent
      * translator cache.
      * 
      * @param locale The locale
-     * @return The closest translator that could be found.
+     * @return The closest translator that could be found, or {@code null} in some rare cases if no translator can be found at all.
      */
     private static Translator getClosestTranslator(Locale locale)
     {
@@ -317,11 +317,13 @@ public class I18n extends ZLibComponent
             if(curLocale.getCountry().equals(locale.getCountry()))
                 break;
         }
-        
-        if(translator == null) translator = translators.get(I18n.primaryLocale);
-        if(translator == null) translator = translators.get(I18n.fallbackLocale);
-        
-        translators.put(locale, translator);
+
+        if(translator == null && I18n.primaryLocale != null)  translator = translators.get(I18n.primaryLocale);
+        if(translator == null && I18n.fallbackLocale != null) translator = translators.get(I18n.fallbackLocale);
+
+        if (translator != null)
+            translators.put(locale, translator);
+
         return translator;
     }
     
