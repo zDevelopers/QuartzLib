@@ -216,11 +216,33 @@ public final class UUIDFetcher
 
                 if(array == null) return uuidMap;
                 
+                List<String> remainingNames = new ArrayList<String>();
+                remainingNames.addAll(names);
+                
 		for (Object profile : array)
 		{
 			JSONObject jsonProfile = (JSONObject) profile;
+                        String foundName = (String) jsonProfile.get("name");
+                        String name = null;
+                        for(String requestedName : remainingNames)
+                        {
+                            if(requestedName.equalsIgnoreCase(foundName))
+                            {
+                                name = requestedName;
+                                break;
+                            }
+                        }
+                        
+                        if(name == null) 
+                        {
+                            name = foundName;
+                        }
+                        else
+                        {
+                            remainingNames.remove(name);
+                        }
+                        
 			String id = (String) jsonProfile.get("id");
-			String name = (String) jsonProfile.get("name");
 			uuidMap.put(name, fromMojangUUID(id));
 		}
 
@@ -308,7 +330,7 @@ public final class UUIDFetcher
                 if(object == null) return null;
                 
 		User user = new User();
-		user.name = (String) object.get("name");
+		user.name = name;
 		user.uuid = fromMojangUUID((String) object.get("id"));
 		return user;
 	}

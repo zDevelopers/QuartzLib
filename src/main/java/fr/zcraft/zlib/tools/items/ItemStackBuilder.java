@@ -117,7 +117,12 @@ public class ItemStackBuilder
     {
         this.itemStack = itemStack;
         this.material = null;
-        this.amount = 0;
+        
+        if(itemStack != null)
+        {
+            this.amount = itemStack.getAmount();
+            this.data = itemStack.getDurability();
+        }
     }
 
     /**
@@ -130,10 +135,19 @@ public class ItemStackBuilder
     public ItemStack item()
     {
         ItemStack newItemStack = itemStack;
-
+        
         if (newItemStack == null)
+        {
             newItemStack = new ItemStack(material, amount);
+        }
+        else
+        {
+            if (material != null)
+                newItemStack.setType(material);
 
+            newItemStack.setAmount(amount);
+        }
+        
         newItemStack.setDurability(data);
 
         if (dye != null)
@@ -203,8 +217,7 @@ public class ItemStackBuilder
     }
 
     /**
-     * Defines the material of the ItemStack. This can only be defined once,
-     * otherwise an IllegalStateException will be thrown.
+     * Defines the material of the ItemStack.
      *
      * @param material The material
      *
@@ -212,9 +225,6 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder material(Material material)
     {
-        if (this.material != null)
-            throw new IllegalStateException("Material has already been defined.");
-
         this.material = material;
         return this;
     }

@@ -88,6 +88,8 @@ public class I18n extends ZLibComponent
     {
         if (ZLib.getPlugin() instanceof ZPlugin)
             jarFile = ((ZPlugin) ZLib.getPlugin()).getJarFile();
+        
+        setFallbackLocale(Locale.getDefault());
     }
 
 
@@ -271,6 +273,8 @@ public class I18n extends ZLibComponent
         I18n.addCountToParameters = addCountToParameters;
     }
     
+    static private boolean playerLocaleWarning = false;
+    
     /**
      * Return the locale used by the player's client.
      * @param player The player
@@ -278,6 +282,10 @@ public class I18n extends ZLibComponent
      */
     public static Locale getPlayerLocale(Player player)
     {
+        if(player == null) {
+            return null;
+        }
+        
         try
         {
             Object playerHandle = Reflection.call(player, "getHandle");
@@ -287,6 +295,12 @@ public class I18n extends ZLibComponent
         }
         catch(Exception e)
         {
+            if(!playerLocaleWarning)
+            {
+                PluginLogger.warning("Could not retrieve locale for player {0}", e, player.getName());
+                playerLocaleWarning = true;
+            }
+            
             return null;
         }
     }
@@ -309,21 +323,28 @@ public class I18n extends ZLibComponent
         if(translators.containsKey(locale))
             return translators.get(locale);
         
-        for(Locale curLocale : translators.keySet())
+        try
         {
-            if(curLocale.getLanguage().equals(locale.getLanguage()))
-                translator = translators.get(curLocale);
-            
-            if(curLocale.getCountry().equals(locale.getCountry()))
-                break;
+            translator = loadLocale(locale);
         }
+        catch (UnsupportedLocaleException ignored) {}
+        
+        if (translator == null)
+        {
+            for (Locale curLocale : translators.keySet())
+            {
+                if (curLocale.getLanguage().equals(locale.getLanguage()))
+                    translator = translators.get(curLocale);
 
+                if (curLocale.getCountry().equals(locale.getCountry()))
+                    break;
+            }
+        }
+        
         if(translator == null && I18n.primaryLocale != null)  translator = translators.get(I18n.primaryLocale);
         if(translator == null && I18n.fallbackLocale != null) translator = translators.get(I18n.fallbackLocale);
-
-        if (translator != null)
-            translators.put(locale, translator);
-
+        
+        if(translator != null) translators.put(locale, translator);
         return translator;
     }
     
@@ -455,10 +476,11 @@ public class I18n extends ZLibComponent
      * Loads a locale.
      *
      * @param locale the locale to be loaded.
+     * @return The translator associated to the locale.
      *
      * @throws UnsupportedLocaleException if the locale is not available.
      */
-    private static void loadLocale(Locale locale) throws UnsupportedLocaleException
+    private static Translator loadLocale(Locale locale) throws UnsupportedLocaleException
     {
         writeFiles();
 
@@ -479,7 +501,7 @@ public class I18n extends ZLibComponent
         if (files == null)
         {
             PluginLogger.warning("Cannot list files of the i18n directory ({0}). Aborting loading of locale {1}.", i18nServerDirectory.getAbsolutePath(), locale);
-            return;
+            return null;
         }
 
         filesLoop:
@@ -510,6 +532,8 @@ public class I18n extends ZLibComponent
         {
             translators.put(locale, loader);
         }
+        
+        return loader;
     }
 
 
