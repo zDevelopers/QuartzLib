@@ -33,16 +33,11 @@ package fr.zcraft.zlib.components.configuration;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.Callback;
-import fr.zcraft.zlib.tools.PluginLogger;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 public abstract class Configuration extends ZLibComponent
 {
     /* ===== Static API ===== */
-    static private ConfigurationItem[] items;
-    static private Callback<ConfigurationItem<?>> updateCallback;
+    static private ConfigurationInstance instance;
     
     @Override
     protected void onEnable() 
@@ -52,27 +47,9 @@ public abstract class Configuration extends ZLibComponent
     
     static public void init(Class configurationClass)
     {
-        ArrayList<ConfigurationItem> itemsList = new ArrayList<>();
-        
-        for(Field field : configurationClass.getFields())
-        {
-            if(ConfigurationItem.class.isAssignableFrom(field.getType()))
-            {
-                try 
-                {
-                    itemsList.add((ConfigurationItem) field.get(null));
-                }
-                catch(Exception ex){}
-            }
-        }
-        
-        items = itemsList.toArray(new ConfigurationItem[itemsList.size()]);
-        loadDefaultValues();
-        
-        if(!validate())
-        {
-            PluginLogger.warning("Some configuration values are invalid. Please check your configuration file.");
-        }
+        instance = new ConfigurationInstance(ZLib.getPlugin().getConfig());
+        instance.init(configurationClass);
+        instance.onEnable();
     }
     
     static public void save()
@@ -82,32 +59,6 @@ public abstract class Configuration extends ZLibComponent
 
     static public void registerConfigurationUpdateCallback(Callback<ConfigurationItem<?>> callback)
     {
-        updateCallback = callback;
-    }
-    
-    static private void loadDefaultValues()
-    {
-        for(ConfigurationItem configField : items)
-        {
-            configField.init();
-        }
-    }
-    
-    static private boolean validate()
-    {
-        boolean isValid = true;
-        
-        for(ConfigurationItem configField : items)
-        {
-            if(!configField.validate())
-                isValid = false;
-        }
-        
-        return isValid;
-    }
-
-    static void triggerCallback(ConfigurationItem<?> configurationItem)
-    {
-        if (updateCallback != null) updateCallback.call(configurationItem);
+        instance.registerConfigurationUpdateCallback(callback);
     }
 }
