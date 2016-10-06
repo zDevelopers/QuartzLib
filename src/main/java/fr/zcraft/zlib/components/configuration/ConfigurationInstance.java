@@ -80,7 +80,7 @@ public class ConfigurationInstance extends ZLibComponent
         }
         catch(Exception ex)
         {
-            PluginLogger.warning("Couldn't read configuration file {0} : ", getFilePath(), ex.getMessage());
+            PluginLogger.warning("Couldn't read configuration file {0} : {1}", getFilePath(), ex.getMessage());
         }
     }
     
