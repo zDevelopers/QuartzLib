@@ -10,14 +10,14 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.Callback;
 import fr.zcraft.zlib.tools.PluginLogger;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 public class ConfigurationInstance extends ZLibComponent
 {
@@ -48,20 +48,28 @@ public class ConfigurationInstance extends ZLibComponent
         this.fileName = null;
     }
     
-    public void load() throws IOException, FileNotFoundException, InvalidConfigurationException
+    public void load() throws IOException, InvalidConfigurationException
     {
         init(this.getClass());
-        if(file != null)
+
+        if (file != null)
         {
             this.bukkitConfiguration.load(file);
         }
-        else if(fileName != null)
+        else if (fileName != null)
         {
             this.bukkitConfiguration.load(ZLib.getPlugin().getDataFolder().getAbsolutePath() + "/" + fileName);
         }
+
         if(!validate())
         {
-            PluginLogger.warning("Some configuration values are invalid. Please check the '" + getFilePath() + "' file.");
+            // The file path is null when the instance was constructed from a FileConfiguration object directly.
+            final String filePath = getFilePath();
+
+            if (filePath != null)
+                PluginLogger.warning("Some configuration values are invalid. Please check the ''{0}'' file.", filePath);
+            else
+                PluginLogger.warning("Some configuration values are invalid. Please check the configuration file.");
         }
     }
     
@@ -80,7 +88,7 @@ public class ConfigurationInstance extends ZLibComponent
         }
         catch(Exception ex)
         {
-            PluginLogger.warning("Couldn't read configuration file {0} : ", getFilePath(), ex.getMessage());
+            PluginLogger.error("Couldn't read configuration file {0} : {1}", ex, getFilePath(), ex.getMessage());
         }
     }
     

@@ -190,6 +190,7 @@ public class ConfigurationItem<T>
     
     boolean validate()
     {
+        PluginLogger.info("Validation for key {0}", getFieldName());
         try
         {
             getValue(getRawValue());
@@ -199,6 +200,11 @@ public class ConfigurationItem<T>
         {
             PluginLogger.warning("Invalid value for configuration field ''{0}'' : ''{1}''.", getFieldName(), ex.getValue());
             PluginLogger.warning("\tReason : {0}", ex.getMessage());
+            return false;
+        }
+        catch (Exception ex)
+        {
+            PluginLogger.error("Exception caught while validating the configuration field ''{0}''", ex, getFieldName());
             return false;
         }
     }
