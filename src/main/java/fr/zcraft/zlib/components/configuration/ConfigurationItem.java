@@ -190,7 +190,6 @@ public class ConfigurationItem<T>
     
     boolean validate()
     {
-        PluginLogger.info("Validation for key {0}", getFieldName());
         try
         {
             getValue(getRawValue());
