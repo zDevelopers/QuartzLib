@@ -7,13 +7,11 @@ import fr.zcraft.zlib.components.gui.ExplorerGui;
 import fr.zcraft.zlib.components.gui.Gui;
 import fr.zcraft.zlib.tools.Callback;
 
-/* Built from recommendations in PR https://github.com/zDevelopers/zLib/pull/14 */
-public class ArrayPromptGui<T> extends ExplorerGui<T> {
+public abstract class ArrayPromptGui<T> extends ExplorerGui<T> {
 
 	private Callback<T> cb;
-	private String purpose;
-	private T[] datas;
-	private ItemRenderer<T> renderer;
+	private String title;
+	private T[] data;
 	private boolean closeOnChoice;
 
 	/**
@@ -21,43 +19,78 @@ public class ArrayPromptGui<T> extends ExplorerGui<T> {
 	 *            Callback called when the player made a choice
 	 * @param player
 	 *            The player making the choice
-	 * @param purpose
-	 *            The purpose (gui's title)
-	 * @param datas
+	 * @param title
+	 *            The gui title
+	 * @param data
 	 *            An array of datas to display
 	 * @param renderer
 	 *            Interface for building gui's ItemStack from array values
 	 * @param closeOnChoice
 	 *            Close the interface when the player has choosen if true
 	 */
-	public <A> ArrayPromptGui(Callback<T> callback, Player player, String purpose, T[] datas, ItemRenderer<T> renderer,
-			boolean closeOnChoice) {
+	public <A> ArrayPromptGui(Callback<T> callback, Player player, String title, T[] data, boolean closeOnChoice) {
 		this.cb = callback;
-		this.purpose = purpose;
-		this.datas = datas;
-		this.renderer = renderer;
+		this.title = title;
+		this.data = data;
 		this.closeOnChoice = closeOnChoice;
 
 		Gui.open(player, this);
 	}
 
+	/**
+	 * @see #onChoice(Object)
+	 * 
+	 *      Constructor with no callback argument. Note that you must override
+	 *      the onChoice method by using this constructor
+	 * 
+	 * @param player
+	 *            The player making the choice
+	 * @param title
+	 *            The gui title
+	 * @param data
+	 *            An array of datas to display
+	 * @param renderer
+	 *            Interface for building gui's ItemStack from array values
+	 * @param closeOnChoice
+	 *            Close the interface when the player has choosen if true
+	 */
+	public <A> ArrayPromptGui(Player player, String title, T[] data, boolean closeOnChoice) {
+		this(null, player, title, data, closeOnChoice);
+	}
+
+	/**
+	 * Convert an object to an ItemStack
+	 * 
+	 * @return The ItemStack to display
+	 */
+	public abstract ItemStack getViewItem(T data);
+
+	/**
+	 * Called when player made a choice if no callback was provided
+	 * 
+	 * @param data
+	 */
+	public void onChoice(T data) {
+		System.err.println("Damn ! I'm not properly implemented : override me or use a callback.");
+	}
+
 	@Override
 	protected void onRightClick(T data) {
-		cb.call(data);
+
+		if (cb != null)
+			cb.call(data);
+		else
+			onChoice(data);
+
 		if (closeOnChoice)
 			close();
 	}
 
 	@Override
 	protected void onUpdate() {
-		setTitle(purpose);
+		setTitle(title);
 		setMode(Mode.READONLY);
-		setData(datas);
-	}
-
-	@Override
-	protected ItemStack getViewItem(T data) {
-		return renderer.build(data);
+		setData(data);
 	}
 
 	public Callback<T> getCallback() {
@@ -65,29 +98,14 @@ public class ArrayPromptGui<T> extends ExplorerGui<T> {
 	}
 
 	public String getPurpose() {
-		return purpose;
+		return title;
 	}
 
-	public T[] getDatas() {
-		return datas;
+	public T[] getData() {
+		return data;
 	}
 
 	public boolean closeOnChoice() {
 		return closeOnChoice;
-	}
-
-	public ItemRenderer<T> getRenderer() {
-		return renderer;
-	}
-
-	public static interface ItemRenderer<T> {
-		/**
-		 * Parse an array element to an ItemStack
-		 * 
-		 * @param The
-		 *            object to parse
-		 * @return The ItemStack to display
-		 */
-		public ItemStack build(T data);
 	}
 }
