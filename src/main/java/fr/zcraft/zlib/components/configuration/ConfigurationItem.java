@@ -201,6 +201,11 @@ public class ConfigurationItem<T>
             PluginLogger.warning("\tReason : {0}", ex.getMessage());
             return false;
         }
+        catch (Exception ex)
+        {
+            PluginLogger.error("Exception caught while validating the configuration field ''{0}''", ex, getFieldName());
+            return false;
+        }
     }
     
     protected T getValue(Object object) throws ConfigurationParseException

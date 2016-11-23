@@ -62,10 +62,21 @@ public class ExternalPluginComponent<T extends Plugin> extends ZLibComponent
     protected final void onEnable()
     {
         Plugin bukkitPlugin = Bukkit.getServer().getPluginManager().getPlugin(pluginName);
-        if(bukkitPlugin == null || !bukkitPlugin.isEnabled())
+        if(bukkitPlugin == null)
         {
-            this.setEnabled(false);
+            setEnabled(false);
             return;
+        }
+        else if (!bukkitPlugin.isEnabled())
+        {
+            // We try to load the plugin (required if we're a startup plugin
+            // depending on a non-startup one).
+            Bukkit.getServer().getPluginManager().enablePlugin(bukkitPlugin);
+            if (!bukkitPlugin.isEnabled())
+            {
+                setEnabled(false);
+                return;
+            }
         }
         
         try
