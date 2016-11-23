@@ -274,8 +274,8 @@ public class Attributes implements List<Attribute>
         for(int i = 0; i < size(); ++i)
         {
             NBTCompound compound = rawAttributes.getCompound(i);
-            Long uuidMost = compound.get("UUIDMost", null);
-            Long uuidLeast = compound.get("UUIDLeast", null);
+            Long uuidMost = compound.get("UUIDMost", null, Long.class);
+            Long uuidLeast = compound.get("UUIDLeast", null, Long.class);
             if(uuidMost == null || uuidLeast == null) continue;
             
             UUID attributeUUID = new UUID(uuidMost, uuidLeast);

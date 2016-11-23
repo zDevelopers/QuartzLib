@@ -135,10 +135,30 @@ public class NBTCompound implements Map<String, Object>
      */
     public <T> T get(String key, T defaultValue)
     {
+        return get(key, defaultValue, defaultValue == null ? null : (Class<T>) defaultValue.getClass());
+    }
+    
+    /**
+     * Returns the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
+     * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
+     * This version of the method is recommended if the defaultValue parameter is null, so it can have enough type information to protect against wrong NBT types.
+     * @param <T> The type to coerce the mapped value to.
+     * @param key The key
+     * @param defaultValue The default value.
+     * @param valueType The type of the expected value.
+     * @return the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
+     */
+    public <T> T get(String key, T defaultValue, Class<T> valueType)
+    {
         try
         {
             Object value = get(key);
             if(value == null) return defaultValue;
+            if(valueType != null) 
+            {
+                if(!valueType.isAssignableFrom(value.getClass()))
+                    return defaultValue;
+            }
             return (T) value;
         }
         catch(ClassCastException | NBTException ex)
