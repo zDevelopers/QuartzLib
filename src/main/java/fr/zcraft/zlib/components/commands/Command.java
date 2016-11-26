@@ -82,6 +82,11 @@ abstract public class Command
         return sender.hasPermission(permissionPrefix + commandGroup.getUsualName());
     }
     
+    public boolean canExecute(CommandSender sender, String[] args)
+    {
+        return canExecute(sender);
+    }
+    
     protected List<String> complete() throws CommandException
     {
         return null;
@@ -92,7 +97,7 @@ abstract public class Command
         this.sender = sender; this.args = args;
         try
         {
-            if(!canExecute(sender))
+            if(!canExecute(sender, args))
                 throw new CommandException(this, Reason.SENDER_NOT_AUTHORIZED);
             run();
         }
@@ -109,7 +114,7 @@ abstract public class Command
         this.sender = sender; this.args = args;
         try
         {
-            if(canExecute(sender))
+            if(canExecute(sender, args))
                 result = complete();
         }
         catch(CommandException ex){}

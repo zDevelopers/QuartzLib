@@ -62,7 +62,7 @@ public class HelpCommand extends Command
         RawText message;
         for(Command tCommand: commandGroup.getCommands())
         {
-            if(!tCommand.canExecute(sender)) continue;
+            if(!tCommand.canExecute(sender, args)) continue;
             
             tCommandName = "/" + commandGroup.getUsualName() + " " + tCommand.getName();
             
@@ -94,7 +94,7 @@ public class HelpCommand extends Command
             return;
         }
         
-        if(!command.canExecute(sender))
+        if(!command.canExecute(sender, args))
             warning("You do not have the permission to use this command.");
 
         String message = "\n";
