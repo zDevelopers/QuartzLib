@@ -33,16 +33,17 @@ package fr.zcraft.zlib.components.nbt;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * This class provides various utilities to manipulate NBT data.
@@ -277,7 +278,7 @@ public abstract class NBT
     static private void toNBTJSONString(StringBuilder builder, String value)
     {
         builder.append('"');
-        builder.append(value);
+        builder.append(value.replace("\"", "\\\""));
         builder.append('"');
     }
 }
