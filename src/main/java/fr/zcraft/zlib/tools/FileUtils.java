@@ -27,11 +27,12 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zlib.components.i18n.utils;
+package fr.zcraft.zlib.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 
@@ -69,6 +70,42 @@ public final class FileUtils
         {
             if (reader != null)
                 try { reader.close(); } catch (IOException ignored) {}
+        }
+    }
+
+    /**
+     * Writes the given content into the file, replacing its content.
+     *
+     * @param file The file to write into.
+     * @param content The content to write into the file.
+     */
+    public static void writeFile(File file, String content) throws IOException
+    {
+        writeFile(file, content, true);
+    }
+
+    /**
+     * Writes the given content into the file.
+     *
+     * @param file The file to write into.
+     * @param content The content to write into the file.
+     * @param overwrite {@code true} to overwrite, {@code false} to append.
+     *
+     * @throws IOException if the file cannot be written to.
+     */
+    public static void writeFile(File file, String content, boolean overwrite) throws IOException
+    {
+        FileWriter writer = null;
+
+        try
+        {
+            writer = new FileWriter(file, !overwrite);
+            writer.write(content);
+            writer.close();
+        }
+        finally
+        {
+            if (writer != null) writer.close();
         }
     }
 }
