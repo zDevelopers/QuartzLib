@@ -121,7 +121,7 @@ enum NBTType
             throw new IllegalArgumentException("Contents of a tag cannot be null");
         if(!isAssignableFrom(value.getClass()))
             throw new IllegalArgumentException("Invalid content type '" + value.getClass() + "' for tag : " + nmsClassName);
-        
+
         try
         {
             Object tag;

@@ -129,6 +129,14 @@ public class NBTCompound implements Map<String, Object>
     }
 
     /**
+     * @return The NMS NBTTagCompound instance.
+     */
+    Object getNBTTagCompound()
+    {
+        return nmsNbtTag;
+    }
+
+    /**
      * Returns the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
      * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
      *

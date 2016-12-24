@@ -38,6 +38,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -192,17 +193,29 @@ public abstract class NBT
      */
     static public ItemStack addToItemStack(final ItemStack item, final Map<String, Object> tags, final boolean replace) throws NMSException
     {
+        init();
+
         try
         {
             final ItemStack craftItemStack = (ItemStack) ItemUtils.getCraftItemStack(item);
+            final Object mcItemStack = ItemUtils.getNMSItemStack(item);
             final NBTCompound compound = fromItemStack(craftItemStack);
 
             if (replace) compound.clear();
             compound.putAll(tags);
+            Object tag = compound.getNBTTagCompound();
+
+            if (tag != null)
+            {
+                final ItemMeta craftItemMeta = (ItemMeta) Reflection.call(craftItemStack.getClass(), null, "getItemMeta", new Object[] {mcItemStack});
+                Reflection.call(CB_CRAFT_ITEM_META, craftItemMeta, "applyToItem", tag);
+
+                craftItemStack.setItemMeta(craftItemMeta);
+            }
 
             return craftItemStack;
         }
-        catch (NMSException e)
+        catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | NMSException e)
         {
             throw new NMSException("Cannot set item stack tags", e);
         }
@@ -236,6 +249,8 @@ public abstract class NBT
     
     static Class<?> MC_ITEM_STACK = null;
     static Class<?> MC_NBT_TAG_COMPOUND = null;
+    static Class<?> CB_CRAFT_ITEM_META = null;
+
 
     static Class getMinecraftClass(String className) throws NMSException
     {
@@ -249,12 +264,25 @@ public abstract class NBT
         }
     }
 
+    static Class getCraftBukkitClass(String className) throws NMSException
+    {
+        try
+        {
+            return Reflection.getBukkitClassByName(className);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            throw new NMSException("Unable to find class: " + className, ex);
+        }
+    }
+
     static private void init() throws NMSException
     {
         if (MC_ITEM_STACK != null) return; // Already initialized
 
         MC_ITEM_STACK = getMinecraftClass("ItemStack");
         MC_NBT_TAG_COMPOUND = getMinecraftClass("NBTTagCompound");
+        CB_CRAFT_ITEM_META = getCraftBukkitClass("inventory.CraftMetaItem");
     }
     
     static private Object getMcNBTCompound(ItemStack item) throws NMSException
