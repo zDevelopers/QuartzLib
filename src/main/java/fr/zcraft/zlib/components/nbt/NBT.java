@@ -211,6 +211,50 @@ public abstract class NBT
                 Reflection.call(CB_CRAFT_ITEM_META, craftItemMeta, "applyToItem", tag);
 
                 craftItemStack.setItemMeta(craftItemMeta);
+
+                // Warning, here is a very ugly hack to have enchants working.
+                // For some reasons, yet to be found, when in the NBTCompound, the tags are updated,
+                // the enchantments, and only them, are not added. I have NO IDEA why. Any other tag
+                // is correctly added, and enchantment tags of nested items (like in a shulker box or
+                // in a chest grabbed with NBT) are correctly restored.
+                // This re-adds manually the enchantments.
+
+                ItemMeta bukkitItemMeta = craftItemStack.getItemMeta();
+                Object rawEnchantments;
+
+                //noinspection unchecked
+                if ((tags.containsKey("ench") && (rawEnchantments = tags.get("ench")) instanceof List && !((List<Object>) rawEnchantments).isEmpty())
+                        || (tags.containsKey("StoredEnchantments") && (rawEnchantments = tags.get("StoredEnchantments")) instanceof List && !((List<Object>) rawEnchantments).isEmpty()))
+                {
+                    // If a full replacement, we remove all previous enchantments, if any.
+                    if (replace)
+                    {
+                        for (Enchantment enchantment : craftItemMeta.getEnchants().keySet())
+                        {
+                            bukkitItemMeta.removeEnchant(enchantment);
+                        }
+                    }
+
+                    @SuppressWarnings ("unchecked")
+                    List<Object> enchantments = (List<Object>) rawEnchantments;
+
+                    for (final Object enchantment : enchantments)
+                    {
+                        if (enchantment instanceof Map)
+                        {
+                            try
+                            {
+                                final Integer enchantmentID = Integer.valueOf(((Map) enchantment).get("id").toString());
+                                final Integer level = Integer.valueOf(((Map) enchantment).get("lvl").toString());
+
+                                bukkitItemMeta.addEnchant(Enchantment.getById(enchantmentID), level, true);
+                            }
+                            catch (NumberFormatException ignored) {}
+                        }
+                    }
+                }
+
+                craftItemStack.setItemMeta(bukkitItemMeta);
             }
 
             return craftItemStack;
