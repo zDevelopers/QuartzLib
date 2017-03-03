@@ -31,7 +31,7 @@ package fr.zcraft.zlib.components.i18n;
 
 import com.google.common.base.Strings;
 import fr.zcraft.zlib.components.i18n.translators.Translator;
-import fr.zcraft.zlib.components.i18n.utils.FileUtils;
+import fr.zcraft.zlib.tools.FileUtils;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.core.ZPlugin;
