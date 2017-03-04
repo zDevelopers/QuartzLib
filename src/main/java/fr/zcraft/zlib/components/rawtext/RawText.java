@@ -31,14 +31,13 @@
 package fr.zcraft.zlib.components.rawtext;
 
 import com.google.common.base.CaseFormat;
+import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
-import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
-import java.util.EnumMap;
-import java.util.HashMap;
+import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -47,9 +46,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONObject;
 
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.bukkit.Achievement;
 
 public class RawText extends RawTextPart<RawText>
 {
@@ -107,7 +107,7 @@ public class RawText extends RawTextPart<RawText>
     
     static public String toJSONString(ItemStack item)
     {
-        Map<String, Object> itemData = new HashMap<String, Object>();
+        Map<String, Object> itemData = new HashMap<>();
         
         String itemId = null;
         try
@@ -119,10 +119,12 @@ public class RawText extends RawTextPart<RawText>
             PluginLogger.warning("NMS Exception while parsing ItemStack to JSON String", ex);
         }
         
-        if(itemId == null) itemId = String.valueOf(item.getType().getId());
+        if (itemId == null) itemId = String.valueOf(item.getType().getId());
+
         itemData.put("id", itemId);
-        
         itemData.put("Damage", item.getDurability());
+        itemData.put("Count", item.getAmount());
+
         try
         {
             itemData.put("tag", NBT.fromItemStack(item));
@@ -130,7 +132,7 @@ public class RawText extends RawTextPart<RawText>
         catch (NMSException ex)
         {
             PluginLogger.warning("Unable to retrieve NBT data", ex);
-            Map<String, Object> tag = new HashMap();
+            Map<String, Object> tag = new HashMap<>();
             
             tag.put("display", NBT.fromItemMeta(item.getItemMeta()));
             tag.put("ench", NBT.fromEnchantments(item.getEnchantments()));
