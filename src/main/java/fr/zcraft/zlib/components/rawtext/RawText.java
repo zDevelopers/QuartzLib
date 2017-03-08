@@ -57,12 +57,25 @@ public class RawText extends RawTextPart<RawText>
     {
         super(text);
     }
-    
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param delimiter The formatters delimiter (vanilla Minecraft uses §)
+     * @param str The string to convert.
+     * @return The RawText equivalent.
+     */
     static public RawText fromFormattedString(char delimiter, String str)
     {
         return fromFormattedString(new ChatColorParser(delimiter, str));
     }
-    
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param str The string to convert.
+     * @return The RawText equivalent.
+     */
     static public RawText fromFormattedString(String str)
     {
         return fromFormattedString(new ChatColorParser(str));
@@ -91,7 +104,14 @@ public class RawText extends RawTextPart<RawText>
         
         return text.build();
     }
-    
+
+    /**
+     * Converts a style name to a tellraw-format compatible name.
+     *
+     * @param color A color.
+     * @return The tellraw-compatible name.
+     * @throws IllegalArgumentException if {@link ChatColor#RESET RESET} is passed.
+     */
     static public String toStyleName(ChatColor color)
     {
         switch(color)
@@ -104,7 +124,13 @@ public class RawText extends RawTextPart<RawText>
                 return color.name().toLowerCase();
         }
     }
-    
+
+    /**
+     * Converts an item name to a tellraw-compatible JSON.
+     *
+     * @param item The item.
+     * @return The tellraw-compatible JSON.
+     */
     static public String toJSONString(ItemStack item)
     {
         Map<String, Object> itemData = new HashMap<>();
@@ -159,7 +185,13 @@ public class RawText extends RawTextPart<RawText>
     {
         return NBT.fromItemFlags(itemFlags);
     }
-    
+
+    /**
+     * Converts an entity name to a tellraw-compatible JSON.
+     *
+     * @param entity The entity.
+     * @return The tellraw-compatible JSON.
+     */
     static public JSONObject toJSON(Entity entity)
     {
         JSONObject obj = new JSONObject();
@@ -175,7 +207,7 @@ public class RawText extends RawTextPart<RawText>
         return obj;
     }
     
-    static private final EnumMap<Achievement, String> ACHIEVEMENTS_NAMES = new EnumMap(Achievement.class);
+    static private final EnumMap<Achievement, String> ACHIEVEMENTS_NAMES = new EnumMap<>(Achievement.class);
     
     static {
         ACHIEVEMENTS_NAMES.put(Achievement.BUILD_WORKBENCH, "buildWorkBench");
@@ -187,8 +219,11 @@ public class RawText extends RawTextPart<RawText>
         ACHIEVEMENTS_NAMES.put(Achievement.END_PORTAL, "theEnd");
         ACHIEVEMENTS_NAMES.put(Achievement.THE_END, "theEnd2");
     }
-    
-    
+
+    /**
+     * @param achievement An achievement.
+     * @return The Minecraft I18N key for this achievement.
+     */
     static public String getI18nKey(Achievement achievement)
     {
         String key = ACHIEVEMENTS_NAMES.get(achievement);
