@@ -47,6 +47,7 @@ import org.bukkit.entity.Player;
 public abstract class PaginatedTextView<T>
 {
     public static final int DEFAULT_LINES_IN_NON_EXPANDED_CHAT_VIEW = 10;
+    public static final int DEFAULT_LINES_IN_EXPANDED_CHAT_VIEW = 20;
 
     private T[] data;
     private int itemsPerPage = DEFAULT_LINES_IN_NON_EXPANDED_CHAT_VIEW - 2; // items minus one header line minus pagination links
