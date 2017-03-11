@@ -161,6 +161,24 @@ public class CommandFlagsTest
     }
 
     @Test
+    public void longFlagWithDashTest()
+    {
+        assertArgs(
+                new String[] {"arg0", "arg1", "--flop-pomf"},
+                new String[] {},
+                new String[] {"arg0", "arg1"},
+                new String[] {"flop-pomf"}
+        );
+
+        assertArgs(
+                new String[] {"arg0", "arg1", "--flop-pomf", "--pomf"},
+                new String[] {},
+                new String[] {"arg0", "arg1"},
+                new String[] {"flop-pomf", "pomf"}
+        );
+    }
+
+    @Test
     public void mixedFlagTest()
     {
         assertArgs(
