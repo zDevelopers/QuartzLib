@@ -41,18 +41,29 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 
 abstract public class Command
-{   
+{
+    private static final Pattern FLAG_PATTERN = Pattern.compile("(--?)[a-zA-Z0-9]+");
+
     protected CommandGroup commandGroup;
     protected String commandName;
     protected String usageParameters;
     protected String commandDescription;
     protected String[] aliases;
+
+    protected boolean flagsEnabled;
+    protected Set<String> acceptedFlags;
     
     protected CommandSender sender;
     protected String[] args;
+    protected Set<String> flags;
     
     abstract protected void run() throws CommandException;
     
@@ -61,13 +72,23 @@ abstract public class Command
         this.commandGroup = commandGroup;
         
         CommandInfo commandInfo = this.getClass().getAnnotation(CommandInfo.class);
-        if(commandInfo == null) 
+        WithFlags withFlags = this.getClass().getAnnotation(WithFlags.class);
+
+        if(commandInfo == null)
             throw new IllegalArgumentException("Command has no CommandInfo annotation");
         
         commandName = commandInfo.name().toLowerCase();
         usageParameters = commandInfo.usageParameters();
         commandDescription = commandGroup.getDescription(commandName);
         aliases = commandInfo.aliases();
+
+        flagsEnabled = withFlags != null;
+        if (flagsEnabled)
+        {
+            acceptedFlags = new HashSet<>();
+            for (final String flag : withFlags.value()) acceptedFlags.add(flag.toLowerCase());
+        }
+        else acceptedFlags = Collections.emptySet();
     }
     
     public boolean canExecute(CommandSender sender)
@@ -94,7 +115,9 @@ abstract public class Command
     
     public void execute(CommandSender sender, String[] args)
     {
-        this.sender = sender; this.args = args;
+        this.sender = sender;
+        parseArgs(args);
+
         try
         {
             if(!canExecute(sender, args))
@@ -105,22 +128,27 @@ abstract public class Command
         {
             warning(ex.getReasonString());
         }
-        this.sender = null; this.args = null;
+
+        this.sender = null; this.args = null; this.flags = null;
     }
     
     public List<String> tabComplete(CommandSender sender, String[] args)
     {
         List<String> result = null;
-        this.sender = sender; this.args = args;
+
+        this.sender = sender;
+        parseArgs(args);
+
         try
         {
             if(canExecute(sender, args))
                 result = complete();
         }
-        catch(CommandException ex){}
-        
-        this.sender = null; this.args = null;
-        if(result == null) result = new ArrayList<String>();
+        catch(CommandException ignored) {}
+
+        this.sender = null; this.args = null; this.flags = null;
+
+        if (result == null) result = new ArrayList<>();
         return result;
     }
     
@@ -172,6 +200,92 @@ abstract public class Command
         
         return command;
     }
+
+
+    /**
+     * Parses arguments to extract flags (if enabled).
+     *
+     * @param args The raw arguments passed to the command.
+     */
+    private void parseArgs(String[] args)
+    {
+        if (!flagsEnabled)
+        {
+            this.args = args;
+            this.flags = null;
+            return;
+        }
+
+        final List<String> argsList = new ArrayList<>(args.length);
+        flags = new HashSet<>();
+
+        parseArgs(args, acceptedFlags, argsList, flags);
+
+        this.args = argsList.toArray(new String[argsList.size()]);
+    }
+
+    /**
+     * Parses arguments to extract flags.
+     *
+     * <p>This method is made static and with all data as argument to be able to be unit tested.</p>
+     *
+     * @param args The raw arguments.
+     * @param acceptedFlags A set with lowercase accepted flags.
+     * @param realArgs An initially empty list filled with the real arguments, ordered.
+     * @param flags An initially empty set filled with flags found in the raw arguments.
+     */
+    private static void parseArgs(final String[] args, final Set<String> acceptedFlags, List<String> realArgs, Set<String> flags)
+    {
+        for (final String arg : args)
+        {
+            if (!FLAG_PATTERN.matcher(arg).matches())
+            {
+                realArgs.add(arg);
+                continue;
+            }
+
+            final Set<String> flagsInArg;
+            if (arg.startsWith("--"))
+            {
+                final String flatFlag = arg.replace("--", "").trim().toLowerCase();
+                if (isValidFlag(acceptedFlags, flatFlag))
+                {
+                    flagsInArg = Collections.singleton(flatFlag);
+                }
+                else
+                {
+                    realArgs.add(arg);
+                    continue;
+                }
+            }
+            else
+            {
+                final String flatFlags = arg.replace("-", "").trim().toLowerCase();
+                flagsInArg = new HashSet<>(flatFlags.length());
+
+                for (char c : flatFlags.toCharArray())
+                {
+                    final String flag = String.valueOf(c);
+                    if (isValidFlag(acceptedFlags, flag)) flagsInArg.add(flag);
+                }
+
+                // If there is no valid flag at all in the argument, we ignore it and
+                // add it back to args
+                if (flagsInArg.isEmpty())
+                {
+                    realArgs.add(arg);
+                    continue;
+                }
+            }
+
+            flags.addAll(flagsInArg);
+        }
+    }
+
+    private static boolean isValidFlag(Set<String> acceptedFlags, String flag)
+    {
+        return acceptedFlags != null && (acceptedFlags.size() == 0 || acceptedFlags.contains(flag.toLowerCase()));
+    }
     
     
     ///////////// Common methods for commands /////////////
@@ -192,7 +306,8 @@ abstract public class Command
             throw new CommandException(this, Reason.COMMANDSENDER_EXPECTED_PLAYER);
         return (Player)sender;
     }
-        
+
+
     ///////////// Methods for command execution /////////////
     
     static protected void info(CommandSender sender, String message)
@@ -239,7 +354,8 @@ abstract public class Command
     {
         RawMessage.send(sender, text);
     }
-    
+
+
     ///////////// Methods for autocompletion /////////////
     
     protected List<String> getMatchingSubset(String prefix, String... list)
@@ -275,7 +391,8 @@ abstract public class Command
         
         return matches;
     }
-    
+
+
     ///////////// Methods for parameters /////////////
     
     static private String invalidParameterString(int index, final String expected)
@@ -393,5 +510,17 @@ abstract public class Command
         
         throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "player name"));
     }
-    
+
+
+    ///////////// Methods for flags /////////////
+
+    protected Set<String> getFlags()
+    {
+        return flags != null ? Collections.unmodifiableSet(flags) : Collections.<String>emptySet();
+    }
+
+    protected boolean hasFlag(String flag)
+    {
+        return flags != null && flags.contains(flag.toLowerCase());
+    }
 }
