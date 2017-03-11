@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.commands;
 
+import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
@@ -48,7 +49,6 @@ import java.util.Scanner;
 @CommandInfo(name = "help", usageParameters = "<command name>")
 public class HelpCommand extends Command
 {
-    private final char HELP_PREFIX = '\u2503';
 
     @Override
     protected void run() throws CommandException 
@@ -102,24 +102,24 @@ public class HelpCommand extends Command
             warning("You do not have the permission to use this command.");
 
         String message = "\n";
-        message += "§6" + HELP_PREFIX + "§l " + ZLib.getPlugin().getName() +  " help for /" + command.getCommandGroup().getUsualName() + " " + command.getName() + "\n";
-        message += "§6" + HELP_PREFIX + " Usage: §r" + command.getUsageString();
-        
+        message += GuiUtils.generatePrefixedFixedLengthString("§6" + Commands.CHAT_PREFIX + "§l ", ZLib.getPlugin().getName() +  " help for /" + command.getCommandGroup().getUsualName() + " " + command.getName()) + "\n";
+        message += GuiUtils.generatePrefixedFixedLengthString("§6" + Commands.CHAT_PREFIX + " ", "Usage: §r" + command.getUsageString()) + "\n";
+
         try
         {
             String help = getHelpText(command);
             if(help.isEmpty())
             {
-                message += "\n§c" + HELP_PREFIX + " There is no help message for this command.";
+                message += "§c" + Commands.CHAT_PREFIX + " There is no help message for this command.";
             }
             else
             {
-                message += "\n" + help;
+                message += help;
             }
         }
         catch(IOException ex)
         {
-            message += "\n§c" + HELP_PREFIX + " Could not read help for this command.";
+            message += "§c" + Commands.CHAT_PREFIX + " Could not read help for this command.";
             PluginLogger.warning("Could not read help for the command: " + command.getName(), ex);
         }
 
@@ -141,7 +141,7 @@ public class HelpCommand extends Command
         while (scanner.hasNextLine()) 
         {
             String line = scanner.nextLine();
-            result.append("§l§9" + HELP_PREFIX + " §r").append(line).append("\n");
+            result.append("§l§9" + Commands.CHAT_PREFIX + " §r").append(line).append("\n");
         }
  
         scanner.close();
@@ -172,30 +172,32 @@ public class HelpCommand extends Command
         @Override
         protected void displayHeader(CommandSender receiver)
         {
-            receiver.sendMessage(ChatColor.BOLD + commandGroup.getDescription());
+            final String header = ChatColor.BOLD + commandGroup.getDescription();
+            receiver.sendMessage(receiver instanceof Player
+                    ? GuiUtils.generatePrefixedFixedLengthString(ChatColor.BLUE + Commands.CHAT_PREFIX + " " + ChatColor.RESET, header)
+                    : header
+            );
         }
 
         @Override
         protected void displayItem(CommandSender receiver, Command command)
         {
             final String commandName = "/" + commandGroup.getUsualName() + " " + command.getName();
-
-            final RawText message = new RawText(commandName)
-                    .color(ChatColor.GOLD)
-                    .suggest(commandName + " ")
-                    .hover(new RawText(command.getUsageString()));
-
             final String description = commandGroup.getDescription(command.getName());
 
-            if(description != null)
-            {
-                message.then(": ")
-                        .color(ChatColor.GOLD)
-                        .then(description)
-                        .color(ChatColor.WHITE);
-            }
+            String helpMessage = ChatColor.GOLD + commandName;
+            if (description != null) helpMessage += ChatColor.GOLD + ": " + ChatColor.WHITE + description;
 
-            RawMessage.send(receiver, message);
+            final String formattedHelpMessage = receiver instanceof Player
+                    ? GuiUtils.generatePrefixedFixedLengthString(ChatColor.GOLD + Commands.CHAT_PREFIX + " ", helpMessage)
+                    : helpMessage;
+
+            RawText helpLine = RawText.fromFormattedString(
+                    formattedHelpMessage,
+                    new RawText().suggest(commandName + " ").hover(new RawText(command.getUsageString()))
+            );
+
+            RawMessage.send(receiver, helpLine);
         }
 
         @Override

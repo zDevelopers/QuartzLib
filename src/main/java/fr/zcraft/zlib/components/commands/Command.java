@@ -280,7 +280,7 @@ abstract public class Command
     
     static private String invalidParameterString(int index, final String expected)
     {
-        return "Argument #" + (index + 1) + " invalid : expected " + expected;
+        return "Argument #" + (index + 1) + " invalid: expected " + expected;
     }
     
     static private String invalidParameterString(int index, final Object[] expected)
@@ -294,7 +294,7 @@ abstract public class Command
         
         String expectedString =  StringUtils.join(expectedStrings, ',');
         
-        return "Argument #" + (index + 1) + " invalid : expected " + expectedString;
+        return "Argument #" + (index + 1) + " invalid: expected " + expectedString;
     }
     
     protected int getIntegerParameter(int index) throws CommandException
@@ -364,7 +364,7 @@ abstract public class Command
                 return false;
 
             default:
-                throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "Boolean (yes/no)"));
+                throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "boolean (yes/no)"));
         }
     }
     

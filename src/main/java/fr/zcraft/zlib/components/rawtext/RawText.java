@@ -53,6 +53,11 @@ import java.util.Set;
 
 public class RawText extends RawTextPart<RawText>
 {
+    public RawText()
+    {
+        super("");
+    }
+
     public RawText(String text)
     {
         super(text);
@@ -67,7 +72,20 @@ public class RawText extends RawTextPart<RawText>
      */
     static public RawText fromFormattedString(char delimiter, String str)
     {
-        return fromFormattedString(new ChatColorParser(delimiter, str));
+        return fromFormattedString(new ChatColorParser(delimiter, str), null);
+    }
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param delimiter The formatters delimiter (vanilla Minecraft uses §)
+     * @param str The string to convert.
+     * @param baseComponent The converted component will be added to this component.
+     * @return The RawText equivalent.
+     */
+    static public RawText fromFormattedString(char delimiter, String str, RawText baseComponent)
+    {
+        return fromFormattedString(new ChatColorParser(delimiter, str), baseComponent);
     }
 
     /**
@@ -78,16 +96,28 @@ public class RawText extends RawTextPart<RawText>
      */
     static public RawText fromFormattedString(String str)
     {
-        return fromFormattedString(new ChatColorParser(str));
+        return fromFormattedString(new ChatColorParser(str), null);
+    }
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param str The string to convert.
+     * @param baseComponent The converted component will be added to this component.
+     * @return The RawText equivalent.
+     */
+    static public RawText fromFormattedString(String str, RawText baseComponent)
+    {
+        return fromFormattedString(new ChatColorParser(str), baseComponent);
     }
     
-    static private RawText fromFormattedString(ChatColorParser parser)
+    static private RawText fromFormattedString(ChatColorParser parser, RawText baseComponent)
     {
-        RawTextPart text = null;
+        RawTextPart text = baseComponent;
         
-        for(ChatColoredString coloredString : parser)
+        for (ChatColoredString coloredString : parser)
         {
-            if(text == null)
+            if (text == null)
             {
                 text = new RawText(coloredString.getString());
             }
@@ -99,7 +129,7 @@ public class RawText extends RawTextPart<RawText>
             text.style(coloredString.getModifiers());
         }
         
-        if(text == null)
+        if (text == null)
             throw new IllegalArgumentException("Invalid input string");
         
         return text.build();

@@ -287,4 +287,14 @@ public class RawTextTest
         
         assertJSON(text, HELLOWORLD_TEST);
     }
+
+    @Test
+    public void fromFormattedTextWithBaseTest()
+    {
+        final String HELLOWORLD_TEST = "{\"text\":\"\", \"color\":\"gold\", \"insertion\":\"test\", \"extra\":[{\"text\":\"Hello\", \"color\":\"red\"}, {\"text\":\" world !\", \"color\":\"green\"}]}";
+
+        RawText text = RawText.fromFormattedString(ChatColor.RED + "Hello" + ChatColor.GREEN + " world !", new RawText().color(ChatColor.GOLD).insert("test"));
+
+        assertJSON(text, HELLOWORLD_TEST);
+    }
 }
