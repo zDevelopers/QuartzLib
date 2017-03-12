@@ -49,7 +49,6 @@ import java.util.Scanner;
 @CommandInfo(name = "help", usageParameters = "<command name>")
 public class HelpCommand extends Command
 {
-
     @Override
     protected void run() throws CommandException 
     {
@@ -172,7 +171,9 @@ public class HelpCommand extends Command
         @Override
         protected void displayHeader(CommandSender receiver)
         {
-            final String header = ChatColor.BOLD + (commandGroup.getDescription().isEmpty() ? ZLib.getPlugin().getName() + " help" : commandGroup.getDescription());
+            final String header = ChatColor.BOLD + (commandGroup.getDescription().isEmpty()
+                    ? ZLib.getPlugin().getName() + " help for /" + commandGroup.getUsualName()
+                    : commandGroup.getDescription());
 
             receiver.sendMessage(receiver instanceof Player
                     ? GuiUtils.generatePrefixedFixedLengthString(ChatColor.BLUE + Commands.CHAT_PREFIX + " " + ChatColor.RESET, header)
