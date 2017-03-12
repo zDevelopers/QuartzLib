@@ -172,7 +172,8 @@ public class HelpCommand extends Command
         @Override
         protected void displayHeader(CommandSender receiver)
         {
-            final String header = ChatColor.BOLD + commandGroup.getDescription();
+            final String header = ChatColor.BOLD + (commandGroup.getDescription().isEmpty() ? ZLib.getPlugin().getName() + " help" : commandGroup.getDescription());
+
             receiver.sendMessage(receiver instanceof Player
                     ? GuiUtils.generatePrefixedFixedLengthString(ChatColor.BLUE + Commands.CHAT_PREFIX + " " + ChatColor.RESET, header)
                     : header
