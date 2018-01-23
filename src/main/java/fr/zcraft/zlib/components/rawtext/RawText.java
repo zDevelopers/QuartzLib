@@ -193,6 +193,8 @@ public class RawText extends RawTextPart<RawText>
             tag.put("display", NBT.fromItemMeta(item.getItemMeta()));
             tag.put("ench", NBT.fromEnchantments(item.getEnchantments()));
             tag.put("HideFlags", NBT.fromItemFlags(item.getItemMeta().getItemFlags()));
+
+            itemData.put("tag", tag);
         }
         
         return NBT.toNBTJSONString(itemData);
