@@ -30,11 +30,14 @@
 package fr.zcraft.zlib.tools.text;
 
 import fr.zcraft.zlib.components.rawtext.RawText;
+import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.NMSNetwork;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 
@@ -42,12 +45,15 @@ public final class MessageSender
 {
     private static boolean enabled = true;
 
-    private static String nmsVersion = Reflection.getBukkitPackageVersion();
+    private final static String nmsVersion = Reflection.getBukkitPackageVersion();
 
     private static Class<?> packetPlayOutChatClass;
     private static Class<?> chatSerializerClass;
     private static Class<?> iChatBaseComponentClass;
     private static Class<?> chatComponentTextClass;
+
+    private static Class<?> chatMessageTypeEnum;
+    private static Method chatMessageByteToTypeMethod;
 
     static
     {
@@ -70,6 +76,26 @@ public final class MessageSender
             if (!nmsVersion.equalsIgnoreCase("v1_8_R1"))
             {
                 chatComponentTextClass = Reflection.getMinecraftClassByName("ChatComponentText");
+
+                // This enum was introduced in 1.12;  before, a byte was directly used.
+                try {
+                    chatMessageTypeEnum = Reflection.getMinecraftClassByName("ChatMessageType");
+                    chatMessageByteToTypeMethod = Reflection.findMethod(chatMessageTypeEnum, "a", byte.class);
+
+                    if (chatMessageByteToTypeMethod == null)
+                    {
+                        PluginLogger.error("You are using a version of Minecraft ({0}) incompatible with zLib.", nmsVersion);
+                        PluginLogger.error("The MessageSender component will not work due to a change in Minecraft code.");
+                        PluginLogger.error("Please report this to the zLib developers at https://github.com/zDevelopers/zLib/issues - thanks you.");
+
+                        chatMessageTypeEnum = null;
+                    }
+                }
+                catch (ClassNotFoundException e)
+                {
+                    chatMessageTypeEnum = null;
+                    chatMessageByteToTypeMethod = null;
+                }
             }
         }
         catch (Exception e)
@@ -518,7 +544,12 @@ public final class MessageSender
                     componentText = Reflection.instantiate(chatComponentTextClass, content);
                 }
 
-                chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
+                final Enum<?> nmsMessageType = type.getMessagePositionEnumValue();
+
+                if (nmsMessageType != null)
+                    chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, chatMessageTypeEnum).newInstance(componentText, nmsMessageType);
+                else
+                    chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
             }
 
             NMSNetwork.sendPacket(receiver, chatPacket);
@@ -572,6 +603,33 @@ public final class MessageSender
         public byte getMessagePositionByte()
         {
             return messagePositionByte;
+        }
+
+        /**
+         * If the Minecraft version uses enum to assign message type into the packet, returns
+         * the Enum value to be used for this message type.
+         *
+         * Else, returns {@code null}.
+         *
+         * @return The enum value to use, if the system uses them; {@code null}, else.
+         * @see #getMessagePositionByte() The method returning the byte to use if the server uses bytes.
+         */
+        public Enum<?> getMessagePositionEnumValue()
+        {
+            if (chatMessageTypeEnum == null)
+                return null;
+
+            try
+            {
+                chatMessageByteToTypeMethod.setAccessible(true);
+
+                return (Enum<?>) chatMessageByteToTypeMethod.invoke(null, messagePositionByte);
+            }
+            catch (IllegalAccessException | InvocationTargetException e)
+            {
+                PluginLogger.error("Unable to retrieve the ");
+                return null;
+            }
         }
 
         /**
