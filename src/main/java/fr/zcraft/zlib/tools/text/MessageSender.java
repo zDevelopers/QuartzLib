@@ -222,8 +222,8 @@ public final class MessageSender
     /**
      * Sends a message.
      *
-     * <strong>WARNING:</strong> don't use this method to send action bars, as they does NOT support JSON (the JSON code
-     * would be displayed in the action bar).
+     * <p><strong>WARNING:</strong> don't use this method to send action bars, as they does NOT support JSON (the JSON code
+     * would be displayed in the action bar).</p>
      *
      * @param receiver The receiver of the message.
      * @param json  The JSON message to be sent.
@@ -251,8 +251,8 @@ public final class MessageSender
     /**
      * Sends a message.
      *
-     * <strong>WARNING:</strong> don't use this method to send action bars, as they does NOT support JSON (the JSON code
-     * would be displayed in the action bar).
+     * <p><strong>WARNING:</strong> don't use this method to send action bars, as they does NOT support JSON (the JSON code
+     * would be displayed in the action bar).</p>
      *
      * @param receiver The UUId of the receiver of the message.
      * @param json  The message to be sent.
@@ -522,10 +522,10 @@ public final class MessageSender
 
         if (type == null) type = MessageType.SYSTEM;
 
+        Object chatPacket = null;
+
         try
         {
-            Object chatPacket;
-
             if (nmsVersion.equalsIgnoreCase("v1_8_R1"))
             {
                 Object baseComponent = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", content));
@@ -557,7 +557,11 @@ public final class MessageSender
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            PluginLogger.error(
+                "Unable to send packet {0} to player {1} (UUID = {2}).", e,
+                chatPacket != null ? chatPacket.getClass().getName() : "<null>",
+                receiver.getName(), receiver.getUniqueId()
+            );
 
             if (type != MessageType.ACTION_BAR)
                 receiver.sendMessage(content);

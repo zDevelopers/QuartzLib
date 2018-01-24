@@ -55,6 +55,61 @@ import java.util.Map.Entry;
 /**
  * This class contains helpers to create or edit very customized ItemStacks
  * using the builder pattern.
+ *
+ * <p>Example of use:</p>
+ * <pre>
+ *     ItemStack item = new ItemStackBuilder(Material.TOTEM)
+ *                  .title(ChatColor.GOLD + "The best totem of all totems")
+ *
+ *                  .lore(ChatColor.GRAY + "I'm better than the others.")
+ *                  .emptyLore()
+ *
+ *                  // This one will be automatically wrapped to 28-characters lines so
+ *                  // the rendered tooltip is not too wide.
+ *                  .longLore(ChatColor.GRAY + "Lorem ipsum dolor sit amnet [&hellip;] elit")
+ *
+ *                  .glow()
+ *                  .hideAttributes()
+ *
+ *                  // Builds the effective ItemStack
+ *                  .item()
+ * </pre>
+ *
+ * <p>Another example, if you want to update an existing ItemStack:</p>
+ * <pre>
+ *     ItemStack item = ...;
+ *
+ *     new ItemStackBuilder(item)
+ *          .title("A new title")
+ *
+ *          // Resets the existing lore.
+ *          // Without this, lore-related methods
+ *          // adds new lines to the existent ones.
+ *          .resetLore()
+ *
+ *          .lore("&hellip;")
+ *          .glow()
+ *
+ *          // This returns the ItemStack, but also updates it by reference
+ *          // if the builder was constructed with an ItemStack, so we don't
+ *          // really need to retrieve the returned value in such cases.
+ *          .item();
+ * </pre>
+ *
+ * <p>You want a {@code CraftItemStack} for some reasons (like NBT handling)? We got you covered:</p>
+ * <pre>
+ *     ItemStack craftItemStack = new ItemStackBuilder()
+ *
+ *                  // Any method of the builder, of course.
+ *                  .title("A Craft ItemStack")
+ *
+ *                  // Returns a CraftItemStack object.
+ *                  // Please note that, as specified in {@link #craftItem()}'s javadoc,
+ *                  // the returned item is here a clone of the original ItemStack in all
+ *                  // cases. The original ItemStack will be updated if it exists, by reference,
+ *                  // but it will not be transformed into a CraftItemStack magically.
+ *                  .craftItem();
+ * </pre>
  */
 public class ItemStackBuilder
 {
@@ -65,6 +120,7 @@ public class ItemStackBuilder
 
     private RawTextPart title = null;
     private final List<String> loreLines = new ArrayList<>();
+    private boolean resetLore = false;
 
     private boolean glowing = false;
     private boolean hideAttributes = false;
@@ -118,10 +174,17 @@ public class ItemStackBuilder
         this.itemStack = itemStack;
         this.material = null;
         
-        if(itemStack != null)
+        if (itemStack != null)
         {
             this.amount = itemStack.getAmount();
             this.data = itemStack.getDurability();
+
+            ItemMeta meta = itemStack.getItemMeta();
+
+            if (meta != null)
+            {
+                loreLines.addAll(meta.getLore());
+            }
         }
     }
 
@@ -164,7 +227,7 @@ public class ItemStackBuilder
         if (title != null)
             meta.setDisplayName(ChatColor.RESET + title.build().toFormattedText());
 
-        if (!loreLines.isEmpty())
+        if (!loreLines.isEmpty() || resetLore)
             meta.setLore(loreLines);
 
         if (hideAttributes)
@@ -426,6 +489,40 @@ public class ItemStackBuilder
     public ItemStackBuilder longLore(ChatColor color, String text, int lineLength)
     {
         return longLore(color + text, lineLength);
+    }
+
+    /**
+     * Adds an empty line in the lore to act as a separator.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder loreSeparator()
+    {
+        loreLines.add("");
+        return this;
+    }
+
+    /**
+     * Clears the previously added lore lines.
+     *
+     * <p>This is mainly useful for {@link ItemStackBuilder builders} used to update an existing
+     * {@link ItemStack}.</p>
+     *
+     * <ul>
+     *     <li>If this method is not called, the original lore will be kept as-is, and calls
+     *     to other lore-related methods will append lore lines to the existing lore.</li>
+     *     <li>If the method is indeed called, then the original lore will be erased, leaving
+     *     a lore-less {@link ItemStack} if no other lore-related method is called, or only
+     *     the new lore lines, else.</li>
+     * </ul>
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder resetLore()
+    {
+        loreLines.clear();
+        resetLore = true;
+        return this;
     }
 
     /**
