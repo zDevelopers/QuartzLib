@@ -48,7 +48,7 @@ Either create a plugin as usual and add the zLib as explained below, or use [the
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.3</version>
+                    <version>2.4</version>
                     <configuration>
                         <artifactSet>
                             <includes>
