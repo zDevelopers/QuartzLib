@@ -30,16 +30,21 @@
 
 package fr.zcraft.zlib.components.commands;
 
+import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.commands.PaginatedTextView;
+import fr.zcraft.zlib.tools.text.RawMessage;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import org.bukkit.ChatColor;
 
 @CommandInfo(name = "help", usageParameters = "<command name>")
 public class HelpCommand extends Command
@@ -47,42 +52,40 @@ public class HelpCommand extends Command
     @Override
     protected void run() throws CommandException 
     {
-        if(args.length < 1)
-            groupHelp();
+        if (args.length < 1)
+        {
+            groupHelp(1);
+        }
         else
+        {
+            if (args.length == 1 && args[0].startsWith("--page="))
+            {
+                try
+                {
+                    groupHelp(Integer.valueOf(args[0].split("=")[1]));
+                    return;
+                }
+                catch (NumberFormatException ignored) {}
+            }
+
             commandHelp();
+        }
     }
     
-    private void groupHelp() throws CommandException 
+    private void groupHelp(int page) throws CommandException
     {
-        sender.sendMessage(commandGroup.getDescription());
-        
-        String tCommandName;
-        String tDescription;
-        RawText message;
+        final List<Command> displayedCommands = new ArrayList<>();
+
         for(Command tCommand: commandGroup.getCommands())
-        {
-            if(!tCommand.canExecute(sender, args)) continue;
-            
-            tCommandName = "/" + commandGroup.getUsualName() + " " + tCommand.getName();
-            
-            message = new RawText(tCommandName)
-                .color(ChatColor.GOLD)
-                .suggest(tCommandName + " ")
-                .hover(new RawText(tCommand.getUsageString()));
-            
-            tDescription = commandGroup.getDescription(tCommand.getName());
-            
-            if(tDescription != null)
-            {
-                message.then(" : ")
-                    .color(ChatColor.GOLD)
-                .then(tDescription)
-                    .color(ChatColor.WHITE);
-            }
-            
-            send(message);
-        }
+            if (tCommand.canExecute(sender, args))
+                displayedCommands.add(tCommand);
+
+        if (sender instanceof Player) info("");
+
+        new GroupHelpPagination()
+            .setData(displayedCommands.toArray(new Command[displayedCommands.size()]))
+            .setCurrentPage(page)
+            .display(sender);
     }
     
     private void commandHelp() throws CommandException 
@@ -98,28 +101,28 @@ public class HelpCommand extends Command
             warning("You do not have the permission to use this command.");
 
         String message = "\n";
-        message += "§6\u2503§l " + ZLib.getPlugin().getName() +  " help for /" + command.getCommandGroup().getUsualName() + " " + command.getName() + "\n";
-        message += "§l§6\u2503 Usage: §r" + command.getUsageString();
-        
+        message += GuiUtils.generatePrefixedFixedLengthString("§6" + Commands.CHAT_PREFIX + "§l ", ZLib.getPlugin().getName() +  " help for /" + command.getCommandGroup().getUsualName() + " " + command.getName()) + "\n";
+        message += GuiUtils.generatePrefixedFixedLengthString("§6" + Commands.CHAT_PREFIX + " ", "Usage: §r" + command.getUsageString()) + "\n";
+
         try
         {
             String help = getHelpText(command);
             if(help.isEmpty())
             {
-                sender.sendMessage(message);
-                warning("There is no help message for this command.");
+                message += "§c" + Commands.CHAT_PREFIX + " There is no help message for this command.";
             }
             else
             {
-                sender.sendMessage(message + "\n" + help);
+                message += help;
             }
         }
         catch(IOException ex)
         {
-            sender.sendMessage(message);
-            warning("Could not read help for this command.");
-            PluginLogger.warning("Could not read help for the command : " + command.getName(), ex);
+            message += "§c" + Commands.CHAT_PREFIX + " Could not read help for this command.";
+            PluginLogger.warning("Could not read help for the command: " + command.getName(), ex);
         }
+
+        sender.sendMessage(message);
     }
     
     private String getHelpText(Command command) throws IOException
@@ -137,14 +140,14 @@ public class HelpCommand extends Command
         while (scanner.hasNextLine()) 
         {
             String line = scanner.nextLine();
-            result.append("§l§9\u2503 §r").append(line).append("\n");
+            result.append("§l§9" + Commands.CHAT_PREFIX + " §r").append(line).append("\n");
         }
  
         scanner.close();
  
 	    return result.toString().trim();
     }
-    
+
 
     @Override
     protected List<String> complete() throws CommandException
@@ -160,5 +163,49 @@ public class HelpCommand extends Command
         }
         
         return matches;
+    }
+
+
+    private class GroupHelpPagination extends PaginatedTextView<Command>
+    {
+        @Override
+        protected void displayHeader(CommandSender receiver)
+        {
+            final String header = ChatColor.BOLD + (commandGroup.getDescription().isEmpty()
+                    ? ZLib.getPlugin().getName() + " help for /" + commandGroup.getUsualName()
+                    : commandGroup.getDescription());
+
+            receiver.sendMessage(receiver instanceof Player
+                    ? GuiUtils.generatePrefixedFixedLengthString(ChatColor.BLUE + Commands.CHAT_PREFIX + " " + ChatColor.RESET, header)
+                    : header
+            );
+        }
+
+        @Override
+        protected void displayItem(CommandSender receiver, Command command)
+        {
+            final String commandName = "/" + commandGroup.getUsualName() + " " + command.getName();
+            final String description = commandGroup.getDescription(command.getName());
+
+            String helpMessage = ChatColor.GOLD + commandName;
+            if (description != null) helpMessage += ChatColor.GOLD + ": " + ChatColor.WHITE + description;
+
+            final String formattedHelpMessage = receiver instanceof Player
+                    ? GuiUtils.generatePrefixedFixedLengthString(ChatColor.GOLD + Commands.CHAT_PREFIX + " ", helpMessage)
+                    : helpMessage;
+
+            RawText helpLine = RawText.fromFormattedString(
+                    formattedHelpMessage,
+                    new RawText().suggest(commandName + " ").hover(new RawText(command.getUsageString()))
+            );
+
+            RawMessage.send(receiver, helpLine);
+        }
+
+        @Override
+        protected String getCommandToPage(int page)
+        {
+            return build("--page=" + page);
+        }
     }
 }

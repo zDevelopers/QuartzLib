@@ -28,12 +28,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-
 package fr.zcraft.zlib.components.rawtext;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
 import junit.framework.Assert;
 import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
@@ -42,6 +38,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+
 
 public class RawTextTest 
 {
@@ -189,6 +190,34 @@ public class RawTextTest
         
         assertJSON(text, HOVER_STATISTIC_TEST);
     }
+
+    @Test
+    public void insertionTest()
+    {
+        final String INSERTION_TEST = "{\"text\":\"test\",\"insertion\":\"/say Hello\",\"bold\":false}";
+        final RawText text = new RawText("test")
+            .insert("/say Hello");
+
+        assertJSON(text, INSERTION_TEST);
+    }
+
+    @Test
+    public void insertionWithOtherStylesTest()
+    {
+        final String INSERTION_WITH_BOLD_TEST = "{\"text\":\"test\",\"insertion\":\"/say Hello\",\"bold\":true}";
+        final String INSERTION_WITH_COLOR_TEST = "{\"text\":\"test\",\"insertion\":\"/say Hello\",\"color\":\"dark_green\"}";
+
+        final RawText boldText = new RawText("test")
+                .insert("/say Hello")
+                .style(ChatColor.BOLD);
+
+        final RawText colorText = new RawText("test")
+                .insert("/say Hello")
+                .style(ChatColor.DARK_GREEN);
+
+        assertJSON(boldText, INSERTION_WITH_BOLD_TEST);
+        assertJSON(colorText, INSERTION_WITH_COLOR_TEST);
+    }
     
     @Test
     public void mapDeleteTest()
@@ -256,6 +285,16 @@ public class RawTextTest
         
         RawText text = RawText.fromFormattedString(ChatColor.RED + "Hello" + ChatColor.GREEN + " world !");
         
+        assertJSON(text, HELLOWORLD_TEST);
+    }
+
+    @Test
+    public void fromFormattedTextWithBaseTest()
+    {
+        final String HELLOWORLD_TEST = "{\"text\":\"\", \"color\":\"gold\", \"insertion\":\"test\", \"extra\":[{\"text\":\"Hello\", \"color\":\"red\"}, {\"text\":\" world !\", \"color\":\"green\"}]}";
+
+        RawText text = RawText.fromFormattedString(ChatColor.RED + "Hello" + ChatColor.GREEN + " world !", new RawText().color(ChatColor.GOLD).insert("test"));
+
         assertJSON(text, HELLOWORLD_TEST);
     }
 }

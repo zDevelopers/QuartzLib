@@ -30,7 +30,10 @@
 
 package fr.zcraft.zlib.components.commands;
 
+import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.tools.PluginLogger;
+import org.bukkit.ChatColor;
+
 
 public class CommandException extends Exception
 {
@@ -67,11 +70,12 @@ public class CommandException extends Exception
             case COMMANDSENDER_EXPECTED_PLAYER:
                 return "You must be a player to use this command.";
             case INVALID_PARAMETERS:
-                return "Invalid arguments : " + extra +"\n§r" +
-                        "Usage : " + command.getUsageString() + "\n" +
-                        "For more information, use /" + 
-                        command.getCommandGroup().getUsualName() + " help " +
-                        command.getName();
+                final String prefix = ChatColor.GOLD + Commands.CHAT_PREFIX + " " + ChatColor.RESET;
+                return "\n"
+                        + ChatColor.RED + Commands.CHAT_PREFIX + ' ' + ChatColor.BOLD + "Invalid argument" + '\n'
+                        + GuiUtils.generatePrefixedFixedLengthString(ChatColor.RED + Commands.CHAT_PREFIX + " ", extra) + '\n'
+                        + GuiUtils.generatePrefixedFixedLengthString(prefix, "Usage: " + command.getUsageString()) + '\n'
+                        + GuiUtils.generatePrefixedFixedLengthString(prefix, "For more information, use /" + command.getCommandGroup().getUsualName() + " help " + command.getName());
             case COMMAND_ERROR:
                 return extra.isEmpty() ? "An unknown error suddenly happened." : extra;
             case SENDER_NOT_AUTHORIZED:
