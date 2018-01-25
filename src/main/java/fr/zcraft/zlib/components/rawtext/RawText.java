@@ -51,6 +51,52 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+
+/**
+ * {@link RawText} provides a tool to construct rich-formatted texts in Minecraft
+ * using the builder pattern.
+ *
+ * <p>It follows the same logic as Minecraft's JSON format. Example of use:</p>
+ *
+ * <pre>
+ *     RawText text = new RawText()
+ *                      .then("I ")
+ *                      .then("am ")
+ *                          .color(ChatColor.RED)
+ *                          .hover("This is displayed as a tooltip")
+ *                          // .command executes directly while .suggest puts
+ *                          // the command into the chat
+ *                          .suggest("/say Hi there")
+ *                      .then("BOLD")
+ *                          .color(ChatColor.DARK_GREEN)
+ *                          .style(ChatColor.BOLD)
+ *                          .uri("http://perdu.com")
+ *                          .hover(
+ *                              new RawText()
+ *                                  .then("Tooltips")
+ *                                      .color(ChatColor.YELLOW)
+ *                                  .then("\ncan be rich text too!")
+ *                           )
+ *                      .build();
+ * </pre>
+ *
+ * <p>See the javadoc below to check out all the possibilities and methods available.</p>
+ *
+ * <p>A lot of methods in zLib accepts {@link RawText} instances where a text is required,
+ * like {@link fr.zcraft.zlib.tools.text.MessageSender}, {@link fr.zcraft.zlib.tools.text.RawMessage},
+ * {@link fr.zcraft.zlib.tools.text.Titles}…</p>
+ *
+ * <p>Please note—due to the way this works, if you want to create progressively a raw text
+ * using this, you'll have to store the unfinished variable into a {@link RawTextPart RawTextPart&lt;?&gt;}
+ * variable. Example:</p>
+ *
+ * <pre>
+ *     RawTextPart text = new RawText().then("The beginning").color(ChatColor.RED);
+ *     text.then("… and the end").color(ChatColor.DARK_GREEN).insert("The end is far");
+ *
+ *     RawMessage.broadcast(text.build());
+ * </pre>
+ */
 public class RawText extends RawTextPart<RawText>
 {
     public RawText()
@@ -238,7 +284,12 @@ public class RawText extends RawTextPart<RawText>
         
         return obj;
     }
-    
+
+
+    /**
+     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
+     */
+    @Deprecated
     static private final EnumMap<Achievement, String> ACHIEVEMENTS_NAMES = new EnumMap<>(Achievement.class);
     
     static {
@@ -255,7 +306,9 @@ public class RawText extends RawTextPart<RawText>
     /**
      * @param achievement An achievement.
      * @return The Minecraft I18N key for this achievement.
+     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
      */
+    @Deprecated
     static public String getI18nKey(Achievement achievement)
     {
         String key = ACHIEVEMENTS_NAMES.get(achievement);

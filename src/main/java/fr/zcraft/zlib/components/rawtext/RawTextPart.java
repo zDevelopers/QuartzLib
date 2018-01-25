@@ -319,7 +319,9 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
      *
      * @param achievement The achievement to display on hover.
      * @return The current raw text component, for method chaining.
+     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
      */
+    @Deprecated
     public T hover(Achievement achievement)
     {
         return hover(ActionHover.SHOW_ACHIEVEMENT, "achievement." + RawText.getI18nKey(achievement));
