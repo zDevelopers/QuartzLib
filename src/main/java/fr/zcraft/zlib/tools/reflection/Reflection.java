@@ -476,14 +476,14 @@ public final class Reflection
             throws NoSuchMethodException, InstantiationException, 
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
-        Constructor<T> constructor = hClass.getConstructor(getTypes(parameters));
+        Constructor<T> constructor = hClass.getDeclaredConstructor(getTypes(parameters));
         constructor.setAccessible(true);
         return constructor.newInstance(parameters);
     }
     
     static public <T> Constructor findConstructor(Class<T> hClass, int parameterCount)
     {
-        for(Constructor constructor: hClass.getConstructors())
+        for(Constructor constructor: hClass.getDeclaredConstructors())
         {
             if(constructor.getParameterTypes().length == parameterCount)
                 return constructor;

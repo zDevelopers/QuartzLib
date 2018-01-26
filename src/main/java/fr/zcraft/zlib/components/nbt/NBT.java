@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.nbt;
 
+import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
@@ -39,6 +40,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +55,46 @@ public abstract class NBT
 {
     private NBT() {}
 
+    private static Method nbtTagCompoundHasKey;
+    private static Method nbtTagCompoundGetList;
+    private static Method nbtTagCompoundGetShort;
+    private static Method nbtTagListGet;
+    private static Method nbtTagListSize;
+
+    static
+    {
+        try
+        {
+            final Class<?> NBTTagCompound = Reflection.getMinecraftClassByName("NBTTagCompound");
+            final Class<?> NBTTagList = Reflection.getMinecraftClassByName("NBTTagList");
+
+            nbtTagCompoundHasKey = Reflection.findMethod(NBTTagCompound, "hasKey", String.class);
+            nbtTagCompoundGetList = Reflection.findMethod(NBTTagCompound, "getList", String.class, int.class);
+            nbtTagCompoundGetShort = Reflection.findMethod(NBTTagCompound,"getShort", String.class);
+
+            nbtTagListGet = Reflection.findMethod(NBTTagList, "get", int.class);
+            nbtTagListSize = Reflection.findMethod(NBTTagList, "size");
+
+            nbtTagCompoundHasKey.setAccessible(true);
+            nbtTagCompoundGetList.setAccessible(true);
+            nbtTagCompoundGetShort.setAccessible(true);
+
+            nbtTagListGet.setAccessible(true);
+            nbtTagListSize.setAccessible(true);
+        }
+        catch(ClassNotFoundException e)
+        {
+            PluginLogger.error("Cannot load NBT base classes; NBT import of enchantments will not work properly. " +
+                    "This is *very* unlikely to happen; if you see this message, please report a bug on " +
+                    "https://github.com/zDevelopers/zLib/issues, thanks!", e);
+
+            nbtTagCompoundHasKey = null;
+            nbtTagCompoundGetList = null;
+            nbtTagCompoundGetShort = null;
+            nbtTagListGet = null;
+            nbtTagListSize = null;
+        }
+    }
 
     /**
      * Returns the NBT JSON representation of the given object.
@@ -174,6 +216,29 @@ public abstract class NBT
     }
 
     /**
+     * Replaces the tags in the given ItemStack by the given tags.
+     *
+     * This operation is only possible on a CraftItemStack. As a consequence,
+     * this method <strong>returns</strong> an {@link ItemStack}. If the given
+     * ItemStack was a CraftItemStack, the same instance will be returned, but
+     * in the other cases, it will be a new one (a copy).
+     *
+     * @param item The ItemStack to change.
+     * @param tags The tags to place inside the stack.
+     *
+     * @return An item stack with the modification applied. It may (if you given
+     * a CraftItemStack) or may not (else) be the same instance as the given
+     * one.
+     * @throws NMSException if the operation cannot be executed.
+     * @see #addToItemStack(ItemStack, Map, boolean) This method is equivalent
+     * to this one with replace = true.
+     */
+    static public ItemStack addToItemStack(ItemStack item, Map<String, Object> tags) throws NMSException
+    {
+        return addToItemStack(item, tags, true);
+    }
+
+    /**
      * Adds or replaces the tags in the given ItemStack by the given tags.
      *
      * This operation is only possible on a CraftItemStack. As a consequence,
@@ -208,84 +273,31 @@ public abstract class NBT
             if (tag != null)
             {
                 final ItemMeta craftItemMeta = (ItemMeta) Reflection.call(craftItemStack.getClass(), null, "getItemMeta", new Object[] {mcItemStack});
-                Reflection.call(CB_CRAFT_ITEM_META, craftItemMeta, "applyToItem", tag);
 
-                craftItemStack.setItemMeta(craftItemMeta);
-
-                // Warning, here is a very ugly hack to have enchants working.
-                // For some reasons, yet to be found, when in the NBTCompound, the tags are updated,
-                // the enchantments, and only them, are not added. I have NO IDEA why. Any other tag
-                // is correctly added, and enchantment tags of nested items (like in a shulker box or
-                // in a chest grabbed with NBT) are correctly restored.
-                // This re-adds manually the enchantments.
-
-                ItemMeta bukkitItemMeta = craftItemStack.getItemMeta();
-                Object rawEnchantments;
-
-                //noinspection unchecked
-                if ((tags.containsKey("ench") && (rawEnchantments = tags.get("ench")) instanceof List && !((List<Object>) rawEnchantments).isEmpty())
-                        || (tags.containsKey("StoredEnchantments") && (rawEnchantments = tags.get("StoredEnchantments")) instanceof List && !((List<Object>) rawEnchantments).isEmpty()))
+                // There's an "applyToItem" method in CraftItemMeta but is doesn't handle well new NBT tags.
+                // We try to re-create a whole new instance from the same CraftItemMeta base class instead,
+                // using the constructor accepting a NBTTagCompound.
+                ItemMeta newCraftItemMeta;
+                try
                 {
-                    // If a full replacement, we remove all previous enchantments, if any.
-                    if (replace)
-                    {
-                        for (Enchantment enchantment : craftItemMeta.getEnchants().keySet())
-                        {
-                            bukkitItemMeta.removeEnchant(enchantment);
-                        }
-                    }
-
-                    @SuppressWarnings ("unchecked")
-                    List<Object> enchantments = (List<Object>) rawEnchantments;
-
-                    for (final Object enchantment : enchantments)
-                    {
-                        if (enchantment instanceof Map)
-                        {
-                            try
-                            {
-                                final Integer enchantmentID = Integer.valueOf(((Map) enchantment).get("id").toString());
-                                final Integer level = Integer.valueOf(((Map) enchantment).get("lvl").toString());
-
-                                bukkitItemMeta.addEnchant(Enchantment.getById(enchantmentID), level, true);
-                            }
-                            catch (NumberFormatException ignored) {}
-                        }
-                    }
+                    newCraftItemMeta = Reflection.instantiate(craftItemMeta.getClass(), tag);
+                }
+                catch (NoSuchMethodException e)
+                {
+                    // The CraftMetaBlockState constructor is different (like some Portal's turrets):
+                    // he takes the Material as his second argument.
+                    newCraftItemMeta = Reflection.instantiate(craftItemMeta.getClass(), tag, craftItemStack.getType());
                 }
 
-                craftItemStack.setItemMeta(bukkitItemMeta);
+                craftItemStack.setItemMeta(newCraftItemMeta);
             }
 
             return craftItemStack;
         }
-        catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | NMSException e)
+        catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException | NMSException e)
         {
             throw new NMSException("Cannot set item stack tags", e);
         }
-    }
-
-    /**
-     * Replaces the tags in the given ItemStack by the given tags.
-     *
-     * This operation is only possible on a CraftItemStack. As a consequence,
-     * this method <strong>returns</strong> an {@link ItemStack}. If the given
-     * ItemStack was a CraftItemStack, the same instance will be returned, but
-     * in the other cases, it will be a new one (a copy).
-     *
-     * @param item The ItemStack to change.
-     * @param tags The tags to place inside the stack.
-     *
-     * @return An item stack with the modification applied. It may (if you given
-     * a CraftItemStack) or may not (else) be the same instance as the given
-     * one.
-     * @throws NMSException if the operation cannot be executed.
-     * @see #addToItemStack(ItemStack, Map, boolean) This method is equivalent
-     * to this one with replace = true.
-     */
-    static public ItemStack addToItemStack(ItemStack item, Map<String, Object> tags) throws NMSException
-    {
-        return addToItemStack(item, tags, true);
     }
 
 

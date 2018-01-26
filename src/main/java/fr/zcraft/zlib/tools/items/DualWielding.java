@@ -31,10 +31,11 @@
 package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.tools.reflection.Reflection;
-import java.lang.reflect.InvocationTargetException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * This class provides various utilities for handling dual-wielding.
@@ -52,7 +53,7 @@ public enum DualWielding
     
     static private Boolean available = null;
     
-    //Dual-wielding isn't available in all builds of Bukkit/Spigot
+    // Dual-wielding isn't available in all builds of Bukkit/Spigot
     static private void init()
     {
         available = Reflection.hasMethod(PlayerInventory.class, "getItemInMainHand")
@@ -63,16 +64,16 @@ public enum DualWielding
     
     static private boolean checkAvailable()
     {
-        if(available == null) init();
+        if (available == null) init();
         return available;
     }
     
     /**
-     * Retreives the item in the given player's hand.
-     * If dual-wielding is not available, it is retreived from the players' only hand.
+     * Retrieves the item in the given player's hand.
+     * If dual-wielding is not available, it is retrieved from the players' only hand.
      * @param player The player to get the item from
      * @param hand The hand 
-     * @return The retreived item.
+     * @return The retrieved item.
      */
     static public ItemStack getItemInHand(Player player, DualWielding hand)
     {

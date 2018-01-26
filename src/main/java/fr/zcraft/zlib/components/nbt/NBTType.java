@@ -30,6 +30,7 @@
 package fr.zcraft.zlib.components.nbt;
 
 import fr.zcraft.zlib.tools.reflection.Reflection;
+
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ enum NBTType
     private final String nmsClassName;
     private Class nmsClass;
 
-    private NBTType(byte id, String nmsClassName, Class... types)
+    NBTType(byte id, String nmsClassName, Class... types)
     {
         this.id = id;
         this.types = types;
@@ -102,6 +103,9 @@ enum NBTType
     
     public Class getNMSClass()
     {
+        if (nmsClassName == null)
+            return null;
+
         try
         {
             if(nmsClass == null)
@@ -117,19 +121,19 @@ enum NBTType
     
     public Object newTag(Object value)
     {
-        if(value == null)
+        if (value == null)
             throw new IllegalArgumentException("Contents of a tag cannot be null");
-        if(!isAssignableFrom(value.getClass()))
-            throw new IllegalArgumentException("Invalid content type '" + value.getClass() + "' for tag : " + nmsClassName);
+        if (!isAssignableFrom(value.getClass()))
+            throw new IllegalArgumentException("Invalid content type '" + value.getClass() + "' for tag " + nmsClassName);
 
         try
         {
             Object tag;
-            switch(this)
+            switch (this)
             {
                 case TAG_COMPOUND:
                     tag = Reflection.instantiate(getNMSClass());
-                    if(value instanceof NBTCompound)
+                    if (value instanceof NBTCompound)
                     {
                         setData(tag, ((NBTCompound)value).nmsNbtMap);
                     }
@@ -138,9 +142,10 @@ enum NBTType
                         new NBTCompound(tag).putAll((Map) value);
                     }
                     break;
+
                 case TAG_LIST:
                     tag = Reflection.instantiate(getNMSClass());
-                    if(value instanceof NBTList)
+                    if (value instanceof NBTList)
                     {
                         setData(tag, ((NBTList)value).nmsNbtList);
                     }
@@ -148,7 +153,12 @@ enum NBTType
                     {
                         new NBTList(tag).addAll((List) value);
                     }
+
+                    // If a NBTTagList is built from scratch, the NMS object is created lately
+                    // and may not have the list's type registered at this point.
+                    NBTList.guessAndWriteTypeToNBTTagList(tag);
                     break;
+
                 default:
                     tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);
             }
@@ -194,7 +204,7 @@ enum NBTType
                 return type;
         }
         
-        throw new IllegalArgumentException("Illegal type id : " + id);
+        throw new IllegalArgumentException("Illegal type id: " + id);
     }
     
     static public NBTType fromNmsNbtTag(Object nmsNbtTag)
@@ -217,6 +227,6 @@ enum NBTType
                 return type;
         }
         
-        throw new IllegalArgumentException("Illegal type class : " + klass);
+        throw new IllegalArgumentException("Illegal type class: " + klass);
     }
 }
