@@ -30,7 +30,6 @@
 
 package fr.zcraft.zlib.components.nbt;
 
-import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
@@ -40,7 +39,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,47 +52,6 @@ import java.util.Set;
 public abstract class NBT 
 {
     private NBT() {}
-
-    private static Method nbtTagCompoundHasKey;
-    private static Method nbtTagCompoundGetList;
-    private static Method nbtTagCompoundGetShort;
-    private static Method nbtTagListGet;
-    private static Method nbtTagListSize;
-
-    static
-    {
-        try
-        {
-            final Class<?> NBTTagCompound = Reflection.getMinecraftClassByName("NBTTagCompound");
-            final Class<?> NBTTagList = Reflection.getMinecraftClassByName("NBTTagList");
-
-            nbtTagCompoundHasKey = Reflection.findMethod(NBTTagCompound, "hasKey", String.class);
-            nbtTagCompoundGetList = Reflection.findMethod(NBTTagCompound, "getList", String.class, int.class);
-            nbtTagCompoundGetShort = Reflection.findMethod(NBTTagCompound,"getShort", String.class);
-
-            nbtTagListGet = Reflection.findMethod(NBTTagList, "get", int.class);
-            nbtTagListSize = Reflection.findMethod(NBTTagList, "size");
-
-            nbtTagCompoundHasKey.setAccessible(true);
-            nbtTagCompoundGetList.setAccessible(true);
-            nbtTagCompoundGetShort.setAccessible(true);
-
-            nbtTagListGet.setAccessible(true);
-            nbtTagListSize.setAccessible(true);
-        }
-        catch(ClassNotFoundException e)
-        {
-            PluginLogger.error("Cannot load NBT base classes; NBT import of enchantments will not work properly. " +
-                    "This is *very* unlikely to happen; if you see this message, please report a bug on " +
-                    "https://github.com/zDevelopers/zLib/issues, thanks!", e);
-
-            nbtTagCompoundHasKey = null;
-            nbtTagCompoundGetList = null;
-            nbtTagCompoundGetShort = null;
-            nbtTagListGet = null;
-            nbtTagListSize = null;
-        }
-    }
 
     /**
      * Returns the NBT JSON representation of the given object.
