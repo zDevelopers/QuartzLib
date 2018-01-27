@@ -29,7 +29,6 @@
  */
 package fr.zcraft.zlib.components.configuration;
 
-import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.util.ArrayList;
@@ -52,6 +51,7 @@ public class ConfigurationItem<T>
     private Class<T> valueType;
     
     private ConfigurationItem parent;
+    private ConfigurationInstance instance;
 
     
     protected ConfigurationItem(String fieldName, T defaultValue, String ... deprecatedNames)
@@ -173,10 +173,11 @@ public class ConfigurationItem<T>
         T oldValue = get();
         getConfig().set(getFieldName(), value);
 
-        Configuration.triggerCallback(this);
-
-        if (save)
-            Configuration.save();
+        if(getInstance() != null)
+        {
+            instance.triggerCallback(this);
+            if(save) instance.save();
+        }
 
         return oldValue;
     }
@@ -200,6 +201,11 @@ public class ConfigurationItem<T>
             PluginLogger.warning("\tReason : {0}", ex.getMessage());
             return false;
         }
+        catch (Exception ex)
+        {
+            PluginLogger.error("Exception caught while validating the configuration field ''{0}''", ex, getFieldName());
+            return false;
+        }
     }
     
     protected T getValue(Object object) throws ConfigurationParseException
@@ -212,11 +218,25 @@ public class ConfigurationItem<T>
     void setParent(ConfigurationItem parent)
     {
         this.parent = parent;
+        if(this.instance == null) this.instance = parent.instance;
     }
     
-    static protected FileConfiguration getConfig()
+    private ConfigurationInstance getInstance()
     {
-        return ZLib.getPlugin().getConfig();
+        if(this.instance == null && this.parent != null) 
+            this.instance = this.parent.getInstance();
+        if(this.instance == null) throw new IllegalStateException("Configuration is not loaded.");
+        return this.instance;
+    }
+    
+    void setInstance(ConfigurationInstance instance)
+    {
+        this.instance = instance;
+    }
+    
+    protected FileConfiguration getConfig()
+    {
+        return getInstance().getConfig();
     }
     
     protected Object getRawValue()

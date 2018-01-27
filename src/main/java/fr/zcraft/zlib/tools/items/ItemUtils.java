@@ -33,7 +33,6 @@ import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.runners.RunTask;
-import java.lang.reflect.Array;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -41,15 +40,16 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.Potion;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
 
 //import org.bukkit.Sound;
 
@@ -273,7 +273,41 @@ abstract public class ItemUtils
         item.setItemMeta(meta);
         return item;
     }
-    
+
+    /**
+     * Checks if two item stacks are similar, by checking the type, data and display name (if set).
+     *
+     * @param first An item stack. Can be {@code null}.
+     * @param other Another item stack. Can be {@code null}.
+     *
+     * @return {@code true} if similar (either both {@code null} or similar).
+     */
+    static public boolean areSimilar(ItemStack first, ItemStack other)
+    {
+        if (first == null || other == null)
+            return first == other;
+
+        return first.getType() == other.getType()
+                && first.getData().equals(other.getData())
+                && ((!first.hasItemMeta() && !other.hasItemMeta())
+                    || (!first.getItemMeta().hasDisplayName() && !other.getItemMeta().hasDisplayName())
+                    || (first.getItemMeta().getDisplayName().equals(other.getItemMeta().getDisplayName()))
+                   );
+    }
+
+    /**
+     * Checks if an item stack have the given display name.
+     *
+     * @param stack An item stack. Can be {@code null}.
+     * @param displayName A display name.
+     *
+     * @return {@code true} if the item stack have the given display name.
+     */
+    static public boolean hasDisplayName(ItemStack stack, String displayName)
+    {
+        return stack != null && stack.hasItemMeta() && stack.getItemMeta().hasDisplayName() && stack.getItemMeta().getDisplayName().equals(displayName);
+    }
+
     /**
      * Emulates the item in the player loosing durability as if the given player was using it.
      * If the player is in creative mode, the item won't be damaged at all.

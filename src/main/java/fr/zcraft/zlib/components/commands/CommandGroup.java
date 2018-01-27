@@ -295,8 +295,8 @@ public class CommandGroup implements TabCompleter, CommandExecutor
     
     protected String getUsage()
     {
-        if(isShortcutCommand()) return "§cUsage : " + commands.get(0).getUsageString();
-        return "§cUsage : /" + getUsualName() + 
+        if(isShortcutCommand()) return "§cUsage: " + commands.get(0).getUsageString();
+        return "§cUsage: /" + getUsualName() +
                 " <" + StringUtils.join(getCommandsNames(), "|") + ">";
     }
     

@@ -31,14 +31,13 @@
 package fr.zcraft.zlib.components.rawtext;
 
 import com.google.common.base.CaseFormat;
+import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
-import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
-import java.util.EnumMap;
-import java.util.HashMap;
+import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -47,34 +46,124 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONObject;
 
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.bukkit.Achievement;
 
+
+/**
+ * {@link RawText} provides a tool to construct rich-formatted texts in Minecraft
+ * using the builder pattern.
+ *
+ * <p>It follows the same logic as Minecraft's JSON format. Example of use:</p>
+ *
+ * <pre>
+ *     RawText text = new RawText()
+ *                      .then("I ")
+ *                      .then("am ")
+ *                          .color(ChatColor.RED)
+ *                          .hover("This is displayed as a tooltip")
+ *                          // .command executes directly while .suggest puts
+ *                          // the command into the chat
+ *                          .suggest("/say Hi there")
+ *                      .then("BOLD")
+ *                          .color(ChatColor.DARK_GREEN)
+ *                          .style(ChatColor.BOLD)
+ *                          .uri("http://perdu.com")
+ *                          .hover(
+ *                              new RawText()
+ *                                  .then("Tooltips")
+ *                                      .color(ChatColor.YELLOW)
+ *                                  .then("\ncan be rich text too!")
+ *                           )
+ *                      .build();
+ * </pre>
+ *
+ * <p>See the javadoc below to check out all the possibilities and methods available.</p>
+ *
+ * <p>A lot of methods in zLib accepts {@link RawText} instances where a text is required,
+ * like {@link fr.zcraft.zlib.tools.text.MessageSender}, {@link fr.zcraft.zlib.tools.text.RawMessage},
+ * {@link fr.zcraft.zlib.tools.text.Titles}…</p>
+ *
+ * <p>Please note—due to the way this works, if you want to create progressively a raw text
+ * using this, you'll have to store the unfinished variable into a {@link RawTextPart RawTextPart&lt;?&gt;}
+ * variable. Example:</p>
+ *
+ * <pre>
+ *     RawTextPart text = new RawText().then("The beginning").color(ChatColor.RED);
+ *     text.then("… and the end").color(ChatColor.DARK_GREEN).insert("The end is far");
+ *
+ *     RawMessage.broadcast(text.build());
+ * </pre>
+ */
 public class RawText extends RawTextPart<RawText>
 {
+    public RawText()
+    {
+        super("");
+    }
+
     public RawText(String text)
     {
         super(text);
     }
-    
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param delimiter The formatters delimiter (vanilla Minecraft uses §)
+     * @param str The string to convert.
+     * @return The RawText equivalent.
+     */
     static public RawText fromFormattedString(char delimiter, String str)
     {
-        return fromFormattedString(new ChatColorParser(delimiter, str));
+        return fromFormattedString(new ChatColorParser(delimiter, str), null);
     }
-    
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param delimiter The formatters delimiter (vanilla Minecraft uses §)
+     * @param str The string to convert.
+     * @param baseComponent The converted component will be added to this component.
+     * @return The RawText equivalent.
+     */
+    static public RawText fromFormattedString(char delimiter, String str, RawText baseComponent)
+    {
+        return fromFormattedString(new ChatColorParser(delimiter, str), baseComponent);
+    }
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param str The string to convert.
+     * @return The RawText equivalent.
+     */
     static public RawText fromFormattedString(String str)
     {
-        return fromFormattedString(new ChatColorParser(str));
+        return fromFormattedString(new ChatColorParser(str), null);
+    }
+
+    /**
+     * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
+     *
+     * @param str The string to convert.
+     * @param baseComponent The converted component will be added to this component.
+     * @return The RawText equivalent.
+     */
+    static public RawText fromFormattedString(String str, RawText baseComponent)
+    {
+        return fromFormattedString(new ChatColorParser(str), baseComponent);
     }
     
-    static private RawText fromFormattedString(ChatColorParser parser)
+    static private RawText fromFormattedString(ChatColorParser parser, RawText baseComponent)
     {
-        RawTextPart text = null;
+        RawTextPart text = baseComponent;
         
-        for(ChatColoredString coloredString : parser)
+        for (ChatColoredString coloredString : parser)
         {
-            if(text == null)
+            if (text == null)
             {
                 text = new RawText(coloredString.getString());
             }
@@ -86,12 +175,19 @@ public class RawText extends RawTextPart<RawText>
             text.style(coloredString.getModifiers());
         }
         
-        if(text == null)
+        if (text == null)
             throw new IllegalArgumentException("Invalid input string");
         
         return text.build();
     }
-    
+
+    /**
+     * Converts a style name to a tellraw-format compatible name.
+     *
+     * @param color A color.
+     * @return The tellraw-compatible name.
+     * @throws IllegalArgumentException if {@link ChatColor#RESET RESET} is passed.
+     */
     static public String toStyleName(ChatColor color)
     {
         switch(color)
@@ -104,10 +200,16 @@ public class RawText extends RawTextPart<RawText>
                 return color.name().toLowerCase();
         }
     }
-    
+
+    /**
+     * Converts an item name to a tellraw-compatible JSON.
+     *
+     * @param item The item.
+     * @return The tellraw-compatible JSON.
+     */
     static public String toJSONString(ItemStack item)
     {
-        Map<String, Object> itemData = new HashMap<String, Object>();
+        Map<String, Object> itemData = new HashMap<>();
         
         String itemId = null;
         try
@@ -119,10 +221,12 @@ public class RawText extends RawTextPart<RawText>
             PluginLogger.warning("NMS Exception while parsing ItemStack to JSON String", ex);
         }
         
-        if(itemId == null) itemId = String.valueOf(item.getType().getId());
+        if (itemId == null) itemId = String.valueOf(item.getType().getId());
+
         itemData.put("id", itemId);
-        
         itemData.put("Damage", item.getDurability());
+        itemData.put("Count", item.getAmount());
+
         try
         {
             itemData.put("tag", NBT.fromItemStack(item));
@@ -130,11 +234,13 @@ public class RawText extends RawTextPart<RawText>
         catch (NMSException ex)
         {
             PluginLogger.warning("Unable to retrieve NBT data", ex);
-            Map<String, Object> tag = new HashMap();
+            Map<String, Object> tag = new HashMap<>();
             
             tag.put("display", NBT.fromItemMeta(item.getItemMeta()));
             tag.put("ench", NBT.fromEnchantments(item.getEnchantments()));
             tag.put("HideFlags", NBT.fromItemFlags(item.getItemMeta().getItemFlags()));
+
+            itemData.put("tag", tag);
         }
         
         return NBT.toNBTJSONString(itemData);
@@ -157,7 +263,13 @@ public class RawText extends RawTextPart<RawText>
     {
         return NBT.fromItemFlags(itemFlags);
     }
-    
+
+    /**
+     * Converts an entity name to a tellraw-compatible JSON.
+     *
+     * @param entity The entity.
+     * @return The tellraw-compatible JSON.
+     */
     static public JSONObject toJSON(Entity entity)
     {
         JSONObject obj = new JSONObject();
@@ -172,8 +284,13 @@ public class RawText extends RawTextPart<RawText>
         
         return obj;
     }
-    
-    static private final EnumMap<Achievement, String> ACHIEVEMENTS_NAMES = new EnumMap(Achievement.class);
+
+
+    /**
+     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
+     */
+    @Deprecated
+    static private final EnumMap<Achievement, String> ACHIEVEMENTS_NAMES = new EnumMap<>(Achievement.class);
     
     static {
         ACHIEVEMENTS_NAMES.put(Achievement.BUILD_WORKBENCH, "buildWorkBench");
@@ -185,8 +302,13 @@ public class RawText extends RawTextPart<RawText>
         ACHIEVEMENTS_NAMES.put(Achievement.END_PORTAL, "theEnd");
         ACHIEVEMENTS_NAMES.put(Achievement.THE_END, "theEnd2");
     }
-    
-    
+
+    /**
+     * @param achievement An achievement.
+     * @return The Minecraft I18N key for this achievement.
+     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
+     */
+    @Deprecated
     static public String getI18nKey(Achievement achievement)
     {
         String key = ACHIEVEMENTS_NAMES.get(achievement);

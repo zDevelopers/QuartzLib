@@ -31,7 +31,6 @@ package fr.zcraft.zlib.tools.text;
 
 import fr.zcraft.zlib.components.i18n.I18n;
 import fr.zcraft.zlib.components.rawtext.RawText;
-import fr.zcraft.zlib.tools.PluginLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
@@ -102,7 +101,6 @@ public final class RawMessage
     public static void broadcast(String json)
     {
         send("@a", json);
-        PluginLogger.info("Raw message broadcast: {0}", json);
     }
 
     /**

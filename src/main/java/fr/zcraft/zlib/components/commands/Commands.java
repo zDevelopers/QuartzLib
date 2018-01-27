@@ -38,13 +38,15 @@ import java.util.List;
 
 public class Commands extends ZLibComponent
 {
-    static private final ArrayList<CommandGroup> commandGroups =  new ArrayList<>();
+    public static final String CHAT_PREFIX = "\u2503";
+
+    static private final List<CommandGroup> commandGroups =  new ArrayList<>();
     static private String globalPermission;
 
     static public void registerShortcut(String commandGroupName, Class<? extends Command> commandClass, String ... shortcutNames)
     {
         CommandGroup group = getMatchingCommandGroup(commandGroupName);
-        if(group == null) throw new IllegalArgumentException("Invalid command group name : " + commandGroupName);
+        if(group == null) throw new IllegalArgumentException("Invalid command group name: " + commandGroupName);
         CommandGroup newCommandGroup = new CommandGroup(group, commandClass, shortcutNames);
         
         newCommandGroup.register(ZLib.getPlugin());

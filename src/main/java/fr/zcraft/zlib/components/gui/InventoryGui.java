@@ -218,6 +218,19 @@ abstract public class InventoryGui extends GuiBase
     {
         this.size = Math.min(((int)(Math.ceil((double) size / INVENTORY_ROW_SIZE))) * INVENTORY_ROW_SIZE, MAX_INVENTORY_SIZE);
     }
+
+    /**
+     * Sets the height of the inventory.
+     * The given value is capped to the maximal height of an inventory.
+     * It will be applied on the next GUI update.
+     * This is a shortcut for {@link #setSize(int) setSize(height * INVENTORY_ROW_SIZE)}.
+     * @param height The new height of the inventory.
+     * @see #setSize(int)
+     */
+    protected final void setHeight(int height)
+    {
+        setSize(height * INVENTORY_ROW_SIZE);
+    }
     
     /** @return The title of the inventory. */
     protected String getTitle() { return title; }
