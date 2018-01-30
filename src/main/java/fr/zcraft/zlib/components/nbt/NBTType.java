@@ -34,6 +34,7 @@ import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.util.List;
 import java.util.Map;
 
+
 enum NBTType
 {
     TAG_END((byte) 0, null, Void.class),
@@ -49,7 +50,7 @@ enum NBTType
     TAG_LIST((byte) 9, "NBTTagList", List.class),
     TAG_COMPOUND((byte) 10, "NBTTagCompound", Map.class);
 
-    // Unique NBT id
+    // Unique NBT type id
     private final byte id;
     private final Class[] types;
     private final String nmsClassName;
@@ -74,33 +75,33 @@ enum NBTType
                 return "data";
         }
     }
-    
+
     public Class[] getJavaTypes()
     {
         return types;
     }
-    
+
     public boolean isAssignableFrom(Class otherType)
     {
-        for(Class type : types)
+        for (Class type : types)
         {
-            if(type.isAssignableFrom(otherType))
+            if (type.isAssignableFrom(otherType))
                 return true;
         }
-        
+
         return false;
     }
-    
+
     public int getId()
     {
         return id;
     }
-    
+
     public String getNMSClassName()
     {
         return nmsClassName;
     }
-    
+
     public Class getNMSClass()
     {
         if (nmsClassName == null)
@@ -108,17 +109,17 @@ enum NBTType
 
         try
         {
-            if(nmsClass == null)
+            if (nmsClass == null)
                 nmsClass = Reflection.getMinecraftClassByName(nmsClassName);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new NBTException("Unable to retrieve NBT tag class", ex);
         }
-        
+
         return nmsClass;
     }
-    
+
     public Object newTag(Object value)
     {
         if (value == null)
@@ -128,14 +129,14 @@ enum NBTType
 
         try
         {
-            Object tag;
+            final Object tag;
             switch (this)
             {
                 case TAG_COMPOUND:
                     tag = Reflection.instantiate(getNMSClass());
                     if (value instanceof NBTCompound)
                     {
-                        setData(tag, ((NBTCompound)value).nmsNbtMap);
+                        setData(tag, ((NBTCompound) value).nmsNbtMap);
                     }
                     else
                     {
@@ -147,7 +148,7 @@ enum NBTType
                     tag = Reflection.instantiate(getNMSClass());
                     if (value instanceof NBTList)
                     {
-                        setData(tag, ((NBTList)value).nmsNbtList);
+                        setData(tag, ((NBTList) value).nmsNbtList);
                     }
                     else
                     {
@@ -162,6 +163,7 @@ enum NBTType
                 default:
                     tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);
             }
+
             return tag;
         }
         catch (Exception ex)
@@ -169,10 +171,10 @@ enum NBTType
             throw new NBTException("Unable to create NBT tag", ex);
         }
     }
-    
+
     public Object getData(Object nmsNBTTag)
     {
-        if(nmsNBTTag == null)
+        if (nmsNBTTag == null)
             return null;
         try
         {
@@ -183,7 +185,7 @@ enum NBTType
             throw new NBTException("Unable to retrieve NBT tag data", ex);
         }
     }
-    
+
     public void setData(Object nmsNBTTag, Object value)
     {
         try
@@ -195,38 +197,38 @@ enum NBTType
             throw new NBTException("Unable to set NBT tag data", ex);
         }
     }
-    
+
     static public NBTType fromId(byte id)
     {
-        for(NBTType type : NBTType.values())
+        for (NBTType type : NBTType.values())
         {
-            if(id == type.id)
+            if (id == type.id)
                 return type;
         }
-        
+
         throw new IllegalArgumentException("Illegal type id: " + id);
     }
-    
+
     static public NBTType fromNmsNbtTag(Object nmsNbtTag)
     {
         try
         {
             return fromId((byte) Reflection.call(nmsNbtTag, "getTypeId"));
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new NBTException("Unable to retrieve type of nbt tag", ex);
         }
     }
-    
+
     static public NBTType fromClass(Class klass)
     {
-        for(NBTType type : NBTType.values())
+        for (NBTType type : NBTType.values())
         {
-            if(type.isAssignableFrom(klass))
+            if (type.isAssignableFrom(klass))
                 return type;
         }
-        
+
         throw new IllegalArgumentException("Illegal type class: " + klass);
     }
 }

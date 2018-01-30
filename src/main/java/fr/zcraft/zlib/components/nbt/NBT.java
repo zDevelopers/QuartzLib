@@ -297,7 +297,18 @@ public abstract class NBT
         MC_NBT_TAG_COMPOUND = getMinecraftClass("NBTTagCompound");
         CB_CRAFT_ITEM_META = getCraftBukkitClass("inventory.CraftMetaItem");
     }
-    
+
+    /**
+     * Extracts the NBT compound in the given ItemStack.
+     *
+     * <p>If there isn't any NBT tag in the ItemStack, one is created, linked to
+     * the ItemStack, and returned, so this will always return a NBT compound tag
+     * linked to the ItemStack.</p>
+     *
+     * @param item The item to extract NBT tags from.
+     * @return The NMS NBT tag.
+     * @throws NMSException If something goes wrong while extracting the tag.
+     */
     static private Object getMcNBTCompound(ItemStack item) throws NMSException
     {
         Object mcItemStack = ItemUtils.getNMSItemStack(item);
@@ -329,6 +340,13 @@ public abstract class NBT
         }
     }
 
+
+    /**
+     * Converts a native Java value to a NMS NBT instance.
+     *
+     * @param value The native Java value to convert.
+     * @return The NMS NBT tag instance converted from the native value.
+     */
     static Object fromNativeValue(Object value)
     {
         if (value == null) return null;
@@ -337,6 +355,16 @@ public abstract class NBT
         return type.newTag(value);
     }
 
+    /**
+     * Converts a NMS NBT tag instance to a native value, effectively
+     * unwrapping the value inside to something Java alone can understand.
+     *
+     * Nested values are also converted, if any, to objects implementing
+     * the {@link Map} or {@link List} interface..
+     *
+     * @param nbtTag The NMS NBT tag instance.
+     * @return The corresponding native value.
+     */
     static Object toNativeValue(Object nbtTag)
     {
         if (nbtTag == null) return null;
