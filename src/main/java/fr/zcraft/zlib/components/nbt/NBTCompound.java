@@ -30,6 +30,8 @@
 
 package fr.zcraft.zlib.components.nbt;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,7 +60,7 @@ public class NBTCompound implements Map<String, Object>
     public NBTCompound()
     {
         this.nmsNbtTag = null;
-        this.nmsNbtMap = new HashMap<String, Object>();
+        this.nmsNbtMap = new HashMap<>();
         this.parent = null;
         this.parentKey = null;
     }
@@ -68,12 +70,13 @@ public class NBTCompound implements Map<String, Object>
         this.nmsNbtTag = nativeNBTTag;
         if(nativeNBTTag == null)
         {
-            this.nmsNbtMap = new HashMap<String, Object>();
+            this.nmsNbtMap = new HashMap<>();
         }
         else
         {
             this.nmsNbtMap = (Map<String, Object>) NBTType.TAG_COMPOUND.getData(nmsNbtTag);
         }
+
         this.parent = null;
         this.parentKey = null;
     }
@@ -98,7 +101,7 @@ public class NBTCompound implements Map<String, Object>
     {
         if(nmsNbtMap == null)
         {
-            nmsNbtMap = new HashMap<String, Object>();
+            nmsNbtMap = new HashMap<>();
             if(nmsNbtTag != null)
             {
                 NBTType.TAG_COMPOUND.setData(nmsNbtTag, nmsNbtMap);
@@ -124,10 +127,19 @@ public class NBTCompound implements Map<String, Object>
         
         return nmsNbtMap;
     }
-    
+
+    /**
+     * @return The NMS NBTTagCompound instance.
+     */
+    Object getNBTTagCompound()
+    {
+        return nmsNbtTag;
+    }
+
     /**
      * Returns the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
      * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
+     *
      * @param <T> The type to coerce the mapped value to.
      * @param key The key
      * @param defaultValue The default value.
@@ -142,6 +154,7 @@ public class NBTCompound implements Map<String, Object>
      * Returns the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
      * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
      * This version of the method is recommended if the defaultValue parameter is null, so it can have enough type information to protect against wrong NBT types.
+     *
      * @param <T> The type to coerce the mapped value to.
      * @param key The key
      * @param defaultValue The default value.
@@ -172,6 +185,7 @@ public class NBTCompound implements Map<String, Object>
      * If the value mapped to the key is not a compound tag, a new empty tag
      * is returned, and the existing value is overwritten if anything is added
      * to the tag.
+     *
      * @param key The key.
      * @return the Compound tag to which the specified key is mapped.
      */
@@ -185,6 +199,7 @@ public class NBTCompound implements Map<String, Object>
      * If the value mapped to the key is not a list tag, a new empty tag
      * is returned, and the existing value is overwritten if anything is added
      * to the tag.
+     *
      * @param key The key.
      * @return the List tag to which the specified key is mapped.
      */
@@ -196,36 +211,31 @@ public class NBTCompound implements Map<String, Object>
     @Override
     public int size()
     {
-        if(nmsNbtMap == null) return 0;
-        return nmsNbtMap.size();
+        return nmsNbtMap == null ? 0 : nmsNbtMap.size();
     }
 
     @Override
     public boolean isEmpty()
     {
-        if(nmsNbtMap == null) return true;
-        return nmsNbtMap.isEmpty();
+        return nmsNbtMap == null || nmsNbtMap.isEmpty();
     }
 
     @Override
     public boolean containsKey(Object key)
     {
-        if(nmsNbtMap == null) return false;
-        return nmsNbtMap.containsKey(key);
+        return nmsNbtMap != null && nmsNbtMap.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value)
     {
-        if(nmsNbtMap == null) return false;
-        return nmsNbtMap.containsValue(NBT.fromNativeValue(value));
+        return nmsNbtMap != null && nmsNbtMap.containsValue(NBT.fromNativeValue(value));
     }
 
     @Override
     public Object get(Object key)
     {
-        if(nmsNbtMap == null) return null;
-        return NBT.toNativeValue(nmsNbtMap.get(key));
+        return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.get(key));
     }
 
     @Override
@@ -237,14 +247,13 @@ public class NBTCompound implements Map<String, Object>
     @Override
     public Object remove(Object key)
     {
-        if(nmsNbtMap == null) return null;
-        return NBT.toNativeValue(nmsNbtMap.remove(key));
+        return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.remove(key));
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Object> m)
+    public void putAll(Map<? extends String, ?> m)
     {
-        for(Entry<? extends String, ? extends Object> entry : m.entrySet())
+        for (Entry<? extends String, ?> entry : m.entrySet())
         {
             put(entry.getKey(), entry.getValue());
         }
@@ -260,43 +269,62 @@ public class NBTCompound implements Map<String, Object>
     @Override
     public Set<String> keySet()
     {
-        if(nmsNbtMap == null) return new HashSet<String>();
-        return nmsNbtMap.keySet();
+        return nmsNbtMap == null ? new HashSet<String>() : nmsNbtMap.keySet();
     }
 
     @Override
     public Collection<Object> values()
     {
-        ArrayList list = new ArrayList(size());
-        if(nmsNbtMap == null) return list;
+        final ArrayList<Object> list = new ArrayList<>(size());
+        if (nmsNbtMap == null) return list;
         
-        for(Object value : nmsNbtMap.values())
+        for (Object value : nmsNbtMap.values())
         {
             list.add(NBT.toNativeValue(value));
         }
         return list;
     }
-    
+
+    /**
+     * Returns this NBT component as a JSON string usable by Minecraft (in things like tellraws).
+     *
+     * @return A JSON representation of this component.
+     * @see NBT#toNBTJSONString(Object) The underlying export method used.
+     */
     @Override
     public String toString()
     {
         return NBT.toNBTJSONString(this);
     }
 
+    /**
+     * Returns a new HashMap containing the keys of this NBT compound. The returned
+     * HashMap is independent from the compound and can be used for export and save.
+     *
+     * @return A new HashMap containing the data stored inside this compound.
+     * @see NBT#addToItemStack(ItemStack, Map, boolean) The method used to add these exported tags back inside an item.
+     */
+    public Map<String, Object> toHashMap()
+    {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.putAll(this);
+        return map;
+    }
+
     @Override
     public Set<Entry<String, Object>> entrySet()
     {
-        HashSet<Entry<String,Object>> set = new HashSet(size());
-        if(nmsNbtMap == null) return set;
+        HashSet<Entry<String,Object>> set = new HashSet<>(size());
+        if (nmsNbtMap == null) return set;
         
-        for(Entry<String, Object> entry : nmsNbtMap.entrySet())
+        for (Entry<String, Object> entry : nmsNbtMap.entrySet())
         {
             set.add(new NBTCompoundEntry(entry.getKey()));
         }
         
         return set;
     }
-    
+
     private class NBTCompoundEntry implements Map.Entry<String, Object>
     {
         private final String key;
@@ -323,7 +351,5 @@ public class NBTCompound implements Map<String, Object>
         {
             return put(key, value);
         }
-        
     }
-
 }
