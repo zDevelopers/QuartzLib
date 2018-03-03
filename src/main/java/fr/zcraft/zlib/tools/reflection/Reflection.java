@@ -29,13 +29,10 @@
  */
 package fr.zcraft.zlib.tools.reflection;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -188,7 +185,7 @@ public final class Reflection
     {
         for (Field field : klass.getDeclaredFields())
         {
-            if (field.getType().equals(type))
+            if (typeIsAssignableFrom(field.getType(), type))
             {
                 field.setAccessible(true);
                 return field;
@@ -425,6 +422,9 @@ public final class Reflection
     
     static public boolean typeIsAssignableFrom(Type source, Type destination)
     {
+        if(source instanceof ParameterizedType) source = ((ParameterizedType) source).getRawType();
+        if(destination instanceof ParameterizedType) source = ((ParameterizedType) destination).getRawType();
+
         if(source instanceof Class && destination instanceof Class)
         {
             return ((Class<?>)destination).isAssignableFrom((Class) source);
