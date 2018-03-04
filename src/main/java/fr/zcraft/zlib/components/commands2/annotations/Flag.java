@@ -28,33 +28,18 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.components.commands2;
+package fr.zcraft.zlib.components.commands2.annotations;
 
-import fr.zcraft.zlib.components.commands2.bb.BBCommand;
-import fr.zcraft.zlib.components.commands2.exceptions.CommandException;
-import fr.zcraft.zlib.components.commands2.iom.CreateCommand;
-import fr.zcraft.zlib.components.commands2.iom.IoMCommand;
-import org.junit.Assert;
-import org.junit.Test;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.Optional;
-
-public class CommandsTest 
-{
-    static private final CommandSender sender = new CommandSender();
-    @Test
-    public void iomTest() throws CommandException {
-        Commands.register(IoMCommand.class, "maptool");
-        Commands.register(CreateCommand.class, "tomap");
-
-        Context<?> mapToolContext = Commands.makeContext("maptool", sender, new String[]{"list"});
-        Assert.assertEquals(mapToolContext.getParentContext().map(Context::getCommandRunnable), Optional.of(IoMCommand.LIST));
-        Assert.assertTrue(mapToolContext.getCommandRunnable() instanceof IoMCommand.ListCommand);
-    }
-
-    @Test
-    public void bbTest() {
-        Commands.registerParameterTypeConverter(new BBCommand.BBItemParamConverter());
-        Commands.register(BBCommand.class, "bb");
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+public @interface Flag {
+    String shortName() default "";
+    String name() default "";
+    String[] names() default {};
+    String[] additionalNames() default {};
 }

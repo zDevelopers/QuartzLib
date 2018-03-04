@@ -28,57 +28,36 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.components.commands2;
+package fr.zcraft.zlib.components.commands2.bb;
 
-import java.util.List;
+import fr.zcraft.zlib.components.commands2.CommandRunnable;
+import fr.zcraft.zlib.components.commands2.ParameterTypeConverter;
+import fr.zcraft.zlib.components.commands2.exceptions.InvalidArgumentException;
+
+import java.util.Arrays;
 import java.util.Optional;
 
-/**
- * This class represents a registered command.
- * @param <T> The command runnable type this command is bound to.
- */
-public class Command<T extends CommandRunnable> {
+public class BBCommand implements CommandRunnable {
+    public BBItem item;
+    public Optional<Integer> amount;
 
-    private final String name;
-    private final Class<T> runnableClass;
-    private final boolean isCommandGroup;
-    private final List<SubCommand<?, T>> subCommands;
-
-    Command(Class<T> runnableClass, String name, boolean isCommandGroup, List<SubCommand<?, T>> subCommands) {
-        this.runnableClass = runnableClass;
-        this.name = name;
-        this.isCommandGroup = isCommandGroup;
-        this.subCommands = subCommands;
+    static public class BBItem {
+        static public final String[] items = {"saw", "stonecutter"};
+        public String itemType;
     }
 
-    public Context<? extends CommandRunnable> makeContext(CommandSender sender, String[] arguments) {
-        return ContextGenerator.makeContext(this, sender, arguments, Optional.empty());
-    }
+    static public class BBItemParamConverter implements ParameterTypeConverter<BBItem> {
 
-    public String getName() {
-        return name;
-    }
-
-    public boolean nameMatches(String string) {
-        return string.equalsIgnoreCase(name);
-    }
-
-    public Class<T> getRunnableClass() {
-        return runnableClass;
-    }
-
-    public boolean isCommandGroup() {
-        return isCommandGroup;
-    }
-
-    public List<SubCommand<?, T>> getSubCommands() {
-        return subCommands;
-    }
-
-    public Optional<SubCommand<?, T>> getSubCommand(String name) {
-        for(SubCommand<?, T> subCommand : subCommands) {
-            if(subCommand.getCommand().nameMatches(name)) return Optional.of(subCommand);
+        @Override
+        public Class<BBItem> getType() {
+            return BBItem.class;
         }
-        return Optional.empty();
+
+        @Override
+        public BBItem fromArgument(String argument) throws InvalidArgumentException {
+            argument = argument.toLowerCase();
+            if(!Arrays.asList(BBItem.items).contains(argument)) throw new InvalidArgumentException();
+            return null;
+        }
     }
 }

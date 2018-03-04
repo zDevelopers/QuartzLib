@@ -30,55 +30,52 @@
 
 package fr.zcraft.zlib.components.commands2;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
- * This class represents a registered command.
+ * This class represents a command execution context.
+ * It contains all the data related to command execution, such as the command sender, arguments, etc.
  * @param <T> The command runnable type this command is bound to.
  */
-public class Command<T extends CommandRunnable> {
+public class Context<T extends CommandRunnable> {
 
-    private final String name;
-    private final Class<T> runnableClass;
-    private final boolean isCommandGroup;
-    private final List<SubCommand<?, T>> subCommands;
+    private final T runnable;
+    private final CommandSender sender;
+    private final String[] args;
+    private final Command<T> parentCommand;
+    private final Optional<Context> parentContext;
+    private final Optional<SubCommand<?, T>> matchedSubCommand;
 
-    Command(Class<T> runnableClass, String name, boolean isCommandGroup, List<SubCommand<?, T>> subCommands) {
-        this.runnableClass = runnableClass;
-        this.name = name;
-        this.isCommandGroup = isCommandGroup;
-        this.subCommands = subCommands;
+    Context(T runnable, CommandSender sender, String[] args, Command<T> command, Optional<Context> parentContext, Optional<SubCommand<?, T>> matchedSubCommand) {
+        this.runnable = runnable;
+        this.sender = sender;
+        this.args = args;
+        this.parentCommand = command;
+        this.parentContext = parentContext;
+        this.matchedSubCommand = matchedSubCommand;
     }
 
-    public Context<? extends CommandRunnable> makeContext(CommandSender sender, String[] arguments) {
-        return ContextGenerator.makeContext(this, sender, arguments, Optional.empty());
+    public T getCommandRunnable() {
+        return this.runnable;
     }
 
-    public String getName() {
-        return name;
+    public CommandSender sender() {
+        return this.sender;
     }
 
-    public boolean nameMatches(String string) {
-        return string.equalsIgnoreCase(name);
+    public String[] getArgs() {
+        return args;
     }
 
-    public Class<T> getRunnableClass() {
-        return runnableClass;
+    public Command<T> getParentCommand() {
+        return parentCommand;
     }
 
-    public boolean isCommandGroup() {
-        return isCommandGroup;
+    public Optional<Context> getParentContext() {
+        return parentContext;
     }
 
-    public List<SubCommand<?, T>> getSubCommands() {
-        return subCommands;
-    }
-
-    public Optional<SubCommand<?, T>> getSubCommand(String name) {
-        for(SubCommand<?, T> subCommand : subCommands) {
-            if(subCommand.getCommand().nameMatches(name)) return Optional.of(subCommand);
-        }
-        return Optional.empty();
+    public Optional<SubCommand<?, T>> getMatchedSubCommand() {
+        return matchedSubCommand;
     }
 }

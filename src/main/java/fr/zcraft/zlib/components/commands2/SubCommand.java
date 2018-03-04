@@ -30,55 +30,33 @@
 
 package fr.zcraft.zlib.components.commands2;
 
-import java.util.List;
-import java.util.Optional;
+import java.lang.reflect.Field;
 
 /**
- * This class represents a registered command.
- * @param <T> The command runnable type this command is bound to.
+ * This class contains information about a command's subcommand.
+ * @param <T>
+ * @param <Parent>
  */
-public class Command<T extends CommandRunnable> {
+public class SubCommand<T extends CommandRunnable, Parent extends CommandRunnable> {
+    private final Command<T> command;
+    private final Parent parentEnumValue;
+    private final Field parentField;
 
-    private final String name;
-    private final Class<T> runnableClass;
-    private final boolean isCommandGroup;
-    private final List<SubCommand<?, T>> subCommands;
-
-    Command(Class<T> runnableClass, String name, boolean isCommandGroup, List<SubCommand<?, T>> subCommands) {
-        this.runnableClass = runnableClass;
-        this.name = name;
-        this.isCommandGroup = isCommandGroup;
-        this.subCommands = subCommands;
+    SubCommand(Command<T> command, Parent parentEnumValue, Field parentField) {
+        this.command = command;
+        this.parentEnumValue = parentEnumValue;
+        this.parentField = parentField;
     }
 
-    public Context<? extends CommandRunnable> makeContext(CommandSender sender, String[] arguments) {
-        return ContextGenerator.makeContext(this, sender, arguments, Optional.empty());
+    public Command<T> getCommand() {
+        return command;
     }
 
-    public String getName() {
-        return name;
+    public Parent getParentEnumValue() {
+        return parentEnumValue;
     }
 
-    public boolean nameMatches(String string) {
-        return string.equalsIgnoreCase(name);
-    }
-
-    public Class<T> getRunnableClass() {
-        return runnableClass;
-    }
-
-    public boolean isCommandGroup() {
-        return isCommandGroup;
-    }
-
-    public List<SubCommand<?, T>> getSubCommands() {
-        return subCommands;
-    }
-
-    public Optional<SubCommand<?, T>> getSubCommand(String name) {
-        for(SubCommand<?, T> subCommand : subCommands) {
-            if(subCommand.getCommand().nameMatches(name)) return Optional.of(subCommand);
-        }
-        return Optional.empty();
+    public Field getParentField() {
+        return parentField;
     }
 }

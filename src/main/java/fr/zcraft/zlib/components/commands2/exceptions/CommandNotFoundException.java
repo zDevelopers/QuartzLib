@@ -28,57 +28,16 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.components.commands2;
+package fr.zcraft.zlib.components.commands2.exceptions;
 
-import java.util.List;
-import java.util.Optional;
+public class CommandNotFoundException extends CommandException {
+    private final String commandName;
 
-/**
- * This class represents a registered command.
- * @param <T> The command runnable type this command is bound to.
- */
-public class Command<T extends CommandRunnable> {
-
-    private final String name;
-    private final Class<T> runnableClass;
-    private final boolean isCommandGroup;
-    private final List<SubCommand<?, T>> subCommands;
-
-    Command(Class<T> runnableClass, String name, boolean isCommandGroup, List<SubCommand<?, T>> subCommands) {
-        this.runnableClass = runnableClass;
-        this.name = name;
-        this.isCommandGroup = isCommandGroup;
-        this.subCommands = subCommands;
+    public CommandNotFoundException(String commandName) {
+        this.commandName = commandName;
     }
 
-    public Context<? extends CommandRunnable> makeContext(CommandSender sender, String[] arguments) {
-        return ContextGenerator.makeContext(this, sender, arguments, Optional.empty());
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean nameMatches(String string) {
-        return string.equalsIgnoreCase(name);
-    }
-
-    public Class<T> getRunnableClass() {
-        return runnableClass;
-    }
-
-    public boolean isCommandGroup() {
-        return isCommandGroup;
-    }
-
-    public List<SubCommand<?, T>> getSubCommands() {
-        return subCommands;
-    }
-
-    public Optional<SubCommand<?, T>> getSubCommand(String name) {
-        for(SubCommand<?, T> subCommand : subCommands) {
-            if(subCommand.getCommand().nameMatches(name)) return Optional.of(subCommand);
-        }
-        return Optional.empty();
+    public String getCommandName() {
+        return commandName;
     }
 }
