@@ -56,7 +56,7 @@ public class BBCommand implements CommandRunnable {
         @Override
         public BBItem fromArgument(String argument) throws InvalidArgumentException {
             argument = argument.toLowerCase();
-            if(!Arrays.asList(BBItem.items).contains(argument)) throw new InvalidArgumentException();
+            if(!Arrays.asList(BBItem.items).contains(argument)) throw new InvalidArgumentException(argument);
             return null;
         }
     }

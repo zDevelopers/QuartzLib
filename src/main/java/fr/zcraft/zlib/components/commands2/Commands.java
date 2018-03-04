@@ -30,6 +30,8 @@
 
 package fr.zcraft.zlib.components.commands2;
 
+import fr.zcraft.zlib.components.commands2.converters.IntegerTypeConverter;
+import fr.zcraft.zlib.components.commands2.converters.URITypeConverter;
 import fr.zcraft.zlib.components.commands2.exceptions.CommandException;
 import fr.zcraft.zlib.components.commands2.exceptions.CommandNotFoundException;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -54,7 +56,7 @@ public abstract class Commands
      * @param command The command runnable to be registered
      * @param name The name of the command
      */
-    static public void register(Class<? extends CommandRunnable> command, String name) {
+    static public void register(Class<? extends CommandRunnable> command, String name) throws CommandException {
         name = name.toLowerCase();
         if(commandRegistry.containsKey(name)) throw new IllegalArgumentException("Command already registered : " + name);
 
@@ -106,5 +108,11 @@ public abstract class Commands
      */
     static public Context<?> makeContext(String commandName, CommandSender sender, String[] arguments) throws CommandException {
         return findCommand(commandName).makeContext(sender, arguments);
+    }
+
+    // REGISTER ALL THE TYPES
+    static {
+        registerParameterTypeConverter(new IntegerTypeConverter());
+        registerParameterTypeConverter(new URITypeConverter());
     }
 }

@@ -37,23 +37,36 @@ import fr.zcraft.zlib.components.commands2.iom.IoMCommand;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 
-public class CommandsTest 
+public class CommandsTest
 {
     static private final CommandSender sender = new CommandSender();
     @Test
-    public void iomTest() throws CommandException {
+    public void iomTest() throws CommandException, URISyntaxException {
         Commands.register(IoMCommand.class, "maptool");
         Commands.register(CreateCommand.class, "tomap");
 
         Context<?> mapToolContext = Commands.makeContext("maptool", sender, new String[]{"list"});
-        Assert.assertEquals(mapToolContext.getParentContext().map(Context::getCommandRunnable), Optional.of(IoMCommand.LIST));
+        Assert.assertEquals(Optional.of(IoMCommand.LIST), mapToolContext.getParentContext().map(Context::getCommandRunnable));
         Assert.assertTrue(mapToolContext.getCommandRunnable() instanceof IoMCommand.ListCommand);
+
+        Context<?> createContext = Commands.makeContext("maptool", sender, new String[]{"create", "http://example.com/test.png", "-w", "42", "--stretch"});
+        Assert.assertTrue(createContext.getCommandRunnable() instanceof CreateCommand);
+        CreateCommand createRunnable = (CreateCommand) createContext.getCommandRunnable();
+
+        Assert.assertEquals(new URI("http://example.com/test.png"), createRunnable.imageURI);
+        Assert.assertEquals(Optional.of(42), createRunnable.width);
+        Assert.assertEquals(Optional.empty(), createRunnable.height);
+        Assert.assertEquals(true, createRunnable.stretch);
+        Assert.assertEquals(false, createRunnable.cover);
+
     }
 
     @Test
-    public void bbTest() {
+    public void bbTest() throws CommandException {
         Commands.registerParameterTypeConverter(new BBCommand.BBItemParamConverter());
         Commands.register(BBCommand.class, "bb");
     }

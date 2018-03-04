@@ -31,5 +31,17 @@
 package fr.zcraft.zlib.components.commands2.exceptions;
 
 public class InvalidArgumentException extends CommandException {
+    private final String argument;
 
+    public InvalidArgumentException() {
+        this(null);
+    }
+
+    public InvalidArgumentException(String argument) {
+        this.argument = argument;
+    }
+
+    public String getArgument() {
+        return argument;
+    }
 }
