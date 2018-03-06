@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+
 public class ConfigurationInstance extends ZLibComponent
 {
     private ConfigurationItem[] items;
@@ -118,7 +119,23 @@ public class ConfigurationInstance extends ZLibComponent
     
     public void save()
     {
-        ZLib.getPlugin().saveConfig();
+        final File saveTo = file != null ? file : (fileName != null ? new File(ZLib.getPlugin().getDataFolder().getAbsolutePath() + "/" + fileName) : null);
+
+        if (saveTo != null)
+        {
+            try
+            {
+                this.getConfig().save(saveTo);
+            }
+            catch (final IOException e)
+            {
+                PluginLogger.error("Could not save config to {0}", e, saveTo);
+            }
+        }
+        else
+        {
+            ZLib.getPlugin().saveConfig();
+        }
     }
     
     public FileConfiguration getConfig()
