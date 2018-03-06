@@ -30,13 +30,13 @@
 
 package fr.zcraft.zlib.components.commands2;
 
-import fr.zcraft.zlib.components.commands2.exceptions.InvalidArgumentException;
+import fr.zcraft.zlib.components.commands2.exceptions.ParameterTypeConverterException;
 
 /**
  * An interface used to parse types from command arguments.
  * @param <T>
  */
 public interface ParameterTypeConverter<T> {
-    public Class<T> getType();
-    public T fromArgument(String argument) throws InvalidArgumentException;
+    Class<T> getType();
+    T fromArgument(String argument) throws ParameterTypeConverterException;
 }

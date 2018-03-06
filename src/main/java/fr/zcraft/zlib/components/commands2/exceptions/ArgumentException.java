@@ -28,39 +28,40 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.components.commands2.bb;
+package fr.zcraft.zlib.components.commands2.exceptions;
 
-import fr.zcraft.zlib.components.commands2.CommandRunnable;
-import fr.zcraft.zlib.components.commands2.ParameterTypeConverter;
-import fr.zcraft.zlib.components.commands2.exceptions.ParameterTypeConverterException;
-
-import java.util.Arrays;
 import java.util.Optional;
 
-public class BBCommand implements CommandRunnable {
-    public BBItem item;
-    public Optional<Integer> amount;
+public abstract class ArgumentException extends CommandException {
+    private final Optional<String> argument;
+    private Optional<Integer> argumentPosition;
 
-    static public class BBItem {
-        static public final String[] items = {"saw", "stonecutter"};
-        public final String itemType;
-
-        public BBItem(String itemType) {
-            this.itemType = itemType;
-        }
+    public ArgumentException() {
+        this(Optional.empty(), Optional.empty());
     }
 
-    static public class BBItemParamConverter implements ParameterTypeConverter<BBItem> {
-        @Override
-        public Class<BBItem> getType() {
-            return BBItem.class;
-        }
+    public ArgumentException(String argument) {
+        this(Optional.of(argument), Optional.empty());
+    }
 
-        @Override
-        public BBItem fromArgument(String argument) throws ParameterTypeConverterException {
-            argument = argument.toLowerCase();
-            if(!Arrays.asList(BBItem.items).contains(argument)) throw new ParameterTypeConverterException("Invalid item name");
-            return new BBItem(argument);
-        }
+    public ArgumentException(String argument, int argumentPosition) {
+        this(Optional.of(argument), Optional.of(argumentPosition));
+    }
+
+    public ArgumentException(Optional<String> argument, Optional<Integer> argumentPosition) {
+        this.argument = argument;
+        this.argumentPosition = argumentPosition;
+    }
+
+    public Optional<String> getArgument() {
+        return argument;
+    }
+
+    public Optional<Integer> getArgumentPosition() {
+        return argumentPosition;
+    }
+
+    public void setArgumentPosition(Optional<Integer> argumentPosition) {
+        this.argumentPosition = argumentPosition;
     }
 }

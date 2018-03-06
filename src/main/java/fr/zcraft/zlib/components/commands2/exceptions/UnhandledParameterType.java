@@ -2,11 +2,12 @@ package fr.zcraft.zlib.components.commands2.exceptions;
 
 import java.lang.reflect.Field;
 
-public class UnhandledParameterType extends CommandException {
+public class UnhandledParameterType extends CommandConfigurationException {
     private final Class<?> type;
     private final Field field;
 
     public UnhandledParameterType(Class<?> type, Field field) {
+        super(field.getDeclaringClass(), "");
         this.type = type;
         this.field = field;
     }

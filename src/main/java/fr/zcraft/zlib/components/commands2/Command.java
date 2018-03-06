@@ -30,6 +30,8 @@
 
 package fr.zcraft.zlib.components.commands2;
 
+import fr.zcraft.zlib.components.commands2.exceptions.CommandException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -43,10 +45,10 @@ public class Command<T extends CommandRunnable> {
     private final Class<T> runnableClass;
     private final boolean isCommandGroup;
     private final List<SubCommand<?, T>> subCommands;
-    private final List<Parameter<?>> parameters;
-    private final List<Flag<?>> flags;
+    private final List<Parameter> parameters;
+    private final List<Flag> flags;
 
-    Command(Class<T> runnableClass, String name, boolean isCommandGroup, List<SubCommand<?, T>> subCommands, List<Parameter<?>> parameters, List<Flag<?>> flags) {
+    Command(Class<T> runnableClass, String name, boolean isCommandGroup, List<SubCommand<?, T>> subCommands, List<Parameter> parameters, List<Flag> flags) {
         this.runnableClass = runnableClass;
         this.name = name;
         this.isCommandGroup = isCommandGroup;
@@ -55,7 +57,7 @@ public class Command<T extends CommandRunnable> {
         this.flags = flags;
     }
 
-    public Context<? extends CommandRunnable> makeContext(CommandSender sender, String[] arguments) {
+    public Context<? extends CommandRunnable> makeContext(CommandSender sender, String[] arguments) throws CommandException {
         return ContextGenerator.makeContext(this, sender, arguments, Optional.empty());
     }
 
@@ -86,23 +88,23 @@ public class Command<T extends CommandRunnable> {
         return Optional.empty();
     }
 
-    public List<Parameter<?>> getParameters() {
+    public List<Parameter> getParameters() {
         return parameters;
     }
 
-    public List<Flag<?>> getFlags() {
+    public List<Flag> getFlags() {
         return flags;
     }
 
-    public Optional<Flag<?>> getFlag(String shortName) {
-        for(Flag<?> flag: flags) {
+    public Optional<Flag> getFlag(String shortName) {
+        for(Flag flag: flags) {
             if(flag.getName().equals(shortName)) return Optional.of(flag);
         }
         return Optional.empty();
     }
 
-    public Optional<Flag<?>> getShortFlag(String shortName) {
-        for(Flag<?> flag: flags) {
+    public Optional<Flag> getShortFlag(String shortName) {
+        for(Flag flag: flags) {
             if(flag.getShortName().equals(shortName)) return Optional.of(flag);
         }
         return Optional.empty();

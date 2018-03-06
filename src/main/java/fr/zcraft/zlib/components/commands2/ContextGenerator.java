@@ -30,8 +30,8 @@
 
 package fr.zcraft.zlib.components.commands2;
 
+import fr.zcraft.zlib.components.commands2.exceptions.*;
 import fr.zcraft.zlib.tools.reflection.Reflection;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,85 +44,118 @@ import java.util.Optional;
 abstract class ContextGenerator {
     private ContextGenerator() {}
 
-    private static <T extends CommandRunnable> Context<T> makeEnumContext(Command<T> command, CommandSender sender, String[] arguments, Optional<Context> parentContext) throws Exception {
-        if(arguments.length < 1) throw new Exception("not enough arguments");//TODO: Better exceptions
-        SubCommand<?, T> subCommand = command.getSubCommand(arguments[0]).orElseThrow(Exception::new);
+    private static <T extends CommandRunnable> Context<T> makeEnumContext(Command<T> command, CommandSender sender, String[] arguments, Optional<Context> parentContext) throws ArgumentException {
+        if(arguments.length < 1) throw new MissingSubcommandException(command);
+        SubCommand<?, T> subCommand = command.getSubCommand(arguments[0]).orElseThrow(() -> new UnknownSubcommandException(command, arguments[0], 0));
         return new Context<>(subCommand.getParentEnumValue(), sender, arguments, command, parentContext, Optional.of(subCommand));
     }
 
-    static Context<? extends CommandRunnable> makeContext(Command<? extends CommandRunnable> command, CommandSender sender, String[] arguments, Optional<Context> parentContext) {
+    static Context<? extends CommandRunnable> makeContext(Command<? extends CommandRunnable> command, CommandSender sender, String[] arguments, Optional<Context> parentContext) throws ArgumentException {
+        if(!command.isCommandGroup()) {
+            return makePlainClassContext(command, sender, arguments, parentContext);
+        }
+
+        Context<?> context = makeEnumContext(command, sender, arguments, parentContext);
+        SubCommand<?, ? extends CommandRunnable> subCommand = context.getMatchedSubCommand().orElseThrow(NullPointerException::new);
         try {
-            if(command.isCommandGroup()) {
-                    Context<?> context = makeEnumContext(command, sender, arguments, parentContext);
-                    SubCommand<?, ? extends CommandRunnable> subCommand = context.getMatchedSubCommand().orElseThrow(NullPointerException::new);
-                    return makeContext(subCommand.getCommand(), sender, Arrays.copyOfRange(arguments, 1, arguments.length), Optional.of(context));
-            } else {
-                return makePlainClassContext(command, sender, arguments, parentContext);
-            }
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+            return makeContext(subCommand.getCommand(), sender, Arrays.copyOfRange(arguments, 1, arguments.length), Optional.of(context));
+        } catch(ArgumentException e) {
+            e.setArgumentPosition(e.getArgumentPosition().map(i -> i + 1));
+            throw e;
         }
     }
 
-
-    private static <T extends CommandRunnable> Context<T> makePlainClassContext(Command<T> command, CommandSender sender, String[] arguments, Optional<Context> parentContext) throws Exception {
-        T runnable = Reflection.instantiate(command.getRunnableClass());
-        List<Parameter<?>> parameters = command.getParameters();
-        List<Flag<?>> flags = command.getFlags();
-        List<Flag<?>> remainingFlags = new ArrayList<>(flags);
+    private static <T extends CommandRunnable> Context<T> makePlainClassContext(Command<T> command, CommandSender sender, String[] arguments, Optional<Context> parentContext) throws ArgumentException {
+        T runnable = instanciateCommandRunnable(command);
+        List<Parameter> parameters = command.getParameters();
+        List<Flag> flags = command.getFlags();
+        List<Flag> remainingFlags = new ArrayList<>(flags);
 
         int argumentsI = 0;
         int parametersI = 0;
 
         for(; argumentsI < arguments.length; ++argumentsI) {
             String argument = arguments[argumentsI];
-            Flag<?> flag = null;
+            Flag flag = null;
             if(argument.startsWith("--")) {
                 argument = argument.substring(2);
-                Optional<Flag<?>> oflag = command.getFlag(argument);
-                if (!oflag.isPresent()) throw new RuntimeException("unknown flag: " + argument);
+                Optional<Flag> oflag = command.getFlag(argument);
+                if (!oflag.isPresent()) throw new UnknownFlagException(argument, argumentsI);
                 flag = oflag.get();
             } else if(argument.startsWith("-")) {
                 argument = argument.substring(1);
-                Optional<Flag<?>> oflag = command.getShortFlag(argument);
-                if (!oflag.isPresent()) throw new RuntimeException("unknown flag: " + argument);
+                Optional<Flag> oflag = command.getShortFlag(argument);
+                if (!oflag.isPresent()) throw new UnknownFlagException(argument, argumentsI);
                 flag = oflag.get();
             }
 
             if(flag != null) {
-                if (!remainingFlags.remove(flag)) throw new RuntimeException("flag already defined: " + argument);
+                if (!remainingFlags.remove(flag)) throw new FlagAlreadyDefinedException(flag, argument, argumentsI);
                 if (!flag.hasValue()) {
-                    flag.getRunnableField().set(runnable, true);
+                    setRunnableField(runnable, flag, true);
                 } else {
-                    if (argumentsI + 1 >= arguments.length) throw new RuntimeException("Missing value for flag :" + argument);
+                    if (argumentsI + 1 >= arguments.length) throw new FlagMissingValueException(flag, argumentsI);
                     ++argumentsI;
-                    String flagValue = arguments[argumentsI];
+                    Object runnableValue = convertFieldType(flag, arguments[argumentsI], argumentsI);
                     if (flag.isRequired()) {
-                        flag.getRunnableField().set(runnable, flag.getTypeConverter().fromArgument(flagValue));
+                        setRunnableField(runnable, flag, runnableValue);
                     } else {
-                        flag.getRunnableField().set(runnable, Optional.of(flag.getTypeConverter().fromArgument(flagValue)));
+                        setRunnableField(runnable, flag,  Optional.of(runnableValue));
                     }
                 }
                 continue;
             }
 
-            if(parametersI >= parameters.size()) throw new RuntimeException("too many arguments");
-            Parameter<?> parameter = parameters.get(argumentsI);
-            parameter.getRunnableField().set(runnable, parameter.getTypeConverter().fromArgument(arguments[argumentsI]));
+            if(parametersI >= parameters.size()) throw new ExtraArgumentException(arguments[argumentsI], argumentsI);
+            Parameter parameter = parameters.get(argumentsI);
+            setRunnableField(runnable, parameter, convertFieldType(parameter, arguments[argumentsI], argumentsI));
             ++parametersI;
         }
 
-        if(!remainingFlags.isEmpty()) {
-            for(Flag f: remainingFlags) {
-                if(f.isRequired()) throw new RuntimeException("missing required flag : " + f.getName());
-                if(f.hasValue()) {
-                    f.getRunnableField().set(runnable, Optional.empty());
-                } else {
-                    f.getRunnableField().set(runnable, false);
-                }
+        //Look for missing required parameters
+        for(; parametersI < parameters.size(); ++parametersI) {
+            Parameter parameter = parameters.get(parametersI);
+            if(parameter.isRequired()) {
+                throw new MissingParameterException(parameter);
+            }
+            setRunnableField(runnable, parameter, Optional.empty());
+        }
+
+        //Look for missing required flags
+        for(Flag f: remainingFlags) {
+            if(f.isRequired()) throw new MissingRequiredFlagException(f);
+            if(f.hasValue()) {
+                setRunnableField(runnable, f, Optional.empty());
+            } else {
+                setRunnableField(runnable, f, false);
             }
         }
 
+
         return new Context<>(runnable, sender, arguments, command, parentContext, Optional.empty());
+    }
+
+    static private void setRunnableField(CommandRunnable runnable, Field field, Object value) {
+        try {
+            field.getRunnableField().set(runnable, value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Unable to set runnable class field : " + runnable.getClass() + "." + field.getRunnableField().getName(), e);
+        }
+    }
+
+    static private <T extends CommandRunnable> T instanciateCommandRunnable(Command<T> command) {
+        try {
+            return Reflection.instantiate(command.getRunnableClass());
+        } catch(Exception e) {
+            throw new RuntimeException("Unable to instanciate Command runnable class : " + command.getRunnableClass().getName(), e);
+        }
+    }
+
+    static private Object convertFieldType(Field parameter, String argument, int argumentPosition) throws InvalidArgumentException {
+        try {
+            return parameter.getTypeConverter().fromArgument(argument);
+        } catch (ParameterTypeConverterException e) {
+            throw new InvalidArgumentException(e, argument, argumentPosition);
+        }
     }
 }

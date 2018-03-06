@@ -1,15 +1,15 @@
 package fr.zcraft.zlib.components.commands2;
 
-public class Field<T> {
-    private final Class<T> parameterType;
+class Field {
+    private final Class<?> parameterType;
     private final java.lang.reflect.Field runnableField;
-    private final ParameterTypeConverter<T> typeConverter;
+    private final ParameterTypeConverter<?> typeConverter;
 
     private final String name;
     private final String about;
     private final boolean isRequired;
 
-    Field(Class<T> parameterType, java.lang.reflect.Field runnableField, ParameterTypeConverter<T> typeConverter, String name, String about, boolean isRequired) {
+    Field(Class<?> parameterType, java.lang.reflect.Field runnableField, ParameterTypeConverter<?> typeConverter, String name, String about, boolean isRequired) {
         this.parameterType = parameterType;
         this.runnableField = runnableField;
         this.typeConverter = typeConverter;
@@ -19,11 +19,11 @@ public class Field<T> {
         this.isRequired = isRequired;
     }
 
-    public Class<T> getParameterType() {
+    public Class<?> getParameterType() {
         return parameterType;
     }
 
-    public ParameterTypeConverter<T> getTypeConverter() {
+    public ParameterTypeConverter<?> getTypeConverter() {
         return typeConverter;
     }
 

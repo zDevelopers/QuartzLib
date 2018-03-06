@@ -69,5 +69,11 @@ public class CommandsTest
     public void bbTest() throws CommandException {
         Commands.registerParameterTypeConverter(new BBCommand.BBItemParamConverter());
         Commands.register(BBCommand.class, "bb");
+
+        Context<?> bbContext = Commands.makeContext("bb", sender, new String[]{"saw"});
+        Assert.assertTrue(bbContext.getCommandRunnable() instanceof BBCommand);
+        BBCommand bbRunnable = (BBCommand) bbContext.getCommandRunnable();
+        Assert.assertEquals("saw", bbRunnable.item.itemType);
+        Assert.assertEquals(Optional.empty(), bbRunnable.amount);
     }
 }

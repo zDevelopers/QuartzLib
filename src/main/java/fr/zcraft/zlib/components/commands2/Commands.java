@@ -34,11 +34,9 @@ import fr.zcraft.zlib.components.commands2.converters.IntegerTypeConverter;
 import fr.zcraft.zlib.components.commands2.converters.URITypeConverter;
 import fr.zcraft.zlib.components.commands2.exceptions.CommandException;
 import fr.zcraft.zlib.components.commands2.exceptions.CommandNotFoundException;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -48,15 +46,15 @@ public abstract class Commands
 {
     private Commands() {}
 
-    static private Map<String, Command<? extends CommandRunnable>> commandRegistry = new HashMap<>();
-    static private Map<Class<?>, ParameterTypeConverter<?>> typeConverterRegistry = new HashMap<>();
+    static private final Map<String, Command<? extends CommandRunnable>> commandRegistry = new HashMap<>();
+    static private final Map<Class<?>, ParameterTypeConverter<?>> typeConverterRegistry = new HashMap<>();
 
     /**
      * Registers a new command.
      * @param command The command runnable to be registered
      * @param name The name of the command
      */
-    static public void register(Class<? extends CommandRunnable> command, String name) throws CommandException {
+    static public void register(Class<? extends CommandRunnable> command, String name) {
         name = name.toLowerCase();
         if(commandRegistry.containsKey(name)) throw new IllegalArgumentException("Command already registered : " + name);
 
@@ -89,13 +87,10 @@ public abstract class Commands
     /**
      * Finds the registered command parameter type converter handling the given type.
      * @param type The type used to look up the matching type converter
-     * @param <T> The type the command parameter type converter handles
      * @return The registered command parameter type converter, if found
      */
-    static public <T> Optional<ParameterTypeConverter<T>> findTypeConverter(Class<T> type) {
-        @SuppressWarnings("unchecked")
-        ParameterTypeConverter<T> typeConverter = (ParameterTypeConverter<T>) typeConverterRegistry.get(type);
-        return Optional.ofNullable(typeConverter);
+    static public Optional<ParameterTypeConverter<?>> findTypeConverter(Class<?> type) {
+        return Optional.ofNullable(typeConverterRegistry.get(type));
     }
 
     /**
