@@ -306,9 +306,7 @@ public class NBTCompound implements Map<String, Object>
      */
     public Map<String, Object> toHashMap()
     {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.putAll(this);
-        return map;
+        return new HashMap<>(this);
     }
 
     @Override
