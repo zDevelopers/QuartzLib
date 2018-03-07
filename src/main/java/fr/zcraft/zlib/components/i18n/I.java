@@ -314,18 +314,18 @@ public class I
     {
         player.sendMessage(I18n.translate(I18n.getPlayerLocale(player), context, singular, plural, count, parameters));
     }
-    
-    public static LazyTranslation i(String messageId)
+
+    public static LazyTranslation l(String messageId)
     {
-        return i(messageId, null, null, null);
+        return l(messageId, null, null, null);
     }
     
-    public static LazyTranslation i(String messageId, String pluralMessageId, Integer count)
+    public static LazyTranslation l(String messageId, String pluralMessageId, Integer count)
     {
-        return i(messageId, pluralMessageId, count, null);
+        return l(messageId, pluralMessageId, count, null);
     }
     
-    public static LazyTranslation i(String messageId, String pluralMessageId, Integer count, String context)
+    public static LazyTranslation l(String messageId, String pluralMessageId, Integer count, String context)
     {
         return new LazyTranslation(messageId, pluralMessageId, count, context);
     }
