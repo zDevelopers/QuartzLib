@@ -32,7 +32,7 @@ package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.components.i18n.I18n;
-import fr.zcraft.zlib.components.i18n.I18nText;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.core.ZLib;
 import java.util.Locale;
 import org.bukkit.entity.Player;
@@ -180,7 +180,7 @@ abstract public class GuiBase
      * @param message The message to send to the player.
      * @param parameters Parameters for the translatable format text, if any.
      */
-    protected void sendMessage(I18nText message, Object... parameters)
+    protected void sendMessage(LazyTranslation message, Object... parameters)
     {
         sendMessage(I.t(message, parameters));
     }

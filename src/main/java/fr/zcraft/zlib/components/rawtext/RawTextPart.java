@@ -34,7 +34,7 @@ import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.components.commands.Command;
 import fr.zcraft.zlib.components.commands.Commands;
 import fr.zcraft.zlib.components.i18n.I;
-import fr.zcraft.zlib.components.i18n.I18nText;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.items.ItemUtils;
@@ -73,7 +73,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     }
     
     private String text = null;
-    private I18nText i18nText = null;
+    private LazyTranslation lazyTranslation = null;
     private Object[] textParameters = null;
     private boolean translate = false;
 
@@ -111,7 +111,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         this(text, null);
     }
     
-    RawTextPart(I18nText text)
+    RawTextPart(LazyTranslation text)
     {
         this(null, text);
     }
@@ -122,9 +122,9 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         this.parent = parent;
     }
 
-    RawTextPart(RawTextPart parent, I18nText text, Object... parameters)
+    RawTextPart(RawTextPart parent, LazyTranslation text, Object... parameters)
     {
-        this.i18nText = text;
+        this.lazyTranslation = text;
         this.parent = parent;
         this.textParameters = parameters;
     }
@@ -155,7 +155,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return newPart;
     }
 
-    public RawTextPart then(I18nText text, Object... parameters)
+    public RawTextPart then(LazyTranslation text, Object... parameters)
     {
         RawTextPart root = getRoot();
         RawTextPart newPart = new RawTextSubPart(root, text, parameters);
@@ -173,16 +173,16 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     public T text(String text)
     {
         this.text = text;
-        this.i18nText = null;
+        this.lazyTranslation = null;
         this.translate = false;
         
         return (T)this;
     }
 
-    public T text(I18nText text, Object... parameters)
+    public T text(LazyTranslation text, Object... parameters)
     {
         this.text = null;
-        this.i18nText = text;
+        this.lazyTranslation = text;
         this.translate = false;
         this.textParameters = parameters;
         
@@ -199,7 +199,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     public T translate(String text)
     {
         this.text = text;
-        this.i18nText = null;
+        this.lazyTranslation = null;
         this.translate = true;
         
         return (T)this;
@@ -704,9 +704,9 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     
     private String getText()
     {
-        if(i18nText != null)
+        if(lazyTranslation != null)
         {
-            return I.t(getLocale(), i18nText, textParameters);
+            return I.t(getLocale(), lazyTranslation, textParameters);
         }
         
         return text;

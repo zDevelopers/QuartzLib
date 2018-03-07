@@ -31,7 +31,7 @@
 package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.components.i18n.I;
-import fr.zcraft.zlib.components.i18n.I18nText;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.tools.items.InventoryUtils;
 import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.Bukkit;
@@ -255,7 +255,7 @@ abstract public class InventoryGui extends GuiBase
      * @param title The new title of the inventory
      * @param parameters Parameters for the translatable format text, if any.
      */
-    protected void setTitle(I18nText title, Object ...parameters)
+    protected void setTitle(LazyTranslation title, Object ...parameters)
     {
         setTitle(I.t(getPlayerLocale(), title, parameters));
     }

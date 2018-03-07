@@ -664,7 +664,7 @@ public class I18n extends ZLibComponent
      *
      * @return The translated text, with the parameters replaced by their values.
      */
-    public static String translate(Locale locale, I18nText text, Object... parameters)
+    public static String translate(Locale locale, LazyTranslation text, Object... parameters)
     {
         return translate(null, text.getContext(), text.getMessageId(), text.getPluralMessageId(), text.getCount(), parameters);
     }

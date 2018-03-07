@@ -33,7 +33,7 @@ package fr.zcraft.zlib.components.commands;
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.components.i18n.I18n;
-import fr.zcraft.zlib.components.i18n.I18nText;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.text.RawMessage;
@@ -407,7 +407,7 @@ abstract public class Command
         throw new CommandException(this, Reason.INVALID_PARAMETERS, reason);
     }
 
-    protected void throwInvalidArgument(I18nText reason, Object... parameters) throws CommandException
+    protected void throwInvalidArgument(LazyTranslation reason, Object... parameters) throws CommandException
     {
         throwInvalidArgument(I.t(getSenderLocale(), reason, parameters));
     }
@@ -495,10 +495,10 @@ abstract public class Command
      * @param message The message to display.
      * @param parameters The parameters of the I18n message.
      *
-     * @see I#t(Locale, I18nText, Object...) the underlying method used
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
      * to retrieve the text and merge it with the parameters.
      */
-    protected void info(I18nText message, Object... parameters)
+    protected void info(LazyTranslation message, Object... parameters)
     {
         info(I.t(getSenderLocale(), message, parameters));
     }
@@ -530,10 +530,10 @@ abstract public class Command
      * @param message The message to display.
      * @param parameters The parameters of the I18n message.
      *
-     * @see I#t(Locale, I18nText, Object...) the underlying method used
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
      * to retrieve the text and merge it with the parameters.
      */
-    protected void success(I18nText message, Object... parameters)
+    protected void success(LazyTranslation message, Object... parameters)
     {
         success(I.t(getSenderLocale(), message, parameters));
     }
@@ -566,10 +566,10 @@ abstract public class Command
      * @param message The message to display.
      * @param parameters The parameters of the I18n message.
      *
-     * @see I#t(Locale, I18nText, Object...) the underlying method used
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
      * to retrieve the text and merge it with the parameters.
      */
-    protected void warning(I18nText message, Object... parameters)
+    protected void warning(LazyTranslation message, Object... parameters)
     {
         warning(I.t(getSenderLocale(), message, parameters));
     }
@@ -597,10 +597,10 @@ abstract public class Command
      * @throws CommandException This method always throws a {@link Reason#COMMAND_ERROR}'s
      * {@link CommandException}, interrupting the execution of the command.
      *
-     * @see I#t(Locale, I18nText, Object...) the underlying method used
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
      * to retrieve the text and merge it with the parameters.
      */
-    protected void error(I18nText message, Object... parameters) throws CommandException
+    protected void error(LazyTranslation message, Object... parameters) throws CommandException
     {
         error(I.t(getSenderLocale(), message, parameters));
     }

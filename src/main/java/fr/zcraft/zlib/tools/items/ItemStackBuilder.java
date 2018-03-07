@@ -32,7 +32,7 @@ package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.i18n.I;
-import fr.zcraft.zlib.components.i18n.I18nText;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.components.nbt.NBTCompound;
 import fr.zcraft.zlib.components.rawtext.RawText;
@@ -379,7 +379,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder title(I18nText text, Object ...parameters)
+    public ItemStackBuilder title(LazyTranslation text, Object ...parameters)
     {
         return title(I.t(locale, text, parameters));
     }
@@ -445,21 +445,21 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreLine(I18nText text, Object ...parameters)
+    public ItemStackBuilder loreLine(LazyTranslation text, Object ...parameters)
     {
         return loreLine(I.t(locale, text, parameters));
     }
     
     /**
      * Adds one line of lore to the ItemStack.
-     * This method is an alias for {@link #loreLine(fr.zcraft.zlib.components.i18n.I18nText, java.lang.Object...) }.
+     * This method is an alias for {@link #loreLine(LazyTranslation, java.lang.Object...) }.
      *
      * @param text The lore line's text. It will be translated using the locale currently set for the ItemStack. 
      * @param parameters Parameters for the translatable format text, if any.
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder lore(I18nText text, Object ...parameters)
+    public ItemStackBuilder lore(LazyTranslation text, Object ...parameters)
     {
         return loreLine(text, parameters);
     }
@@ -568,7 +568,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder longLore(int lineLength, I18nText text, Object ...parameters)
+    public ItemStackBuilder longLore(int lineLength, LazyTranslation text, Object ...parameters)
     {
         return longLore(I.t(locale, text, parameters), lineLength);
     }
@@ -582,7 +582,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder longLore(I18nText text, Object ...parameters)
+    public ItemStackBuilder longLore(LazyTranslation text, Object ...parameters)
     {
         return longLore(I.t(locale, text, parameters));
     }

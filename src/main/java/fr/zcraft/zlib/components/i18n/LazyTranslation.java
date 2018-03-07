@@ -30,7 +30,7 @@
 
 package fr.zcraft.zlib.components.i18n;
 
-public class I18nText
+public class LazyTranslation
 {
     private final String messageId;
     private final String pluralMessageId;
@@ -39,7 +39,7 @@ public class I18nText
     
     private Object[] parameters;
     
-    public I18nText(String messageId, String pluralMessageId, Integer count, String context)
+    public LazyTranslation(String messageId, String pluralMessageId, Integer count, String context)
     {
         this.messageId = messageId;
         this.pluralMessageId = pluralMessageId;
@@ -47,7 +47,7 @@ public class I18nText
         this.context = context;
     }
     
-    public I18nText(String messageId)
+    public LazyTranslation(String messageId)
     {
         this(messageId, null, null, null);
     }

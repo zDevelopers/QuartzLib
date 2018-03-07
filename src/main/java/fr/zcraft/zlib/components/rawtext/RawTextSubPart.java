@@ -30,7 +30,7 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
-import fr.zcraft.zlib.components.i18n.I18nText;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 
 class RawTextSubPart extends RawTextPart<RawTextSubPart>
 {
@@ -39,7 +39,7 @@ class RawTextSubPart extends RawTextPart<RawTextSubPart>
         super(text);
     }
     
-    public RawTextSubPart(I18nText text)
+    public RawTextSubPart(LazyTranslation text)
     {
         super(text);
     }
@@ -49,7 +49,7 @@ class RawTextSubPart extends RawTextPart<RawTextSubPart>
         super(text, parent);
     }
     
-    public RawTextSubPart(RawTextPart parent, I18nText text, Object... parameters)
+    public RawTextSubPart(RawTextPart parent, LazyTranslation text, Object... parameters)
     {
         super(parent, text, parameters);
     }
