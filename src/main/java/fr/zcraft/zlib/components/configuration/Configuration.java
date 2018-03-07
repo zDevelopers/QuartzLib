@@ -34,6 +34,7 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.tools.Callback;
 
+
 public abstract class Configuration extends ZLibComponent
 {
     /* ===== Static API ===== */
@@ -51,12 +52,30 @@ public abstract class Configuration extends ZLibComponent
         instance.init(configurationClass);
         instance.onEnable();
     }
-    
+
+    /**
+     * Saves the config.yml configuration to the disk.
+     */
     static public void save()
     {
-        ZLib.getPlugin().saveConfig();
+        instance.save(true);
     }
 
+    /**
+     * Reloads the config.yml configuration from the disk.
+     */
+    static public void reload()
+    {
+        instance.reload(true);
+    }
+
+    /**
+     * Registers a callback called when the configuration is updated someway.
+     *
+     * Callbacks are not called when the configuration is reloaded fully.
+     *
+     * @param callback The callback.
+     */
     static public void registerConfigurationUpdateCallback(Callback<ConfigurationItem<?>> callback)
     {
         instance.registerConfigurationUpdateCallback(callback);
