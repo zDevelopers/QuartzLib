@@ -33,6 +33,8 @@ package fr.zcraft.zlib.tools.items;
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.components.i18n.I18nText;
+import fr.zcraft.zlib.components.nbt.NBT;
+import fr.zcraft.zlib.components.nbt.NBTCompound;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.components.rawtext.RawTextPart;
 import fr.zcraft.zlib.tools.PluginLogger;
@@ -129,6 +131,9 @@ public class ItemStackBuilder
     private boolean glowing = false;
     private boolean hideAttributes = false;
     private String[] hiddenAttributes = null;
+
+    private Map<String, Object> nbt = null;
+    private boolean replaceNBT = false;
 
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
@@ -281,7 +286,14 @@ public class ItemStackBuilder
         ItemStack bukkitItem = item();
         try
         {
-            return (ItemStack) ItemUtils.asCraftCopy(item());
+            ItemStack craftCopy = (ItemStack) ItemUtils.asCraftCopy(bukkitItem);
+
+            if (nbt != null && !nbt.isEmpty())
+            {
+                craftCopy = NBT.addToItemStack(craftCopy, nbt, replaceNBT);
+            }
+
+            return craftCopy;
         }
         catch(NMSException ex)
         {
@@ -719,6 +731,41 @@ public class ItemStackBuilder
     public ItemStackBuilder dye(DyeColor dye)
     {
         this.dye = dye;
+        return this;
+    }
+
+    /**
+     * Sets the NBT tags to be set in the stack.
+     * It is set last and will override some properties like
+     * display names.
+     *
+     * <strong>WARNING</strong>—As NBT data cannot be added to an ItemStack if it's not a CraftItemStack,
+     * NBT data will <strong>only be added if you retrieve the item using {@link #craftItem()}</strong>.
+     *
+     * @param compound A map containing the NBT tags to apply to the item.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     * @see NBTCompound#toHashMap() A method to export the data inside a compound as an independent HashMap.
+     * @see #replaceNBT() Option to replace the whole NBT data
+     */
+    public ItemStackBuilder nbt(Map<String, Object> compound)
+    {
+        this.nbt = compound;
+        return this;
+    }
+
+    /**
+     * Sets the NBT data to replace the whole data in the item stack. If not called,
+     * NBT data will be appended to the existing data, overriding concurrent keys only.
+     * If this is called, the whole NBT data will be the data set in {@link #nbt(Map)},
+     * clearing any existing data.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     * @see #nbt(Map) The method to set NBT data.
+     */
+    public ItemStackBuilder replaceNBT()
+    {
+        this.replaceNBT = true;
         return this;
     }
     

@@ -31,10 +31,11 @@ package fr.zcraft.zlib.components.configuration;
 
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import org.bukkit.configuration.file.FileConfiguration;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import org.bukkit.configuration.file.FileConfiguration;
 
 
 /**
@@ -147,12 +148,12 @@ public class ConfigurationItem<T>
     /**
      * Updates the value of this configuration item. Saves the change in the configuration file.
      *
-     * If you don't want to save the update, use {@link #set(Object,Boolean) set(value, false)}.
+     * If you don't want to save the update, use {@link #set(Object,boolean) set(value, false)}.
      *
      * @param value the new value.
      * @return The previously stored value.
      *
-     * @see #set(Object, Boolean)
+     * @see #set(Object, boolean)
      */
     public T set(T value)
     {
@@ -299,7 +300,7 @@ public class ConfigurationItem<T>
         }
         catch(Exception ex)
         {
-            PluginLogger.warning("Unable to instanciate configuration field '{0}' of type '{1}'", ex, fieldName, sectionClass.getName());
+            PluginLogger.warning("Unable to instantiate configuration field '{0}' of type '{1}'", ex, fieldName, sectionClass.getName());
             throw new RuntimeException(ex);
         }
         return section;

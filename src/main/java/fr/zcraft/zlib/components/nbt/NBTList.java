@@ -30,6 +30,9 @@
 
 package fr.zcraft.zlib.components.nbt;
 
+import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.reflection.Reflection;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,19 +40,22 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+
 /**
  * This class represents the NBT List tag type.
- * 
+ *
  * It implements all operations of {@link java.util.List}, as well as a few specific operations for NBT data.
  */
 public class NBTList implements List<Object>
 {
     private Object nmsNbtTag;
     List<Object> nmsNbtList;
-    
+
+    private NBTType type = NBTType.TAG_END;
+
     private final Object parent;
     private final Object parentKey;
-    
+
     /**
      * Created a new empty NBT list.
      * It is not linked to any item, therefore it is equivalent of using directly
@@ -59,20 +65,23 @@ public class NBTList implements List<Object>
     {
         this(null, new ArrayList<>());
     }
-    
+
+    @SuppressWarnings ("unchecked")
     NBTList(Object nmsListTag)
     {
         this(null, nmsListTag == null ? new ArrayList<>() : (List<Object>) NBTType.TAG_LIST.getData(nmsListTag));
     }
-    
+
     private NBTList(Object nmsListTag, List<Object> nmsNbtList)
     {
         this.nmsNbtTag = nmsListTag;
         this.nmsNbtList = nmsNbtList;
         this.parent = null;
         this.parentKey = null;
+
+        setTypeFromNBTTag();
     }
-    
+
     NBTList(NBTCompound parent, String parentKey)
     {
         this.nmsNbtList = null;
@@ -80,7 +89,7 @@ public class NBTList implements List<Object>
         this.parent = parent;
         this.parentKey = parentKey;
     }
-    
+
     NBTList(NBTList parent, int index)
     {
         this.nmsNbtList = null;
@@ -88,57 +97,154 @@ public class NBTList implements List<Object>
         this.parent = parent;
         this.parentKey = index;
     }
-    
+
+
     private List<Object> getNbtList()
     {
-        if(nmsNbtList == null)
+        if (nmsNbtList == null)
         {
-            nmsNbtList = new ArrayList<Object>();
-            if(nmsNbtTag != null)
+            nmsNbtList = new ArrayList<>();
+            if (nmsNbtTag != null)
             {
                 NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
+                setTypeFromNBTTag();
             }
             else
             {
                 nmsNbtTag = NBTType.TAG_LIST.newTag(nmsNbtList);
                 NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
-                
-                if(parent != null && parentKey != null)
+
+                setTypeFromNBTList();
+                writeTypeToNBTTag();
+
+                if (parent != null && parentKey != null)
                 {
-                    if(parent instanceof NBTCompound)
+                    if (parent instanceof NBTCompound)
                     {
-                        ((NBTCompound)parent).put((String)parentKey, this);
+                        ((NBTCompound) parent).put((String) parentKey, this);
                     }
-                    else if(parent instanceof NBTList)
+                    else if (parent instanceof NBTList)
                     {
-                        ((NBTList)parent).set((Integer)parentKey, this);
+                        ((NBTList) parent).set((Integer) parentKey, this);
                     }
                 }
             }
         }
-        
+
         return nmsNbtList;
     }
+
+
+    private void setTypeFromNBTTag()
+    {
+        if (nmsNbtTag != null)
+        {
+            try
+            {
+                this.type = NBTType.fromId((byte) Reflection.getFieldValue(nmsNbtTag, "type"));
+            }
+            catch (NoSuchFieldException | IllegalAccessException e)
+            {
+                PluginLogger.error("Unable to retrieve NBTTagList's type. The type will be guessed next time an element is inserted into the list…", e);
+            }
+        }
+    }
+
+    private void setTypeFromNBTList()
+    {
+        if (nmsNbtList != null && !nmsNbtList.isEmpty())
+        {
+            setType(NBTType.fromNmsNbtTag(nmsNbtList.get(0)));
+        }
+    }
+
+    private void setType(NBTType type)
+    {
+        this.type = type;
+        writeTypeToNBTTag();
+    }
+
+    private void writeTypeToNBTTag()
+    {
+        if (nmsNbtTag != null)
+        {
+            try
+            {
+                Reflection.setFieldValue(nmsNbtTag, "type", (byte) type.getId());
+            }
+            catch (NoSuchFieldException | IllegalAccessException e)
+            {
+                PluginLogger.error("Unable to set NBTTagList's type. Such malformed lists cannot be read by Minecraft most of the time.", e);
+            }
+        }
+    }
+
+    static void guessAndWriteTypeToNBTTagList(Object nmsNbtTag)
+    {
+        try
+        {
+            final NBTType currentType = NBTType.fromId((byte) Reflection.getFieldValue(nmsNbtTag, "type"));
+            if (currentType == null || currentType.equals(NBTType.TAG_END))
+            {
+                // We retrieve the first element of the internal list and use it as
+                // the list type, if the list is not empty.
+                @SuppressWarnings ("unchecked")
+                final List<Object> internalNBTList = (List<Object>) Reflection.getFieldValue(nmsNbtTag, "list");
+
+                if (!internalNBTList.isEmpty())
+                {
+                    Reflection.setFieldValue(nmsNbtTag, "type", (byte) NBTType.fromNmsNbtTag(internalNBTList.get(0)).getId());
+                }
+            }
+        }
+        catch (NoSuchFieldException | IllegalAccessException e)
+        {
+            PluginLogger.error("Unable to set NBTTagList's type. Such malformed lists cannot be read by Minecraft most of the time.", e);
+        }
+    }
+
+    public NBTType getType()
+    {
+        return type;
+    }
+
+    private void checkType(Object o)
+    {
+        if (type == null || type.equals(NBTType.TAG_END))
+        {
+            try
+            {
+                setType(NBTType.fromClass(o.getClass()));
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new IllegalArgumentException("Illegal type class in a NBT list: " + o.getClass(), e);
+            }
+
+            return;
+        }
+
+        if (!type.isAssignableFrom(o.getClass()))
+            throw new IllegalArgumentException("Illegal type class in a NBT list: " + o.getClass());
+    }
+
 
     @Override
     public int size()
     {
-        if(nmsNbtList == null) return 0;
-        return nmsNbtList.size();
+        return nmsNbtList == null ? 0 : nmsNbtList.size();
     }
 
     @Override
     public boolean isEmpty()
     {
-        if(nmsNbtList == null) return true;
-        return nmsNbtList.isEmpty();
+        return nmsNbtList == null || nmsNbtList.isEmpty();
     }
 
     @Override
     public boolean contains(Object o)
     {
-        if(nmsNbtList == null) return false;
-        return nmsNbtList.contains(NBT.fromNativeValue(o));
+        return nmsNbtList != null && nmsNbtList.contains(NBT.fromNativeValue(o));
     }
 
     @Override
@@ -150,14 +256,14 @@ public class NBTList implements List<Object>
     @Override
     public Object[] toArray()
     {
-        return toArray(new Object[]{});
+        return toArray(new Object[] {});
     }
 
     @Override
     public <T> T[] toArray(T[] a)
     {
-        ArrayList<T> list = new ArrayList<T>(size());
-        if(nmsNbtList != null)
+        ArrayList<T> list = new ArrayList<>(size());
+        if (nmsNbtList != null)
             list.addAll((List<T>) this);
         return list.toArray(a);
     }
@@ -165,27 +271,33 @@ public class NBTList implements List<Object>
     @Override
     public boolean add(Object e)
     {
-        return getNbtList().add(NBT.fromNativeValue(e));
+        checkType(e);
+        final boolean added = getNbtList().add(NBT.fromNativeValue(e));
+
+        writeTypeToNBTTag();
+
+        return added;
     }
 
     @Override
     public boolean remove(Object o)
     {
-        if(nmsNbtList == null) return false;
-        return nmsNbtList.remove(NBT.fromNativeValue(o));
+        return nmsNbtList != null && nmsNbtList.remove(NBT.fromNativeValue(o));
     }
 
     @Override
     public boolean containsAll(Collection<?> c)
     {
-        if(nmsNbtList == null) return false;
-        
-        for(Object o : c)
+        if (nmsNbtList == null) return false;
+
+        for (Object o : c)
         {
-            if(!contains(o))
+            if (!contains(o))
+            {
                 return false;
+            }
         }
-        
+
         return true;
     }
 
@@ -193,12 +305,15 @@ public class NBTList implements List<Object>
     public boolean addAll(Collection<? extends Object> c)
     {
         boolean changed = false;
-        for(Object value : c)
+        for (Object value : c)
         {
-            if(getNbtList().add(NBT.fromNativeValue(value)))
+            checkType(value);
+            if (getNbtList().add(NBT.fromNativeValue(value)))
                 changed = true;
         }
-        
+
+        writeTypeToNBTTag();
+
         return changed;
     }
 
@@ -206,106 +321,115 @@ public class NBTList implements List<Object>
     public boolean addAll(int index, Collection<? extends Object> c)
     {
         int i = 0;
-        for(Object o : c)
+        for (Object o : c)
         {
+            checkType(o);
             add(i + index, o);
             ++i;
         }
-        
+
+        writeTypeToNBTTag();
+
         return !c.isEmpty();
     }
 
     @Override
     public boolean removeAll(Collection<?> c)
     {
-        if(nmsNbtList == null) return false;
-        
+        if (nmsNbtList == null) return false;
+
         boolean changed = false;
-        for(Object value : c)
+        for (Object value : c)
         {
-            if(remove(value))
+            if (remove(value))
                 changed = true;
         }
-        
+
         return changed;
     }
 
     @Override
     public boolean retainAll(Collection<?> c)
     {
-        if(nmsNbtList == null) return false;
-        
+        if (nmsNbtList == null) return false;
+
         boolean changed = false;
-        
-        for(Object value : this)
+
+        for (Object value : this)
         {
-            if(c.contains(value))
+            if (c.contains(value))
             {
-                if(nmsNbtList.remove(value))
+                if (nmsNbtList.remove(value))
                     changed = true;
             }
         }
-        
+
         return changed;
     }
 
     @Override
     public void clear()
     {
-        if(nmsNbtList == null) return;
-        
+        if (nmsNbtList == null) return;
+
         nmsNbtList.clear();
     }
 
     @Override
     public Object get(int index)
     {
-        if(nmsNbtList == null)
+        if (nmsNbtList == null)
             throw new ArrayIndexOutOfBoundsException("NBT List is empty");
         return NBT.toNativeValue(nmsNbtList.get(index));
     }
-    
+
     /**
-     * Returns the value at the specified position in this list, or the specified default value if this value is null. 
+     * Returns the value at the specified position in this list, or the specified default value if this value is null.
      * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
-     * @param <T> The type to coerce the indexed value to.
-     * @param index The position
+     *
+     * @param <T>          The type to coerce the indexed value to.
+     * @param index        The position
      * @param defaultValue The default value.
-     * @return the value at the specified position in this list, or the specified default value if this value is null. 
+     *
+     * @return the value at the specified position in this list, or the specified default value if this value is null.
      */
     public <T> T get(int index, T defaultValue)
     {
         try
         {
             Object value = get(index);
-            if(value == null) return defaultValue;
+            if (value == null) return defaultValue;
             return (T) value;
         }
-        catch(ClassCastException | NBTException ex)
+        catch (ClassCastException | NBTException ex)
         {
             return defaultValue;
         }
     }
-    
+
     /**
      * Returns the Compound tag at the specified index.
      * If the value at the specified index is not a compound tag, a new empty tag
      * is returned, and the existing value is overwritten if anything is added
      * to the tag.
+     *
      * @param index The index.
+     *
      * @return the Compound tag at the specified index.
      */
     public NBTCompound getCompound(int index)
     {
         return get(index, new NBTCompound(this, index));
     }
-    
+
     /**
      * Returns the Compound tag at the specified index.
      * If the value at the specified index is not a compound tag, a new empty tag
      * is returned, and the existing value is overwritten if anything is added
      * to the tag.
+     *
      * @param index The index.
+     *
      * @return the Compound tag at the specified index.
      */
     public NBTList getList(int index)
@@ -316,27 +440,34 @@ public class NBTList implements List<Object>
     @Override
     public Object set(int index, Object element)
     {
-        return NBT.toNativeValue(getNbtList().set(index, NBT.fromNativeValue(element)));
+        checkType(element);
+        final Object oldValue = NBT.toNativeValue(getNbtList().set(index, NBT.fromNativeValue(element)));
+
+        writeTypeToNBTTag();
+
+        return oldValue;
     }
 
     @Override
     public void add(int index, Object element)
     {
+        checkType(element);
         getNbtList().add(index, NBT.fromNativeValue(element));
+        writeTypeToNBTTag();
     }
 
     @Override
     public Object remove(int index)
     {
-        if(nmsNbtList == null)
-            throw new IndexOutOfBoundsException("NBT List is empty");
+        if (nmsNbtList == null)
+            throw new IndexOutOfBoundsException("NBT list is empty");
         return NBT.toNativeValue(nmsNbtList.remove(index));
     }
 
     @Override
     public int indexOf(Object o)
     {
-        if(nmsNbtList == null)
+        if (nmsNbtList == null)
             return -1;
         return nmsNbtList.indexOf(NBT.fromNativeValue(o));
     }
@@ -344,7 +475,7 @@ public class NBTList implements List<Object>
     @Override
     public int lastIndexOf(Object o)
     {
-        if(nmsNbtList == null)
+        if (nmsNbtList == null)
             return -1;
         return nmsNbtList.lastIndexOf(NBT.fromNativeValue(o));
     }
@@ -359,11 +490,11 @@ public class NBTList implements List<Object>
     public ListIterator<Object> listIterator(int index)
     {
         if (index < 0 || index > size())
-            throw new IndexOutOfBoundsException("Index is out of bounds : " + index);
-        
-        if(nmsNbtList == null)
+            throw new IndexOutOfBoundsException("Index is out of bounds: " + index);
+
+        if (nmsNbtList == null)
             return new NBTListIterator(null);
-        
+
         return new NBTListIterator(nmsNbtList.listIterator(index));
     }
 
@@ -371,73 +502,77 @@ public class NBTList implements List<Object>
     public NBTList subList(int fromIndex, int toIndex)
     {
         if (fromIndex < 0 || fromIndex > size())
-            throw new IndexOutOfBoundsException("fromIndex is out of bounds : " + fromIndex);
-        
+            throw new IndexOutOfBoundsException("fromIndex is out of bounds: " + fromIndex);
+
         if (toIndex < 0 || toIndex > size())
-            throw new IndexOutOfBoundsException("toIndex is out of bounds : " + toIndex);
-        
-        if(nmsNbtList == null)
+            throw new IndexOutOfBoundsException("toIndex is out of bounds: " + toIndex);
+
+        if (nmsNbtList == null)
             return new NBTList(nmsNbtTag, null);
-        
+
         return new NBTList(nmsNbtTag, nmsNbtList.subList(fromIndex, toIndex));
     }
-    
+
     /**
      * Returns a new filtering iterator for the given type.
      * This special iterator will iterate over the list, but will skip all
      * values that cannot be coerced to the specified type.
-     * @param <T> The type the values need to be coerced to.
+     *
+     * @param <T>   The type the values need to be coerced to.
      * @param klass The class the values need to be coerced to.
+     *
      * @return The filtered iterable.
      */
     public <T> Iterable<T> filter(Class<T> klass)
     {
-        return new NBTListFilterIterator<T>(listIterator());
+        return new NBTListFilterIterator<>(listIterator());
     }
-    
+
     /**
      * Returns a new filtering iterator for the given type.
      * This special iterator will iterate over the list, but will skip all
      * values that cannot be coerced to the specified type.
-     * @param <T> The type the values need to be coerced to.
+     *
+     * @param <T>   The type the values need to be coerced to.
      * @param klass The class the values need to be coerced to.
      * @param index The index to start the iteration at.
+     *
      * @return The filtered iterator.
      */
     public <T> ListIterator<T> filter(Class<T> klass, int index)
     {
-        return new NBTListFilterIterator<T>(listIterator(index));
+        return new NBTListFilterIterator<>(listIterator(index));
     }
-    
+
     @Override
     public String toString()
     {
         return NBT.toNBTJSONString(this);
     }
-    
+
     private class NBTListIterator implements ListIterator<Object>
     {
         private ListIterator<Object> iterator;
-        
-        public NBTListIterator(ListIterator<Object> iterator)
+
+        NBTListIterator(ListIterator<Object> iterator)
         {
             this.iterator = iterator;
         }
-        
+
         private ListIterator<Object> getIterator()
         {
-            if(iterator == null)
+            if (iterator == null)
             {
                 iterator = getNbtList().listIterator();
             }
-            
+
             return iterator;
         }
-        
+
         @Override
         public boolean hasNext()
         {
-            if(iterator == null)
+            if (iterator == null)
                 return false;
             return iterator.hasNext();
         }
@@ -445,7 +580,7 @@ public class NBTList implements List<Object>
         @Override
         public Object next()
         {
-            if(iterator == null)
+            if (iterator == null)
                 throw new NoSuchElementException("NBT List is empty");
             return NBT.toNativeValue(iterator.next());
         }
@@ -453,7 +588,7 @@ public class NBTList implements List<Object>
         @Override
         public boolean hasPrevious()
         {
-            if(iterator == null)
+            if (iterator == null)
                 return false;
             return iterator.hasPrevious();
         }
@@ -461,7 +596,7 @@ public class NBTList implements List<Object>
         @Override
         public Object previous()
         {
-            if(iterator == null)
+            if (iterator == null)
                 throw new NoSuchElementException("NBT List is empty");
             return NBT.toNativeValue(iterator.previous());
         }
@@ -469,7 +604,7 @@ public class NBTList implements List<Object>
         @Override
         public int nextIndex()
         {
-            if(iterator == null)
+            if (iterator == null)
                 throw new NoSuchElementException("NBT List is empty");
             return iterator.nextIndex();
         }
@@ -477,7 +612,7 @@ public class NBTList implements List<Object>
         @Override
         public int previousIndex()
         {
-            if(iterator == null)
+            if (iterator == null)
                 throw new NoSuchElementException("NBT List is empty");
             return iterator.previousIndex();
         }
@@ -485,7 +620,7 @@ public class NBTList implements List<Object>
         @Override
         public void remove()
         {
-            if(iterator == null)
+            if (iterator == null)
                 throw new NoSuchElementException("NBT List is empty");
             iterator.remove();
         }
@@ -493,33 +628,37 @@ public class NBTList implements List<Object>
         @Override
         public void set(Object e)
         {
+            checkType(e);
             getIterator().set(NBT.fromNativeValue(e));
+            writeTypeToNBTTag();
         }
 
         @Override
         public void add(Object e)
         {
+            checkType(e);
             getIterator().add(NBT.fromNativeValue(e));
+            writeTypeToNBTTag();
         }
 
     }
-    
+
     private class NBTListFilterIterator<T> implements ListIterator<T>, Iterable<T>
     {
         private final ListIterator<Object> baseIterator;
         private T previousItem;
         private T nextItem;
-        
+
         private int previousIndex;
         private int nextIndex;
-        
-        public NBTListFilterIterator(ListIterator<Object> baseIterator)
+
+        NBTListFilterIterator(ListIterator<Object> baseIterator)
         {
             this.baseIterator = baseIterator;
             previousItem = null;
             nextItem = fetchNext();
         }
-        
+
         @Override
         public boolean hasNext()
         {
@@ -529,42 +668,42 @@ public class NBTList implements List<Object>
         @Override
         public T next()
         {
-            if(nextItem == null)
+            if (nextItem == null)
                 throw new NoSuchElementException();
-            
+
             previousItem = nextItem;
             previousIndex = nextIndex;
             nextItem = fetchNext();
             return previousItem;
         }
-        
+
         private T fetchNext()
         {
-            while(true)
+            while (true)
             {
-                if(!baseIterator.hasNext())
+                if (!baseIterator.hasNext())
                     return null;
                 try
                 {
                     ++nextIndex;
                     return (T) baseIterator.next();
                 }
-                catch(ClassCastException ex) {}
+                catch (ClassCastException ignored) {}
             }
         }
-        
+
         private T fetchPrevious()
         {
-            while(true)
+            while (true)
             {
-                if(!baseIterator.hasPrevious())
+                if (!baseIterator.hasPrevious())
                     return null;
                 try
                 {
                     --previousIndex;
                     return (T) baseIterator.previous();
                 }
-                catch(ClassCastException ex) {}
+                catch (ClassCastException ignored) {}
             }
         }
 
@@ -591,7 +730,7 @@ public class NBTList implements List<Object>
         @Override
         public int nextIndex()
         {
-            if(!baseIterator.hasNext())
+            if (!baseIterator.hasNext())
                 return -1;
             return nextIndex;
         }
@@ -599,7 +738,7 @@ public class NBTList implements List<Object>
         @Override
         public int previousIndex()
         {
-            if(!baseIterator.hasPrevious())
+            if (!baseIterator.hasPrevious())
                 return -1;
             return previousIndex;
         }
@@ -613,15 +752,17 @@ public class NBTList implements List<Object>
         @Override
         public void set(T e)
         {
+            checkType(e);
             baseIterator.set(e);
+            writeTypeToNBTTag();
         }
 
         @Override
         public void add(T e)
         {
+            checkType(e);
             baseIterator.add(e);
+            writeTypeToNBTTag();
         }
-        
     }
-    
 }

@@ -35,6 +35,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -130,7 +131,7 @@ public final class Reflection
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public Object getFieldValue(Class hClass, Object instance, String name) 
+    static public Object getFieldValue(Class<?> hClass, Object instance, String name)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         return getField(hClass, name).get(instance);
@@ -167,7 +168,7 @@ public final class Reflection
      * @return The {@link Field}.
      * @throws NoSuchFieldException if the class does not contains any field with this name.
      */
-    static public Field getField(Class klass, String name) throws NoSuchFieldException
+    static public Field getField(Class<?> klass, String name) throws NoSuchFieldException
     {
         Field field = klass.getDeclaredField(name);
         field.setAccessible(true);
@@ -184,11 +185,11 @@ public final class Reflection
      * @return The {@link Field}.
      * @throws NoSuchFieldException if the class does not contains any field with this name.
      */
-    static public Field getField(Class klass, Class type) throws NoSuchFieldException
+    static public Field getField(Class<?> klass, Class<?> type) throws NoSuchFieldException
     {
         for (Field field : klass.getDeclaredFields())
         {
-            if (field.getType().equals(type))
+            if (typeIsAssignableFrom(field.getType(), type))
             {
                 field.setAccessible(true);
                 return field;
@@ -233,7 +234,7 @@ public final class Reflection
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public void setFieldValue(Class hClass, Object instance, String name, Object value) 
+    static public void setFieldValue(Class<?> hClass, Object instance, String name, Object value)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         getField(hClass, name).set(instance, value);
@@ -259,7 +260,7 @@ public final class Reflection
      *                                   invocation conversion.
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
-    static public Object call(Class hClass, String name, Object... parameters)
+    static public Object call(Class<?> hClass, String name, Object... parameters)
             throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         return call(hClass, null, name, parameters);
@@ -318,10 +319,21 @@ public final class Reflection
      *                                   conversion.
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
-    static public Object call(Class hClass, Object instance, String name, Object... parameters)
+    static public Object call(Class<?> hClass, Object instance, String name, Object... parameters)
             throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
-        Method method = hClass.getMethod(name, getTypes(parameters));
+        Method method;
+        final Class[] types = getTypes(parameters);
+
+        try
+        {
+            method = hClass.getMethod(name, types);
+        }
+        catch (NoSuchMethodException ex)
+        {
+            method = hClass.getDeclaredMethod(name, types);
+        }
+
         method.setAccessible(true);
         return method.invoke(instance, parameters);
     }
@@ -333,11 +345,18 @@ public final class Reflection
      * @param parameterTypes The parameter types to look for
      * @return If the method exists in the given class, or not
      */
-    static public boolean hasMethod(Class hClass, String name, Class... parameterTypes)
+    static public boolean hasMethod(Class<?> hClass, String name, Class... parameterTypes)
     {
         try
         {
-            hClass.getMethod(name, parameterTypes);
+            try
+            {
+                hClass.getMethod(name, parameterTypes);
+            }
+            catch (NoSuchMethodException ex)
+            {
+                hClass.getDeclaredMethod(name, parameterTypes);
+            }
         }
         catch (NoSuchMethodException | SecurityException ex)
         {
@@ -346,17 +365,17 @@ public final class Reflection
         return true;
     }
     
-    static public Method findMethod(Class hClass, String name, Type... parameterTypes)
+    static public Method findMethod(Class<?> hClass, String name, Type... parameterTypes)
     {
         return findMethod(hClass, name, null, 0, parameterTypes);
     }
     
-    static public Method findMethod(Class hClass, String name, int modifiers, Type... parameterTypes)
+    static public Method findMethod(Class<?> hClass, String name, int modifiers, Type... parameterTypes)
     {
         return findMethod(hClass, name, null, modifiers, parameterTypes);
     }
     
-    static public Method findMethod(Class hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
+    static public Method findMethod(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
     {
         List<Method> methods = findAllMethods(hClass, name, returnType, modifiers, parameterTypes);
         
@@ -365,7 +384,7 @@ public final class Reflection
         return methods.get(0);
     }
     
-    static public List<Method> findAllMethods(Class hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
+    static public List<Method> findAllMethods(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
     {
         List<Method> methods = new ArrayList<>();
         
@@ -407,9 +426,12 @@ public final class Reflection
     
     static public boolean typeIsAssignableFrom(Type source, Type destination)
     {
+        if(source instanceof ParameterizedType) source = ((ParameterizedType) source).getRawType();
+        if(destination instanceof ParameterizedType) source = ((ParameterizedType) destination).getRawType();
+
         if(source instanceof Class && destination instanceof Class)
         {
-            return ((Class)destination).isAssignableFrom((Class) source);
+            return ((Class<?>)destination).isAssignableFrom((Class) source);
         }
         
         return source.equals(destination);
@@ -458,14 +480,14 @@ public final class Reflection
             throws NoSuchMethodException, InstantiationException, 
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
-        Constructor<T> constructor = hClass.getConstructor(getTypes(parameters));
+        Constructor<T> constructor = hClass.getDeclaredConstructor(getTypes(parameters));
         constructor.setAccessible(true);
         return constructor.newInstance(parameters);
     }
     
     static public <T> Constructor findConstructor(Class<T> hClass, int parameterCount)
     {
-        for(Constructor constructor: hClass.getConstructors())
+        for(Constructor constructor: hClass.getDeclaredConstructors())
         {
             if(constructor.getParameterTypes().length == parameterCount)
                 return constructor;
