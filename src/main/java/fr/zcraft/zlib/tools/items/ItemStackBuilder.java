@@ -31,6 +31,8 @@
 package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.components.gui.GuiUtils;
+import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.components.nbt.NBTCompound;
 import fr.zcraft.zlib.components.rawtext.RawText;
@@ -48,8 +50,10 @@ import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -135,6 +139,8 @@ public class ItemStackBuilder
 
     private DyeColor dye = null;
 
+    private Locale locale = null;
+    
     /**
      * Creates a new ItemStackBuilder.
      */
@@ -230,7 +236,12 @@ public class ItemStackBuilder
         ItemMeta meta = newItemStack.getItemMeta();
 
         if (title != null)
+        {
+            if(title.getLocale() == null)
+                title.locale(locale);
+        
             meta.setDisplayName(ChatColor.RESET + title.build().toFormattedText());
+        }
 
         if (!loreLines.isEmpty() || resetLore)
             meta.setLore(loreLines);
@@ -329,7 +340,7 @@ public class ItemStackBuilder
     {
         if (this.title != null)
             throw new IllegalStateException("Title has already been defined.");
-
+        
         this.title = text;
         return this;
     }
@@ -363,6 +374,20 @@ public class ItemStackBuilder
      * Sets the title of the ItemStack. If a text has already been defined, it
      * will be appended to the already existing one.
      *
+     * @param text The text. It will be translated using the locale currently set for the ItemStack. 
+     * @param parameters Parameters for the translatable format text, if any.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder title(LazyTranslation text, Object ...parameters)
+    {
+        return title(I.tl(locale, text, parameters));
+    }
+    
+    /**
+     * Sets the title of the ItemStack. If a text has already been defined, it
+     * will be appended to the already existing one.
+     *
      * @param texts The text. If several strings are provided, they will be all
      *              concatenated.
      *
@@ -370,7 +395,7 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder title(String... texts)
     {
-        return title(null, texts);
+        return title((ChatColor) null, texts);
     }
 
     /**
@@ -393,7 +418,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder lore(List<String> lines)
+    public ItemStackBuilder lore(Collection<? extends String> lines)
     {
         loreLines.addAll(lines);
         return this;
@@ -409,7 +434,34 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder loreLine(String... text)
     {
-        return loreLine(null, text);
+        return loreLine((ChatColor) null, text);
+    }
+    
+    /**
+     * Adds one line of lore to the ItemStack.
+     *
+     * @param text The lore line's text. It will be translated using the locale currently set for the ItemStack. 
+     * @param parameters Parameters for the translatable format text, if any.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder loreLine(LazyTranslation text, Object ...parameters)
+    {
+        return loreLine(I.tl(locale, text, parameters));
+    }
+    
+    /**
+     * Adds one line of lore to the ItemStack.
+     * This method is an alias for {@link #loreLine(LazyTranslation, java.lang.Object...) }.
+     *
+     * @param text The lore line's text. It will be translated using the locale currently set for the ItemStack. 
+     * @param parameters Parameters for the translatable format text, if any.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder lore(LazyTranslation text, Object ...parameters)
+    {
+        return loreLine(text, parameters);
     }
 
     /**
@@ -440,6 +492,9 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder loreLine(RawTextPart rawText)
     {
+        if(rawText.getLocale() == null)
+            rawText.locale(locale);
+        
         return loreLine(rawText.toFormattedText());
     }
 
@@ -462,7 +517,7 @@ public class ItemStackBuilder
      * characters, so the tooltip is not too large.
      *
      * @param text       The text.
-     * @param lineLength The max length of a line.
+     * @param lineLength The maximum length of a line.
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see GuiUtils#generateLore(String, int)
@@ -493,7 +548,7 @@ public class ItemStackBuilder
      *
      * @param color      The color for this line of lore.
      * @param text       The text.
-     * @param lineLength The max length of a line.
+     * @param lineLength The maximum length of a line.
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see GuiUtils#generateLore(String, int)
@@ -501,6 +556,35 @@ public class ItemStackBuilder
     public ItemStackBuilder longLore(ChatColor color, String text, int lineLength)
     {
         return longLore(color + text, lineLength);
+    }
+    
+    /**
+     * Adds a line of lore and wraps it to lines of {@code lineLength} 
+     * characters, so the tooltip is not too large.
+     *
+     * @param lineLength The maximum length of a line.
+     * @param text The lore line's text. It will be translated using the locale currently set for the ItemStack. 
+     * @param parameters Parameters for the translatable format text, if any.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder longLore(int lineLength, LazyTranslation text, Object ...parameters)
+    {
+        return longLore(I.tl(locale, text, parameters), lineLength);
+    }
+    
+    /**
+     * Adds a line of lore and wraps it to lines of {@code lineLength} 
+     * characters, so the tooltip is not too large.
+     *
+     * @param text The lore line's text. It will be translated using the locale currently set for the ItemStack. 
+     * @param parameters Parameters for the translatable format text, if any.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder longLore(LazyTranslation text, Object ...parameters)
+    {
+        return longLore(I.tl(locale, text, parameters));
     }
 
     /**
@@ -683,6 +767,26 @@ public class ItemStackBuilder
     {
         this.replaceNBT = true;
         return this;
+    }
+    
+    /**
+     * Sets the locale used to translate different strings of the ItemStack.
+     * @param locale The locale to use.
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder locale(Locale locale)
+    {
+        this.locale = locale;
+        return this;
+    }
+    
+    /**
+     * Retreives the locale assigned to this ItemStackBuilder
+     * @return the locale assigned to this ItemStackBuilder, or null if not defined.
+     */
+    public Locale getLocale()
+    {
+        return this.locale;
     }
 
     /**

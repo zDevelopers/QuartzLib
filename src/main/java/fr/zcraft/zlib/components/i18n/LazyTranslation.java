@@ -28,29 +28,57 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.zlib.components.rawtext;
+package fr.zcraft.zlib.components.i18n;
 
-import fr.zcraft.zlib.components.i18n.LazyTranslation;
-
-class RawTextSubPart extends RawTextPart<RawTextSubPart>
+public class LazyTranslation
 {
-    public RawTextSubPart(String text)
+    private final String messageId;
+    private final String pluralMessageId;
+    private final Integer count;
+    private final String context;
+    
+    private Object[] parameters;
+    
+    public LazyTranslation(String messageId, String pluralMessageId, Integer count, String context)
     {
-        super(text);
+        this.messageId = messageId;
+        this.pluralMessageId = pluralMessageId;
+        this.count = count;
+        this.context = context;
     }
     
-    public RawTextSubPart(LazyTranslation text)
+    public LazyTranslation(String messageId)
     {
-        super(text);
+        this(messageId, null, null, null);
+    }
+
+    public String getMessageId()
+    {
+        return messageId;
+    }
+
+    public String getPluralMessageId()
+    {
+        return pluralMessageId;
+    }
+
+    public Integer getCount()
+    {
+        return count;
     }
     
-    public RawTextSubPart(String text, RawTextPart parent)
+    public String getContext()
     {
-        super(text, parent);
+        return context;
     }
-    
-    public RawTextSubPart(RawTextPart parent, LazyTranslation text, Object... parameters)
+
+    public Object[] getParameters()
     {
-        super(parent, text, parameters);
+        return parameters;
+    }
+
+    public void setParameters(Object[] parameters)
+    {
+        this.parameters = parameters;
     }
 }

@@ -130,10 +130,12 @@ abstract public class ActionGui extends InventoryGui
      * @param name The identifier of the action.
      * @param slot The slot the action will be placed on.
      * @param material The material used to represent the action.
+     * @return an {@link fr.zcraft.zlib.tools.items.ItemStackBuilder} ItemStackBuilder to build the representing item
      */
-    protected void action(String name, int slot, Material material)
+    protected ItemStackBuilder action(String name, int slot, Material material)
     {
-        action(name, slot, GuiUtils.makeItem(material));
+        return action(name, slot)
+                .material(material);
     }
     
     /**
@@ -180,7 +182,7 @@ abstract public class ActionGui extends InventoryGui
         
         action(action);
         
-        if(item == null) return action.updateItem();
+        if(item == null) return action.updateItem().locale(getPlayerLocale());
         return null;
     }
     
@@ -243,7 +245,7 @@ abstract public class ActionGui extends InventoryGui
     
     protected ItemStackBuilder updateAction(String name)
     {
-        return getAction(name).updateItem();
+        return getAction(name).updateItem().locale(getPlayerLocale());
     }
 
     /**

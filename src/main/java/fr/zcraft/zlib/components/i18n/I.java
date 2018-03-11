@@ -87,6 +87,16 @@ public class I
     {
         return I18n.translate(null, null, text, null, null, parameters);
     }
+    
+    public static String tl(Locale locale, LazyTranslation text, Object... parameters)
+    {
+        return I18n.translate(locale, text, parameters);
+    }
+    
+    public static String tl(LazyTranslation text, Object... parameters)
+    {
+        return tl(null, text, parameters);
+    }
 
     /**
      * Translates the string with a plural.
@@ -304,5 +314,24 @@ public class I
     {
         player.sendMessage(I18n.translate(I18n.getPlayerLocale(player), context, singular, plural, count, parameters));
     }
+
+    public static LazyTranslation l(String messageId)
+    {
+        return lcn(null, messageId, null, null);
+    }
     
+    public static LazyTranslation ln(String messageId, String pluralMessageId, Integer count)
+    {
+        return lcn(null, messageId, pluralMessageId, count);
+    }
+
+    public static LazyTranslation lc(String messageId, Integer count)
+    {
+        return lcn(null, messageId, null, count);
+    }
+
+    public static LazyTranslation lcn(String context, String messageId, String pluralMessageId, Integer count)
+    {
+        return new LazyTranslation(messageId, pluralMessageId, count, context);
+    }
 }

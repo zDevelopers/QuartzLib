@@ -648,6 +648,21 @@ public class I18n extends ZLibComponent
     }
     
     /**
+     * Translates the given string.
+     *
+     * @param locale          The locale to use to translate the string.
+     * @param text            The text to translate
+     * @param parameters      The parameters, replacing values like {@code {0}} in the translated
+     *                        string.
+     *
+     * @return The translated text, with the parameters replaced by their values.
+     */
+    public static String translate(Locale locale, LazyTranslation text, Object... parameters)
+    {
+        return translate(locale, text.getContext(), text.getMessageId(), text.getPluralMessageId(), text.getCount(), parameters);
+    }
+    
+    /**
      * Replaces some formatting codes into system codes.
      *
      * @param text The input text.

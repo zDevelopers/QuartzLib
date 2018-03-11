@@ -30,7 +30,9 @@
 
 package fr.zcraft.zlib.components.gui;
 
+import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.components.i18n.I18n;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.core.ZLib;
 import java.util.Locale;
 import org.bukkit.entity.Player;
@@ -164,6 +166,25 @@ abstract public class GuiBase
     /** @return The locale used by the player this Gui instance is associated to. */
     protected final Locale getPlayerLocale() { return playerLocale; }
     
+    /**
+     * Sends a message to the player this Gui instance is associated to.
+     * @param message The message to send to the player.
+     */
+    protected void sendMessage(String message)
+    {
+        getPlayer().sendMessage(message);
+    }
+    
+    /**
+     * Sends a message to the player this Gui instance is associated to.
+     * @param message The message to send to the player.
+     * @param parameters Parameters for the translatable format text, if any.
+     */
+    protected void sendMessage(LazyTranslation message, Object... parameters)
+    {
+        sendMessage(I.tl(getPlayerLocale(), message, parameters));
+    }
+    
     protected boolean checkImmune()
     {
         if(!immune) return false;
@@ -175,7 +196,5 @@ abstract public class GuiBase
     {
         this.immune = immune;
     }
-    
-    /* ===== Static API ===== */
     
 }

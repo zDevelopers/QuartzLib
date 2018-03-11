@@ -31,6 +31,9 @@
 package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
+import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zlib.components.i18n.I18n;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.text.RawMessage;
@@ -44,9 +47,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 
 abstract public class Command
 {
@@ -63,6 +66,9 @@ abstract public class Command
 
     protected CommandSender sender;
     protected String[] args;
+    
+    private Locale senderLocale;
+
     protected Set<String> flags;
 
     /**
@@ -158,12 +164,15 @@ abstract public class Command
     public void execute(CommandSender sender, String[] args)
     {
         this.sender = sender;
+        this.senderLocale = null;
+
         parseArgs(args);
 
         try
         {
             if (!canExecute(sender, args))
                 throw new CommandException(this, Reason.SENDER_NOT_AUTHORIZED);
+
             run();
         }
         catch (CommandException ex)
@@ -172,6 +181,7 @@ abstract public class Command
         }
 
         this.sender = null;
+        this.senderLocale = null;
         this.args = null;
         this.flags = null;
     }
@@ -187,6 +197,7 @@ abstract public class Command
         List<String> result = null;
 
         this.sender = sender;
+        this.senderLocale = null;
         parseArgs(args);
 
         try
@@ -194,9 +205,10 @@ abstract public class Command
             if (canExecute(sender, args))
                 result = complete();
         }
-        catch (CommandException ignored) {}
+        catch (CommandException ignored){}
 
         this.sender = null;
+        this.senderLocale = null;
         this.args = null;
         this.flags = null;
 
@@ -379,6 +391,7 @@ abstract public class Command
     }
 
 
+
     ///////////// Common methods for commands /////////////
 
     /**
@@ -394,6 +407,12 @@ abstract public class Command
         throw new CommandException(this, Reason.INVALID_PARAMETERS, reason);
     }
 
+    protected void throwInvalidArgument(LazyTranslation reason, Object... parameters) throws CommandException
+    {
+        throwInvalidArgument(I.tl(getSenderLocale(), reason, parameters));
+    }
+    
+
     /**
      * Stops the command execution because the command usage is disallowed, and
      * displays an error message.
@@ -408,7 +427,7 @@ abstract public class Command
     /**
      * Retrieves the {@link Player} who executed this command. If the command is
      * not executed by a player, aborts the execution and displays an error
-     * messagE.
+     * message.
      *
      * @return The player executing this command.
      * @throws CommandException If the sender is not a player.
@@ -419,6 +438,32 @@ abstract public class Command
             throw new CommandException(this, Reason.COMMANDSENDER_EXPECTED_PLAYER);
         return (Player) sender;
     }
+
+    /**
+     * Retrieves the sender's locale. If it cannot be retrieved for some reason,
+     * or if the sender is not a player (e.g. the console), the primary, or the
+     * fallback if no primary is defined, language is returned instead.
+     *
+     * @return The {@link Locale} to use for this sender.
+     */
+    protected Locale getSenderLocale()
+    {
+        if(sender == null) return null;
+        
+        if(senderLocale != null) return senderLocale;
+        
+        if(sender instanceof Player) 
+            senderLocale = I18n.getPlayerLocale((Player) sender);
+        
+        if(senderLocale == null)
+            senderLocale = I18n.getPrimaryLocale();
+        
+        if(senderLocale == null)
+            senderLocale = I18n.getFallbackLocale();
+        
+        return senderLocale;
+    }
+
 
 
     ///////////// Methods for command execution /////////////
@@ -445,6 +490,20 @@ abstract public class Command
     }
 
     /**
+     * Displays a gray informational message to the sender.
+     *
+     * @param message The message to display.
+     * @param parameters The parameters of the I18n message.
+     *
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
+     * to retrieve the text and merge it with the parameters.
+     */
+    protected void info(LazyTranslation message, Object... parameters)
+    {
+        info(I.tl(getSenderLocale(), message, parameters));
+    }
+
+    /**
      * Displays a green success message.
      *
      * @param sender  The receiver of the message.
@@ -464,6 +523,21 @@ abstract public class Command
     {
         success(sender, message);
     }
+
+    /**
+     * Displays a green success message to the sender.
+     *
+     * @param message The message to display.
+     * @param parameters The parameters of the I18n message.
+     *
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
+     * to retrieve the text and merge it with the parameters.
+     */
+    protected void success(LazyTranslation message, Object... parameters)
+    {
+        success(I.tl(getSenderLocale(), message, parameters));
+    }
+    
 
     /**
      * Displays a red warning message.
@@ -487,11 +561,27 @@ abstract public class Command
     }
 
     /**
+     * Displays a red warning message to the sender.
+     *
+     * @param message The message to display.
+     * @param parameters The parameters of the I18n message.
+     *
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
+     * to retrieve the text and merge it with the parameters.
+     */
+    protected void warning(LazyTranslation message, Object... parameters)
+    {
+        warning(I.tl(getSenderLocale(), message, parameters));
+    }
+
+
+    /**
      * Aborts the execution and displays an error message.
      *
      * @param message The message.
      *
-     * @throws CommandException
+     * @throws CommandException This method always throws a {@link Reason#COMMAND_ERROR}'s
+     * {@link CommandException}, interrupting the execution of the command.
      */
     protected void error(String message) throws CommandException
     {
@@ -499,9 +589,28 @@ abstract public class Command
     }
 
     /**
+     * Aborts the execution and displays an error message.
+     *
+     * @param message The message.
+     * @param parameters The parameters of the I18n message.
+     *
+     * @throws CommandException This method always throws a {@link Reason#COMMAND_ERROR}'s
+     * {@link CommandException}, interrupting the execution of the command.
+     *
+     * @see I#t(Locale, LazyTranslation, Object...) the underlying method used
+     * to retrieve the text and merge it with the parameters.
+     */
+    protected void error(LazyTranslation message, Object... parameters) throws CommandException
+    {
+        error(I.tl(getSenderLocale(), message, parameters));
+    }
+
+
+    /**
      * Aborts the execution and displays a generic error message.
      *
-     * @throws CommandException
+     * @throws CommandException This method always throws a {@link Reason#COMMAND_ERROR}'s
+     * {@link CommandException}, interrupting the execution of the command.
      */
     protected void error() throws CommandException
     {
@@ -527,6 +636,9 @@ abstract public class Command
      */
     protected void send(RawText text)
     {
+        if(text.getLocale() == null)
+            text.locale(getSenderLocale());
+        
         RawMessage.send(sender, text);
     }
 
