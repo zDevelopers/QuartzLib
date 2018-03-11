@@ -88,14 +88,14 @@ public class I
         return I18n.translate(null, null, text, null, null, parameters);
     }
     
-    public static String t(Locale locale, LazyTranslation text, Object... parameters)
+    public static String tl(Locale locale, LazyTranslation text, Object... parameters)
     {
         return I18n.translate(locale, text, parameters);
     }
     
-    public static String t(LazyTranslation text, Object... parameters)
+    public static String tl(LazyTranslation text, Object... parameters)
     {
-        return t(null, text, parameters);
+        return tl(null, text, parameters);
     }
 
     /**
@@ -317,15 +317,20 @@ public class I
 
     public static LazyTranslation l(String messageId)
     {
-        return l(messageId, null, null, null);
+        return lcn(null, messageId, null, null);
     }
     
-    public static LazyTranslation l(String messageId, String pluralMessageId, Integer count)
+    public static LazyTranslation ln(String messageId, String pluralMessageId, Integer count)
     {
-        return l(messageId, pluralMessageId, count, null);
+        return lcn(null, messageId, pluralMessageId, count);
     }
-    
-    public static LazyTranslation l(String messageId, String pluralMessageId, Integer count, String context)
+
+    public static LazyTranslation lc(String messageId, Integer count)
+    {
+        return lcn(null, messageId, null, count);
+    }
+
+    public static LazyTranslation lcn(String context, String messageId, String pluralMessageId, Integer count)
     {
         return new LazyTranslation(messageId, pluralMessageId, count, context);
     }

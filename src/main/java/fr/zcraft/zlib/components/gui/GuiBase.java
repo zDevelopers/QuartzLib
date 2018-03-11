@@ -182,7 +182,7 @@ abstract public class GuiBase
      */
     protected void sendMessage(LazyTranslation message, Object... parameters)
     {
-        sendMessage(I.t(message, parameters));
+        sendMessage(I.tl(getPlayerLocale(), message, parameters));
     }
     
     protected boolean checkImmune()

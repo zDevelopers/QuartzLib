@@ -706,7 +706,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     {
         if(lazyTranslation != null)
         {
-            return I.t(getLocale(), lazyTranslation, textParameters);
+            return I.tl(getLocale(), lazyTranslation, textParameters);
         }
         
         return text;

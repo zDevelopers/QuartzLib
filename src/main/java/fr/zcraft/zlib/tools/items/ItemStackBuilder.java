@@ -381,7 +381,7 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder title(LazyTranslation text, Object ...parameters)
     {
-        return title(I.t(locale, text, parameters));
+        return title(I.tl(locale, text, parameters));
     }
     
     /**
@@ -447,7 +447,7 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder loreLine(LazyTranslation text, Object ...parameters)
     {
-        return loreLine(I.t(locale, text, parameters));
+        return loreLine(I.tl(locale, text, parameters));
     }
     
     /**
@@ -570,7 +570,7 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder longLore(int lineLength, LazyTranslation text, Object ...parameters)
     {
-        return longLore(I.t(locale, text, parameters), lineLength);
+        return longLore(I.tl(locale, text, parameters), lineLength);
     }
     
     /**
@@ -584,7 +584,7 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder longLore(LazyTranslation text, Object ...parameters)
     {
-        return longLore(I.t(locale, text, parameters));
+        return longLore(I.tl(locale, text, parameters));
     }
 
     /**

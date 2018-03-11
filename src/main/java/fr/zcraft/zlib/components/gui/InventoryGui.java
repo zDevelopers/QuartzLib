@@ -257,7 +257,7 @@ abstract public class InventoryGui extends GuiBase
      */
     protected void setTitle(LazyTranslation title, Object ...parameters)
     {
-        setTitle(I.t(getPlayerLocale(), title, parameters));
+        setTitle(I.tl(getPlayerLocale(), title, parameters));
     }
     
     /** @return The underlying inventory, or null if the Gui has not been opened yet. */

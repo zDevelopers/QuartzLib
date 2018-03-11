@@ -29,6 +29,8 @@
  */
 package fr.zcraft.zlib.tools.items;
 
+import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zlib.components.i18n.LazyTranslation;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
@@ -49,6 +51,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 //import org.bukkit.Sound;

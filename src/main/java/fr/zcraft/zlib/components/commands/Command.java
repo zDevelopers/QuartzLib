@@ -409,7 +409,7 @@ abstract public class Command
 
     protected void throwInvalidArgument(LazyTranslation reason, Object... parameters) throws CommandException
     {
-        throwInvalidArgument(I.t(getSenderLocale(), reason, parameters));
+        throwInvalidArgument(I.tl(getSenderLocale(), reason, parameters));
     }
     
 
@@ -500,7 +500,7 @@ abstract public class Command
      */
     protected void info(LazyTranslation message, Object... parameters)
     {
-        info(I.t(getSenderLocale(), message, parameters));
+        info(I.tl(getSenderLocale(), message, parameters));
     }
 
     /**
@@ -535,7 +535,7 @@ abstract public class Command
      */
     protected void success(LazyTranslation message, Object... parameters)
     {
-        success(I.t(getSenderLocale(), message, parameters));
+        success(I.tl(getSenderLocale(), message, parameters));
     }
     
 
@@ -571,7 +571,7 @@ abstract public class Command
      */
     protected void warning(LazyTranslation message, Object... parameters)
     {
-        warning(I.t(getSenderLocale(), message, parameters));
+        warning(I.tl(getSenderLocale(), message, parameters));
     }
 
 
@@ -602,7 +602,7 @@ abstract public class Command
      */
     protected void error(LazyTranslation message, Object... parameters) throws CommandException
     {
-        error(I.t(getSenderLocale(), message, parameters));
+        error(I.tl(getSenderLocale(), message, parameters));
     }
 
 
