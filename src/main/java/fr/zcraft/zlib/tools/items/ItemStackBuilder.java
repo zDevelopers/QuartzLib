@@ -186,7 +186,7 @@ public class ItemStackBuilder
 
             ItemMeta meta = itemStack.getItemMeta();
 
-            if (meta != null)
+            if (meta != null && meta.getLore() != null)
             {
                 loreLines.addAll(meta.getLore());
             }

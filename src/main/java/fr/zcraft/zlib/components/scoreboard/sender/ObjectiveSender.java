@@ -194,7 +194,7 @@ public class ObjectiveSender
             try
             {
                 String currentPlayerObjective = sentObjectives.get(receiver);
-                if (currentPlayerObjective != null && objective.getName().equals(currentPlayerObjective))
+                if (objective.getName().equals(currentPlayerObjective))
                 {
                     updateObjectiveDisplayName(getPlayerConnection(receiver), objective);
                 }
@@ -223,7 +223,7 @@ public class ObjectiveSender
             {
                 String currentPlayerObjective = sentObjectives.get(receiver);
 
-                if (currentPlayerObjective != null && objective.getName().equals(currentPlayerObjective))
+                if (objective.getName().equals(currentPlayerObjective))
                 {
                     Object connection = getPlayerConnection(receiver);
 

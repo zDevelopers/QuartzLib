@@ -32,9 +32,10 @@ package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.components.i18n.I18n;
 import fr.zcraft.zlib.core.ZLib;
-import java.util.Locale;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+
+import java.util.Locale;
 
 abstract public class GuiBase 
 {

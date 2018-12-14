@@ -195,7 +195,7 @@ public class ConfigurationInstance extends ZLibComponent
     final void init(Class configurationClass)
     {
         if(items != null) return;
-        
+
         ArrayList<ConfigurationItem> itemsList = new ArrayList<>();
         
         for(Field field : configurationClass.getFields())
