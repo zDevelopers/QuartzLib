@@ -49,6 +49,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 //import org.bukkit.Sound;
@@ -242,14 +243,21 @@ abstract public class ItemUtils
      * Emulates the behaviour of the /give command
      * @param player The player to give the item to.
      * @param item The item to give to the player
-     * @return true if the player received the item in its inventory, false if it had to be dropped on the ground.
+     * @return true if the player received the item in its inventory, false if
+     * it had to be totally or partially dropped on the ground.
      */
-    static public boolean give(Player player, ItemStack item)
+    static public boolean give(final Player player, final ItemStack item)
     {
-        if (!player.getInventory().addItem(item).isEmpty())
+        final Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+
+        // Not everything fit.
+        if (!leftover.isEmpty())
         {
-            // Inventory was full
-            player.getWorld().dropItem(player.getLocation(), item);
+            for (final ItemStack leftOverItem : leftover.values())
+            {
+                drop(player.getLocation(), leftOverItem);
+            }
+
             return false;
         }
         else

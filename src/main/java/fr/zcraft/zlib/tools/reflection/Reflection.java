@@ -31,12 +31,7 @@ package fr.zcraft.zlib.tools.reflection;
 
 import org.bukkit.Bukkit;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -513,16 +508,55 @@ public final class Reflection
         }
         return types;
     }
-    
+
+    /**
+     * Returns the first class in the call hierarchy that have a defined name
+     * (i.e. the first non-anonymous caller class), excluding the very first one.
+     *
+     * In other words, return the named class that called the method this method
+     * is called from.
+     *
+     * @return The caller class.
+     */
+    static public Class<?> getCallerClass()
+    {
+        final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        for (int i = 3; i < stackTrace.length; i++)
+        {
+            final Class caller;
+            try
+            {
+                caller = Class.forName(stackTrace[i].getClassName());
+            }
+            catch (ClassNotFoundException ex)
+            {
+                continue;
+            }
+
+            return caller;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the first class in the call stack with the specified type.
+     *
+     * @param baseType The type to lookup for.
+     * @param <T> The looked-up type.
+     * @return The caller class of the specified type, or {@code null} if none found.
+     */
     static public <T> Class<? extends T> getCallerClass(Class<T> baseType)
     {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
         for (int i = 2; i < stackTrace.length; i++)
         {
             if (stackTrace[i].getClassName().equals(baseType.getName()))
                 continue;
 
-            Class caller;
+            final Class caller;
             try
             {
                 caller = Class.forName(stackTrace[i].getClassName());
