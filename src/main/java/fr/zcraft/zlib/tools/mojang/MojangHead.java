@@ -36,9 +36,7 @@ package fr.zcraft.zlib.tools.mojang;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 /**
  * Easier access to Mojang's “Marc's Head Format” Heads, e.g. for use in GUIs.
@@ -83,7 +81,7 @@ public enum MojangHead
     PRESENT_2,
     PUMPKIN,
     TNT("MHF_TNT"),
-    TT_2("MHF_TNT2"),
+    TNT_2("MHF_TNT2"),
 
     /* Miscellaneous */
     ARROW_UP,
@@ -113,13 +111,7 @@ public enum MojangHead
      */
     public ItemStack asItem()
     {
-        final ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-        final SkullMeta meta = (SkullMeta) item.getItemMeta();
-
-        meta.setOwner(headName);
-        item.setItemMeta(meta);
-
-        return item;
+        return asItemBuilder().item();
     }
 
     /**
@@ -127,6 +119,6 @@ public enum MojangHead
      */
     public ItemStackBuilder asItemBuilder()
     {
-        return new ItemStackBuilder(asItem());
+        return new ItemStackBuilder(Material.SKULL_ITEM).head(headName);
     }
 }

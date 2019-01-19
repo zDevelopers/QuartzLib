@@ -40,9 +40,11 @@ import fr.zcraft.zlib.tools.reflection.NMSException;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.Colorable;
 import org.bukkit.material.MaterialData;
 
@@ -116,7 +118,7 @@ import java.util.Map.Entry;
 public class ItemStackBuilder
 {
     private final ItemStack itemStack;
-    private Material material = null;
+    private Material material;
     private int amount = 1;
     private short data = 0;
 
@@ -134,6 +136,7 @@ public class ItemStackBuilder
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
     private DyeColor dye = null;
+    private String headOwner = null;
 
     /**
      * Creates a new ItemStackBuilder.
@@ -202,14 +205,16 @@ public class ItemStackBuilder
      */
     public ItemStack item()
     {
-        ItemStack newItemStack = itemStack;
+        final ItemStack newItemStack;
         
-        if (newItemStack == null)
+        if (itemStack == null)
         {
             newItemStack = new ItemStack(material, amount);
         }
         else
         {
+            newItemStack = itemStack;
+
             if (material != null)
                 newItemStack.setType(material);
 
@@ -220,14 +225,14 @@ public class ItemStackBuilder
 
         if (dye != null)
         {
-            MaterialData materialData = newItemStack.getData();
+            final MaterialData materialData = newItemStack.getData();
             if (!(materialData instanceof Colorable))
-                throw new IllegalStateException("Unable to apply dye : item is not colorable.");
+                throw new IllegalStateException("Unable to apply dye: item is not colorable.");
 
             ((Colorable) materialData).setColor(dye);
         }
 
-        ItemMeta meta = newItemStack.getItemMeta();
+        final ItemMeta meta = newItemStack.getItemMeta();
 
         if (title != null)
             meta.setDisplayName(ChatColor.RESET + title.build().toFormattedText());
@@ -235,9 +240,18 @@ public class ItemStackBuilder
         if (!loreLines.isEmpty() || resetLore)
             meta.setLore(loreLines);
 
+        if (headOwner != null)
+        {
+            if (!(meta instanceof SkullMeta))
+                throw new IllegalStateException("Unable to set head owner: item is not a skull.");
+
+            ((SkullMeta) meta).setOwner(headOwner);
+            newItemStack.setDurability((short) SkullType.PLAYER.ordinal());
+        }
+
         if (hideAttributes)
         {
-            if(hiddenAttributes == null)
+            if (hiddenAttributes == null)
             {
                 ItemUtils.hideItemAttributes(meta);
             }
@@ -272,7 +286,7 @@ public class ItemStackBuilder
      */
     public ItemStack craftItem()
     {
-        ItemStack bukkitItem = item();
+        final ItemStack bukkitItem = item();
         try
         {
             ItemStack craftCopy = (ItemStack) ItemUtils.asCraftCopy(bukkitItem);
@@ -284,7 +298,7 @@ public class ItemStackBuilder
 
             return craftCopy;
         }
-        catch(NMSException ex)
+        catch (NMSException ex)
         {
             PluginLogger.warning("CraftItem failed", ex);
             return bukkitItem;
@@ -647,6 +661,22 @@ public class ItemStackBuilder
     public ItemStackBuilder dye(DyeColor dye)
     {
         this.dye = dye;
+        return this;
+    }
+
+    /**
+     * Sets the skin name to use for this ItemStack. If the item is not of type
+     * {@link Material#SKULL_ITEM}, an {@link IllegalStateException} will be
+     * thrown when making the item. Setting this will override the data value
+     * of the skull.
+     *
+     * @param owner The head's owner, implying the skin displayed on the head.
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder head(String owner)
+    {
+        this.headOwner = owner;
         return this;
     }
 
