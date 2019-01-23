@@ -90,11 +90,22 @@ public class PropertiesTranslator extends Translator
     public PropertiesTranslator(Locale locale, File file)
     {
         super(locale, file);
+    }
 
-        ResourceBundle bundle   = ResourceBundle.getBundle(I18n.getI18nDirectory(), locale, new ZLibResourceBundleControl(file));
-        Boolean disableMetadata = bundle.containsKey(METADATA_DISABLED);
+    public PropertiesTranslator(Locale locale, String resourceReference)
+    {
+        super(locale, resourceReference);
+    }
 
-        for (String key : bundle.keySet())
+    @Override
+    protected void load()
+    {
+        final ZLibResourceBundleControl control = file != null ? new ZLibResourceBundleControl(file) : new ZLibResourceBundleControl(resourceReference);
+
+        final ResourceBundle bundle   = ResourceBundle.getBundle(control.toBundleName(I18n.getI18nDirectory(), locale), locale, control);
+        final boolean disableMetadata = bundle.containsKey(METADATA_DISABLED);
+
+        for (final String key : bundle.keySet())
         {
             final String value = bundle.getString(key);
 

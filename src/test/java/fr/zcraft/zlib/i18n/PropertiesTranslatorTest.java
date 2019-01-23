@@ -32,11 +32,13 @@ package fr.zcraft.zlib.i18n;
 import fr.zcraft.zlib.TestsUtils;
 import fr.zcraft.zlib.components.i18n.translators.Translator;
 import fr.zcraft.zlib.components.i18n.translators.properties.PropertiesTranslator;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
 
@@ -47,6 +49,15 @@ public class PropertiesTranslatorTest
     public PropertiesTranslatorTest() throws IOException
     {
         translator = Translator.getInstance(Locale.FRANCE, TestsUtils.tempResource("i18n/fr_FR.properties"));
+
+        try
+        {
+            Reflection.call(translator, "load");
+        }
+        catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
+        {
+            Assert.fail("Unable to load translations");
+        }
     }
 
     @Test
@@ -68,6 +79,15 @@ public class PropertiesTranslatorTest
     public void testAuthorsWithoutMeta() throws IOException
     {
         PropertiesTranslator noMetaTranslator = new PropertiesTranslator(Locale.UK, TestsUtils.tempResource("i18n/en_GB.no-meta.properties"));
+
+        try
+        {
+            Reflection.call(noMetaTranslator, "load");
+        }
+        catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
+        {
+            Assert.fail("Unable to load translations");
+        }
 
         Assert.assertNull("Last translator retrieved in no-meta mode", noMetaTranslator.getLastTranslator());
         Assert.assertNull("Translation team retrieved in no-meta mode", noMetaTranslator.getTranslationTeam());

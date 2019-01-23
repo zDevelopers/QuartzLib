@@ -31,27 +31,20 @@ package fr.zcraft.zlib.components.i18n;
 
 import com.google.common.base.Strings;
 import fr.zcraft.zlib.components.i18n.translators.Translator;
-import fr.zcraft.zlib.tools.FileUtils;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zlib.core.ZPlugin;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -59,11 +52,17 @@ import java.util.jar.JarFile;
 
 public class I18n extends ZLibComponent
 {
-    private final static String LAST_VERSION_UPDATE_CHECK_FILE = ".version";
-    private final static String ALWAYS_OVERWRITE_FILE = ".overwrite";
-    private final static String BACKUP_DIRECTORY = "backups";
+    private final static Map<Locale, Set<Translator>> translators = new ConcurrentHashMap<>();
 
-    private final static Map<Locale, Translator> translators = new ConcurrentHashMap<>();
+    private final static Comparator<Translator> TRANSLATORS_COMPARATOR = new Comparator<Translator>() {
+        @Override
+        public int compare(Translator translator1, Translator translator2)
+        {
+            if (translator1.equals(translator2)) return 0;
+            else if (translator1.getPriority() == translator2.getPriority()) return translator1.getFilePath().compareTo(translator2.getFilePath());
+            else return Integer.compare(translator2.getPriority(), translator1.getPriority());
+        }
+    };
 
     private static Locale primaryLocale = null;
     private static Locale fallbackLocale = null;
@@ -80,16 +79,24 @@ public class I18n extends ZLibComponent
 
     private static boolean addCountToParameters = true;
 
-    private static boolean filesWritten = false;
-
 
     @Override
     protected void onEnable()
     {
-        if (ZLib.getPlugin() instanceof ZPlugin)
+        if (ZLib.getPlugin() instanceof ZPlugin && jarFile == null)
+        {
             jarFile = ((ZPlugin) ZLib.getPlugin()).getJarFile();
+        }
         
-        setFallbackLocale(Locale.getDefault());
+        setPrimaryLocale(Locale.getDefault());
+        setFallbackLocale(Locale.US);
+
+        if (jarFile != null)
+        {
+            loadFromJar(i18nDirectory);
+        }
+
+        load(new File(ZLib.getPlugin().getDataFolder(), i18nDirectory), 100);
     }
 
 
@@ -99,7 +106,8 @@ public class I18n extends ZLibComponent
 
 
     /**
-     * Call this to auto-detect the default system locale and to use it.
+     * Call this to reset the primary locale to the system's default locale
+     * (the default value for the primary locale).
      */
     public static void useDefaultPrimaryLocale()
     {
@@ -111,20 +119,9 @@ public class I18n extends ZLibComponent
      *
      * @param locale The locale. If {@code null}, system locale used.
      */
-    public static void setPrimaryLocale(Locale locale)
+    public static void setPrimaryLocale(final Locale locale)
     {
-        if (locale == null)
-            locale = Locale.getDefault();
-
-        try
-        {
-            loadLocale(locale);
-            primaryLocale = locale;
-        }
-        catch (UnsupportedLocaleException e)
-        {
-            PluginLogger.warning("The primary locale {0} cannot be loaded.", locale);
-        }
+        primaryLocale = locale != null ? locale : Locale.getDefault();
     }
 
     /**
@@ -132,23 +129,14 @@ public class I18n extends ZLibComponent
      *
      * @param locale The locale.
      */
-    public static void setFallbackLocale(Locale locale)
+    public static void setFallbackLocale(final Locale locale)
     {
-        if (locale == null)
-            return;
-
-        try
-        {
-            loadLocale(locale);
-            fallbackLocale = locale;
-        }
-        catch (UnsupportedLocaleException e)
-        {
-            PluginLogger.warning("The fallback locale {0} cannot be loaded.", locale);
-        }
+        fallbackLocale = locale;
     }
 
     /**
+     * For the locales to be correctly loaded, this should be called <em>before</em> enabling the component.
+     *
      * @param i18nDirectory The name of the subdirectory where the translations are stored. Default:
      *                      "i18n".
      */
@@ -167,10 +155,11 @@ public class I18n extends ZLibComponent
 
     /**
      * Sets the plugin's JAR file. Required if you don't use {@link ZPlugin}.
+     * For the locales to be correctly loaded, this should be called <em>before</em> enabling the component.
      *
      * @param jarFile A reference to the plugin's JAR file.
      */
-    public static void setJarFile(File jarFile)
+    public static void setJarFile(final File jarFile)
     {
         try
         {
@@ -282,20 +271,19 @@ public class I18n extends ZLibComponent
      */
     public static Locale getPlayerLocale(Player player)
     {
-        if(player == null) {
+        if (player == null) {
             return null;
         }
         
         try
         {
-            Object playerHandle = Reflection.call(player, "getHandle");
-            String localeName = (String) Reflection.getFieldValue(playerHandle, "locale");
-            String[] splitLocale = localeName.split("[_\\-]", 2);
-            return new Locale(splitLocale[0], splitLocale[1]);
+            final Object playerHandle = Reflection.call(player, "getHandle");
+            final String localeName = (String) Reflection.getFieldValue(playerHandle, "locale");
+            return localeFromString(localeName);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            if(!playerLocaleWarning)
+            if (!playerLocaleWarning)
             {
                 PluginLogger.warning("Could not retrieve locale for player {0}", e, player.getName());
                 playerLocaleWarning = true;
@@ -305,240 +293,168 @@ public class I18n extends ZLibComponent
         }
     }
 
+
     /* **  TRANSLATIONS LOADING METHODS  ** */
-    
-    /**
-     * Fetches the closest translator for the given local, and stores it in the
-     * translator cache.
-     * 
-     * @param locale The locale
-     * @return The closest translator that could be found, or {@code null} in some rare cases if no translator can be found at all.
-     */
-    private static Translator getClosestTranslator(Locale locale)
-    {
-        Translator translator = null;
-        
-        if(locale == null) return null;
-        
-        if(translators.containsKey(locale))
-            return translators.get(locale);
-        
-        try
-        {
-            translator = loadLocale(locale);
-        }
-        catch (UnsupportedLocaleException ignored) {}
-        
-        if (translator == null)
-        {
-            for (Locale curLocale : translators.keySet())
-            {
-                if (curLocale.getLanguage().equals(locale.getLanguage()))
-                    translator = translators.get(curLocale);
 
-                if (curLocale.getCountry().equals(locale.getCountry()))
-                    break;
-            }
-        }
-        
-        if(translator == null && I18n.primaryLocale != null)  translator = translators.get(I18n.primaryLocale);
-        if(translator == null && I18n.fallbackLocale != null) translator = translators.get(I18n.fallbackLocale);
-        
-        if(translator != null) translators.put(locale, translator);
-        return translator;
+    /**
+     * Loads the translations from the plugin's JAR file under the
+     * given directory (recursively).
+     *
+     * @param directory The directory to scan inside the plugin's JAR.
+     */
+    public static void loadFromJar(final String directory)
+    {
+        loadFromJar(directory, 0);
     }
-    
+
     /**
-     * Writes the translation files in the plugin storage directory, and updates the files if
-     * needed.
+     * Loads the translations from the plugin's JAR file under the
+     * given directory (recursively).
+     *
+     * @param directory The directory to scan inside the plugin's JAR.
+     * @param priority The priority to set for this translator. Translators with
+     *                 a higher priority will be called first for a translation.
      */
-    private static void writeFiles()
+    public static void loadFromJar(final String directory, final int priority)
     {
-        if (filesWritten)
-            return;
+        if (jarFile == null) throw new IllegalStateException("I18n.jarFile must be set to use the loadFromJar method.");
 
-        filesWritten = true;
-
-
-        File serverDirectory = new File(ZLib.getPlugin().getDataFolder(), i18nDirectory);
-
-        if (!serverDirectory.exists())
-        {
-            if (!serverDirectory.mkdirs())
-            {
-                PluginLogger.warning("Unable to create the i18n directory at {0}, is the directory writable?", serverDirectory.getAbsolutePath());
-                return;
-            }
-        }
-
-        if (!serverDirectory.canWrite())
-        {
-            PluginLogger.warning("The i18n directory ({0}) is not readable: the translations system is disabled.", serverDirectory.getAbsolutePath());
-            return;
-        }
-
-        if (!serverDirectory.canWrite())
-        {
-            PluginLogger.warning("The i18n directory ({0}) is not writable, the translation files will not be updated if needed.", serverDirectory.getAbsolutePath());
-            return;
-        }
-
-        if (!(ZLib.getPlugin() instanceof ZPlugin) && jarFile == null)
-        {
-            PluginLogger.warning("Unable to load the i18n files: if your plugin main class does not extends ZPlugin, you have to call I18n.setJarFile(getFile()) from your main class somewhere.");
-            return;
-        }
-
-
-        final File updateCheckFile = new File(serverDirectory, LAST_VERSION_UPDATE_CHECK_FILE);
-
-        final boolean alwaysOverwrite = (new File(serverDirectory, ALWAYS_OVERWRITE_FILE)).exists();
-        final String writtenVersion = FileUtils.readFile(updateCheckFile).replace("\n", "").replace("\r", "").trim();
-        final String currentVersion = ZLib.getPlugin().getDescription().getVersion();
-
-        Boolean updateNeeded = false;
-        if (alwaysOverwrite || writtenVersion.isEmpty() || !writtenVersion.equals(currentVersion))
-            updateNeeded = true;
-
-        // Update of the stored current version
-        if (writtenVersion.isEmpty() || !writtenVersion.equals(currentVersion))
-        {
-            Writer writer = null;
-            try
-            {
-                if (!updateCheckFile.exists() && !updateCheckFile.createNewFile())
-                    throw new FileNotFoundException(updateCheckFile.getAbsolutePath());
-
-                if (updateCheckFile.exists())
-                {
-                    writer = new BufferedWriter(new FileWriter(updateCheckFile));
-                    writer.write(currentVersion);
-                }
-            }
-            catch (IOException e)
-            {
-                PluginLogger.error("Unable to update the last translation version, the system will may update the languages every time. Please check if the {0} file is writable.", e, updateCheckFile.getAbsolutePath());
-            }
-            finally
-            {
-                if (writer != null)
-                    try { writer.close(); } catch (IOException ignored) {}
-            }
-        }
-
-        // Backup directory
-        File backupDirectory = new File(serverDirectory, BACKUP_DIRECTORY + File.separator + writtenVersion.replace(File.separatorChar, '-').replace("\n", "").replace("\r", "").trim());
-        if (updateNeeded && !alwaysOverwrite && !backupDirectory.exists() && !backupDirectory.mkdirs())
-        {
-            PluginLogger.warning("Unable to create the backup directory at {0}: old files will not be saved!", backupDirectory.getAbsolutePath());
-        }
-
+        final String normalizedDirectory = StringUtils.removeEnd(StringUtils.removeStart(directory.trim(), "/"), "/") + "/";
 
         final Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements())
         {
-            JarEntry entry = entries.nextElement();
+            final String name = entries.nextElement().getName();
 
-            if (entry.getName().startsWith(i18nDirectory + "/"))
+            if (name.startsWith(normalizedDirectory))
             {
-                File serverFile = new File(serverDirectory, entry.getName().substring((i18nDirectory + "/").length()));
-                if (serverFile.isDirectory())
-                    continue;
-
-                if (!serverFile.exists())
+                if (!name.endsWith("/"))
                 {
-                    ZLib.getPlugin().saveResource(entry.getName(), true);
-                }
-                else if (updateNeeded)
-                {
-                    // Backup
-                    if (!alwaysOverwrite)
-                    {
-                        if (backupDirectory.exists() && backupDirectory.isDirectory())
-                        {
-                            File backupFile = new File(backupDirectory, serverFile.getName());
-                            String oldPath = serverFile.getAbsolutePath();
+                    final String[] nameParts = name.split("/");
+                    final String basename = nameParts[nameParts.length - 1];
 
-                            if (!serverFile.renameTo(backupFile))
-                                PluginLogger.warning("Unable to backup file {0} to {1}", oldPath, backupFile.getAbsolutePath());
-                            else
-                                PluginLogger.info("Translation file {0} backed up to {1}", oldPath, backupFile.getAbsolutePath());
-                        }
-                    }
+                    final Locale locale = localeFromString(basename.split("\\.")[0]);
+                    final Translator translator = Translator.getInstance(locale, name);
 
-                    ZLib.getPlugin().saveResource(entry.getName(), true);
+                    if (translator != null) registerTranslator(locale, translator, priority);
                 }
             }
         }
     }
 
     /**
-     * Loads a locale.
+     * Loads a file into the translations system.
      *
-     * @param locale the locale to be loaded.
-     * @return The translator associated to the locale.
+     * If this file is a directory, all files inside will be loaded, recursively.
      *
-     * @throws UnsupportedLocaleException if the locale is not available.
+     * The locale will be extracted from the file name, and the format, from the
+     * file's extension.
+     *
+     * @param file The file to load.
      */
-    private static Translator loadLocale(Locale locale) throws UnsupportedLocaleException
+    public static void load(final File file)
     {
-        writeFiles();
+        load(file, 0);
+    }
 
-        Translator loader = null;
+    /**
+     * Loads a file into the translations system.
+     *
+     * If this file is a directory, all files inside will be loaded, recursively.
+     *
+     * The locale will be extracted from the file name, and the format, from the
+     * file's extension.
+     *
+     * @param file The file to load.
+     * @param priority The priority to set for this translator. Translators with
+     *                 a higher priority will be called first for a translation.
+     */
+    public static void load(final File file, int priority)
+    {
+        Validate.notNull(file, "The File to load into the i18n component cannot be null.");
 
-        // The files names checked to find the translation file for this locale
-        List<String> checkedFileNames = Arrays.asList(
-                locale.toString().toLowerCase(),
-                locale.toLanguageTag().toLowerCase(),
-                (locale.getLanguage() + "_" + locale.getCountry()).toLowerCase(),
-                locale.getLanguage().toLowerCase(),
-                locale.getCountry().toLowerCase()
-        );
+        if (!file.exists()) return;
 
-
-        final File i18nServerDirectory = new File(ZLib.getPlugin().getDataFolder(), i18nDirectory);
-        final File[] files = i18nServerDirectory.listFiles();
-        if (files == null)
+        if (file.isDirectory())
         {
-            PluginLogger.warning("Cannot list files of the i18n directory ({0}). Aborting loading of locale {1}.", i18nServerDirectory.getAbsolutePath(), locale);
-            return null;
+            final File[] children = file.listFiles();
+            if (children == null) return;
+
+            for (final File child : children) load(child, priority);
+        }
+        else if (file.isFile())
+        {
+            final Locale locale = localeFromString(file.getName().split("\\.")[0]);
+            final Translator translator = Translator.getInstance(locale, file);
+
+            if (translator != null) registerTranslator(locale, translator, priority);
+        }
+    }
+
+    /**
+     * Registers a translator into the translations system.
+     *
+     * @param locale The locale to register this translator for.
+     * @param translator The translator.
+     * @param priority The priority to set for this translator. Translators with
+     *                 a higher priority will be called first for a translation.
+     */
+    public static void registerTranslator(final Locale locale, final Translator translator, final int priority)
+    {
+        translator.setPriority(priority);
+        getTranslatorsChain(locale).add(translator);
+    }
+
+    /**
+     * Retrieves the translators chain for a given locale.
+     *
+     * @param locale The locale.
+     * @return The chain, in an ordered {@link TreeSet}. Will never be {@code null}, but can
+     * be empty if no translator was registered for that locale.
+     */
+    private static Set<Translator> getTranslatorsChain(final Locale locale)
+    {
+        Set<Translator> translators = I18n.translators.get(locale);
+
+        if (translators == null)
+        {
+            translators = new TreeSet<>(TRANSLATORS_COMPARATOR);
+            I18n.translators.put(locale, translators);
         }
 
-        filesLoop:
-        for (File file : files)
-        {
-            if (!file.isFile())
-                continue;
-
-            String lowerCaseFileName = file.getName().toLowerCase();
-
-            for (String checkedFileName : checkedFileNames)
-            {
-                if (lowerCaseFileName.startsWith(checkedFileName))
-                {
-                    loader = Translator.getInstance(locale, file);
-                    if (loader != null)
-                        break filesLoop;
-                }
-            }
-        }
-
-
-        if (loader == null)
-        {
-            throw new UnsupportedLocaleException(locale);
-        }
-        else
-        {
-            translators.put(locale, loader);
-        }
-        
-        return loader;
+        return translators;
     }
 
 
 
     /* **  TRANSLATION METHODS  ** */
+
+
+    /**
+     * Tries to translate the given string from the given chain.
+     *
+     * @param chain           The translators chain. All translators will be tested one after another
+     *                        in order, until one yields a translation.
+     * @param context         The translation context. {@code null} if no context defined.
+     * @param messageId       The string to translate.
+     * @param messageIdPlural The plural version of the string to translate. {@code null} if this
+     *                        translation does not have a plural form.
+     * @param count           The count of items to use to choose the singular or plural form.
+     *                        {@code null} if this translation does not have a plural form.
+     *
+     * @return The non-formatted translated string, if one of the translators was able to
+     * translate it; else, {@code null}.
+     */
+    private static String translateFromChain(Set<Translator> chain, String context, String messageId, String messageIdPlural, Integer count)
+    {
+        for (Translator translator : chain)
+        {
+            final String translated = translator.translate(context, messageId, messageIdPlural, count);
+            if (translated != null) return translated;
+        }
+
+        return null;
+    }
 
     /**
      * Translates the given string using the given locale.
@@ -567,7 +483,6 @@ public class I18n extends ZLibComponent
     public static String translate(Locale locale, String context, String messageId, String messageIdPlural, Integer count, Object... parameters)
     {
         String translated = null;
-        Translator translator = null;
         Locale usedLocale = Locale.getDefault();
 
         // Simplifies the programmer's work. The count is likely to be used in the string, so if,
@@ -576,27 +491,68 @@ public class I18n extends ZLibComponent
         if (addCountToParameters && count != null && (parameters == null || parameters.length == 0))
             parameters = new Object[] {count};
 
-        if(locale != null && (translator = getClosestTranslator(locale)) != null)
+
+        // We first try the given locale, or a close one, if non-null.
+        if (locale != null)
         {
-            translated = translator.translate(context, messageId, messageIdPlural, count);
-            usedLocale = translator.getLocale();
-        }
-        
-        if (translated == null && primaryLocale != null && (translator = translators.get(primaryLocale)) != null)
-        {
-            translated = translator.translate(context, messageId, messageIdPlural, count);
-            usedLocale = translator.getLocale();
-        }
-        
-        if (translated == null && fallbackLocale != null && (translator = translators.get(fallbackLocale)) != null)
-        {
-            translated = translator.translate(context, messageId, messageIdPlural, count);
-            usedLocale = translator.getLocale();
+            // We first try the given locale
+            if ((translated = translateFromChain(getTranslatorsChain(locale), context, messageId, messageIdPlural, count)) != null)
+            {
+                usedLocale = locale;
+            }
+            else
+            {
+                // Then, we lookup for a close locale (same language and country, then same language)
+                Locale perfect = null;
+                final Set<Locale> close = new HashSet<>();
+
+                for (Locale curLocale : translators.keySet())
+                {
+                    if (curLocale.getLanguage().equals(locale.getLanguage()))
+                    {
+                        if (curLocale.getCountry().equals(locale.getCountry()))
+                        {
+                            perfect = curLocale;
+                        }
+                        else
+                        {
+                            close.add(curLocale);
+                        }
+                    }
+                }
+
+                if (perfect != null && (translated = translateFromChain(getTranslatorsChain(perfect), context, messageId, messageIdPlural, count)) != null)
+                {
+                    usedLocale = perfect;
+                }
+                else
+                {
+                    for (Locale closeLocale : close)
+                    {
+                        if ((translated = translateFromChain(getTranslatorsChain(closeLocale), context, messageId, messageIdPlural, count)) != null)
+                        {
+                            usedLocale = closeLocale;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
+        // If we still don't have anything, we try the primary then fallback locales
+        if (translated == null && primaryLocale != null && (translated = translateFromChain(getTranslatorsChain(primaryLocale), context, messageId, messageIdPlural, count)) != null)
+        {
+            usedLocale = primaryLocale;
+        }
+        if (translated == null && fallbackLocale != null && (translated = translateFromChain(getTranslatorsChain(fallbackLocale), context, messageId, messageIdPlural, count)) != null)
+        {
+            usedLocale = fallbackLocale;
+        }
+
+        // If it's still null, we use the messageId singular or plural, using
+        // English rules to select the one.
         if (translated == null)
         {
-            // We use english rules to handle plurals, in this case.
             if (count != null && count != 1 && messageIdPlural != null)
                 translated = messageIdPlural;
             else
@@ -607,7 +563,9 @@ public class I18n extends ZLibComponent
 
 
         if (userFriendlyFormatting)
+        {
             translated = replaceFormattingCodes(translated);
+        }
 
         // We replace « ' » with « '' » to escape single quotes, so the formatter leave them alive
         MessageFormat formatter = new MessageFormat(translated.replace("'", "''"), usedLocale);
@@ -714,19 +672,31 @@ public class I18n extends ZLibComponent
      *
      * @param locale A locale.
      *
-     * @return The last translator for this locale, or null if either this locale is not loader or a
-     * last translator is not available.
+     * @return The last translator for this locale; may be an empty string
+     * if none found.
      */
     public static String getLastTranslator(Locale locale)
     {
-        try
+        return StringUtils.join(getLastTranslators(locale), ", ");
+    }
+
+    /**
+     * Retrieves the last translators for a locale.
+     *
+     * @param locale The locale.
+     *
+     * @return The last translators for this locale. The list may be empty.
+     */
+    public static List<String> getLastTranslators(final Locale locale)
+    {
+        final List<String> lastTranslators = new ArrayList<>();
+
+        for (Translator translator : getTranslatorsChain(locale))
         {
-            return translators.get(locale).getLastTranslator();
+            lastTranslators.add(translator.getLastTranslator());
         }
-        catch (NullPointerException e)  // Handles both null and unavailable locale
-        {
-            return null;
-        }
+
+        return lastTranslators;
     }
 
     /**
@@ -734,19 +704,31 @@ public class I18n extends ZLibComponent
      *
      * @param locale A locale.
      *
-     * @return The last translator for this locale, or null if either this locale is not loader or a
-     * translation team is not available.
+     * @return The last translator for this locale; may be an empty string
+     * if none found.
      */
     public static String getTranslationTeam(Locale locale)
     {
-        try
+        return StringUtils.join(getTranslationTeams(locale), ", ");
+    }
+
+    /**
+     * Retrieves the translation teams for a locale.
+     *
+     * @param locale The locale.
+     *
+     * @return The translation teams for this locale. The list may be empty.
+     */
+    public static List<String> getTranslationTeams(final Locale locale)
+    {
+        final List<String> teams = new ArrayList<>();
+
+        for (Translator translator : getTranslatorsChain(locale))
         {
-            return translators.get(locale).getTranslationTeam();
+            teams.add(translator.getTranslationTeam());
         }
-        catch (NullPointerException e)  // Handles both null and unavailable locale
-        {
-            return null;
-        }
+
+        return teams;
     }
 
     /**
@@ -754,18 +736,44 @@ public class I18n extends ZLibComponent
      *
      * @param locale A locale.
      *
-     * @return The receiver of the error reports for this locale, or null if either this locale is
-     * not loader or a receiver is not available.
+     * @return The receiver of the error reports for this locale; may be an
+     * empty string if none found.
      */
     public static String getReportErrorsTo(Locale locale)
     {
-        try
+        return StringUtils.join(getAllReportErrorsTo(locale), ", ");
+    }
+
+    /**
+     * Retrieves the last translators for a locale.
+     *
+     * @param locale The locale.
+     *
+     * @return The last translators for this locale. The list may be empty.
+     */
+    public static List<String> getAllReportErrorsTo(final Locale locale)
+    {
+        final List<String> reports = new ArrayList<>();
+
+        for (Translator translator : getTranslatorsChain(locale))
         {
-            return translators.get(locale).getReportErrorsTo();
+            reports.add(translator.getReportErrorsTo());
         }
-        catch (NullPointerException e)  // Handles both null and unavailable locale
+
+        return reports;
+    }
+
+
+    public static Locale localeFromString(final String localeName)
+    {
+        String[] splitLocale = localeName.split("[_\\-]", 2);
+        if (splitLocale.length >= 2)
         {
-            return null;
+            return new Locale(splitLocale[0], splitLocale[1]);
+        }
+        else
+        {
+            return new Locale(localeName);
         }
     }
 }

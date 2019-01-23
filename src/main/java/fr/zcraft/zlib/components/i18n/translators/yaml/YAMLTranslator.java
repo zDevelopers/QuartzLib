@@ -94,26 +94,30 @@ public class YAMLTranslator extends Translator
     public YAMLTranslator(Locale locale, File file)
     {
         super(locale, file);
-
-        load();
     }
 
-    private void load()
+    public YAMLTranslator(Locale locale, String resourceReference)
     {
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
+        super(locale, resourceReference);
+    }
+
+    @Override
+    protected void load()
+    {
+        final YamlConfiguration configuration = YamlConfiguration.loadConfiguration(getReader());
 
         if (configuration.getKeys(false).isEmpty())
         {
-            PluginLogger.error("Cannot load the {0} translation file.", file.getAbsolutePath());
+            PluginLogger.error("Cannot load the {0} translation file.", getFilePath());
             return;
         }
 
-        for (Map.Entry<String, Object> entry : configuration.getValues(false).entrySet())
+        for (final Map.Entry<String, Object> entry : configuration.getValues(false).entrySet())
         {
             if (entry.getValue() instanceof ConfigurationSection)
             {
-                ConfigurationSection context = (ConfigurationSection) entry.getValue();
-                String contextName = entry.getKey().equals("keys") ? null : entry.getKey();
+                final ConfigurationSection context = (ConfigurationSection) entry.getValue();
+                final String contextName = entry.getKey().equals("keys") ? null : entry.getKey();
 
                 for (Map.Entry<String, Object> translationEntry : context.getValues(true).entrySet())
                     if (!(translationEntry.getValue() instanceof ConfigurationSection))

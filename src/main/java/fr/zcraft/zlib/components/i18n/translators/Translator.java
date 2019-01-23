@@ -32,8 +32,14 @@ package fr.zcraft.zlib.components.i18n.translators;
 import fr.zcraft.zlib.components.i18n.translators.gettext.GettextPOTranslator;
 import fr.zcraft.zlib.components.i18n.translators.properties.PropertiesTranslator;
 import fr.zcraft.zlib.components.i18n.translators.yaml.YAMLTranslator;
+import fr.zcraft.zlib.core.ZLib;
+import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.reflection.Reflection;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import java.io.File;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +48,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Classes used to load & store the translations extends this class.
+ *
+ * Translators are lazy: strings are only loaded on first use.
  */
 public abstract class Translator
 {
@@ -55,6 +63,10 @@ public abstract class Translator
 
     protected final Locale locale;
     protected final File file;
+    protected final String resourceReference;
+
+    private boolean loaded = false;
+    private int priority = 0;
 
     /**
      * Context → messageId → translation
@@ -66,6 +78,78 @@ public abstract class Translator
     {
         this.locale = locale;
         this.file = file;
+        this.resourceReference = null;
+    }
+
+    public Translator(final Locale locale, final String resourceReference)
+    {
+        this.locale = locale;
+        this.resourceReference = resourceReference;
+        this.file = null;
+    }
+
+    protected Reader getReader()
+    {
+        if (file != null)
+        {
+            try
+            {
+                return new FileReader(file);
+            }
+            catch (FileNotFoundException e)
+            {
+                PluginLogger.error("Unable to load file {0} in translator {1}", e, getFilePath(), getClass().getSimpleName());
+                return null;
+            }
+        }
+
+        else if (resourceReference != null)
+        {
+            final InputStream stream = ZLib.getPlugin().getResource(resourceReference);
+
+            if (stream == null)
+            {
+                PluginLogger.error("Unable to load file {0} in translator {1}", getFilePath(), getClass().getSimpleName());
+                return null;
+            }
+
+            return new InputStreamReader(stream);
+        }
+
+        else return null;
+    }
+
+    public String getFilePath()
+    {
+        if (file != null)
+        {
+            return file.getAbsolutePath();
+        }
+
+        else if (resourceReference != null)
+        {
+            return "jar:" + resourceReference;
+        }
+
+        else return "<unknown>";
+    }
+
+    /**
+     * Loads the translations into the {@link #translations} map. Translators are
+     * lazy: this method will automatically be called on first translation request.
+     */
+    protected abstract void load();
+
+    /**
+     * Loads the translations if not already loaded.
+     */
+    private void load0()
+    {
+        if (!loaded)
+        {
+            load();
+            loaded = true;
+        }
     }
 
     /**
@@ -83,6 +167,8 @@ public abstract class Translator
      */
     public String translate(String context, String messageId, String messageIdPlural, Integer count)
     {
+        load0();
+
         final Map<String, Translation> contextMap = translations.get(getContextKey(context));
         if (contextMap == null)
             return null;
@@ -147,7 +233,25 @@ public abstract class Translator
         return locale;
     }
 
+    /**
+     * @return The priority of this translator: higher priority translators will
+     * called first for a translation in the translators chain.
+     */
+    public int getPriority()
+    {
+        return priority;
+    }
 
+    /**
+     * Sets the priority of this translator. Higher priority translators
+     * will be called first for a translation in the translators chain.
+     *
+     * @param priority The priority. Default to 0 if unset.
+     */
+    public void setPriority(int priority)
+    {
+        this.priority = priority;
+    }
 
     /**
      * Registers a translation to be stored in the system.
@@ -184,7 +288,30 @@ public abstract class Translator
         return context != null ? context : NO_CONTEXT_KEY;
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        final Translator that = (Translator) o;
+
+        return new EqualsBuilder()
+                .append(priority, that.priority)
+                .append(locale, that.locale)
+                .append(getFilePath(), that.getFilePath())
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37)
+                .append(locale)
+                .append(getFilePath())
+                .append(priority)
+                .toHashCode();
+    }
 
     /**
      * Returns a new translations loader for this locale and this file.
@@ -196,25 +323,74 @@ public abstract class Translator
      */
     public static Translator getInstance(Locale locale, File file)
     {
-        String[] fileNameParts = file.getName().split("\\.");
-        if (fileNameParts.length < 2)
-            return null;
+        return getInstance(getTranslatorClass(file.getName()), locale, file);
+    }
+
+    /**
+     * Returns a new translations loader for this locale and a resource from the plugin's JAR.
+     *
+     * @param locale The locale
+     * @param resourceReference The path to the resource.
+     *
+     * @return A translations loader for this file.
+     */
+    public static Translator getInstance(Locale locale, String resourceReference)
+    {
+        return getInstance(getTranslatorClass(resourceReference), locale, resourceReference);
+    }
+
+    /**
+     * Extracts from the file name and returns the translator type to use.
+     *
+     * @param fileName The file name.
+     * @return The translator type to be used.
+     */
+    private static Class<? extends Translator> getTranslatorClass(final String fileName)
+    {
+        final String[] fileNameParts = fileName.split("\\.");
+
+        if (fileNameParts.length < 2) return null;
 
         switch (fileNameParts[fileNameParts.length - 1].toLowerCase())
         {
             case "po":
-                return new GettextPOTranslator(locale, file);
+                return GettextPOTranslator.class;
 
             case "yml":
             case "yaml":
-                return new YAMLTranslator(locale, file);
+                return YAMLTranslator.class;
 
             case "properties":
             case "class":
-                return new PropertiesTranslator(locale, file);
+                return PropertiesTranslator.class;
 
             default:
                 return null;
+        }
+    }
+
+    /**
+     * Instanciate a Translator instance from the given class.
+     *
+     * @param clazz The class.
+     * @param locale The locale for this translator.
+     * @param resourcePointer A pointer to the resource: either a {@link File} or a {@link String} to reference a
+     *                        bundled resource.
+     *
+     * @return The new instance, or {@code null} if none could be made ({@code null} class or invalid constructor
+     * or exception).
+     */
+    private static Translator getInstance(final Class<? extends Translator> clazz, final Locale locale, final Object resourcePointer)
+    {
+        if (clazz == null) return null;
+
+        try
+        {
+            return Reflection.instantiate(clazz, locale, resourcePointer);
+        }
+        catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e)
+        {
+            return null;
         }
     }
 }

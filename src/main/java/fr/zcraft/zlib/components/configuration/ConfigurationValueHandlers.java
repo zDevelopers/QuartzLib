@@ -269,7 +269,7 @@ public abstract class ConfigurationValueHandlers
         {
             return new Locale.Builder().setLanguageTag(obj.toString()).build();
         }
-        catch(IllformedLocaleException ex)
+        catch (IllformedLocaleException ex)
         {
             throw new ConfigurationParseException("Illegal language tag : " + ex.getMessage(), obj);
         }

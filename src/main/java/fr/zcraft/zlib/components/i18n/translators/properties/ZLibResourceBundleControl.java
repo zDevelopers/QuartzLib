@@ -43,12 +43,19 @@ import java.util.ResourceBundle;
 public class ZLibResourceBundleControl extends ResourceBundle.Control
 {
     private final File bundleFile;
+    private final String resourceReference;
 
     public ZLibResourceBundleControl(File bundleFile)
     {
         this.bundleFile = bundleFile;
+        this.resourceReference = null;
     }
 
+    public ZLibResourceBundleControl(String resourceReference)
+    {
+        this.bundleFile = null;
+        this.resourceReference = resourceReference;
+    }
 
     /**
      * <p>Uses the file name as the bundle name.</p>
@@ -60,7 +67,8 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
     @Override
     public String toBundleName(String baseName, Locale locale)
     {
-        final String[] nameParts = bundleFile.getName().split("\\.");
+        final String[] nameParts = (bundleFile != null ? bundleFile.getName() : resourceReference).split("\\.");
+
         if (nameParts.length >= 2)
         {
             nameParts[nameParts.length - 1] = "";
@@ -71,7 +79,7 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
 
     /**
      * <p>Loads the bundles from the file system instead of the JAR file, to allow modifications by
-     * the end user.</p>
+     * the end user, if a file was provided.</p>
      *
      * <hr />
      *
@@ -80,28 +88,18 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
     @Override
     public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException
     {
-        switch (format)
+        if (format.equals("java.properties") && bundleFile != null)
         {
-            case "java.properties":
-                ResourceBundle bundle = null;
-                InputStream stream = null;
+            final ResourceBundle bundle;
+            try (InputStream stream = new FileInputStream(bundleFile))
+            {
+                bundle = new PropertyResourceBundle(stream);
+            }
 
-                try
-                {
-                    stream = new FileInputStream(bundleFile);
-                    bundle = new PropertyResourceBundle(stream);
-                }
-                finally
-                {
-                    if (stream != null)
-                        stream.close();
-                }
-
-                return bundle;
-
-            default:
-                return super.newBundle(baseName, locale, format, loader, reload);
+            return bundle;
         }
+
+        return super.newBundle(baseName, locale, format, loader, reload);
     }
 
     /**

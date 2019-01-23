@@ -37,7 +37,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.Reader;
 import java.util.Locale;
 
 
@@ -63,30 +63,32 @@ public class GettextPOTranslator extends Translator
     public GettextPOTranslator(Locale locale, File file)
     {
         super(locale, file);
-
-        load();
     }
 
-    private void load()
+    public GettextPOTranslator(Locale locale, String resourceReference)
+    {
+        super(locale, resourceReference);
+    }
+
+    @Override
+    protected void load()
     {
         try
         {
-            source = new POFile(file);
+            final Reader reader = getReader();
+            if (reader == null) return;
+
+            source = new POFile(getReader());
             source.parse();
 
-            for (Translation translation : source.getTranslations())
+            for (final Translation translation : source.getTranslations())
             {
                 registerTranslation(translation);
             }
         }
-        catch (FileNotFoundException e)
-        {
-            PluginLogger.error("Cannot load the {0} translations file.", e, file.getAbsolutePath());
-            source = null;
-        }
         catch (POFile.CannotParsePOException e)
         {
-            PluginLogger.error("Cannot parse the {0} translations file.", e, file.getAbsolutePath());
+            PluginLogger.error("Cannot parse the {0} translations file.", e, getFilePath());
             source = null;
         }
     }
@@ -94,6 +96,8 @@ public class GettextPOTranslator extends Translator
     @Override
     public Integer getPluralIndex(Integer count)
     {
+        if (source == null) return count != 1 ? 1 : 0;
+
         try
         {
             scriptEngine.put("n", count);

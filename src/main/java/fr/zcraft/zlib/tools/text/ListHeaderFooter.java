@@ -130,13 +130,28 @@ public final class ListHeaderFooter
 
         try
         {
-            Object serializedHeader = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawHeader));
-            Object serializedFooter = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawFooter));
+            final Object serializedHeader = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawHeader));
+            final Object serializedFooter = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawFooter));
 
-            Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor(iChatBaseComponentClass).newInstance(serializedHeader);
-            Reflection.setFieldValue(packet, "b", serializedFooter);
+            // 1.11-
+            try
+            {
+                final Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor(iChatBaseComponentClass).newInstance(serializedHeader);
+                Reflection.setFieldValue(packet, "b", serializedFooter);
 
-            NMSNetwork.sendPacket(player, packet);
+                NMSNetwork.sendPacket(player, packet);
+            }
+
+            // 1.12+
+            catch (NoSuchMethodException e)
+            {
+                final Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor().newInstance();
+
+                Reflection.setFieldValue(packet, "a", serializedHeader);
+                Reflection.setFieldValue(packet, "b", serializedFooter);
+
+                NMSNetwork.sendPacket(player, packet);
+            }
         }
         catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchFieldException e)
         {
