@@ -172,16 +172,6 @@ public class RawTextTest
     }
     
     @Test
-    public void hoverAchievementTest()
-    {
-        final String HOVER_ACHIEVEMENT_TEST = "{\"text\":\"test\",\"hoverEvent\":{\"action\":\"show_achievement\",\"value\":\"achievement.theEnd\"}}";
-        RawText text = new RawText("test")
-            .hover(Achievement.END_PORTAL);
-        
-        assertJSON(text, HOVER_ACHIEVEMENT_TEST);
-    }
-    
-    @Test
     public void hoverStatisticTest()
     {
         final String HOVER_STATISTIC_TEST = "{\"text\":\"test\",\"hoverEvent\":{\"action\":\"show_achievement\",\"value\":\"stat.walkOneCm\"}}";

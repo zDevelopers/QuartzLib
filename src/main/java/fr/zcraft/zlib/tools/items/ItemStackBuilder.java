@@ -47,9 +47,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 
 /**
@@ -69,7 +71,6 @@ import java.util.Map.Entry;
  *                  .longLore(ChatColor.GRAY + "Lorem ipsum dolor sit amnet [&hellip;] elit")
  *
  *                  .glow()
- *                  .hideAttributes()
  *
  *                  // Builds the effective ItemStack
  *                  .item()
@@ -122,12 +123,12 @@ public class ItemStackBuilder
     private final List<String> loreLines = new ArrayList<>();
     private boolean resetLore = false;
 
-    private boolean hideAttributes = false;
-
     private Map<String, Object> nbt = null;
     private boolean replaceNBT = false;
 
     private boolean applyGlowEffect = false;
+    
+    private Set<ItemFlag> flags = new HashSet<ItemFlag>();
     
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
@@ -223,11 +224,6 @@ public class ItemStackBuilder
         if (!loreLines.isEmpty() || resetLore)
             meta.setLore(loreLines);
 
-        if (hideAttributes)
-        {
-        	meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        
-        }
 
         if(!meta.hasEnchants() && applyGlowEffect) {
         	if(material != Material.FISHING_ROD)
@@ -293,6 +289,75 @@ public class ItemStackBuilder
         return this;
     }
 
+    /**
+     * Adds ItemFlags to the ItemStack.
+     *
+     * @param flag The ItemFlag(s)
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder addItemFlag(ItemFlag ...flag)
+    {
+    	if(flag==null || flag.length<1)
+    		return this;
+    	for(int i = 0; i<flag.length;i++) {
+    		if(flag !=null)
+    			this.flags.add(flag[i]);
+    	}
+        return this;
+    }
+    
+    /**
+     * Removes ItemFlags from the ItemStack.
+     *
+     * @param flag The ItemFlag(s) (null to remove all)
+     *
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder removeItemFlag(ItemFlag ...flag)
+    {
+    	if(flag==null || flag.length<1) {
+    		this.flags = new HashSet<ItemFlag>();
+    		return this;
+    	}
+    		
+    	for(int i = 0; i<flag.length;i++) {
+    		if(flag !=null)
+    			this.flags.remove(flag[i]);
+    	}
+        return this;
+    }
+    
+    /**
+     * Gets ItemFlags of the ItemStack.
+     *
+     * @return Set<ItemFlag> of the ItemStack
+     */
+    public Set<ItemFlag> getItemFlags()
+    {
+    	return this.flags;
+    }
+    
+    /**
+     * Check if the ItemStack has any ItemFlags
+     *
+     * @return boolean: true -> has ItemFlags
+     */
+    public boolean hasItemFlags()
+    {
+    	return !this.flags.isEmpty();
+    }
+    
+    /**
+     * Check if the ItemStack has a specific ItemFlag
+     *
+     * @return boolean: true -> has that ItemFlag
+     */
+    public boolean hasItemFlag(ItemFlag flag)
+    {
+    	return this.flags.contains(flag);
+    }
+    
     /**
      * Defines the amount of the ItemStack.
      *
@@ -643,5 +708,21 @@ public class ItemStackBuilder
         }
 
         return builder.toString();
+    }
+    
+    /**
+     * Hides all the item attributes of the given {@link ItemStack}.
+     *
+     * @param stack The {@link ItemStack} to hide attributes from.
+     * @return The same item stack. The modification is applied by reference,
+     * the stack is returned for convenience reasons.
+     */
+    @Deprecated
+    public ItemStackBuilder hideAllItemAttributes()
+    {
+       ItemFlag[] all = ItemFlag.values();
+       for(ItemFlag a : all)
+    	   this.flags.add(a);
+       return this;
     }
 }

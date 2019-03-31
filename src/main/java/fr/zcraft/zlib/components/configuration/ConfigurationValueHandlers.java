@@ -453,8 +453,13 @@ public abstract class ConfigurationValueHandlers
             item = new ItemStackBuilder(material, amount);
         }
         
-        if(map.containsKey("data"))
-            item.data(handleShortValue(map.get("data")));
+        if(map.containsKey("data")) {
+        	// Not good
+        	// This is not a good idea but it works ....
+        	material = new ItemStack(material, 1,handleShortValue(map.get("data")) ).getType();
+        	
+        }
+        
         
         if(map.containsKey("title"))
             item.title(map.get("title").toString());
@@ -467,7 +472,7 @@ public abstract class ConfigurationValueHandlers
         
         if(map.containsKey("hideAttributes"))
             if(handleBoolValue(map.get("hideAttributes")))
-                item.hideAttributes();
+                item.hideAllItemAttributes();
         
         
         if(map.containsKey("enchantments"))
