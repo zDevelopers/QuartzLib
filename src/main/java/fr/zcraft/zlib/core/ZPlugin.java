@@ -30,6 +30,7 @@
 package fr.zcraft.zlib.core;
 
 import fr.zcraft.zlib.tools.PluginLogger;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -45,9 +46,45 @@ import java.util.jar.JarFile;
  */
 public abstract class ZPlugin extends JavaPlugin
 {
+	
+	public final String minimumSupportedMinecraftVersion = "1_13";
+	
+	private boolean checkIsVersionSupported() {
+		
+		String packagename = this.getServer().getClass().getPackage().getName();
+		String versionRaw = packagename.substring(packagename.lastIndexOf('.') + 1).replace("v", "");
+		
+		String[] versionBits = versionRaw.substring(0, versionRaw.length()-3).split("_");
+		String[] minimumVerBits = minimumSupportedMinecraftVersion.split("_");
+		
+		int length = versionBits.length>minimumVerBits.length ? versionBits.length: minimumVerBits.length ;
+		
+		for(int i = 0; i<length ;i++) {
+			int minimum = i < minimumVerBits.length ? Integer.parseInt(minimumVerBits[i]) : 0;
+			int current = i < versionBits.length? Integer.parseInt(versionBits[i]) : 0;
+			if(current<minimum) {
+				return false;
+			} 
+			if(current>minimum) {
+				return true;
+			}
+			
+			
+		}
+		return true;
+	}
+	
     @Override
     public void onLoad()
     {
+    	if(!checkIsVersionSupported()) {
+    		getLogger().severe("This Plugin is powered by zLib-1.13 which requires the Server to be at least on 1.13!");
+    		getLogger().severe("Plugin is now shutting down! If you ARE running 1.13 or newer please contact the");
+    		getLogger().severe("Developers of zLib and file a Bug report. ");
+    		getLogger().severe("!!WARNING!! If you ignore this message you will not get any support whatsoever from us !!WARNING!!");
+    		this.getPluginLoader().disablePlugin(this);
+    		return;
+    	}
         ZLib.init(this);
     }
 
