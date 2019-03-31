@@ -1,4 +1,4 @@
-zLib [![Build Status](https://jenkins.carrade.eu/job/zLib/badge/icon)](https://jenkins.carrade.eu/job/zLib/)
+zLib-1.13 [![Build Status](https://jenkins.carrade.eu/job/zLib/badge/icon)](https://jenkins.carrade.eu/job/zLib/)
 ==========
 
 Helper library for Bukkit plugins development.
@@ -11,7 +11,7 @@ For the `master` branch:
 ### How to use this library in your plugin?
 
 If you are using Maven to build your plugin, follow these simple steps. Other builds methods are not supported (but you can use them of course).  
-Currently, the zLib requires **Java 7** or later and **Bukkit 1.8.3** or later.
+Currently, the zLib-1.13 requires **Java 7** or later and **Bukkit 1.13** or later.
 
 #### I'm starting a new plugin
 
@@ -34,7 +34,7 @@ Either create a plugin as usual and add the zLib as explained below, or use [the
         <dependency>
             <groupId>fr.zcraft</groupId>
             <artifactId>zlib</artifactId>
-            <version>0.99-SNAPSHOT</version>
+            <version>1.01-SNAPSHOT</version>
         </dependency>
     ```
     
