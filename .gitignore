@@ -102,3 +102,5 @@ local.properties
 # TeXlipse plugin
 .texlipse
 
+# MacOS 
+.DS_Store

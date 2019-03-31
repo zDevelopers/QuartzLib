@@ -31,19 +31,13 @@
 package fr.zcraft.zlib.components.rawtext;
 
 import com.google.common.base.CaseFormat;
-import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONObject;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -206,11 +200,14 @@ public class RawText extends RawTextPart<RawText>
     {
     	String s = null;
 		try {
-			s = Reflection.getMinecraftClassByName("ItemStack").getMethod("getTag").invoke(Reflection
+			s = "{id: \"minecraft:" + item.getType().toString().toLowerCase() + "\", Count: 1b, tag:" ;
+			s+= Reflection.getMinecraftClassByName("ItemStack").getMethod("getTag").invoke(Reflection
 					.getBukkitClassByName("CraftItemStack").getMethod("asNMSCopy", ItemStack.class).invoke(null, item))
-					.toString().replace("\\", "\\\\").replace("\"", "\\\"");
+					.toString();
+			s+= "}";
+			s = s.replace("\\", "\\\\").replace("\"", "\\\"");
 		} catch (Exception e) {
-			s = "{}";
+			s = "{id: \"minecraft:" + item.getType().toString().toLowerCase() + "\", Count: 1b}".replace("\\", "\\\\").replace("\"", "\\\"") ;
 			e.printStackTrace();
 		}
         return s;
