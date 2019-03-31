@@ -214,7 +214,7 @@ public class ItemStackBuilder
         }
         
        
-
+        
 
         ItemMeta meta = newItemStack.getItemMeta();
 
@@ -233,6 +233,11 @@ public class ItemStackBuilder
         	
         	meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
+        
+        for(ItemFlag f : this.flags) 
+        	if(f!=null)
+        		meta.addItemFlags(f);
+        
         
         newItemStack.setItemMeta(meta);
         	
