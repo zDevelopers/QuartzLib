@@ -49,6 +49,7 @@ import java.util.Set;
 /**
  * This class provides various utilities to manipulate NBT data.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class NBT 
 {
     private NBT() {}
@@ -130,7 +131,7 @@ public abstract class NBT
         for (Map.Entry<Enchantment, Integer> enchantment : enchants.entrySet())
         {
             Map<String, Object> enchantmentData = new HashMap<>();
-            enchantmentData.put("id", enchantment.getKey().getId());
+            enchantmentData.put("key", enchantment.getKey().getKey().getKey());
             enchantmentData.put("lvl", enchantment.getValue());
             enchantList.add(enchantmentData);
         }

@@ -32,24 +32,18 @@ package fr.zcraft.zlib.components.rawtext;
 
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.components.nbt.NBT;
-import fr.zcraft.zlib.tools.PluginLogger;
-import fr.zcraft.zlib.tools.items.ItemUtils;
-import fr.zcraft.zlib.tools.reflection.NMSException;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
-import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONObject;
 
-import java.util.EnumMap;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -97,6 +91,7 @@ import java.util.Set;
  *     RawMessage.broadcast(text.build());
  * </pre>
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RawText extends RawTextPart<RawText>
 {
     public RawText()
@@ -202,68 +197,26 @@ public class RawText extends RawTextPart<RawText>
     }
 
     /**
-     * Converts an item name to a tellraw-compatible JSON.
+     * Converts an item to a tellraw-compatible JSON.
      *
      * @param item The item.
      * @return The tellraw-compatible JSON.
      */
     static public String toJSONString(ItemStack item)
     {
-        Map<String, Object> itemData = new HashMap<>();
-        
-        String itemId = null;
-        try
-        {
-            itemId = ItemUtils.getMinecraftId(item);
-        }
-        catch (NMSException ex)
-        {
-            PluginLogger.warning("NMS Exception while parsing ItemStack to JSON String", ex);
-        }
-        
-        if (itemId == null) itemId = String.valueOf(item.getType().getId());
-
-        itemData.put("id", itemId);
-        itemData.put("Damage", item.getDurability());
-        itemData.put("Count", item.getAmount());
-
-        try
-        {
-            itemData.put("tag", NBT.fromItemStack(item));
-        }
-        catch (NMSException ex)
-        {
-            PluginLogger.warning("Unable to retrieve NBT data", ex);
-            Map<String, Object> tag = new HashMap<>();
-            
-            tag.put("display", NBT.fromItemMeta(item.getItemMeta()));
-            tag.put("ench", NBT.fromEnchantments(item.getEnchantments()));
-            tag.put("HideFlags", NBT.fromItemFlags(item.getItemMeta().getItemFlags()));
-
-            itemData.put("tag", tag);
-        }
-        
-        return NBT.toNBTJSONString(itemData);
+    	String s = null;
+		try {
+			s = Reflection.getMinecraftClassByName("ItemStack").getMethod("getTag").invoke(Reflection
+					.getBukkitClassByName("CraftItemStack").getMethod("asNMSCopy", ItemStack.class).invoke(null, item))
+					.toString().replace("\\", "\\\\").replace("\"", "\\\"");
+		} catch (Exception e) {
+			s = "{}";
+			e.printStackTrace();
+		}
+        return s;
     }
     
-    @Deprecated
-    static public String toJSONString(ItemMeta meta)
-    {
-        return NBT.toNBTJSONString(NBT.fromItemMeta(meta));
-    }
-
-    @Deprecated
-    static public String toJSONString(Map<Enchantment, Integer> enchants)
-    {
-        return NBT.toNBTJSONString(NBT.fromEnchantments(enchants));
-    }
-    
-    @Deprecated
-    static public byte toJSON(Set<ItemFlag> itemFlags)
-    {
-        return NBT.fromItemFlags(itemFlags);
-    }
-
+   
     /**
      * Converts an entity name to a tellraw-compatible JSON.
      *
@@ -286,39 +239,5 @@ public class RawText extends RawTextPart<RawText>
     }
 
 
-    /**
-     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
-     */
-    @Deprecated
-    static private final EnumMap<Achievement, String> ACHIEVEMENTS_NAMES = new EnumMap<>(Achievement.class);
     
-    static {
-        ACHIEVEMENTS_NAMES.put(Achievement.BUILD_WORKBENCH, "buildWorkBench");
-        ACHIEVEMENTS_NAMES.put(Achievement.GET_DIAMONDS, "diamonds");
-        ACHIEVEMENTS_NAMES.put(Achievement.NETHER_PORTAL, "portal");
-        ACHIEVEMENTS_NAMES.put(Achievement.GHAST_RETURN, "ghast");
-        ACHIEVEMENTS_NAMES.put(Achievement.GET_BLAZE_ROD, "blazeRod");
-        ACHIEVEMENTS_NAMES.put(Achievement.BREW_POTION, "potion");
-        ACHIEVEMENTS_NAMES.put(Achievement.END_PORTAL, "theEnd");
-        ACHIEVEMENTS_NAMES.put(Achievement.THE_END, "theEnd2");
-    }
-
-    /**
-     * @param achievement An achievement.
-     * @return The Minecraft I18N key for this achievement.
-     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
-     */
-    @Deprecated
-    static public String getI18nKey(Achievement achievement)
-    {
-        String key = ACHIEVEMENTS_NAMES.get(achievement);
-        
-        if(key == null)
-        {
-            key = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, achievement.name());
-            ACHIEVEMENTS_NAMES.put(achievement, key);
-        }
-        
-        return key;
-    }
 }

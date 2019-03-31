@@ -66,7 +66,8 @@ public final class FutureEvents
      *
      * @param listener The listener to register.
      */
-    public static void registerFutureEvents(final Listener listener)
+    @SuppressWarnings("unchecked")
+	public static void registerFutureEvents(final Listener listener)
     {
         if (!ZLib.isInitialized() || !ZLib.getPlugin().isEnabled())
             throw new IllegalPluginAccessException("Plugin attempted to register the future listener " + listener + " while not enabled or zLib not initialized!");

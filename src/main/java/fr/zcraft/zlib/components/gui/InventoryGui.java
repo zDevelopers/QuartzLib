@@ -75,7 +75,8 @@ abstract public class InventoryGui extends GuiBase
      * Asks the GUI to update its data, and refresh its view accordingly.
      * The inventory may be regenerated when calling this method.
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void update()
     {
         super.update();

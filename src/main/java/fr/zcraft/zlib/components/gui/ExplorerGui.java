@@ -340,7 +340,7 @@ abstract public class ExplorerGui<T> extends ActionGui
         event.setCancelled(true);
         if(mode.equals(Mode.READONLY)) return;
         if(!onPutItem(event.getCursor())) return;
-        event.setCursor(new ItemStack(Material.AIR));
+        event.getView().setCursor(new ItemStack(Material.AIR));
     }
 
     /**
@@ -622,7 +622,7 @@ abstract public class ExplorerGui<T> extends ActionGui
         
         public final boolean isValid;
         
-        public ExplorerGuiEvent(ExplorerGui gui, InventoryClickEvent event)
+        public ExplorerGuiEvent(@SuppressWarnings("rawtypes") ExplorerGui gui, InventoryClickEvent event)
         {
             if(gui.isData2D)
             {

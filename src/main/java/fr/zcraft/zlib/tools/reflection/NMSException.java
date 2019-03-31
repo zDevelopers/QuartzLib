@@ -36,7 +36,12 @@ package fr.zcraft.zlib.tools.reflection;
  */
 public class NMSException extends Exception
 {
-    public NMSException(String text, Throwable cause)
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6086704913006336442L;
+
+	public NMSException(String text, Throwable cause)
     {
         super(text, cause);
     }

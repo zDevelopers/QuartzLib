@@ -173,7 +173,8 @@ public final class Gui extends ZLibComponent
      * @param guiClass The GUI class.
      * @return the currently opened GUI.
      */
-    static public <T extends GuiBase> T getOpenGui(HumanEntity entity, Class<T> guiClass)
+    @SuppressWarnings("unchecked")
+	static public <T extends GuiBase> T getOpenGui(HumanEntity entity, Class<T> guiClass)
     {
         GuiBase openGui = getOpenGui(entity);
         if(openGui == null) return null;

@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public abstract class ConfigurationValueHandlers 
 {
     static private final Map<Class, ValueHandler> valueHandlers = new HashMap<>();
@@ -416,12 +417,22 @@ public abstract class ConfigurationValueHandlers
     @ConfigurationValueHandler
     static public Enchantment handleEnchantmentValue(String value) throws ConfigurationParseException
     {
-        Enchantment enchantment = Enchantment.getByName(value.toUpperCase());
+    	Enchantment[] allregistered = Enchantment.values();
+    	if(allregistered == null) throw new UnsupportedOperationException("No Enchantments registered in system!");
+    	Enchantment enchantment = null;
+    	for(int i = 0; i<allregistered.length;i++) {
+    		if(allregistered[i] != null && allregistered[i].getKey().getKey().equalsIgnoreCase(value)) {
+    			enchantment = allregistered[i];
+    			break;
+    		}
+    			
+    	}
+        
         if(enchantment == null) throw new ConfigurationParseException("Invalid enchantment name", value);
         return enchantment;
     }
     
-    @ConfigurationValueHandler
+	@ConfigurationValueHandler
     static public ItemStack handleItemStackValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("type"))
@@ -458,13 +469,14 @@ public abstract class ConfigurationValueHandlers
             if(handleBoolValue(map.get("hideAttributes")))
                 item.hideAttributes();
         
+        
         if(map.containsKey("enchantments"))
             item.enchant(handleMapValue(map.get("enchantments"), Enchantment.class, Integer.class));
         
         return item.item();
     }
     
-    @ConfigurationValueHandler
+	@ConfigurationValueHandler
     static public Potion handlePotionValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("effect"))
@@ -481,7 +493,7 @@ public abstract class ConfigurationValueHandlers
     @ConfigurationValueHandler
     static public DyeColor handleDyeColorValue(Integer value) throws ConfigurationParseException
     {
-        DyeColor color = DyeColor.getByDyeData((byte) (int) value);
+		DyeColor color = DyeColor.getByDyeData((byte) (int) value);
         
         if(color == null)
             throw new ConfigurationParseException("Invalid dye color code", value);
@@ -501,10 +513,10 @@ public abstract class ConfigurationValueHandlers
         return value;
     }
     
-    @ConfigurationValueHandler
+	@ConfigurationValueHandler
     static public BannerMeta handleBannerValue(Map map) throws ConfigurationParseException
     {
-        BannerMeta banner = (BannerMeta) new ItemStack(Material.BANNER).getItemMeta();
+        BannerMeta banner = (BannerMeta) new ItemStack(Material.WHITE_BANNER).getItemMeta();
         DyeColor baseColor = getValue(map, "color", DyeColor.BLACK);
         List patterns = getListValue(map, "patterns", new ArrayList(), Object.class);
         

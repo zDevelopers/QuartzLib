@@ -398,7 +398,12 @@ public class POFile
      */
     public class CannotParsePOException extends RuntimeException
     {
-        public CannotParsePOException(String message)
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 2176879572411871580L;
+
+		public CannotParsePOException(String message)
         {
             super(message);
         }

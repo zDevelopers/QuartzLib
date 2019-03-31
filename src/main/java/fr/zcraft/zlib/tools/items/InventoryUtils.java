@@ -50,7 +50,8 @@ abstract public class InventoryUtils
      * @param inventory2 The other inventory.
      * @return {@code true} if the two inventories are the same one.
      */
-    static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
+    @SuppressWarnings("deprecation")
+	static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
     {
         if (inventory1 == inventory2)
         {
@@ -107,7 +108,8 @@ abstract public class InventoryUtils
             this.inventory = inventory;
         }
 
-        @Override
+        @SuppressWarnings("deprecation")
+		@Override
         public void run()
         {
             for(HumanEntity entity : inventory.getViewers())

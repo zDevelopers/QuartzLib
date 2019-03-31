@@ -78,13 +78,16 @@ public class ConfigurationList<T> extends ConfigurationItem<List<T>> implements 
         return get().iterator();
     }
 
+
     @Override
+    @SuppressWarnings("unchecked")
     public T[] toArray()
     {
         return (T[]) get().toArray();
     }
 
     @Override
+    @SuppressWarnings("hiding")
     public <T> T[] toArray(T[] a)
     {
         return get().toArray(a);

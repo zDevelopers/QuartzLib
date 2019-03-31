@@ -259,7 +259,8 @@ public class NBTList implements List<Object>
         return toArray(new Object[] {});
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <T> T[] toArray(T[] a)
     {
         ArrayList<T> list = new ArrayList<>(size());
@@ -393,7 +394,8 @@ public class NBTList implements List<Object>
      *
      * @return the value at the specified position in this list, or the specified default value if this value is null.
      */
-    public <T> T get(int index, T defaultValue)
+    @SuppressWarnings("unchecked")
+	public <T> T get(int index, T defaultValue)
     {
         try
         {
@@ -677,7 +679,8 @@ public class NBTList implements List<Object>
             return previousItem;
         }
 
-        private T fetchNext()
+        @SuppressWarnings("unchecked")
+		private T fetchNext()
         {
             while (true)
             {
@@ -692,7 +695,8 @@ public class NBTList implements List<Object>
             }
         }
 
-        private T fetchPrevious()
+        @SuppressWarnings("unchecked")
+		private T fetchPrevious()
         {
             while (true)
             {

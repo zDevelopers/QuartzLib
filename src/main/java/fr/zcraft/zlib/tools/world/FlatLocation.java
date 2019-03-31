@@ -44,6 +44,7 @@ import org.bukkit.block.BlockFace;
  * In this documentation, the X and Y coordinates always refer to the plane's
  * coordinates, unless otherwise specified (referred as 'real world coordinates').
  */
+@SuppressWarnings("incomplete-switch")
 public class FlatLocation extends Location
 {
     /**

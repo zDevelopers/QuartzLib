@@ -754,7 +754,8 @@ abstract public class Command
      * @return The retrieved enum value.
      * @throws CommandException If the value cannot be found in the enum.
      */
-    protected <T extends Enum> T getEnumParameter(int index, Class<T> enumType) throws CommandException
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	protected <T extends Enum> T getEnumParameter(int index, Class<T> enumType) throws CommandException
     {
         Enum[] enumValues = enumType.getEnumConstants();
         String parameter = args[index].toLowerCase();

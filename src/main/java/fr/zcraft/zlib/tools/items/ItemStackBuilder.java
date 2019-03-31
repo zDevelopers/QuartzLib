@@ -38,13 +38,11 @@ import fr.zcraft.zlib.components.rawtext.RawTextPart;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Colorable;
-import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,27 +111,26 @@ import java.util.Map.Entry;
  *                  .craftItem();
  * </pre>
  */
+@SuppressWarnings("rawtypes")
 public class ItemStackBuilder
 {
     private final ItemStack itemStack;
     private Material material = null;
     private int amount = 1;
-    private short data = 0;
 
-    private RawTextPart title = null;
+	private RawTextPart title = null;
     private final List<String> loreLines = new ArrayList<>();
     private boolean resetLore = false;
 
-    private boolean glowing = false;
     private boolean hideAttributes = false;
-    private String[] hiddenAttributes = null;
 
     private Map<String, Object> nbt = null;
     private boolean replaceNBT = false;
 
+    private boolean applyGlowEffect = false;
+    
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
-    private DyeColor dye = null;
 
     /**
      * Creates a new ItemStackBuilder.
@@ -182,7 +179,6 @@ public class ItemStackBuilder
         if (itemStack != null)
         {
             this.amount = itemStack.getAmount();
-            this.data = itemStack.getDurability();
 
             ItemMeta meta = itemStack.getItemMeta();
 
@@ -216,16 +212,8 @@ public class ItemStackBuilder
             newItemStack.setAmount(amount);
         }
         
-        newItemStack.setDurability(data);
+       
 
-        if (dye != null)
-        {
-            MaterialData materialData = newItemStack.getData();
-            if (!(materialData instanceof Colorable))
-                throw new IllegalStateException("Unable to apply dye : item is not colorable.");
-
-            ((Colorable) materialData).setColor(dye);
-        }
 
         ItemMeta meta = newItemStack.getItemMeta();
 
@@ -237,20 +225,21 @@ public class ItemStackBuilder
 
         if (hideAttributes)
         {
-            if(hiddenAttributes == null)
-            {
-                ItemUtils.hideItemAttributes(meta);
-            }
-            else
-            {
-                ItemUtils.hideItemAttributes(meta, hiddenAttributes);
-            }
+        	meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        
         }
 
+        if(!meta.hasEnchants() && applyGlowEffect) {
+        	if(material != Material.FISHING_ROD)
+        		meta.addEnchant(Enchantment.LURE, 1, true);
+        	else
+        		meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
+        	
+        	meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+        
         newItemStack.setItemMeta(meta);
-
-        if (glowing)
-            GlowEffect.addGlow(newItemStack);
+        	
 
         newItemStack.addUnsafeEnchantments(enchantments);
 
@@ -545,10 +534,10 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder glow()
     {
-        if (this.glowing)
+        if (this.applyGlowEffect)
             throw new IllegalStateException("Glowing has already been set.");
 
-        this.glowing = true;
+        this.applyGlowEffect = true;
         return this;
     }
 
@@ -599,57 +588,9 @@ public class ItemStackBuilder
         return this;
     }
 
-    /**
-     * Hides all of the attribute lines of the ItemStack. This can only be
-     * called once, otherwise an IllegalStateException will be thrown.
-     *
-     * @return The current ItemStackBuilder instance, for methods chaining.
-     */
-    public ItemStackBuilder hideAttributes()
-    {
-        if (this.hideAttributes)
-            throw new IllegalStateException("'Hidden attributes' has already been set.");
+  
 
-        this.hideAttributes = true;
-        return this;
-    }
-    
-    public ItemStackBuilder hideAttributes(String... flagsNames)
-    {
-        hideAttributes();
-        this.hiddenAttributes = flagsNames;
-        
-        return this;
-    }
-
-    /**
-     * Sets the data (= damage) value of the ItemStack.
-     *
-     * @param data The data value.
-     *
-     * @return The current ItemStackBuilder instance, for methods chaining.
-     */
-    public ItemStackBuilder data(short data)
-    {
-        this.data = data;
-        return this;
-    }
-
-    /**
-     * Sets the dye color of the ItemStack. If the item is not colorable, an
-     * IllegalStateException will be thrown when making the item. Setting this
-     * value will override damage/data values.
-     *
-     * @param dye The dye color for the item.
-     *
-     * @return The current ItemStackBuilder instance, for methods chaining.
-     */
-    public ItemStackBuilder dye(DyeColor dye)
-    {
-        this.dye = dye;
-        return this;
-    }
-
+   
     /**
      * Sets the NBT tags to be set in the stack.
      * It is set last and will override some properties like

@@ -34,7 +34,7 @@ import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.util.List;
 import java.util.Map;
 
-
+@SuppressWarnings({"rawtypes","unchecked"})
 enum NBTType
 {
     TAG_END((byte) 0, null, Void.class),
@@ -52,7 +52,7 @@ enum NBTType
 
     // Unique NBT type id
     private final byte id;
-    private final Class[] types;
+	private final Class[] types;
     private final String nmsClassName;
     private Class nmsClass;
 

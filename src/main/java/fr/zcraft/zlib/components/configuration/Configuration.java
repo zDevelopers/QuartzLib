@@ -45,7 +45,7 @@ public abstract class Configuration extends ZLibComponent
     {
         init(this.getClass());
     }
-    
+    @SuppressWarnings("rawtypes")
     static public void init(Class configurationClass)
     {
         instance = new ConfigurationInstance(ZLib.getPlugin().getConfig());

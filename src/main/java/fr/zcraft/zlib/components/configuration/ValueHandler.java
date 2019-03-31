@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 class ValueHandler<T>
 {
     private final Class<T> outputType;

@@ -90,7 +90,8 @@ public class Attributes implements List<Attribute>
         return toArray(new Object[]{});
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <T> T[] toArray(T[] a)
     {
         ArrayList<T> list = new ArrayList<T>(size());

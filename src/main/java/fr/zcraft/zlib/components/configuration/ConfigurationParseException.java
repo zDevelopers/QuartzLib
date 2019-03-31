@@ -32,7 +32,11 @@ package fr.zcraft.zlib.components.configuration;
 
 public class ConfigurationParseException extends Exception
 {
-    private final Object value;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5461007750484876641L;
+	private final Object value;
     public ConfigurationParseException(String message, Object value)
     {
         super(message);

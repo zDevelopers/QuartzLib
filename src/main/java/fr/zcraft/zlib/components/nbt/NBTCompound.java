@@ -65,7 +65,8 @@ public class NBTCompound implements Map<String, Object>
         this.parentKey = null;
     }
     
-    NBTCompound(Object nativeNBTTag)
+    @SuppressWarnings("unchecked")
+	NBTCompound(Object nativeNBTTag)
     {
         this.nmsNbtTag = nativeNBTTag;
         if(nativeNBTTag == null)
@@ -145,7 +146,8 @@ public class NBTCompound implements Map<String, Object>
      * @param defaultValue The default value.
      * @return the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
      */
-    public <T> T get(String key, T defaultValue)
+    @SuppressWarnings("unchecked")
+	public <T> T get(String key, T defaultValue)
     {
         return get(key, defaultValue, defaultValue == null ? null : (Class<T>) defaultValue.getClass());
     }
@@ -161,7 +163,8 @@ public class NBTCompound implements Map<String, Object>
      * @param valueType The type of the expected value.
      * @return the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
      */
-    public <T> T get(String key, T defaultValue, Class<T> valueType)
+    @SuppressWarnings("unchecked")
+	public <T> T get(String key, T defaultValue, Class<T> valueType)
     {
         try
         {

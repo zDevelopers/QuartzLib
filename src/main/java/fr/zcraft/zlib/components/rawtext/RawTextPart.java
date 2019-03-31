@@ -37,7 +37,6 @@ import fr.zcraft.zlib.components.commands.Commands;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
-import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Entity;
@@ -51,6 +50,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<RawTextPart>, JSONAware
 {
     static private enum ActionClick
@@ -314,18 +315,6 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, enumValue.toString());
     }
 
-    /**
-     * Adds an hover achievement to this component.
-     *
-     * @param achievement The achievement to display on hover.
-     * @return The current raw text component, for method chaining.
-     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
-     */
-    @Deprecated
-    public T hover(Achievement achievement)
-    {
-        return hover(ActionHover.SHOW_ACHIEVEMENT, "achievement." + RawText.getI18nKey(achievement));
-    }
 
     /**
      * Adds an hover statistic to this component.

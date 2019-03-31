@@ -36,7 +36,6 @@ package fr.zcraft.zlib.tools.mojang;
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -111,11 +110,13 @@ public enum MojangHead
     /**
      * @return The head as an ItemStack (of type {@link Material#SKULL_ITEM}).
      */
-    public ItemStack asItem()
+    @SuppressWarnings("deprecation")
+	public ItemStack asItem()
     {
-        final ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-        final SkullMeta meta = (SkullMeta) item.getItemMeta();
-
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD,1);
+        
+        SkullMeta meta = (SkullMeta) item.getItemMeta();
+       
         meta.setOwner(headName);
         item.setItemMeta(meta);
 

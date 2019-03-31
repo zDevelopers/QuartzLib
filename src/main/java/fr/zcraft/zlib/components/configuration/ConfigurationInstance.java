@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 public class ConfigurationInstance extends ZLibComponent
 {
+	@SuppressWarnings("rawtypes")
     private ConfigurationItem[] items;
     private Callback<ConfigurationItem<?>> updateCallback;
     private FileConfiguration bukkitConfiguration;
@@ -192,6 +193,7 @@ public class ConfigurationInstance extends ZLibComponent
         }
     }
     
+    @SuppressWarnings("rawtypes")
     final void init(Class configurationClass)
     {
         if(items != null) return;
@@ -284,6 +286,7 @@ public class ConfigurationInstance extends ZLibComponent
         updateCallback = callback;
     }
     
+    @SuppressWarnings("rawtypes")
     private void initFields()
     {
         for(ConfigurationItem configField : items)
@@ -296,6 +299,7 @@ public class ConfigurationInstance extends ZLibComponent
      * Checks if the configuration is valid.
      * @return validity.
      */
+    @SuppressWarnings("rawtypes")
     private boolean validate()
     {
         boolean isValid = true;

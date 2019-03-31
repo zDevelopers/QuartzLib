@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("rawtypes")
 public class ConfigurationSection 
         extends ConfigurationItem<Map> 
         implements Map<String, ConfigurationItem>,

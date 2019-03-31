@@ -54,6 +54,7 @@ import java.util.UUID;
  *
  * @author ProkopyL and Amaury Carrade (documentation only).
  */
+@SuppressWarnings("unused")
 public final class UUIDFetcher
 {
 	/**

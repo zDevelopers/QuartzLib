@@ -44,6 +44,7 @@ import java.util.List;
  * @author ProkopyL
  * @author Amaury Carrade
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public final class Reflection
 {
     private Reflection() {}
@@ -580,7 +581,8 @@ public final class Reflection
         return (Class<T>) value.getClass();
     }
     
-    static public Class getClosestType(Class reference, Collection<Class> candidates)
+    
+	static public Class getClosestType(Class reference, Collection<Class> candidates)
     {
         ArrayList<Class> remainingCandidates = new ArrayList(candidates);
         

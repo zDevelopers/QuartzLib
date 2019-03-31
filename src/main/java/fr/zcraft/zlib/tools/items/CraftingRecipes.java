@@ -33,12 +33,10 @@ package fr.zcraft.zlib.tools.items;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.material.MaterialData;
 
 /**
  * This class provides various utilities for Crafting Recipes management.
@@ -163,7 +161,8 @@ public class CraftingRecipes extends ZLibComponent
      */
     static public ShapedRecipe shaped(ItemStack result, Material... materials)
     {
-        ShapedRecipe recipe = new ShapedRecipe(result)
+        @SuppressWarnings("deprecation")
+		ShapedRecipe recipe = new ShapedRecipe(result)
                 .shape(generateRecipeShape(materials.length));
                 
         if(materials.length > 9)
@@ -179,31 +178,6 @@ public class CraftingRecipes extends ZLibComponent
         return recipe;
     }
     
-    /**
-     * Generates a dummy shaped recipe, without any specified shape.
-     * Ingredients are automatically indexed, using uppercase letters
-     * (A = first ingredient, B = second ingredient, etc.)
-     * @param result The resulting item of the recipe.
-     * @param materials The ingredients for the recipe
-     * @return The dummy recipe.
-     */
-    static public ShapedRecipe shaped(ItemStack result, MaterialData... materials)
-    {
-        ShapedRecipe recipe = new ShapedRecipe(result)
-                .shape(generateRecipeShape(materials.length));
-                
-        if(materials.length > 9)
-            throw new IllegalArgumentException("Too many materials for a recipe.");
-        
-        char key = 'A';
-        for(int i = 0; i < materials.length; ++i)
-        {
-            recipe.setIngredient(key, materials[i]);
-            key = (char)(key + 1);
-        }
-        
-        return recipe;
-    }
     
     /**
      * Generates a new shaped recipe.
@@ -238,23 +212,7 @@ public class CraftingRecipes extends ZLibComponent
         return shaped(result, line1, line2, line3, new Material[]{});
     }
     
-    /**
-     * Generates a new shaped recipe.
-     * Ingredients are automatically indexed, using uppercase letters
-     * (A = first ingredient, B = second ingredient, etc.)
-     * @param result The resulting item of the recipe.
-     * @param line1 The first line of the recipe
-     * @param line2 The second line of the recipe
-     * @param line3 The third line of the recipe
-     * @param materials The ingredients for the recipe
-     * @return The shaped recipe
-     */
-    static public ShapedRecipe shaped(ItemStack result, String line1, String line2, String line3, MaterialData... materials)
-    {
-        ShapedRecipe recipe = shaped(result, materials);
-        recipe.shape(line1, line2, line3);
-        return recipe;
-    }
+   
     
     /**
      * Generates a new shaped recipe, using the same ingredients and results as
@@ -281,130 +239,9 @@ public class CraftingRecipes extends ZLibComponent
         return newRecipe;
     }
     
-    /**
-     * Returns a list of all the possible recipes for two ingredients in a
-     * 2x2 shaped, placed diagonally.
-     * Example :
-     * A B -
-     * B A -
-     * - - -
-     * @param a The first material of the recipe.
-     * @param b The second material of the recipe.
-     * @param result The resulting item of the recipe.
-     * @return All the possible recipes.
-     */
-    static public List<Recipe> get2x2DiagonalRecipes(Material a, Material b, ItemStack result)
-    {
-        return get2x2DiagonalRecipes(new MaterialData(a), new MaterialData(b), result);
-    }
     
-    /**
-     * Returns a list of all the possible recipes for two ingredients in a
-     * 2x2 shaped, placed diagonally.
-     * Example :
-     * A B -
-     * B A -
-     * - - -
-     * @param a The first material of the recipe.
-     * @param b The second material of the recipe.
-     * @param result The resulting item of the recipe.
-     * @return All the possible recipes.
-     */
-    static public List<Recipe> get2x2DiagonalRecipes(MaterialData a, MaterialData b, ItemStack result)
-    {
-        ArrayList<Recipe> recipes = new ArrayList<>();
-        
-        recipes.add(shaped(result, "AB ", "BA ", "   ", a, b));
-        recipes.add(shaped(result, "BA ", "AB ", "   ", a, b));
-        recipes.add(shaped(result, " AB", " BA", "   ", a, b));
-        recipes.add(shaped(result, " BA", " AB", "   ", a, b));
-        recipes.add(shaped(result, "   ", "AB ", "BA ", a, b));
-        recipes.add(shaped(result, "   ", "BA ", "AB ", a, b));
-        recipes.add(shaped(result, "   ", " AB", " BA", a, b));
-        recipes.add(shaped(result, "   ", " BA", " AB", a, b));
-        
-        return recipes;
-    }
     
-     /**
-     * Returns a list of all the possible recipes for one ingredient in a
-     * 2x2 shape, placed diagonally. The other diagonal is empty.
-     * Example :
-     * A - -
-     * - A -
-     * - - -
-     * @param a The material of the recipe.
-     * @param result The resulting item of the recipe.
-     * @return All the possible recipes.
-     */
-    static public List<Recipe> get2x2DiagonalRecipes(Material a, ItemStack result)
-    {
-        return get2x2DiagonalRecipes(new MaterialData(a), result);
-    }
+   
     
-    /**
-     * Returns a list of all the possible recipes for one ingredient in a
-     * 2x2 shape, placed diagonally. The other diagonal is empty.
-     * Example :
-     * A - -
-     * - A -
-     * - - -
-     * @param a The material of the recipe.
-     * @param result The resulting item of the recipe.
-     * @return All the possible recipes.
-     */
-    static public List<Recipe> get2x2DiagonalRecipes(MaterialData a, ItemStack result)
-    {
-        ArrayList<Recipe> recipes = new ArrayList<>();
-        
-        recipes.add(shaped(result, "A  ", " A ", "   ", a));
-        recipes.add(shaped(result, " A ", "A  ", "   ", a));
-        recipes.add(shaped(result, " A ", "  A", "   ", a));
-        recipes.add(shaped(result, "  A", " A ", "   ", a));
-        recipes.add(shaped(result, "   ", "A  ", " A ", a));
-        recipes.add(shaped(result, "   ", " A ", "A  ", a));
-        recipes.add(shaped(result, "   ", " A ", "  A", a));
-        recipes.add(shaped(result, "   ", "  A", " A ", a));
-        
-        return recipes;
-    }
-    
-    /**
-     * Returns a list of all the possible recipes for one ingredient in a
-     * 2x2 shape.
-     * Example :
-     * A A -
-     * A A -
-     * - - -
-     * @param a The material of the recipe.
-     * @param result The resulting item of the recipe.
-     * @return All the possible recipes.
-     */
-    static public List<Recipe> get2x2Recipes(Material a, ItemStack result)
-    {
-        return get2x2Recipes(new MaterialData(a), result);
-    }
-    
-    /**
-     * Returns a list of all the possible recipes for one ingredient in a
-     * 2x2 shape.
-     * Example :
-     * A A -
-     * A A -
-     * - - -
-     * @param a The material of the recipe.
-     * @param result The resulting item of the recipe.
-     * @return All the possible recipes.
-     */
-    static public List<Recipe> get2x2Recipes(MaterialData a, ItemStack result)
-    {
-        ArrayList<Recipe> recipes = new ArrayList<>();
-        
-        recipes.add(shaped(result, "AA ", "AA ", "   ", a));
-        recipes.add(shaped(result, " AA", " AA", "   ", a));
-        recipes.add(shaped(result, "   ", "AA ", "AA ", a));
-        recipes.add(shaped(result, "   ", " AA", " AA", a));
-        
-        return recipes;
-    }
+   
 }

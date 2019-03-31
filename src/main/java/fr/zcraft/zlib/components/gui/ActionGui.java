@@ -472,7 +472,8 @@ abstract public class ActionGui extends InventoryGui
             this.builder = null;
         }
         
-        public Action(String name, int slot, ItemStackBuilder builder, Method callback)
+        @SuppressWarnings("unused")
+		public Action(String name, int slot, ItemStackBuilder builder, Method callback)
         {
             this.name = name;
             this.slot = slot;

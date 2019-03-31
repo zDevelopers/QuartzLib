@@ -154,7 +154,7 @@ public class PromptGui extends GuiBase
         signLocation.getWorld().getBlockAt(signLocation.clone().add(0, -1, 0)).setType(Material.GLASS);
 
         final Block block = signLocation.getWorld().getBlockAt(signLocation);
-        block.setType(Material.SIGN_POST, false);
+        block.setType(Material.SIGN, false);
 
         final Sign sign = (Sign) block.getState();
         setSignContents(sign, contents);
