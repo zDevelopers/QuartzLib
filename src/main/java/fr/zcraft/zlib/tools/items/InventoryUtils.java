@@ -31,6 +31,8 @@
 package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.tools.runners.RunTask;
+import otg.zLib.Additions.VersionUtils;
+
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -56,12 +58,30 @@ abstract public class InventoryUtils
         {
             return true;
         }
+        
+        if(VersionUtils.getServerAPIVersion().equals(VersionUtils.GameServerVersion.VERSION_1_12_2_OR_OLDER)) {
+        	boolean nameSame = false;
+        	boolean titleSame = false;
+        	
+        	try {
+        		nameSame = inventory1.getClass().getMethod("getName").invoke(inventory1)
+        				.equals(inventory2.getClass().getMethod("getName").invoke(inventory2));
+        	} catch(Exception e) {
+        		// ignore
+        	}
+        	try {
+        		titleSame = inventory1.getClass().getMethod("getTitle").invoke(inventory1)
+        				.equals(inventory2.getClass().getMethod("getTitle").invoke(inventory2));	
+        	} catch(Exception e) {
+        		// ignore
+        	}
+        	if(nameSame || titleSame)
+        		return false;
+        }
 
         if (inventory1 == null || inventory2 == null
                 || inventory1.getSize() != inventory2.getSize()
-                || inventory1.getType() != inventory2.getType()
-                || !inventory1.getName().equals(inventory2.getName())
-                || !inventory1.getTitle().equals(inventory2.getTitle()))
+                || inventory1.getType() != inventory2.getType())
         {
             return false;
         }

@@ -40,6 +40,7 @@ import org.bukkit.event.Listener;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
+@SuppressWarnings({"unchecked"})
 public final class Gui extends ZLibComponent
 {
     /**

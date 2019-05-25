@@ -44,6 +44,7 @@ import java.util.Set;
  * 
  * It implements all operations of {@link java.util.Map} with a String key, as well as a few specific operations for NBT data.
  */
+@SuppressWarnings({"unchecked"})
 public class NBTCompound implements Map<String, Object>
 {
     private Object nmsNbtTag;

@@ -40,6 +40,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * This class provides various utilities for handling dual-wielding.
  */
+@SuppressWarnings("all")
 public enum DualWielding 
 {
     /**
@@ -75,7 +76,7 @@ public enum DualWielding
      * @param hand The hand 
      * @return The retrieved item.
      */
-    static public ItemStack getItemInHand(Player player, DualWielding hand)
+	static public ItemStack getItemInHand(Player player, DualWielding hand)
     {
         try
         {

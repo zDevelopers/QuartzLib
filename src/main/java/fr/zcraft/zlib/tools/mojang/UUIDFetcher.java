@@ -430,6 +430,7 @@ public final class UUIDFetcher
 	 */
 	static private class User
 	{
+		@SuppressWarnings("unused")
 		public String name;
 		public UUID uuid;
 	}

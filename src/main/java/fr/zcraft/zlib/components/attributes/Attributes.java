@@ -50,6 +50,7 @@ import org.bukkit.inventory.ItemStack;
  * It implements all operations of {@link java.util.List} for {@link fr.zcraft.zlib.components.attributes.Attribute}, 
  * as well as a few specific operations for item attributes.
  */
+@SuppressWarnings("unchecked")
 public class Attributes implements List<Attribute>
 {
     private final NBTList rawAttributes;
@@ -90,7 +91,8 @@ public class Attributes implements List<Attribute>
         return toArray(new Object[]{});
     }
 
-    @Override
+
+	@Override
     public <T> T[] toArray(T[] a)
     {
         ArrayList<T> list = new ArrayList<T>(size());

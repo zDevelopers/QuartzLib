@@ -113,6 +113,7 @@ import java.util.Map.Entry;
  *                  .craftItem();
  * </pre>
  */
+@SuppressWarnings({"deprecation","rawtypes"})
 public class ItemStackBuilder
 {
     private final ItemStack itemStack;
@@ -249,10 +250,9 @@ public class ItemStackBuilder
 
         newItemStack.setItemMeta(meta);
 
+        newItemStack.addUnsafeEnchantments(enchantments);
         if (glowing)
             GlowEffect.addGlow(newItemStack);
-
-        newItemStack.addUnsafeEnchantments(enchantments);
 
         return newItemStack;
     }

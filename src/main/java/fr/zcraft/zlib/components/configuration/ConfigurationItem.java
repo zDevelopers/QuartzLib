@@ -51,6 +51,7 @@ public class ConfigurationItem<T>
     
     private Class<T> valueType;
     
+    @SuppressWarnings({"rawtypes"})
     private ConfigurationItem parent;
     private ConfigurationInstance instance;
 
@@ -216,6 +217,7 @@ public class ConfigurationItem<T>
     
     void init() {}
     
+    @SuppressWarnings({"rawtypes"})
     void setParent(ConfigurationItem parent)
     {
         this.parent = parent;

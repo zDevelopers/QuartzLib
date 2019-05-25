@@ -41,6 +41,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+@SuppressWarnings({"unused","rawtypes"})
 class WorkerMainThreadExecutor implements Runnable
 {
     static private final int WATCH_LOOP_DELAY = 1;

@@ -44,6 +44,7 @@ import org.bukkit.entity.Player;
  *
  * @param <T> Data type to display.
  */
+@SuppressWarnings({"rawtypes"})
 public abstract class PaginatedTextView<T>
 {
     public static final int DEFAULT_LINES_IN_NON_EXPANDED_CHAT_VIEW = 10;

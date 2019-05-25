@@ -58,7 +58,8 @@ public class ExternalPluginComponent<T extends Plugin> extends ZLibComponent
         this.pluginName = pluginName;
     }
     
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected final void onEnable()
     {
         Plugin bukkitPlugin = Bukkit.getServer().getPluginManager().getPlugin(pluginName);

@@ -46,6 +46,7 @@ import java.util.NoSuchElementException;
  *
  * It implements all operations of {@link java.util.List}, as well as a few specific operations for NBT data.
  */
+@SuppressWarnings({"unchecked"})
 public class NBTList implements List<Object>
 {
     private Object nmsNbtTag;
@@ -66,7 +67,6 @@ public class NBTList implements List<Object>
         this(null, new ArrayList<>());
     }
 
-    @SuppressWarnings ("unchecked")
     NBTList(Object nmsListTag)
     {
         this(null, nmsListTag == null ? new ArrayList<>() : (List<Object>) NBTType.TAG_LIST.getData(nmsListTag));
@@ -188,7 +188,6 @@ public class NBTList implements List<Object>
             {
                 // We retrieve the first element of the internal list and use it as
                 // the list type, if the list is not empty.
-                @SuppressWarnings ("unchecked")
                 final List<Object> internalNBTList = (List<Object>) Reflection.getFieldValue(nmsNbtTag, "list");
 
                 if (!internalNBTList.isEmpty())

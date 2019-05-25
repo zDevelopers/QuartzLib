@@ -33,6 +33,8 @@ package fr.zcraft.zlib.components.configuration;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import otg.zLib.Additions.VersionUtils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -58,9 +60,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public abstract class ConfigurationValueHandlers 
 {
-    static private final Map<Class, ValueHandler> valueHandlers = new HashMap<>();
+    
+	static private final Map<Class, ValueHandler> valueHandlers = new HashMap<>();
     
     static {
         registerHandlers(ConfigurationValueHandlers.class);
@@ -414,14 +418,15 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
+    //TODO Use namespaced key
     static public Enchantment handleEnchantmentValue(String value) throws ConfigurationParseException
     {
-        Enchantment enchantment = Enchantment.getByName(value.toUpperCase());
+		Enchantment enchantment = Enchantment.getByName(value.toUpperCase());
         if(enchantment == null) throw new ConfigurationParseException("Invalid enchantment name", value);
         return enchantment;
     }
     
-    @ConfigurationValueHandler
+	@ConfigurationValueHandler
     static public ItemStack handleItemStackValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("type"))
@@ -432,9 +437,10 @@ public abstract class ConfigurationValueHandlers
         
         ItemStackBuilder item;
         
+        //TODO Work around this
         if(material.equals(Material.POTION))
         {
-            Potion potion = handlePotionValue(map);
+            Potion potion = handlePotionValue(map);	
             item = new ItemStackBuilder(potion.toItemStack(amount));
         }
         else
@@ -464,7 +470,7 @@ public abstract class ConfigurationValueHandlers
         return item.item();
     }
     
-    @ConfigurationValueHandler
+	@ConfigurationValueHandler
     static public Potion handlePotionValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("effect"))
@@ -479,9 +485,10 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
+    //TODO: not use DyeData
     static public DyeColor handleDyeColorValue(Integer value) throws ConfigurationParseException
     {
-        DyeColor color = DyeColor.getByDyeData((byte) (int) value);
+		DyeColor color = DyeColor.getByDyeData((byte) (int) value);
         
         if(color == null)
             throw new ConfigurationParseException("Invalid dye color code", value);
@@ -501,10 +508,19 @@ public abstract class ConfigurationValueHandlers
         return value;
     }
     
-    @ConfigurationValueHandler
+	@ConfigurationValueHandler
     static public BannerMeta handleBannerValue(Map map) throws ConfigurationParseException
     {
-        BannerMeta banner = (BannerMeta) new ItemStack(Material.BANNER).getItemMeta();
+    	Material bannerMat = null;
+    	switch(VersionUtils.getServerAPIVersion()) {
+    		case VERSION_1_12_2_OR_OLDER:
+    			bannerMat = Material.valueOf("BANNER");
+    			break;
+    		default:
+    			bannerMat = Material.valueOf("WHITE_BANNER");
+    			break;
+    	}
+        BannerMeta banner = (BannerMeta) new ItemStack(bannerMat).getItemMeta();
         DyeColor baseColor = getValue(map, "color", DyeColor.BLACK);
         List patterns = getListValue(map, "patterns", new ArrayList(), Object.class);
         

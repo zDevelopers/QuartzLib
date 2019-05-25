@@ -37,6 +37,8 @@ import org.bukkit.block.banner.PatternType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 
+import otg.zLib.Additions.VersionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,6 +54,7 @@ import java.util.Map;
  *
  * @author Florian Cassayre
  */
+@SuppressWarnings("deprecation")
 public final class TextualBanners
 {
     /**
@@ -146,7 +149,16 @@ public final class TextualBanners
      */
     public static ItemStack getBanner(DyeColor color, List<Pattern> patterns)
     {
-        ItemStack banner = new ItemStack(Material.BANNER);
+    	Material bannerMat = null;
+    	switch(VersionUtils.getServerAPIVersion()) {
+    		case VERSION_1_12_2_OR_OLDER:
+    			bannerMat = Material.valueOf("BANNER");
+    			break;
+    		default:
+    			bannerMat = Material.valueOf("WHITE_BANNER");
+    			break;
+    	}
+        ItemStack banner = new ItemStack(bannerMat);
         banner.setItemMeta(getBannerMeta(color, patterns));
         return banner;
     }
@@ -159,9 +171,18 @@ public final class TextualBanners
      *
      * @return An ItemMeta containing these parameters
      */
-    public static BannerMeta getBannerMeta(DyeColor color, List<Pattern> patterns)
+	public static BannerMeta getBannerMeta(DyeColor color, List<Pattern> patterns)
     {
-        BannerMeta meta = (BannerMeta) new ItemStack(Material.BANNER).getItemMeta();
+    	Material bannerMat = null;
+    	switch(VersionUtils.getServerAPIVersion()) {
+    		case VERSION_1_12_2_OR_OLDER:
+    			bannerMat = Material.valueOf("BANNER");
+    			break;
+    		default:
+    			bannerMat = Material.valueOf("WHITE_BANNER");
+    			break;
+    	}
+        BannerMeta meta = (BannerMeta) new ItemStack(bannerMat).getItemMeta();
         meta.setBaseColor(color);
         meta.setPatterns(patterns);
         return meta;
@@ -324,7 +345,7 @@ public final class TextualBanners
      */
     public static void editBanner(ItemStack item, Banner banner)
     {
-        if (item.getType() != Material.BANNER)
+        if (item.getType().toString().endsWith("BANNER"))
             throw new IllegalArgumentException("The specified ItemStack isn't a banner !");
         BannerMeta meta = (BannerMeta) item.getItemMeta();
         banner.setBaseColor(meta.getBaseColor());

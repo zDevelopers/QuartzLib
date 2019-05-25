@@ -56,6 +56,7 @@ public class CommandGroup implements TabCompleter, CommandExecutor
     private final HashMap<String, String> commandsDescriptions = new HashMap<>();
     private String description = "";
     
+    @SuppressWarnings({"unchecked"})
     CommandGroup(CommandGroup shortcutCommandGroup, Class<? extends Command> commandClass, String ... names)
     {
         this.names = names;
@@ -64,6 +65,7 @@ public class CommandGroup implements TabCompleter, CommandExecutor
         initCommands();
     }
     
+    @SuppressWarnings({"unchecked"})
     CommandGroup(String[] names, Class<? extends Command> ... commandsClasses)
     {
         this.names = names;

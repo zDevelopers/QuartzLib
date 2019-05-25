@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.rawtext;
 
+@SuppressWarnings({"rawtypes"})
 class RawTextSubPart extends RawTextPart<RawTextSubPart>
 {
     public RawTextSubPart(String text)

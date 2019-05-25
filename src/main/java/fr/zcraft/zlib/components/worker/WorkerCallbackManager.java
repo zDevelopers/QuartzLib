@@ -37,6 +37,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 
+@SuppressWarnings({"unchecked","rawtypes","unused"})
 class WorkerCallbackManager implements Runnable
 {
     static private final int WATCH_LOOP_DELAY = 5;

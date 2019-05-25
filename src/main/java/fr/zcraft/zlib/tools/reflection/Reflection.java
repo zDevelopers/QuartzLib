@@ -44,6 +44,7 @@ import java.util.List;
  * @author ProkopyL
  * @author Amaury Carrade
  */
+@SuppressWarnings({"unchecked","rawtypes"})
 public final class Reflection
 {
     private Reflection() {}

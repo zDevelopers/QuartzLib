@@ -45,6 +45,7 @@ import org.bukkit.material.MaterialData;
  * Crafting recipes can be registered safely before the plugin/server is loaded.
  * If this is the case, their registration will be done at plugin initialization. 
  */
+@SuppressWarnings("deprecation")
 public class CraftingRecipes extends ZLibComponent
 {
     static private boolean registered = false;

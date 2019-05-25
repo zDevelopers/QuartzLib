@@ -34,6 +34,8 @@ import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.Callback;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+import otg.zLib.Additions.VersionUtils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -154,7 +156,19 @@ public class PromptGui extends GuiBase
         signLocation.getWorld().getBlockAt(signLocation.clone().add(0, -1, 0)).setType(Material.GLASS);
 
         final Block block = signLocation.getWorld().getBlockAt(signLocation);
-        block.setType(Material.SIGN_POST, false);
+        Material signMat = null;
+        switch(VersionUtils.getServerAPIVersion()) {
+        case VERSION_1_12_2_OR_OLDER:
+        	signMat = Material.valueOf("SIGN_POST");
+        	break;
+        case VERSION_1_13_X:
+        	signMat = Material.valueOf("SIGN");
+        	break;
+        default:
+        	signMat = Material.valueOf("OAK_SIGN");
+        	break;
+        }
+        block.setType(signMat, false);
 
         final Sign sign = (Sign) block.getState();
         setSignContents(sign, contents);

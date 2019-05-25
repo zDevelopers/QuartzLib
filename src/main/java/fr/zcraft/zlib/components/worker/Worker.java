@@ -44,6 +44,7 @@ import java.util.concurrent.Future;
  * A worker is a thread that can handle multiple tasks, which are executed in a queue.
  * 
  */
+@SuppressWarnings({"unchecked","rawtypes"})
 public abstract class Worker extends ZLibComponent
 {
     /*===== Static API =====*/

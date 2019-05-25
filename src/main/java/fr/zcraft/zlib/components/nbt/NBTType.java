@@ -34,7 +34,7 @@ import fr.zcraft.zlib.tools.reflection.Reflection;
 import java.util.List;
 import java.util.Map;
 
-
+@SuppressWarnings({"unchecked","rawtypes"})
 enum NBTType
 {
     TAG_END((byte) 0, null, Void.class),

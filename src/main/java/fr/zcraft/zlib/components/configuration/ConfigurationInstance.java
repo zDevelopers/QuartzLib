@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-
+@SuppressWarnings({"rawtypes"})
 public class ConfigurationInstance extends ZLibComponent
 {
-    private ConfigurationItem[] items;
+	private ConfigurationItem[] items;
     private Callback<ConfigurationItem<?>> updateCallback;
     private FileConfiguration bukkitConfiguration;
     private final String fileName;

@@ -97,6 +97,7 @@ import java.util.Set;
  *     RawMessage.broadcast(text.build());
  * </pre>
  */
+@SuppressWarnings({"rawtypes","unchecked","deprecation"})
 public class RawText extends RawTextPart<RawText>
 {
     public RawText()

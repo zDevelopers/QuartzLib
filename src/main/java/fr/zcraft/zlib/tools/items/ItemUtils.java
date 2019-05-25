@@ -57,12 +57,16 @@ import java.util.Random;
 /**
  * Utility class for dealing with items and inventories.
  */
+@SuppressWarnings({"rawtypes","unchecked","deprecation"})
 abstract public class ItemUtils
 {
     private ItemUtils() {}
     
-    static private boolean addItemFlagLoaded = false;
+    static private boolean bukkitItemFlagMethodsLoaded = false;
     static private Method addItemFlagsMethod = null;
+    static private Method hasItemFlagsMethod = null;
+    static private Method removeItemFlagsMethod = null;
+    
     static private Object[] itemFlagValues = null;
 
     /**
@@ -70,7 +74,7 @@ abstract public class ItemUtils
      */
     static private void init()
     {
-        if (addItemFlagLoaded) return;
+        if (bukkitItemFlagMethodsLoaded) return;
         
         try
         {
@@ -86,7 +90,22 @@ abstract public class ItemUtils
                 addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagValues.getClass());
             }
             
+          
+            hasItemFlagsMethod = ItemMeta.class.getMethod("hasItemFlag​", itemFlagClass);
+            hasItemFlagsMethod.setAccessible(true);
+            
+            try
+            {
+                removeItemFlagsMethod = ItemMeta.class.getMethod("removeItemFlags", itemFlagClass);
+            }
+            catch(NoSuchMethodException ex)
+            {
+                removeItemFlagsMethod = ItemMeta.class.getMethod("removeItemFlags", itemFlagValues.getClass());
+            }
+            
+            
             addItemFlagsMethod.setAccessible(true);
+            removeItemFlagsMethod.setAccessible(true);
         }
         catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e)
         {
@@ -97,7 +116,7 @@ abstract public class ItemUtils
             PluginLogger.error("Exception occurred while looking for the ItemFlag API.", e.getCause());
         }
         
-        addItemFlagLoaded = true;
+        bukkitItemFlagMethodsLoaded = true;
     }
 
     static private Object getItemFlagValue(String flagName)
@@ -129,6 +148,70 @@ abstract public class ItemUtils
     }
     
     /**
+     * Checks if the {@link ItemMeta} has the specified ItemFlag .
+     *
+     * @param meta The {@link ItemMeta} to check from attributes from.
+     * @param flagName The name of the ItemFlag
+     */
+    static public boolean hasItemFlag(ItemMeta meta, String flagName)
+    {
+        if (!bukkitItemFlagMethodsLoaded) init();
+        if (hasItemFlagsMethod == null)
+        {
+            return false;
+        }
+        Object fl =  getItemFlagValue(flagName);
+        if(fl == null)
+        	return false;
+
+        try
+        {
+            return (boolean) hasItemFlagsMethod.invoke(meta, fl);
+        }
+        catch (IllegalAccessException ex)
+        {
+            PluginLogger.error("IllegalAccessException caught while invoking the ItemMeta.hasItemFlag method.", ex);
+        }
+        catch (InvocationTargetException ex)
+        {
+            PluginLogger.error("Exception occurred while invoking the ItemMeta.hasItemFlag method.", ex.getCause());
+        }
+
+        return false;
+    }
+    
+    /**
+     * Removes specified ItemFlags from the specified item attributes of the given {@link ItemMeta}.
+     *
+     * @param meta The {@link ItemMeta} to remove attributes from.
+     * @param values names of the ItemFlags to remove
+     * @return The modified item meta. 
+     */
+    static public ItemMeta removeItemFlags(ItemMeta meta, String ...values)
+    {
+        if (!bukkitItemFlagMethodsLoaded) init();
+        if (removeItemFlagsMethod == null)
+        {
+            return meta;
+        }
+        Object[] vl = getItemFlagsValues(values);
+        try
+        {
+            removeItemFlagsMethod.invoke(meta, vl);
+        }
+        catch (IllegalAccessException ex)
+        {
+            PluginLogger.error("IllegalAccessException caught while invoking the ItemMeta.removeItemFlags method.", ex);
+        }
+        catch (InvocationTargetException ex)
+        {
+            PluginLogger.error("Exception occurred while invoking the ItemMeta.removeItemFlags method.", ex.getCause());
+        }
+
+        return meta;
+    }
+    
+    /**
      * Hides all the item attributes of the given {@link ItemMeta}.
      *
      * @param meta The {@link ItemMeta} to hide attributes from.
@@ -137,7 +220,7 @@ abstract public class ItemUtils
      */
     static public ItemMeta hideItemAttributes(ItemMeta meta)
     {
-        if (!addItemFlagLoaded) init();
+        if (!bukkitItemFlagMethodsLoaded) init();
         return hideItemAttributes(meta, itemFlagValues);
     }
     
@@ -151,7 +234,7 @@ abstract public class ItemUtils
      */
     static public ItemMeta hideItemAttributes(ItemMeta meta, String... itemFlagsNames)
     {
-        if (!addItemFlagLoaded) init();
+        if (!bukkitItemFlagMethodsLoaded) init();
         return hideItemAttributes(meta, getItemFlagsValues(itemFlagsNames));
     }
     
@@ -182,8 +265,7 @@ abstract public class ItemUtils
      * Hides all the item attributes of the given {@link ItemStack}.
      *
      * <p>
-     * Warning: this will update the ItemMeta, clearing the effects of, as
-     * example, {@link fr.zcraft.zlib.tools.items.GlowEffect}.</p>
+     * Warning: this will update the ItemMeta
      *
      * @param stack The {@link ItemStack} to hide attributes from.
      * @return The same item stack. The modification is applied by reference,

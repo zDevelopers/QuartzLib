@@ -34,7 +34,12 @@ import java.util.Locale;
 
 public class UnsupportedLocaleException extends IllegalArgumentException
 {
-    public UnsupportedLocaleException(Locale locale)
+    /**
+	 * Default Serial UID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public UnsupportedLocaleException(Locale locale)
     {
         super("Unsupported locale " + locale);
     }

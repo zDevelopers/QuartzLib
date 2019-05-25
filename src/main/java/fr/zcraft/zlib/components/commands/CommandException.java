@@ -37,7 +37,12 @@ import org.bukkit.ChatColor;
 
 public class CommandException extends Exception
 {
-    public enum Reason
+    /**
+	 * Generated SerialUID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public enum Reason
     {
         COMMANDSENDER_EXPECTED_PLAYER,
         INVALID_PARAMETERS,

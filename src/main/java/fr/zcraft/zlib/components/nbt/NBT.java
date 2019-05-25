@@ -33,6 +33,7 @@ package fr.zcraft.zlib.components.nbt;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
+
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -49,6 +50,7 @@ import java.util.Set;
 /**
  * This class provides various utilities to manipulate NBT data.
  */
+@SuppressWarnings("rawtypes")
 public abstract class NBT 
 {
     private NBT() {}
@@ -123,6 +125,7 @@ public abstract class NBT
      * @param enchants the enchantment list to get the data from.
      * @return an NBT-like representation of the specified enchantments.
      */
+    //TODO make this better
     static public List<Map<String, Object>> fromEnchantments(Map<Enchantment, Integer> enchants)
     {
         List<Map<String, Object>> enchantList = new ArrayList<>();
@@ -130,13 +133,27 @@ public abstract class NBT
         for (Map.Entry<Enchantment, Integer> enchantment : enchants.entrySet())
         {
             Map<String, Object> enchantmentData = new HashMap<>();
-            enchantmentData.put("id", enchantment.getKey().getId());
+            Object put = null;
+            Enchantment ench = enchantment.getKey();
+            try {
+            	put = ench.getClass().getMethod("getId").invoke(ench);
+            } catch(Exception e) {
+            	try {
+					put = ((org.bukkit.NamespacedKey) ench.getClass().getMethod("getKey").invoke(ench)).getKey();
+				} catch (Exception f) {
+					// FUCK
+				}
+            	
+            }
+            enchantmentData.put("id", put);
             enchantmentData.put("lvl", enchantment.getValue());
             enchantList.add(enchantmentData);
         }
         
         return enchantList;
     }
+    
+    
     
     /**
      * Returns an NBT-like representation of the item flags (HideFlags).
@@ -384,7 +401,8 @@ public abstract class NBT
 
     /* ========== NBT String Utilities ========== */
     
-    static private void toNBTJSONString(StringBuilder builder, Object value)
+    @SuppressWarnings("unchecked")
+	static private void toNBTJSONString(StringBuilder builder, Object value)
     {
         if (value == null) return;
         

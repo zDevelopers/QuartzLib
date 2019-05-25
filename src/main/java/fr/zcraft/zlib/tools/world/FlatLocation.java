@@ -170,7 +170,8 @@ public class FlatLocation extends Location
      * @param loc2 The second location.
      * @return  The distance
      */
-    static public double flatDistanceX(FlatLocation loc1, FlatLocation loc2)
+    @SuppressWarnings("incomplete-switch")
+	static public double flatDistanceX(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         
@@ -194,7 +195,8 @@ public class FlatLocation extends Location
      * @param loc2 The second location.
      * @return  The block distance
      */
-    static public int flatBlockDistanceX(FlatLocation loc1, FlatLocation loc2)
+    @SuppressWarnings("incomplete-switch")
+	static public int flatBlockDistanceX(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         
@@ -254,7 +256,8 @@ public class FlatLocation extends Location
      * @param loc2 The second location
      * @return The new location
      */
-    static public FlatLocation minMerged(FlatLocation loc1, FlatLocation loc2)
+    @SuppressWarnings("incomplete-switch")
+	static public FlatLocation minMerged(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         FlatLocation loc = new FlatLocation(loc1.getWorld(), loc1.getFacing());

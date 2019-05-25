@@ -36,7 +36,12 @@ package fr.zcraft.zlib.components.nbt;
  */
 public class NBTException extends RuntimeException
 {
-    public NBTException(String text, Throwable cause)
+    /**
+	 * Default Serial UID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public NBTException(String text, Throwable cause)
     {
         super(text, cause);
     }

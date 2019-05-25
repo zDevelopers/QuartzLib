@@ -53,6 +53,7 @@ public class Commands extends ZLibComponent
         commandGroups.add(newCommandGroup);
     }
     
+    @SuppressWarnings({"unchecked"})
     static public void register(String[] names, Class<? extends Command> ... commandsClasses)
     {
         final CommandGroup commandGroup = new CommandGroup(names, commandsClasses);
@@ -61,6 +62,7 @@ public class Commands extends ZLibComponent
         commandGroups.add(commandGroup);
     }
     
+    @SuppressWarnings({"unchecked"})
     static public void register(String name, Class<? extends Command> ... commandsClasses)
     {
         register(new String[] {name}, commandsClasses);

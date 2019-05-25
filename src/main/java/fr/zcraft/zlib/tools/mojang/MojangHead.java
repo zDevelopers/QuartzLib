@@ -35,6 +35,8 @@ package fr.zcraft.zlib.tools.mojang;
 
 import com.google.common.base.CaseFormat;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
+import otg.zLib.Additions.VersionUtils;
+
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.inventory.ItemStack;
@@ -43,6 +45,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 /**
  * Easier access to Mojang's “Marc's Head Format” Heads, e.g. for use in GUIs.
  */
+@SuppressWarnings("all")
 public enum MojangHead
 {
     /* Entities */
@@ -111,9 +114,18 @@ public enum MojangHead
     /**
      * @return The head as an ItemStack (of type {@link Material#SKULL_ITEM}).
      */
-    public ItemStack asItem()
+	public ItemStack asItem()
     {
-        final ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+    	ItemStack cred = null;
+    	switch(VersionUtils.getServerAPIVersion()) {
+    	case VERSION_1_12_2_OR_OLDER:
+    		cred = new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal());
+    		break;
+    	default:
+    		cred = new ItemStack(Material.valueOf("PLAYER_HEAD"),1);
+    	}
+    	
+        final ItemStack item = cred.clone();
         final SkullMeta meta = (SkullMeta) item.getItemMeta();
 
         meta.setOwner(headName);
