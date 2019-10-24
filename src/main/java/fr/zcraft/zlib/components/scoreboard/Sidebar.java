@@ -38,13 +38,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -299,6 +293,8 @@ public abstract class Sidebar
                 // Else, only the title is updated, or nothing
             else if (title != null)
                 globalObjective.setDisplayName(title);
+
+            ObjectiveSender.send(globalObjective);
         }
 
         else

@@ -77,6 +77,7 @@ public class ObjectiveSender
     private final static Class<?> packetPlayOutScoreboardObjectiveClass;
     private final static Class<?> packetPlayOutScoreboardDisplayObjectiveClass;
     private final static Class<?> packetPlayOutScoreboardScoreClass;
+    private static Class<?> chatComponentText;
 
     private static Object enumScoreboardHealthDisplay_INTEGER = null;
     private static Object enumScoreboardAction_CHANGE = null;
@@ -85,6 +86,15 @@ public class ObjectiveSender
 
     static
     {
+        try
+        {
+            chatComponentText = Reflection.getMinecraftClassByName("ChatComponentText");
+        }
+        catch (ClassNotFoundException e)
+        {
+            chatComponentText = null;
+        }
+
         try
         {
             packetPlayOutScoreboardObjectiveClass = Reflection.getMinecraftClassByName("PacketPlayOutScoreboardObjective");
@@ -126,7 +136,14 @@ public class ObjectiveSender
             }
             catch (ClassNotFoundException e)
             {
-                enumScoreboardAction = Reflection.getMinecraftClassByName("EnumScoreboardAction");
+                try
+                {
+                    enumScoreboardAction = Reflection.getMinecraftClassByName("EnumScoreboardAction");
+                }
+                catch (ClassNotFoundException ex)
+                {
+                    enumScoreboardAction = Reflection.getMinecraftClassByName("ScoreboardServer$Action");
+                }
             }
 
             for (Object enumConstant : enumScoreboardAction.getEnumConstants())
@@ -296,7 +313,15 @@ public class ObjectiveSender
         final String oldObjective = sentObjectives.get(receiver);
         final Object connection = getPlayerConnection(receiver);
 
-        createObjective(connection, objective);
+        try
+        {
+            createObjective(connection, objective);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
         sendScores(connection, objective);
 
         // The objective is displayed when the scores are sent, so all the lines are displayed
@@ -420,9 +445,18 @@ public class ObjectiveSender
             Object packet = Reflection.instantiate(packetPlayOutScoreboardObjectiveClass);
 
             Reflection.setFieldValue(packet, "a", objectiveName);                       // Objective name
-            Reflection.setFieldValue(packet, "b", objectiveDisplayName);                // Display name
             Reflection.setFieldValue(packet, "c", enumScoreboardHealthDisplay_INTEGER); // Display mode (integer or hearts)
             Reflection.setFieldValue(packet, "d", action);                              // Action (0 = create; 1 = delete; 2 = update)
+
+            // Display name. The try part is for 1.13+, using chat components for the title; the catch for 1.12-.
+            try
+            {
+                Reflection.setFieldValue(packet, "b", Reflection.instantiate(chatComponentText, objectiveDisplayName));
+            }
+            catch (IllegalArgumentException e)
+            {
+                Reflection.setFieldValue(packet, "b", objectiveDisplayName);
+            }
 
             NMSNetwork.sendPacket(connection, packet);
         }

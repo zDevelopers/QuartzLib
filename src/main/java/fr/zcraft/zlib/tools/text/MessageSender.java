@@ -641,7 +641,18 @@ public final class MessageSender
          */
         public boolean isJSON()
         {
-            return isJSON;
+            if (isJSON)
+            {
+                return true;
+            }
+
+            // Action bar is JSON for 1.9+
+            else if (this == ACTION_BAR)
+            {
+                return !nmsVersion.contains("v1_8");
+            }
+
+            else return false;
         }
     }
 }
