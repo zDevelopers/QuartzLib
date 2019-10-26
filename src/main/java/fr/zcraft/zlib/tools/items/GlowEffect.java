@@ -40,6 +40,8 @@ import java.lang.reflect.Field;
 /**
  * A fake enchantment to add a glowing effect on any item.
  *
+ * <strong>Only work with 1.12 and before.</strong>
+ *
  * @author Amaury Carrade
  */
 public class GlowEffect extends EnchantmentWrapper
