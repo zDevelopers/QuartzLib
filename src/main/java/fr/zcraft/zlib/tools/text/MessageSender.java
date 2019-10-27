@@ -52,6 +52,9 @@ public final class MessageSender
     private static Class<?> iChatBaseComponentClass;
     private static Class<?> chatComponentTextClass;
 
+    private static Class<?> packetPlayOutTitleClass;
+    private static Enum<?> actionBarTitleActionEnum;
+
     private static Class<?> chatMessageTypeEnum;
     private static Method chatMessageByteToTypeMethod;
 
@@ -97,8 +100,30 @@ public final class MessageSender
                     chatMessageByteToTypeMethod = null;
                 }
             }
+
+            // For 1.12+, we send action bars using the title packet, as sending them using the chat packet is broken
+            // (see MC-119145).
+            try
+            {
+                packetPlayOutTitleClass = Reflection.getMinecraftClassByName("PacketPlayOutTitle");
+
+                final Class<? extends Enum> titleActionEnum = Reflection.getMinecraftClassByName("PacketPlayOutTitle$EnumTitleAction");
+                for (final Enum<?> actionEnumConstant : titleActionEnum.getEnumConstants())
+                {
+                    if (actionEnumConstant.name().equals("ACTIONBAR"))
+                    {
+                        actionBarTitleActionEnum = actionEnumConstant;
+                        break;
+                    }
+                }
+            }
+            catch (final Exception e)
+            {
+                packetPlayOutTitleClass = null;
+                actionBarTitleActionEnum = null;
+            }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             enabled = false;
         }
@@ -537,19 +562,39 @@ public final class MessageSender
 
                 if (type.isJSON())
                 {
-                    componentText = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", content));
+                    componentText = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, "a", (Object) content));
                 }
                 else
                 {
                     componentText = Reflection.instantiate(chatComponentTextClass, content);
                 }
 
-                final Enum<?> nmsMessageType = type.getMessagePositionEnumValue();
-
-                if (nmsMessageType != null)
-                    chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, chatMessageTypeEnum).newInstance(componentText, nmsMessageType);
+                // For Minecraft 1.12+, we cannot send action bars using chat packets, as their JSON formatting is
+                // ignored due to a bug (MC-119145). So, if possible, we use an alternative way of sending them using
+                // the Title packet.
+                if (type == MessageType.ACTION_BAR && packetPlayOutTitleClass != null)
+                {
+                    chatPacket = packetPlayOutTitleClass
+                            .getConstructor(actionBarTitleActionEnum.getClass(), iChatBaseComponentClass)
+                            .newInstance(actionBarTitleActionEnum, componentText);
+                }
                 else
-                    chatPacket = packetPlayOutChatClass.getConstructor(iChatBaseComponentClass, byte.class).newInstance(componentText, type.getMessagePositionByte());
+                {
+                    final Enum<?> nmsMessageType = type.getMessagePositionEnumValue();
+
+                    if (nmsMessageType != null)
+                    {
+                        chatPacket = packetPlayOutChatClass
+                                .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum)
+                                .newInstance(componentText, nmsMessageType);
+                    }
+                    else
+                    {
+                        chatPacket = packetPlayOutChatClass
+                                .getConstructor(iChatBaseComponentClass, byte.class)
+                                .newInstance(componentText, type.getMessagePositionByte());
+                    }
+                }
             }
 
             NMSNetwork.sendPacket(receiver, chatPacket);
