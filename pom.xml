@@ -75,6 +75,16 @@
 			<artifactId>bukkit</artifactId>
 			<version>1.8.3-R0.1-SNAPSHOT</version>
 		</dependency>
+
+		<!--
+			TEMP DEPENDENCY: it was removed from Bukkit dependencies in 1.14, but is still available at runtime.
+			It is used by RawTextPart (implements JSONAware); TODO check if it's really needed.
+		-->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
