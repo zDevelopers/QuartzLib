@@ -30,10 +30,16 @@
 package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.tools.PluginLogger;
+import fr.zcraft.zlib.tools.items.ItemUtils;
+
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
+
+
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.Material;
 
 import java.lang.reflect.Field;
 
@@ -44,134 +50,146 @@ import java.lang.reflect.Field;
  *
  * @author Amaury Carrade
  */
-public class GlowEffect extends EnchantmentWrapper
-{
-    private final static int ENCHANTMENT_ID = 254;
-    private final static String ENCHANTMENT_NAME = "GlowEffect";
-    private static Enchantment glow;
+public class GlowEffect extends EnchantmentWrapper {
+	private final static int ENCHANTMENT_ID = 254;
+	private final static String ENCHANTMENT_NAME = "GlowEffect";
+	private static Enchantment glow;
 
-    protected GlowEffect(int id)
-    {
-        super(id);
-    }
+	protected GlowEffect(int id) {
 
-    /**
-     * Registers, if needed, and returns the fake enchantment to apply on items.
-     *
-     * @return an instance of the fake enchantment.
-     */
-    private static Enchantment getGlow()
-    {
-        if (glow != null)
-        {
-            return glow;
-        }
+		super(id);
 
-        try
-        {
-            // We change this to force Bukkit to accept a new enchantment.
-            // Thanks to Cybermaxke on BukkitDev.
-            Field acceptingNewField = Enchantment.class.getDeclaredField("acceptingNew");
-            acceptingNewField.setAccessible(true);
-            acceptingNewField.set(null, true);
-        }
-        catch (Exception e)
-        {
-            PluginLogger.error("Unable to re-enable enchantments registrations", e);
-        }
+	}
 
-        try
-        {
-            glow = new GlowEffect(ENCHANTMENT_ID);
-            Enchantment.registerEnchantment(glow);
-        }
-        catch (IllegalArgumentException e)
-        {
-            // If the enchantment is already registered - happens on server reload
-            glow = Enchantment.getById(ENCHANTMENT_ID); // getByID required - by name it doesn't work (returns null).
-        }
+	/**
+	 * Registers, if needed, and returns the fake enchantment to apply on items.
+	 *
+	 * @return an instance of the fake enchantment.
+	 */
+	private static Enchantment getGlow() {
+		if (glow != null) {
+			return glow;
+		}
 
-        return glow;
-    }
+		try {
+			// We change this to force Bukkit to accept a new enchantment.
+			// Thanks to Cybermaxke on BukkitDev.
+			Field acceptingNewField = Enchantment.class.getDeclaredField("acceptingNew");
+			acceptingNewField.setAccessible(true);
+			acceptingNewField.set(null, true);
+		} catch (Exception e) {
+			PluginLogger.error("Unable to re-enable enchantments registrations", e);
+		}
 
-    /**
-     * Adds a glowing effect to the given item stack.
-     *
-     * Warning: this effect is a bit unstable: it will be thrown away if the item's meta is updated.
-     * So add it at the end.
-     *
-     * @param item The item.
-     */
-    public static void addGlow(ItemStack item)
-    {
-        if (item == null) return;
+		try {
+			try {
+				glow = new GlowEffect(ENCHANTMENT_ID);
+				Enchantment.registerEnchantment(glow);
+			} catch (NoSuchMethodError e) {
+				// 1.13+
 
-        Enchantment glow = getGlow();
-        if (glow != null) item.addEnchantment(glow, 1);
-    }
+			}
 
-    /**
-     * Removes a previously-added glowing effect from the given item.
-     *
-     * @param item The item.
-     */
-    public static void removeGlow(ItemStack item)
-    {
-        if(item == null) return;
+		} catch (IllegalArgumentException e) {
+			// If the enchantment is already registered - happens on server
+			// reload
+			glow = Enchantment.getById(ENCHANTMENT_ID); // getByID required - by
+														// name it doesn't work
+														// (returns null).
+		}
 
-        Enchantment glow = getGlow();
-        if (glow != null) item.removeEnchantment(glow);
-    }
-    
-    /**
-     * Returns if the give item has the glowing effect applied to it.
-     * @param item The item.
-     * @return if the give item has the glowing effect applied to it.
-     */
-    public static boolean hasGlow(ItemStack item)
-    {
-        if(item == null) return false;
-        
-        Enchantment glow = getGlow();
-        if(glow != null) return item.getEnchantmentLevel(glow) > 0;
-        return false;
-    }
+		return glow;
+	}
 
-    /* **  Enchantment properties overwritten  ** */
+	/**
+	 * Adds a glowing effect to the given item stack.
+	 *
+	 * Warning: this effect is a bit unstable: it will be thrown away if the
+	 * item's meta is updated. So add it at the end.
+	 *
+	 * @param item
+	 *            The item.
+	 */
+	public static void addGlow(ItemStack item) {
+		if (item == null)
+			return;
 
-    @Override
-    public boolean canEnchantItem(ItemStack item)
-    {
-        return true;
-    }
+		Enchantment glow = getGlow();
+		if (glow != null)
+			item.addEnchantment(glow, 1);
+		else {
+			//from https://github.com/zDevelopers/zLib/pull/21/files#diff-cd248f55f1484c684edc6fa27c585899L167-R44
+			if (item == null || item.getItemMeta().hasEnchants())
+				return;
+			Enchantment fakeGlow = item.getType() != Material.FISHING_ROD ? Enchantment.LURE : Enchantment.ARROW_DAMAGE;
+			ItemMeta im = item.getItemMeta();
+			im.addEnchant(fakeGlow, 1, true);
+			ItemUtils.hideItemAttributes(im, "HIDE_ENCHANTS");
+			item.setItemMeta(im);
+		}
+	}
 
-    @Override
-    public boolean conflictsWith(Enchantment other)
-    {
-        return false;
-    }
+	/**
+	 * Removes a previously-added glowing effect from the given item.
+	 *
+	 * @param item
+	 *            The item.
+	 */
+	public static void removeGlow(ItemStack item) {
+		if (item == null)
+			return;
 
-    @Override
-    public EnchantmentTarget getItemTarget()
-    {
-        return null;
-    }
+		Enchantment glow = getGlow();
+		if (glow != null)
+			item.removeEnchantment(glow);
+	}
 
-    @Override
-    public int getMaxLevel()
-    {
-        return 5;
-    }
+	/**
+	 * Returns if the give item has the glowing effect applied to it.
+	 * 
+	 * @param item
+	 *            The item.
+	 * @return if the give item has the glowing effect applied to it.
+	 */
+	public static boolean hasGlow(ItemStack item) {
+		if (item == null)
+			return false;
 
-    @Override
-    public String getName()
-    {
-        return ENCHANTMENT_NAME;
-    }
+		Enchantment glow = getGlow();
+		if (glow != null)
+			return item.getEnchantmentLevel(glow) > 0;
+		return false;
+	}
 
-    @Override
-    public int getStartLevel()
-    {
-        return 1;
-    }
+	/* ** Enchantment properties overwritten ** */
+
+	@Override
+	public boolean canEnchantItem(ItemStack item) {
+		return true;
+	}
+
+	@Override
+	public boolean conflictsWith(Enchantment other) {
+		return false;
+	}
+
+	@Override
+	public EnchantmentTarget getItemTarget() {
+		return null;
+	}
+
+	@Override
+	public int getMaxLevel() {
+		return 5;
+	}
+
+	@Override
+	public String getName() {
+		return ENCHANTMENT_NAME;
+	}
+
+	@Override
+	public int getStartLevel() {
+		return 1;
+	}
 }
