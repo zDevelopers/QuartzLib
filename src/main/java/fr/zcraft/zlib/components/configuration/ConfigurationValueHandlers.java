@@ -30,13 +30,11 @@
 
 package fr.zcraft.zlib.components.configuration;
 
+import fr.zcraft.zlib.tools.MinecraftVersion;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.reflection.Reflection;
-import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.configuration.MemorySection;
@@ -44,19 +42,15 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.IllformedLocaleException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public abstract class ConfigurationValueHandlers 
 {
@@ -68,7 +62,7 @@ public abstract class ConfigurationValueHandlers
     
     private ConfigurationValueHandlers() {}
     
-    static public void registerHandlers(Class handlersClass)
+    static public void registerHandlers(final Class<?> handlersClass)
     {
         for(Method method : handlersClass.getMethods())
         {
@@ -89,7 +83,7 @@ public abstract class ConfigurationValueHandlers
         }
     }
     
-    static private void addHandler(Class returnType, Method method)
+    static private void addHandler(final Class<?> returnType, Method method)
     {
         ValueHandler handler = valueHandlers.get(returnType);
         
@@ -427,12 +421,17 @@ public abstract class ConfigurationValueHandlers
         if(!map.containsKey("type"))
             throw new ConfigurationParseException("Key 'type' required.", map);
         
-        Material material = handleEnumValue(map.get("type"), Material.class);
+        final Material material = Material.matchMaterial(map.get("type").toString());
+
+        if (material == null)
+            throw new ConfigurationParseException("This material does not exist: '" + map.get("type").toString() + "'.", map);
+
         int amount = map.containsKey("amount") ? handleIntValue(map.get("amount")) : 1;
         
         ItemStackBuilder item;
+        boolean requiresCraftItem = false;
         
-        if(material.equals(Material.POTION))
+        if (material.equals(Material.POTION))
         {
             Potion potion = handlePotionValue(map);
             item = new ItemStackBuilder(potion.toItemStack(amount));
@@ -442,29 +441,42 @@ public abstract class ConfigurationValueHandlers
             item = new ItemStackBuilder(material, amount);
         }
         
-        if(map.containsKey("data"))
+        if (map.containsKey("data"))
+        {
             item.data(handleShortValue(map.get("data")));
+            PluginLogger.warning("In configuration, ItemStack `data` field is deprecated. Use `nbt` instead.");
+        }
         
-        if(map.containsKey("title"))
+        if (map.containsKey("title"))
             item.title(map.get("title").toString());
         
-        if(map.containsKey("lore"))
+        if (map.containsKey("lore"))
             item.lore(handleListValue(map.get("lore"), String.class));
         
-        if(map.containsKey("glow"))
+        if (map.containsKey("glow"))
             item.glow(handleBoolValue(map.get("glow")));
+
+        if (map.containsKey("hideAttributes") && handleBoolValue(map.get("hideAttributes")))
+            item.hideAttributes();
         
-        if(map.containsKey("hideAttributes"))
-            if(handleBoolValue(map.get("hideAttributes")))
-                item.hideAttributes();
-        
-        if(map.containsKey("enchantments"))
+        if (map.containsKey("enchantments"))
             item.enchant(handleMapValue(map.get("enchantments"), Enchantment.class, Integer.class));
+
+        if (map.containsKey("nbt"))
+        {
+            Object nbt = map.get("nbt");
+            if (nbt instanceof Map)
+            {
+                item.nbt((Map<String, Object>) nbt);
+                requiresCraftItem = true;
+            }
+        }
         
-        return item.item();
+        return requiresCraftItem ? item.craftItem() : item.item();
     }
     
     @ConfigurationValueHandler
+    @Deprecated
     static public Potion handlePotionValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("effect"))
@@ -472,10 +484,77 @@ public abstract class ConfigurationValueHandlers
         
         PotionType type = handleEnumValue(map.get("effect"), PotionType.class);
         int level = map.containsKey("level") ? handleByteValue(map.get("level")) : 1;
-        boolean splash = map.containsKey("splash") ? handleBoolValue(map.get("splash")) : false;
-        boolean extended = map.containsKey("extended") ? handleBoolValue(map.get("extended")) : false;
+        boolean splash = map.containsKey("splash") && handleBoolValue(map.get("splash"));
+        boolean extended = map.containsKey("extended") && handleBoolValue(map.get("extended"));
         
         return new Potion(type, level, splash, extended);
+    }
+
+    @ConfigurationValueHandler
+    static public PotionEffectType handlePotionEffectTypeValue(final String name) throws ConfigurationParseException
+    {
+        final PotionEffectType effect = PotionEffectType.getByName(name);
+
+        if (effect == null)
+            throw new ConfigurationParseException("This potion effect does not exist.", name);
+
+        return effect;
+    }
+
+    @ConfigurationValueHandler
+    static public PotionEffect handlePotionEffectValue(final String name) throws ConfigurationParseException
+    {
+        return new PotionEffect(handlePotionEffectTypeValue(name), 30, 1);
+    }
+
+    @ConfigurationValueHandler
+    static public PotionEffect handlePotionEffectValue(final Map<?, ?> map) throws ConfigurationParseException
+    {
+        final Integer color = !map.containsKey("color") || map.get("color") == null ? null : handleIntValue(map.get("color"));
+
+        if (!map.containsKey("effect"))
+            throw new ConfigurationParseException("Potion effect is required.", map);
+
+        final PotionEffectType effect = handlePotionEffectTypeValue(map.get("effect").toString());
+
+        // 1.13+: there is no longer a color, but there is a `has-icon` flag.
+        try
+        {
+            return Reflection.instantiate(PotionEffect.class,
+                    effect,
+                    map.containsKey("duration") ? handleIntValue(map.get("duration")) : 1,
+                    map.containsKey("amplifier") ? handleIntValue(map.get("amplifier")) : 1,
+                    map.containsKey("ambient") && handleBoolValue(map.get("ambient")),
+                    map.containsKey("has-particles") && handleBoolValue(map.get("has-particles")),
+                    map.containsKey("has-icon") && handleBoolValue(map.get("has-icon"))
+            );
+        }
+        catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex)
+        {
+            // 1.9 - 1.12: we can specify a color.
+            try
+            {
+                return Reflection.instantiate(PotionEffect.class,
+                        effect,
+                        map.containsKey("duration") ? handleIntValue(map.get("duration")) : 1,
+                        map.containsKey("amplifier") ? handleIntValue(map.get("amplifier")) : 1,
+                        map.containsKey("ambient") && handleBoolValue(map.get("ambient")),
+                        map.containsKey("has-particles") && handleBoolValue(map.get("has-particles")),
+                        color != null ? Color.fromRGB(color) : null
+                );
+            }
+            catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e)
+            {
+                // This one should always work.
+                return new PotionEffect(
+                        effect,
+                        map.containsKey("duration") ? handleIntValue(map.get("duration")) : 1,
+                        map.containsKey("amplifier") ? handleIntValue(map.get("amplifier")) : 1,
+                        map.containsKey("ambient") && handleBoolValue(map.get("ambient")),
+                        map.containsKey("has-particles") && handleBoolValue(map.get("has-particles"))
+                );
+            }
+        }
     }
     
     @ConfigurationValueHandler
@@ -502,11 +581,22 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public BannerMeta handleBannerValue(Map map) throws ConfigurationParseException
+    static public BannerMeta handleBannerValue(final Map map) throws ConfigurationParseException
     {
-        BannerMeta banner = (BannerMeta) new ItemStack(Material.BANNER).getItemMeta();
-        DyeColor baseColor = getValue(map, "color", DyeColor.BLACK);
-        List patterns = getListValue(map, "patterns", new ArrayList(), Object.class);
+        final Material bannerMaterial;
+
+        if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER)
+        {
+            bannerMaterial = Material.valueOf("BANNER");
+        }
+        else
+        {
+            bannerMaterial = Material.valueOf("WHITE_BANNER");
+        }
+
+        final BannerMeta banner = (BannerMeta) new ItemStack(bannerMaterial).getItemMeta();
+        final DyeColor baseColor = getValue(map, "color", DyeColor.BLACK);
+        final List<?> patterns = getListValue(map, "patterns", new ArrayList<>(), Object.class);
         
         banner.setBaseColor(baseColor);
         

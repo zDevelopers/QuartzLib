@@ -46,7 +46,7 @@ public abstract class Configuration extends ZLibComponent
         init(this.getClass());
     }
     
-    static public void init(Class configurationClass)
+    static public void init(final Class<?> configurationClass)
     {
         instance = new ConfigurationInstance(ZLib.getPlugin().getConfig());
         instance.init(configurationClass);
@@ -76,7 +76,7 @@ public abstract class Configuration extends ZLibComponent
      *
      * @param callback The callback.
      */
-    static public void registerConfigurationUpdateCallback(Callback<ConfigurationItem<?>> callback)
+    static public void registerConfigurationUpdateCallback(final Callback<ConfigurationItem<?>> callback)
     {
         instance.registerConfigurationUpdateCallback(callback);
     }
