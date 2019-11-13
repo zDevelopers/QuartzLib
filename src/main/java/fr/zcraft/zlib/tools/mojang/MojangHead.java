@@ -107,6 +107,14 @@ public enum MojangHead
     }
 
     /**
+     * @return The Mojang head's name, to be used as skull owner.
+     */
+    public String getHeadName()
+    {
+        return headName;
+    }
+
+    /**
      * @return The head as an ItemStack (of type {@link Material#SKULL_ITEM}
      * or {@link Material#PLAYER_HEAD} according to the Minecraft version used).
      */
