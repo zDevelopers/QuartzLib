@@ -30,11 +30,14 @@
 
 package fr.zcraft.zlib.tools.items;
 
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * This class provides various utilities for inventory management.
@@ -56,40 +59,59 @@ abstract public class InventoryUtils
         {
             return true;
         }
-
-        if (inventory1 == null || inventory2 == null
-                || inventory1.getSize() != inventory2.getSize()
-                || inventory1.getType() != inventory2.getType()
-                || !inventory1.getName().equals(inventory2.getName())
-                || !inventory1.getTitle().equals(inventory2.getTitle()))
+        else if (inventory1 == null || inventory2 == null)
         {
             return false;
         }
 
-            for (int slot = 0; slot < inventory1.getSize(); slot++)
+        // The `getName` and `getTitle` methods were removed in 1.13+, as they are now only available in the
+        // InventoryView, when an inventory is opened. So we use reflection to test the titles if possible;
+        // else, we only rely on the content.
+        // We initialize the test variables to true, so if the test fails, this criteria is considered valid
+        // and ignored.
+
+        boolean sameName = true;
+        boolean sameTitle = true;
+
+        try
+        {
+            sameName = Reflection.call(inventory1, "getName").equals(Reflection.call(inventory2, "getName"));
+        }
+        catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {}
+
+        try
+        {
+            sameTitle = Reflection.call(inventory1, "getTitle").equals(Reflection.call(inventory2, "getTitle"));
+        }
+        catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {}
+
+        if (!sameName || !sameTitle || inventory1.getSize() != inventory2.getSize() || inventory1.getType() != inventory2.getType())
+            return false;
+
+        for (int slot = 0; slot < inventory1.getSize(); slot++)
+        {
+            ItemStack item1 = inventory1.getItem(slot);
+            ItemStack item2 = inventory2.getItem(slot);
+
+            if (item1 == null || item2 == null)
             {
-                ItemStack item1 = inventory1.getItem(slot);
-                ItemStack item2 = inventory2.getItem(slot);
-
-                if (item1 == null || item2 == null)
+                if (item1 == item2)
                 {
-                    if (item1 == item2)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    continue;
                 }
-
-                if (!item1.equals(item2))
+                else
                 {
                     return false;
                 }
             }
 
-            return true;
+            if (!item1.equals(item2))
+            {
+                return false;
+            }
+        }
+
+        return true;
         
     }
     

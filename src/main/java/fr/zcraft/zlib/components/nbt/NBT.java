@@ -30,6 +30,7 @@
 
 package fr.zcraft.zlib.components.nbt;
 
+import fr.zcraft.zlib.tools.MinecraftVersion;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.reflection.Reflection;
@@ -129,8 +130,25 @@ public abstract class NBT
         
         for (Map.Entry<Enchantment, Integer> enchantment : enchants.entrySet())
         {
-            Map<String, Object> enchantmentData = new HashMap<>();
-            enchantmentData.put("id", enchantment.getKey().getId());
+            final Map<String, Object> enchantmentData = new HashMap<>();
+
+            if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER)
+            {
+                enchantmentData.put("id", enchantment.getKey().getId());
+            }
+            else
+            {
+                final Enchantment enchant = enchantment.getKey();
+                try
+                {
+                    enchantmentData.put("id", Reflection.call(enchant, "getKey").toString());
+                }
+                catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
+                {
+                    enchantmentData.put("id", enchant.getName());
+                }
+            }
+
             enchantmentData.put("lvl", enchantment.getValue());
             enchantList.add(enchantmentData);
         }

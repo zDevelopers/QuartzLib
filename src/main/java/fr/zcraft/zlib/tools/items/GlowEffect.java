@@ -30,16 +30,12 @@
 package fr.zcraft.zlib.tools.items;
 
 import fr.zcraft.zlib.tools.PluginLogger;
-import fr.zcraft.zlib.tools.items.ItemUtils;
-
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
-
-
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.Material;
 
 import java.lang.reflect.Field;
 
@@ -103,26 +99,30 @@ public class GlowEffect extends EnchantmentWrapper {
 
 	/**
 	 * Adds a glowing effect to the given item stack.
-	 *
+	 * <p>
 	 * Warning: this effect is a bit unstable: it will be thrown away if the
 	 * item's meta is updated. So add it at the end.
 	 *
-	 * @param item
-	 *            The item.
+	 * @param item The item.
 	 */
-	public static void addGlow(ItemStack item) {
+	public static void addGlow(ItemStack item)
+	{
 		if (item == null)
 			return;
 
-		Enchantment glow = getGlow();
+		final Enchantment glow = getGlow();
+
 		if (glow != null)
+		{
 			item.addEnchantment(glow, 1);
-		else {
+		}
+		else
+		{
 			//from https://github.com/zDevelopers/zLib/pull/21/files#diff-cd248f55f1484c684edc6fa27c585899L167-R44
-			if (item == null || item.getItemMeta().hasEnchants())
-				return;
-			Enchantment fakeGlow = item.getType() != Material.FISHING_ROD ? Enchantment.LURE : Enchantment.ARROW_DAMAGE;
-			ItemMeta im = item.getItemMeta();
+			if (item.getItemMeta().hasEnchants()) return;
+
+			final Enchantment fakeGlow = item.getType() != Material.FISHING_ROD ? Enchantment.LURE : Enchantment.ARROW_DAMAGE;
+			final ItemMeta im = item.getItemMeta();
 			im.addEnchant(fakeGlow, 1, true);
 			ItemUtils.hideItemAttributes(im, "HIDE_ENCHANTS");
 			item.setItemMeta(im);

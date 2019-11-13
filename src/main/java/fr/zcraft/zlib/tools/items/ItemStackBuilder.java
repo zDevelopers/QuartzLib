@@ -262,11 +262,10 @@ public class ItemStackBuilder
         }
 
         newItemStack.setItemMeta(meta);
+        newItemStack.addUnsafeEnchantments(enchantments);
 
         if (glowing)
             GlowEffect.addGlow(newItemStack);
-
-        newItemStack.addUnsafeEnchantments(enchantments);
 
         return newItemStack;
     }
