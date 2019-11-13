@@ -107,7 +107,8 @@ public enum MojangHead
     }
 
     /**
-     * @return The head as an ItemStack (of type {@link Material#SKULL_ITEM}).
+     * @return The head as an ItemStack (of type {@link Material#SKULL_ITEM}
+     * or {@link Material#PLAYER_HEAD} according to the Minecraft version used).
      */
     public ItemStack asItem()
     {
@@ -119,6 +120,13 @@ public enum MojangHead
      */
     public ItemStackBuilder asItemBuilder()
     {
-        return new ItemStackBuilder(Material.SKULL_ITEM).head(headName);
+        Material headMaterial = Material.matchMaterial("PLAYER_HEAD");
+
+        if (headMaterial == null)
+        {
+            headMaterial = Material.matchMaterial("SKULL_ITEM");
+        }
+
+        return new ItemStackBuilder(headMaterial).head(headName);
     }
 }

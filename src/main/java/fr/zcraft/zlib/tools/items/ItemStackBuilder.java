@@ -35,6 +35,7 @@ import fr.zcraft.zlib.components.nbt.NBT;
 import fr.zcraft.zlib.components.nbt.NBTCompound;
 import fr.zcraft.zlib.components.rawtext.RawText;
 import fr.zcraft.zlib.components.rawtext.RawTextPart;
+import fr.zcraft.zlib.tools.MinecraftVersion;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import org.bukkit.ChatColor;
@@ -246,7 +247,9 @@ public class ItemStackBuilder
                 throw new IllegalStateException("Unable to set head owner: item is not a skull.");
 
             ((SkullMeta) meta).setOwner(headOwner);
-            newItemStack.setDurability((short) SkullType.PLAYER.ordinal());
+
+            if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER)
+                newItemStack.setDurability((short) SkullType.PLAYER.ordinal());
         }
 
         if (hideAttributes)
