@@ -61,8 +61,11 @@ abstract public class ItemUtils
 {
     private ItemUtils() {}
     
-    static private boolean addItemFlagLoaded = false;
+    static private boolean itemFlagMethodsLoaded = false;
     static private Method addItemFlagsMethod = null;
+    static private Method hasItemFlagsMethod = null;
+    static private Method removeItemFlagsMethod = null;
+
     static private Object[] itemFlagValues = null;
 
     /**
@@ -70,23 +73,37 @@ abstract public class ItemUtils
      */
     static private void init()
     {
-        if (addItemFlagLoaded) return;
+        if (itemFlagMethodsLoaded) return;
         
         try
         {
-            Class<?> itemFlagClass = Class.forName("org.bukkit.inventory.ItemFlag");
-            Method valuesMethod = itemFlagClass.getDeclaredMethod("values");
+            final Class<?> itemFlagClass = Class.forName("org.bukkit.inventory.ItemFlag");
+            final Method valuesMethod = itemFlagClass.getDeclaredMethod("values");
             itemFlagValues = (Object[]) valuesMethod.invoke(null);
+
             try
             {
                 addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagClass);
             }
-            catch(NoSuchMethodException ex)
+            catch (NoSuchMethodException ex)
             {
                 addItemFlagsMethod = ItemMeta.class.getMethod("addItemFlags", itemFlagValues.getClass());
             }
+
+            hasItemFlagsMethod = ItemMeta.class.getMethod("hasItemFlag​", itemFlagClass);
+
+            try
+            {
+                removeItemFlagsMethod = ItemMeta.class.getMethod("removeItemFlags", itemFlagClass);
+            }
+            catch (NoSuchMethodException ex)
+            {
+                removeItemFlagsMethod = ItemMeta.class.getMethod("removeItemFlags", itemFlagValues.getClass());
+            }
             
             addItemFlagsMethod.setAccessible(true);
+            hasItemFlagsMethod.setAccessible(true);
+            removeItemFlagsMethod.setAccessible(true);
         }
         catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e)
         {
@@ -97,35 +114,103 @@ abstract public class ItemUtils
             PluginLogger.error("Exception occurred while looking for the ItemFlag API.", e.getCause());
         }
         
-        addItemFlagLoaded = true;
+        itemFlagMethodsLoaded = true;
     }
 
-    static private Object getItemFlagValue(String flagName)
+    static private Object getItemFlagValue(final String flagName)
     {
-        if(itemFlagValues == null) return null;
+        if (itemFlagValues == null) return null;
         
-        for(Object value : itemFlagValues)
-        {
-            if(value.toString().equalsIgnoreCase(flagName))
+        for (Object value : itemFlagValues)
+            if (value.toString().equalsIgnoreCase(flagName))
                 return value;
-        }
         
         return null;
     }
     
-    static private Object[] getItemFlagsValues(String... flagsNames)
+    static private Object[] getItemFlagsValues(final String... flagsNames)
     {
-        List flagsList = new ArrayList();
-        for(String flagName : flagsNames)
+        final List<Object> flagsList = new ArrayList<>();
+
+        for (String flagName : flagsNames)
         {
-            Object flag = getItemFlagValue(flagName);
-            if(flag != null)
+            final Object flag = getItemFlagValue(flagName);
+            if (flag != null)
+            {
                 flagsList.add(flag);
+            }
         }
-        
-        
-        Object array = Array.newInstance(itemFlagValues[0].getClass(), flagsList.size());
+
+        final Object array = Array.newInstance(itemFlagValues[0].getClass(), flagsList.size());
         return flagsList.toArray((Object[]) array);
+    }
+
+    /**
+     * Checks if the {@link ItemMeta} has the specified item flag.
+     *
+     * @param meta The {@link ItemMeta} to check the item flag in.
+     * @param flagName The name of the ItemFlag
+     *
+     * @return {@code true} if the given flag is set.
+     */
+    static public boolean hasItemFlag(final ItemMeta meta, final String flagName)
+    {
+        if (!itemFlagMethodsLoaded) init();
+        if (hasItemFlagsMethod == null)
+        {
+            return false;
+        }
+
+        final Object flag =  getItemFlagValue(flagName);
+        if (flag == null) return false;
+
+        try
+        {
+            return (boolean) hasItemFlagsMethod.invoke(meta, flag);
+        }
+        catch (IllegalAccessException ex)
+        {
+            PluginLogger.error("IllegalAccessException caught while invoking the ItemMeta.hasItemFlag method.", ex);
+        }
+        catch (InvocationTargetException ex)
+        {
+            PluginLogger.error("Exception occurred while invoking the ItemMeta.hasItemFlag method.", ex.getCause());
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes the specified item flag from the specified item attributes from the given {@link ItemMeta}.
+     *
+     * @param meta The {@link ItemMeta} to remove the flag from.
+     * @param values The name of the item flags to remove.
+     *
+     * @return The modified item meta.
+     */
+    static public ItemMeta removeItemFlags(final ItemMeta meta, final String ...values)
+    {
+        if (!itemFlagMethodsLoaded) init();
+        if (removeItemFlagsMethod == null)
+        {
+            return meta;
+        }
+
+        final Object[] vl = getItemFlagsValues(values);
+        try
+        {
+            removeItemFlagsMethod.invoke(meta, vl);
+        }
+        catch (IllegalAccessException ex)
+        {
+            PluginLogger.error("IllegalAccessException caught while invoking the ItemMeta.removeItemFlags method.", ex);
+        }
+        catch (InvocationTargetException ex)
+        {
+            PluginLogger.error("Exception occurred while invoking the ItemMeta.removeItemFlags method.", ex.getCause());
+        }
+
+        return meta;
     }
     
     /**
@@ -137,7 +222,7 @@ abstract public class ItemUtils
      */
     static public ItemMeta hideItemAttributes(ItemMeta meta)
     {
-        if (!addItemFlagLoaded) init();
+        if (!itemFlagMethodsLoaded) init();
         return hideItemAttributes(meta, itemFlagValues);
     }
     
@@ -151,7 +236,7 @@ abstract public class ItemUtils
      */
     static public ItemMeta hideItemAttributes(ItemMeta meta, String... itemFlagsNames)
     {
-        if (!addItemFlagLoaded) init();
+        if (!itemFlagMethodsLoaded) init();
         return hideItemAttributes(meta, getItemFlagsValues(itemFlagsNames));
     }
     
