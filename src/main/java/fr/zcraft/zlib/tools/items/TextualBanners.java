@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.tools.items;
 
+import fr.zcraft.zlib.tools.MinecraftVersion;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
@@ -136,6 +137,16 @@ public final class TextualBanners
         return patterns;
     }
 
+    private static Material getBannerMaterial()
+    {
+        if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER)
+        {
+            return Material.valueOf("BANNER");
+        }
+
+        return Material.valueOf("WHITE_BANNER");
+    }
+
     /**
      * Returns a banner containing the patterns with the background color.
      *
@@ -146,7 +157,7 @@ public final class TextualBanners
      */
     public static ItemStack getBanner(DyeColor color, List<Pattern> patterns)
     {
-        ItemStack banner = new ItemStack(Material.BANNER);
+        ItemStack banner = new ItemStack(getBannerMaterial());
         banner.setItemMeta(getBannerMeta(color, patterns));
         return banner;
     }
@@ -161,7 +172,7 @@ public final class TextualBanners
      */
     public static BannerMeta getBannerMeta(DyeColor color, List<Pattern> patterns)
     {
-        BannerMeta meta = (BannerMeta) new ItemStack(Material.BANNER).getItemMeta();
+        BannerMeta meta = (BannerMeta) new ItemStack(getBannerMaterial()).getItemMeta();
         meta.setBaseColor(color);
         meta.setPatterns(patterns);
         return meta;
@@ -324,9 +335,10 @@ public final class TextualBanners
      */
     public static void editBanner(ItemStack item, Banner banner)
     {
-        if (item.getType() != Material.BANNER)
+        if (!item.getType().toString().endsWith("BANNER"))
             throw new IllegalArgumentException("The specified ItemStack isn't a banner !");
-        BannerMeta meta = (BannerMeta) item.getItemMeta();
+
+        final BannerMeta meta = (BannerMeta) item.getItemMeta();
         banner.setBaseColor(meta.getBaseColor());
         banner.setPatterns(meta.getPatterns());
         banner.update();
