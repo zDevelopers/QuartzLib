@@ -31,6 +31,7 @@
 package fr.zcraft.zlib.components.gui;
 
 import fr.zcraft.zlib.tools.items.InventoryUtils;
+import fr.zcraft.zlib.tools.reflection.Reflection;
 import fr.zcraft.zlib.tools.runners.RunTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -41,6 +42,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * This class provides the basic needs for chest-type GUIs.
@@ -53,52 +56,43 @@ abstract public class InventoryGui extends GuiBase
     static protected final int MAX_INVENTORY_COLUMN_SIZE = 6;
     static protected final int MAX_INVENTORY_SIZE = INVENTORY_ROW_SIZE * MAX_INVENTORY_COLUMN_SIZE;
     static protected final int MAX_TITLE_LENGTH = 32;
-    
+
     /**
      * The size of the inventory.
      */
     private int size = 0;
-    
+
     /**
      * The title of the inventory.
      */
     private String title = "Inventory";
-    
+
     /**
      * The current Bukkit inventory.
      */
     private Inventory inventory;
 
     /* ===== Public API ===== */
-    
-    /**
-     * Asks the GUI to update its data, and refresh its view accordingly.
-     * The inventory may be regenerated when calling this method.
-     */
-    @Override
-    public void update()
-    {
-        super.update();
-        Player player = getPlayer();
-        
-        //If inventory does not need to be regenerated
-        if(inventory != null && inventory.getTitle().equals(title) && inventory.getSize() == size)
-        {
-            refresh();
-        }
-        else
-        {
-            inventory = Bukkit.createInventory(player, size, title);
-            populate(inventory);
 
-            if(isOpen()) // Reopening the inventory
+    /**
+     * Returns if the given event affects the GUI's inventory.
+     *
+     * @param event The event to test
+     * @return true if any of the event's slots is in the GUI's inventory,
+     * false otherwise.
+     */
+    static protected boolean affectsGui(final InventoryDragEvent event)
+    {
+        for (int slot : event.getRawSlots())
+        {
+            if (slot < event.getInventory().getSize())
             {
-                player.closeInventory();
-                player.openInventory(inventory);
+                return true;
             }
         }
+        return false;
     }
-    
+
     /**
      * Asks the GUI to recreate its view.
      * The inventory is cleared, but never regenerated when calling this method.
@@ -108,24 +102,24 @@ abstract public class InventoryGui extends GuiBase
         inventory.clear();
         populate(inventory);
     }
-    
+
     /* ===== Protected API ===== */
-    
+
     @Override
-    protected void open(Player player)
+    protected void open(final Player player)
     {
         super.open(player);
         player.openInventory(inventory);
     }
-    
+
     /**
      * Closes this inventory.
      */
     @Override
     public void close()
     {
-        if(!isOpen()) return;
-        
+        if (!isOpen()) return;
+
         // If close() is called manually, not from InventoryCloseEvent
         // Ran on the next tick because it's unsafe to call Player.closeInventory() from an
         // InventoryEvent.
@@ -139,23 +133,23 @@ abstract public class InventoryGui extends GuiBase
                     getPlayer().closeInventory();
             }
         });
-        
+
         super.close();
     }
-    
+
     /**
      * Called when the inventory needs to be (re)populated.
      *
      * @param inventory The inventory to populate
      */
-    abstract protected void populate(Inventory inventory);
-    
+    abstract protected void populate(final Inventory inventory);
+
     /**
      * Raised when an action is performed on an item in the inventory.
      *
      * @param event The click event data.
      */
-    abstract protected void onClick(InventoryClickEvent event);
+    abstract protected void onClick(final InventoryClickEvent event);
 
 
     /**
@@ -164,57 +158,83 @@ abstract public class InventoryGui extends GuiBase
      *
      * @param event The drag event data.
      */
-    protected void onDrag(InventoryDragEvent event)
+    protected void onDrag(final InventoryDragEvent event)
     {
-        if(affectsGui(event)) event.setCancelled(true);
+        if (affectsGui(event)) event.setCancelled(true);
     }
-    
+
     /**
      * Returns if the given event affects the GUI's inventory.
      *
      * @param event The event to test
      * @return {@code true} if the event's slot is in the GUI's inventory,
-     *         {@code false} otherwise.
+     * {@code false} otherwise.
      */
-    static protected boolean affectsGui(InventoryClickEvent event)
+    static protected boolean affectsGui(final InventoryClickEvent event)
     {
         return event.getRawSlot() < event.getInventory().getSize();
     }
 
     /**
-     * Returns if the given event affects the GUI's inventory.
-     *
-     * @param event The event to test
-     * @return true if any of the event's slots is in the GUI's inventory, 
-     *         false otherwise.
+     * Asks the GUI to update its data, and refresh its view accordingly.
+     * The inventory may be regenerated when calling this method.
      */
-    static protected boolean affectsGui(InventoryDragEvent event)
+    @Override
+    public void update()
     {
-        for(int slot : event.getRawSlots())
+        super.update();
+        Player player = getPlayer();
+
+        boolean titleIsStillTheSame = false;
+        try
         {
-            if(slot < event.getInventory().getSize())
+            titleIsStillTheSame = player.getOpenInventory().getTitle().equals(title);
+        }
+        catch (final NoSuchMethodError e)
+        {
+            try
             {
-                return true;
+                titleIsStillTheSame = Reflection.call(inventory, "getTitle").equals(title);
+            }
+            catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) { }
+        }
+
+        // If inventory does not need to be regenerated
+        if (inventory != null && titleIsStillTheSame && inventory.getSize() == size)
+        {
+            refresh();
+        }
+        else
+        {
+            inventory = Bukkit.createInventory(player, size, title);
+            populate(inventory);
+
+            if (isOpen()) // Reopening the inventory - FIXME This probably resets the player' mouse cursor position to the center of the GUI in 1.13.
+            {
+                player.closeInventory();
+                player.openInventory(inventory);
             }
         }
-        return false;
     }
 
     /* ===== Getters & Setters ===== */
-    
-    /** @return The size of the inventory. */
+
+    /**
+     * @return The size of the inventory.
+     */
     protected final int getSize() { return size; }
-    
+
     /**
      * Sets the new size of the inventory.
      * The given value is raised to be a multiple of the size of an inventory's
      * row, and is capped to the maximal size of an inventory.
      * It will be applied on the next GUI update.
+     *
      * @param size The new size of the inventory.
      */
-    protected final void setSize(int size)
+    protected final void setSize(final int size)
     {
-        this.size = Math.min(((int)(Math.ceil((double) size / INVENTORY_ROW_SIZE))) * INVENTORY_ROW_SIZE, MAX_INVENTORY_SIZE);
+        this.size = Math.min(((int) (Math.ceil((double) size / INVENTORY_ROW_SIZE))) * INVENTORY_ROW_SIZE, MAX_INVENTORY_SIZE);
     }
 
     /**
@@ -222,70 +242,75 @@ abstract public class InventoryGui extends GuiBase
      * The given value is capped to the maximal height of an inventory.
      * It will be applied on the next GUI update.
      * This is a shortcut for {@link #setSize(int) setSize(height * INVENTORY_ROW_SIZE)}.
+     *
      * @param height The new height of the inventory.
      * @see #setSize(int)
      */
-    protected final void setHeight(int height)
+    protected final void setHeight(final int height)
     {
         setSize(height * INVENTORY_ROW_SIZE);
     }
-    
-    /** @return The title of the inventory. */
+
+    /**
+     * @return The title of the inventory.
+     */
     protected String getTitle() { return title; }
 
     /**
      * Sets the new title of the inventory.
      * It will be applied on the next GUI update.
+     *
      * @param title The new title of the inventory
      */
     protected void setTitle(String title)
     {
-        if(title != null && title.length() > MAX_TITLE_LENGTH)
+        if (title != null && title.length() > MAX_TITLE_LENGTH)
         {
             title = title.substring(0, MAX_TITLE_LENGTH - 4) + "...";
         }
         this.title = title;
     }
-    
-    /** @return The underlying inventory, or null if the Gui has not been opened yet. */
+
+    /**
+     * @return The underlying inventory, or null if the Gui has not been opened yet.
+     */
     public Inventory getInventory() { return inventory; }
-    
+
     @Override
     protected Listener getEventListener() { return new InventoryGuiListener(); }
-    
+
     /**
      * Implements a Bukkit listener for all GUI-related events.
      */
     protected class InventoryGuiListener implements Listener
     {
         @EventHandler
-        public void onInventoryDrag(InventoryDragEvent event)
+        public void onInventoryDrag(final InventoryDragEvent event)
         {
-            if(event.getWhoClicked() != getPlayer()) return;
+            if (event.getWhoClicked() != getPlayer()) return;
             onDrag(event);
         }
 
         @EventHandler
-        public void onInventoryClick(InventoryClickEvent event)
+        public void onInventoryClick(final InventoryClickEvent event)
         {
-            if(event.getWhoClicked() != getPlayer()) return;
-            
+            if (event.getWhoClicked() != getPlayer()) return;
+
             onClick(event);
         }
-        
+
         @EventHandler
-        public void onInventoryClose(InventoryCloseEvent event)
+        public void onInventoryClose(final InventoryCloseEvent event)
         {
-            if(event.getPlayer() != getPlayer()) return;
-            
-            if(!event.getInventory().equals(inventory)) return;
-            
-            if(isOpen())
+            if (event.getPlayer() != getPlayer()) return;
+
+            if (!event.getInventory().equals(inventory)) return;
+
+            if (isOpen())
             {
-                if(checkImmune()) return;
+                if (checkImmune()) return;
                 close();
             }
         }
     }
-    
 }

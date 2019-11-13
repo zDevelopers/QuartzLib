@@ -337,10 +337,11 @@ abstract public class ExplorerGui<T> extends ActionGui
      */
     private void onActionPut(InventoryClickEvent event)
     {
+        // TODO from @Xernium — Fix inventory handling
         event.setCancelled(true);
         if(mode.equals(Mode.READONLY)) return;
         if(!onPutItem(event.getCursor())) return;
-        event.setCursor(new ItemStack(Material.AIR));
+        event.getView().setCursor(new ItemStack(Material.AIR));
     }
 
     /**
