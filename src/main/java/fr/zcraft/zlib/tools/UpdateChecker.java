@@ -172,8 +172,6 @@ public final class UpdateChecker implements Listener
             return;
         }
 
-        PluginLogger.info("Update checker booted: resource {0} ({1}), API: {2}", resourceURI, resourceID, checkURI);
-
         checkTask = RunAsyncTask.timer(new Runnable()
         {
             @Override
