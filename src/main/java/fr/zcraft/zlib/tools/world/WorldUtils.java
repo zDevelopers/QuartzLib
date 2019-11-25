@@ -67,13 +67,13 @@ public class WorldUtils
             return BlockFace.NORTH;
         
         if(yaw <= -45 && yaw > -135)
-            return BlockFace.EAST;
+            return BlockFace.WEST;
         
         if(yaw <= -135 || yaw > 135)
             return BlockFace.SOUTH;
         
         if(yaw <= 135 && yaw > 45)
-            return BlockFace.WEST;
+            return BlockFace.EAST;
         
         return BlockFace.SELF;
     }
