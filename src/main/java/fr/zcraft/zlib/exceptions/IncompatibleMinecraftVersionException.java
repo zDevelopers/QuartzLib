@@ -38,7 +38,10 @@ package fr.zcraft.zlib.exceptions;
  */
 public class IncompatibleMinecraftVersionException extends RuntimeException
 {
-    public IncompatibleMinecraftVersionException(String message, Throwable cause)
+
+	private static final long serialVersionUID = -8022385806817755567L;
+
+	public IncompatibleMinecraftVersionException(String message, Throwable cause)
     {
         super(message, cause);
     }
