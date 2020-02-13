@@ -51,7 +51,7 @@ public class GlowEffect extends EnchantmentWrapper {
 	private final static String ENCHANTMENT_NAME = "GlowEffect";
 	private static Enchantment glow;
 
-	protected GlowEffect(int id) {
+	protected GlowEffect(String id) {
 
 		super(id);
 
@@ -79,7 +79,7 @@ public class GlowEffect extends EnchantmentWrapper {
 
 		try {
 			try {
-				glow = new GlowEffect(ENCHANTMENT_ID);
+				glow = new GlowEffect("LURE");
 				Enchantment.registerEnchantment(glow);
 			} catch (NoSuchMethodError e) {
 				// 1.13+
@@ -89,7 +89,7 @@ public class GlowEffect extends EnchantmentWrapper {
 		} catch (IllegalArgumentException e) {
 			// If the enchantment is already registered - happens on server
 			// reload
-			glow = Enchantment.getById(ENCHANTMENT_ID); // getByID required - by
+			glow = Enchantment.getByName("LURE"); // getByID required - by
 														// name it doesn't work
 														// (returns null).
 		}

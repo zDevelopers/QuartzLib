@@ -29,6 +29,7 @@
  */
 package fr.zcraft.zlib.components.nbt;
 
+import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 
 import java.util.List;
@@ -130,40 +131,48 @@ enum NBTType
         try
         {
             final Object tag;
+            PluginLogger.info("debug: Inside switch\n");
             switch (this)
-            {
+            {            
                 case TAG_COMPOUND:
+                	PluginLogger.info("debug: TAG COMPOUND\n");
                     tag = Reflection.instantiate(getNMSClass());
                     if (value instanceof NBTCompound)
                     {
+                    	PluginLogger.info("debug: NBTCOMPOUND\n");
                         setData(tag, ((NBTCompound) value).nmsNbtMap);
                     }
                     else
                     {
+                    	PluginLogger.info("debug: C est pas un NBTCOMPOUND\n");
                         new NBTCompound(tag).putAll((Map) value);
                     }
                     break;
 
                 case TAG_LIST:
+                	PluginLogger.info("debug: TAG List\n");
                     tag = Reflection.instantiate(getNMSClass());
                     if (value instanceof NBTList)
                     {
+                    	PluginLogger.info("debug: NBT List\n");
                         setData(tag, ((NBTList) value).nmsNbtList);
                     }
                     else
                     {
+                    	PluginLogger.info("debug: C est pas un NBT List\n");
                         new NBTList(tag).addAll((List) value);
                     }
 
                     // If a NBTTagList is built from scratch, the NMS object is created lately
                     // and may not have the list's type registered at this point.
+                    PluginLogger.info("debug: guessAndWriteTypeToNBTTagList\n");
                     NBTList.guessAndWriteTypeToNBTTagList(tag);
                     break;
 
                 default:
-                    tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);
+                	PluginLogger.info("debug: default "+getNMSClass());tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);break;
             }
-
+            
             return tag;
         }
         catch (Exception ex)

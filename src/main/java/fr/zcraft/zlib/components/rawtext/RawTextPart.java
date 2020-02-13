@@ -37,9 +37,9 @@ import fr.zcraft.zlib.components.commands.Commands;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
-import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
 import org.bukkit.Statistic;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
@@ -63,7 +63,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     static private enum ActionHover
     {
         SHOW_TEXT,
-        SHOW_ACHIEVEMENT,
+        SHOW_ADVANCEMENT,
         SHOW_ITEM,
         SHOW_ENTITY
     }
@@ -315,16 +315,16 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
     }
 
     /**
-     * Adds an hover achievement to this component.
+     * Adds an hover advancement to this component.
      *
-     * @param achievement The achievement to display on hover.
+     * @param advancement The advancement to display on hover.
      * @return The current raw text component, for method chaining.
-     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
+
      */
-    @Deprecated
-    public T hover(Achievement achievement)
+
+    public T hover(Advancement advancement)
     {
-        return hover(ActionHover.SHOW_ACHIEVEMENT, "achievement." + RawText.getI18nKey(achievement));
+        return hover(ActionHover.SHOW_ADVANCEMENT, "advancement." + advancement.getKey());
     }
 
     /**
@@ -335,7 +335,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
      */
     public T hover(Statistic statistic)
     {
-        return hover(ActionHover.SHOW_ACHIEVEMENT, "stat." + enumCamel(statistic));
+        return hover(ActionHover.SHOW_ADVANCEMENT, "stat." + enumCamel(statistic));
     }
 
     /**
