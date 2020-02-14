@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.nbt;
 import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 
@@ -170,7 +171,8 @@ enum NBTType
                     break;
 
                 default:
-                	PluginLogger.info("debug: default "+getNMSClass());tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);break;
+                	PluginLogger.info("debug: default "+getNMSClass()+" | "+value);//tag =/*Reflection.instantiate(getNMSClass(), value); */
+                	Constructor cons=Reflection.findConstructor(getNMSClass(), 1);cons.setAccessible(true);tag=cons.newInstance(value);
             }
             
             return tag;

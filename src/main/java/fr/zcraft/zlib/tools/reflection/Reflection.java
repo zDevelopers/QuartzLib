@@ -31,6 +31,8 @@ package fr.zcraft.zlib.tools.reflection;
 
 import org.bukkit.Bukkit;
 
+import fr.zcraft.zlib.tools.PluginLogger;
+
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
