@@ -132,47 +132,40 @@ enum NBTType
         try
         {
             final Object tag;
-            PluginLogger.info("debug: Inside switch\n");
             switch (this)
             {            
                 case TAG_COMPOUND:
-                	PluginLogger.info("debug: TAG COMPOUND\n");
                     tag = Reflection.instantiate(getNMSClass());
                     if (value instanceof NBTCompound)
                     {
-                    	PluginLogger.info("debug: NBTCOMPOUND\n");
                         setData(tag, ((NBTCompound) value).nmsNbtMap);
                     }
                     else
                     {
-                    	PluginLogger.info("debug: C est pas un NBTCOMPOUND\n");
                         new NBTCompound(tag).putAll((Map) value);
                     }
                     break;
 
                 case TAG_LIST:
-                	PluginLogger.info("debug: TAG List\n");
                     tag = Reflection.instantiate(getNMSClass());
                     if (value instanceof NBTList)
                     {
-                    	PluginLogger.info("debug: NBT List\n");
                         setData(tag, ((NBTList) value).nmsNbtList);
                     }
                     else
                     {
-                    	PluginLogger.info("debug: C est pas un NBT List\n");
                         new NBTList(tag).addAll((List) value);
                     }
 
                     // If a NBTTagList is built from scratch, the NMS object is created lately
                     // and may not have the list's type registered at this point.
-                    PluginLogger.info("debug: guessAndWriteTypeToNBTTagList\n");
                     NBTList.guessAndWriteTypeToNBTTagList(tag);
                     break;
 
                 default:
-                	PluginLogger.info("debug: default "+getNMSClass()+" | "+value);//tag =/*Reflection.instantiate(getNMSClass(), value); */
-                	Constructor cons=Reflection.findConstructor(getNMSClass(), 1);cons.setAccessible(true);tag=cons.newInstance(value);
+                	Constructor cons=Reflection.findConstructor(getNMSClass(), 1);
+                	cons.setAccessible(true);
+                	tag=cons.newInstance(value);
             }
             
             return tag;
