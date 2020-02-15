@@ -37,7 +37,7 @@
 
 	<groupId>fr.zcraft</groupId>
 	<artifactId>zlib</artifactId>
-	<version>0.99-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 
 	<packaging>jar</packaging>
 
