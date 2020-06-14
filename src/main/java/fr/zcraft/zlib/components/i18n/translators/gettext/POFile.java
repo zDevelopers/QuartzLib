@@ -31,20 +31,9 @@ package fr.zcraft.zlib.components.i18n.translators.gettext;
 
 import fr.zcraft.zlib.components.i18n.translators.Translation;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 
 /**
@@ -92,7 +81,10 @@ public class POFile
      */
     public POFile(File file) throws FileNotFoundException
     {
-        this(new FileReader(file));
+        this(new BufferedReader(
+                new InputStreamReader(
+                        new FileInputStream(file), StandardCharsets.UTF_8)));
+        //this(new FileReader(file));
     }
 
     /**

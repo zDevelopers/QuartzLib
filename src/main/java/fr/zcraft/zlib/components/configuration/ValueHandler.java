@@ -7,6 +7,7 @@
 package fr.zcraft.zlib.components.configuration;
 
 import fr.zcraft.zlib.tools.reflection.Reflection;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -37,7 +38,6 @@ class ValueHandler<T>
         
         Class inputType = Reflection.getClosestType(inputValue.getClass(), methods.keySet());
         if(inputType != null) handler = methods.get(inputType);
-        
         if(handler == null)
         {
             if(!methods.containsKey(String.class))
@@ -50,7 +50,6 @@ class ValueHandler<T>
                 inputValue = inputValue.toString();
             }
         }
-    
         return (T) handler.invoke(null, inputValue);
     }
 }
