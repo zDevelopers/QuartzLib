@@ -44,7 +44,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-@WorkerAttributes(name = "Command", queriesMainThread = false)
 abstract public class Command
 {
     private static final Pattern FLAG_PATTERN = Pattern.compile("(--?)[a-zA-Z0-9-]+");
