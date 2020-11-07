@@ -121,7 +121,7 @@ public abstract class ZLib
         }
         catch (InstantiationException | IllegalAccessException e)
         {
-            PluginLogger.error("Cannot instantiate the ZLib component '{0}'", e, componentClass.getName());
+            PluginLogger.error("Cannot instantiate the ZLib component {0}", e, componentClass.getName());
             return null;
         }
         catch (NoClassDefFoundError e)
