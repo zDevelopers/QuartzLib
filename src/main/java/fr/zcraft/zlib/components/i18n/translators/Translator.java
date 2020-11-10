@@ -40,6 +40,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -94,9 +95,12 @@ public abstract class Translator
         {
             try
             {
-                return new FileReader(file);
+                return new BufferedReader(
+                        new InputStreamReader(
+                                new FileInputStream(file), StandardCharsets.UTF_8));
+
             }
-            catch (FileNotFoundException e)
+            catch (IOException e)
             {
                 PluginLogger.error("Unable to load file {0} in translator {1}", e, getFilePath(), getClass().getSimpleName());
                 return null;
@@ -184,7 +188,6 @@ public abstract class Translator
             // Ensures the translation is available
             if (translation.getTranslations().size() <= pluralIndex)
                 return null;
-
             return translation.getTranslations().get(pluralIndex);
         }
         else

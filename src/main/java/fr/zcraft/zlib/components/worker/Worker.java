@@ -78,7 +78,6 @@ public abstract class Worker extends ZLibComponent
     static private Worker getWorker(Class<? extends Worker> workerClass)
     {
         Worker worker = runningWorkers.get(workerClass);
-        
         if(worker == null)
             throw new IllegalStateException("Worker '" + workerClass.getName() + "' has not been correctly initialized");
         

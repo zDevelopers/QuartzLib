@@ -37,8 +37,8 @@ import fr.zcraft.zlib.tools.items.ItemUtils;
 import fr.zcraft.zlib.tools.reflection.NMSException;
 import fr.zcraft.zlib.tools.text.ChatColorParser;
 import fr.zcraft.zlib.tools.text.ChatColoredString;
-import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemFlag;
@@ -286,39 +286,6 @@ public class RawText extends RawTextPart<RawText>
     }
 
 
-    /**
-     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
-     */
-    @Deprecated
-    static private final EnumMap<Achievement, String> ACHIEVEMENTS_NAMES = new EnumMap<>(Achievement.class);
-    
-    static {
-        ACHIEVEMENTS_NAMES.put(Achievement.BUILD_WORKBENCH, "buildWorkBench");
-        ACHIEVEMENTS_NAMES.put(Achievement.GET_DIAMONDS, "diamonds");
-        ACHIEVEMENTS_NAMES.put(Achievement.NETHER_PORTAL, "portal");
-        ACHIEVEMENTS_NAMES.put(Achievement.GHAST_RETURN, "ghast");
-        ACHIEVEMENTS_NAMES.put(Achievement.GET_BLAZE_ROD, "blazeRod");
-        ACHIEVEMENTS_NAMES.put(Achievement.BREW_POTION, "potion");
-        ACHIEVEMENTS_NAMES.put(Achievement.END_PORTAL, "theEnd");
-        ACHIEVEMENTS_NAMES.put(Achievement.THE_END, "theEnd2");
-    }
 
-    /**
-     * @param achievement An achievement.
-     * @return The Minecraft I18N key for this achievement.
-     * @deprecated Future Minecraft versions does not support achievements (they use advancements instead).
-     */
-    @Deprecated
-    static public String getI18nKey(Achievement achievement)
-    {
-        String key = ACHIEVEMENTS_NAMES.get(achievement);
-        
-        if(key == null)
-        {
-            key = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, achievement.name());
-            ACHIEVEMENTS_NAMES.put(achievement, key);
-        }
-        
-        return key;
-    }
+
 }

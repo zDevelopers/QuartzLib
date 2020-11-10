@@ -726,6 +726,7 @@ public class ItemStackBuilder
      */
     private String arrayToString(String... texts)
     {
+
         StringBuilder builder = new StringBuilder();
 
         for (String text : texts)

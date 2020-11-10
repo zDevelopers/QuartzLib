@@ -64,16 +64,6 @@ public class FlatLocation extends Location
     public FlatLocation(World world, double x, double y, double z, float yaw, float pitch, BlockFace facing)
     {
         super(world, x, y, z, yaw, pitch);
-        switch(facing)
-        {
-            case NORTH:
-            case SOUTH:
-            case EAST:
-            case WEST:
-                break;
-            default:
-                throw new IllegalArgumentException("Only N/S/E/W orientations are supported");
-        }
         this.facing = facing;
     }
     
@@ -137,7 +127,29 @@ public class FlatLocation extends Location
     {
         return new FlatLocation(this);
     }
-    
+
+
+    /**
+     * Adds the given values to the plane's coordinates.
+     * @param x The X coordinate
+     * @param z The Z coordinate
+     * @return This location.
+     */
+    public FlatLocation addH(double x, double z,BlockFace bf)
+    {
+                switch (bf){
+                    case NORTH:
+                        add(x, 0, -z); break;
+                    case EAST:
+                        add(x, 0, z); break;
+                    case WEST:
+                        add(-x, 0, -z); break;
+                    case SOUTH:
+                        add(-x, 0, z); break;
+                }
+
+        return this;
+    }
     /**
      * Adds the given values to the plane's coordinates.
      * @param x The X coordinate

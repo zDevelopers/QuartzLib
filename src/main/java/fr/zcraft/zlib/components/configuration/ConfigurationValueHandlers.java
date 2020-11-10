@@ -114,9 +114,8 @@ public abstract class ConfigurationValueHandlers
         {
             obj = ((MemorySection) obj).getValues(false);
         }
-        
+
         if(outputType.isAssignableFrom(obj.getClass())) return (T) obj;
-        
         ValueHandler handler = valueHandlers.get(outputType);
         if(handler == null) 
         {

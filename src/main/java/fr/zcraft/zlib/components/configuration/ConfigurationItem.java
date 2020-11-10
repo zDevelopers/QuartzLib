@@ -84,8 +84,8 @@ public class ConfigurationItem<T>
         try
         {
             T value = getValue(getRawValue());
-            if(value == null) 
-                return defaultValue;
+            if(value == null){
+                return defaultValue;}
             return value;
         }
         catch (ConfigurationParseException ex)

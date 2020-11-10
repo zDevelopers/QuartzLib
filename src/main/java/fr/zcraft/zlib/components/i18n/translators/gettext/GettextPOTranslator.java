@@ -79,6 +79,7 @@ public class GettextPOTranslator extends Translator
             if (reader == null) return;
 
             source = new POFile(getReader());
+
             source.parse();
 
             for (final Translation translation : source.getTranslations())

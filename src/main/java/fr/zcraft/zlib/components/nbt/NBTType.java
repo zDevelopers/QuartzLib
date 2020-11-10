@@ -29,8 +29,10 @@
  */
 package fr.zcraft.zlib.components.nbt;
 
+import fr.zcraft.zlib.tools.PluginLogger;
 import fr.zcraft.zlib.tools.reflection.Reflection;
 
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 
@@ -131,7 +133,7 @@ enum NBTType
         {
             final Object tag;
             switch (this)
-            {
+            {            
                 case TAG_COMPOUND:
                     tag = Reflection.instantiate(getNMSClass());
                     if (value instanceof NBTCompound)
@@ -161,9 +163,11 @@ enum NBTType
                     break;
 
                 default:
-                    tag = Reflection.findConstructor(getNMSClass(), 1).newInstance(value);
+                	Constructor cons=Reflection.findConstructor(getNMSClass(), 1);
+                	cons.setAccessible(true);
+                	tag=cons.newInstance(value);
             }
-
+            
             return tag;
         }
         catch (Exception ex)

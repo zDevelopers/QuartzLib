@@ -132,22 +132,9 @@ public abstract class NBT
         {
             final Map<String, Object> enchantmentData = new HashMap<>();
 
-            if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER)
-            {
-                enchantmentData.put("id", enchantment.getKey().getId());
-            }
-            else
-            {
-                final Enchantment enchant = enchantment.getKey();
-                try
-                {
-                    enchantmentData.put("id", Reflection.call(enchant, "getKey").toString());
-                }
-                catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
-                {
-                    enchantmentData.put("id", enchant.getName());
-                }
-            }
+           
+            enchantmentData.put("key", enchantment.getKey());
+            
 
             enchantmentData.put("lvl", enchantment.getValue());
             enchantList.add(enchantmentData);

@@ -32,6 +32,7 @@ package fr.zcraft.zlib.components.commands;
 
 import fr.zcraft.zlib.components.commands.CommandException.Reason;
 import fr.zcraft.zlib.components.rawtext.RawText;
+import fr.zcraft.zlib.components.worker.WorkerAttributes;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.tools.text.RawMessage;
 import org.apache.commons.lang.StringUtils;
@@ -39,14 +40,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
-
 
 abstract public class Command
 {
@@ -408,7 +404,7 @@ abstract public class Command
     /**
      * Retrieves the {@link Player} who executed this command. If the command is
      * not executed by a player, aborts the execution and displays an error
-     * messagE.
+     * message.
      *
      * @return The player executing this command.
      * @throws CommandException If the sender is not a player.
@@ -788,6 +784,34 @@ abstract public class Command
 
         throw new CommandException(this, Reason.INVALID_PARAMETERS, invalidParameterString(index, "player name"));
     }
+
+    /**
+     * Retrieves a player from its name at the given index, or aborts the
+     * execution if none can be found.
+     *
+     * @param parameter The string containing the name.
+     * @param callback A consumer that will use the offline player's UUID
+     *
+     * @throws CommandException If the value is invalid.
+     */
+    public void offlinePlayerParameter(final String parameter, final Consumer<UUID> callback){
+        CommandWorkers cw=new CommandWorkers();
+        cw.OfflineNameFetch(parameter,callback);
+    }
+    /**
+     * Retrieves a player from its name at the given index, or aborts the
+     * execution if none can be found.
+     *
+     * @param index The index.
+     * @param callback A consumer that will use the offline player's UUID
+     *
+     * @throws CommandException If the value is invalid.
+     */
+    public void offlinePlayerParameter(int index, final Consumer<UUID> callback){
+        final String parameter = args[index];
+        offlinePlayerParameter(parameter,callback);
+    }
+
 
 
     ///////////// Methods for flags /////////////
