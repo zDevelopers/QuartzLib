@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright or © or Copr. ZLib contributors (2015 - 2016)
+  ~ Copyright or © or Copr. QuartzLib contributors (2015 - 2020)
   ~
   ~ This software is governed by the CeCILL-B license under French law and
   ~ abiding by the rules of distribution of free software.  You can  use,
@@ -36,7 +36,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>fr.zcraft</groupId>
-	<artifactId>zlib</artifactId>
+	<artifactId>quartzlib</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
 	<packaging>jar</packaging>

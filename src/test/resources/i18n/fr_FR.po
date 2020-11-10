@@ -1,10 +1,10 @@
 # Testing data for the PO parser and translator
-# Copyright (C) 2015 zLib contributors
+# Copyright (C) 2015-2020 QuartzLib contributors
 # This file is distributed under the CeCILL-B license.
 #
 #, fuzzy
 msgid   ""
-msgstr  "Project-Id-Version: fr.zcraft.zlib\n"
+msgstr  "Project-Id-Version: fr.zcraft.quartzlib\n"
         "Report-Msgid-Bugs-To: AmauryCarrade\n"
         "POT-Creation-Date: 2016-01-15 23:46+0100\n"
         "PO-Revision-Date: 2016-01-16 04:04+0100\n"
