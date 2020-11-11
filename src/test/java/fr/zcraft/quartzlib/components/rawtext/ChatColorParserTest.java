@@ -35,7 +35,7 @@ import fr.zcraft.quartzlib.tools.text.ChatColoredString;
 import java.util.EnumSet;
 import org.bukkit.ChatColor;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ChatColorParserTest 
 {

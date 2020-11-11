@@ -33,7 +33,7 @@ package fr.zcraft.quartzlib.components.commands;
 
 import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

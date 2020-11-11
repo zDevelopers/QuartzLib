@@ -1,7 +1,7 @@
 package fr.zcraft.quartzlib.core;
 
 import fr.zcraft.quartzlib.MockedBukkitTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertSame;
 

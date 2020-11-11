@@ -33,8 +33,8 @@ import fr.zcraft.quartzlib.TestsUtils;
 import fr.zcraft.quartzlib.components.i18n.translators.Translation;
 import fr.zcraft.quartzlib.components.i18n.translators.gettext.POFile;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.InputStreamReader;
 
@@ -44,7 +44,7 @@ public class POParserTest
     private final POFile po = new POFile(new InputStreamReader(TestsUtils.getResource("i18n/fr_FR.po")));
 
     @Test
-    @Before
+    @BeforeEach
     public void testPoParsing()
     {
         try

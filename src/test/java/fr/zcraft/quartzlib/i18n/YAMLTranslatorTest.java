@@ -35,7 +35,7 @@ import fr.zcraft.quartzlib.components.i18n.translators.yaml.YAMLTranslator;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
