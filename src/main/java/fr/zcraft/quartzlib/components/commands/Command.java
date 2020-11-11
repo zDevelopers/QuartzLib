@@ -790,8 +790,6 @@ abstract public class Command
      *
      * @param parameter The string containing the name.
      * @param callback A consumer that will use the offline player's UUID
-     *
-     * @throws CommandException If the value is invalid.
      */
     public void offlinePlayerParameter(final String parameter, final Consumer<UUID> callback){
         CommandWorkers cw=new CommandWorkers();
@@ -803,8 +801,6 @@ abstract public class Command
      *
      * @param index The index.
      * @param callback A consumer that will use the offline player's UUID
-     *
-     * @throws CommandException If the value is invalid.
      */
     public void offlinePlayerParameter(int index, final Consumer<UUID> callback){
         final String parameter = args[index];
@@ -822,7 +818,7 @@ abstract public class Command
      * {@link WithFlags}. </p>
      *
      * <p>A flag is a value precessed by one or two dashes, and composed of
-     * alphanumerical characters, and dashes.<br /> Flags are not
+     * alphanumerical characters, and dashes.<br> Flags are not
      * case-sensitive.</p>
      *
      * <p>One-letter flags are passed using the syntax {@code -f} (for the
@@ -843,7 +839,7 @@ abstract public class Command
      *     \@WithFlags({"flag", "f"})
      * </pre>
      *
-     * If a flag-like argument is passed but not in the flags whitelist, it will
+     * <p>If a flag-like argument is passed but not in the flags whitelist, it will
      * be left in the {@link #args} parameters like any other arguments. Else,
      * the retrieved flags are removed from the arguments list.</p>
      *

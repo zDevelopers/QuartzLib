@@ -82,7 +82,7 @@ public final class ListHeaderFooter
     /**
      * Sends the player list headers and footers to the given player.
      *
-     * @param player The receiver of the header & footers.
+     * @param player The receiver of the header &amp; footers.
      * @param header The header.
      * @param footer The footer.
      *
@@ -100,7 +100,7 @@ public final class ListHeaderFooter
     /**
      * Sends the player list headers and footers to the given player.
      *
-     * @param player The receiver of the header & footers.
+     * @param player The receiver of the header &amp; footers.
      * @param header The header.
      * @param footer The footer.
      *
@@ -118,7 +118,7 @@ public final class ListHeaderFooter
     /**
      * Sends the player list headers and footers to the given player.
      *
-     * @param player    The receiver of the header & footers.
+     * @param player    The receiver of the header &amp; footers.
      * @param rawHeader The header (raw JSON message).
      * @param rawFooter The footer (raw JSON message).
      *

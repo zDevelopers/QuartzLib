@@ -178,7 +178,7 @@ public class I18n extends QuartzComponent
      *
      * <ul>
      *     <li>
-     *         Every colors & formatting codes without underscores, written in english:
+     *         Every colors &amp; formatting codes without underscores, written in english:
      *         <pre>
      *             {black}, {darkblue}, {darkgreen}, {darkaqua}, {darkred}, {darkpurple}, {gold}, {gray},
      *             {darkgray}, {blue}, {yellow}, {green}, {aqua}, {red}, {lightpurple}, {bold}, {strikethrough},

@@ -138,7 +138,7 @@ public final class MessageSender
      * @param message  The message to be sent.
      * @param type     The message's type.
      *
-     * @return {@code false} if an error occurred while sending the message.<br />
+     * @return {@code false} if an error occurred while sending the message.<br>
      * If this happens:
      * <ul>
      *     <li>
@@ -166,7 +166,7 @@ public final class MessageSender
      * @param message  The message to be sent.
      * @param type     The message's type.
      *
-     * @return {@code false} if an error occurred while sending the message.<br />
+     * @return {@code false} if an error occurred while sending the message.<br>
      * If this happens:
      * <ul>
      *     <li>
@@ -193,7 +193,7 @@ public final class MessageSender
      * @param type     The message's type.
      *
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     * occurred while sending the message.<br />
+     * occurred while sending the message.<br>
      * If this happens:
      * <ul>
      *     <li>
@@ -222,7 +222,7 @@ public final class MessageSender
      * @param type     The message's type.
      *
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     * occurred while sending the message.<br />
+     * occurred while sending the message.<br>
      * If this happens:
      * <ul>
      *     <li>
@@ -254,7 +254,7 @@ public final class MessageSender
      * @param json  The JSON message to be sent.
      * @param type     The message's type.
      *
-     * @return {@code false} if an error occurred while sending the message.<br />
+     * @return {@code false} if an error occurred while sending the message.<br>
      * If this happens:
      * <ul>
      *     <li>
@@ -284,7 +284,7 @@ public final class MessageSender
      * @param type     The message's type.
      *
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     * occurred while sending the message.<br />
+     * occurred while sending the message.<br>
      * If this happens:
      * <ul>
      *     <li>

@@ -12,6 +12,11 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 8
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Publish to GitHub Packages
         id: maven_publish
         run: |

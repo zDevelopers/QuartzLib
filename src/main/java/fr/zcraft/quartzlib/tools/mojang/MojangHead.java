@@ -115,8 +115,7 @@ public enum MojangHead
     }
 
     /**
-     * @return The head as an ItemStack (of type {@link Material#SKULL_ITEM}
-     * or {@link Material#PLAYER_HEAD} according to the Minecraft version used).
+     * @return The head as an ItemStack (of type {@link Material#PLAYER_HEAD}).
      */
     public ItemStack asItem()
     {

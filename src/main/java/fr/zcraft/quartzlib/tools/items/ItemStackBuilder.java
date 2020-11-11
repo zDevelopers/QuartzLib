@@ -668,7 +668,7 @@ public class ItemStackBuilder
 
     /**
      * Sets the skin name to use for this ItemStack. If the item is not of type
-     * {@link Material#SKULL_ITEM}, an {@link IllegalStateException} will be
+     * {@link Material#PLAYER_HEAD}, an {@link IllegalStateException} will be
      * thrown when making the item. Setting this will override the data value
      * of the skull.
      *

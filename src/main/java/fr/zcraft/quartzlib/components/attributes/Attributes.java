@@ -408,7 +408,7 @@ public class Attributes implements List<Attribute>
     
     /**
      * Returns the Minecraft NBT/JSON string representation of this attribute list.
-     * See {@link fr.zcraft.quartzlib.tools.nbt.NBT#toNBTJSONString(java.lang.Object) } for more information.
+     * See {@link fr.zcraft.quartzlib.components.nbt.NBT#toNBTJSONString(java.lang.Object) } for more information.
      * @return the Minecraft NBT/JSON string representation of this attribute list.
      */
     @Override

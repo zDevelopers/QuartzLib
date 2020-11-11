@@ -110,7 +110,7 @@ public final class Titles
      *
      * @param player   The receiver of the title.
      * @param fadeIn   The fade-in time, in ticks.
-     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay     The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                 ticks).
      * @param fadeOut  The fade-out time, in ticks.
      * @param title    The text of the title. {@code null} if you don't want to display a title.
@@ -133,7 +133,7 @@ public final class Titles
      *
      * @param player   The receiver of the title.
      * @param fadeIn   The fade-in time, in ticks.
-     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay     The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                 ticks).
      * @param fadeOut  The fade-out time, in ticks.
      * @param title    The text of the title. {@code null} if you don't want to display a title.
@@ -156,7 +156,7 @@ public final class Titles
      *
      * @param player      The receiver of the title.
      * @param fadeIn      The fade-in time, in ticks.
-     * @param stay        The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay        The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                    ticks).
      * @param fadeOut     The fade-out time, in ticks.
      * @param rawTitle    The JSON representation of the title. {@code null} if you don't want to
@@ -182,7 +182,7 @@ public final class Titles
      * Displays a title to the whole server.
      *
      * @param fadeIn   The fade-in time, in ticks.
-     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay     The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                 ticks).
      * @param fadeOut  The fade-out time, in ticks.
      * @param title    The text of the title. {@code null} if you don't want to display a title.
@@ -203,7 +203,7 @@ public final class Titles
      * Displays a title to the whole server.
      *
      * @param fadeIn   The fade-in time, in ticks.
-     * @param stay     The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay     The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                 ticks).
      * @param fadeOut  The fade-out time, in ticks.
      * @param title    The text of the title. {@code null} if you don't want to display a title.
@@ -224,7 +224,7 @@ public final class Titles
      * Displays a title to the whole server.
      *
      * @param fadeIn      The fade-in time, in ticks.
-     * @param stay        The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay        The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                    ticks).
      * @param fadeOut     The fade-out time, in ticks.
      * @param rawTitle    The JSON representation of the title. {@code null} if you don't want to
@@ -252,7 +252,7 @@ public final class Titles
      *
      * @param connection  The player's connection (instance of {@code net.minecraft.server.PlayerConnection})
      * @param fadeIn      The fade-in time, in ticks.
-     * @param stay        The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay        The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                    ticks).
      * @param fadeOut     The fade-out time, in ticks.
      * @param rawTitle    The JSON representation of the title. {@code null} if you don't want to
@@ -287,7 +287,7 @@ public final class Titles
      *
      * @param connection The player's connection (instance of {@code net.minecraft.server.PlayerConnection})
      * @param fadeIn     The fade-in time, in ticks.
-     * @param stay       The time the title stays in the screen, fade-in & out times excluded (in
+     * @param stay       The time the title stays in the screen, fade-in &amp; out times excluded (in
      *                   ticks).
      * @param fadeOut    The fade-out time, in ticks.
      *

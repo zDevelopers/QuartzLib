@@ -60,7 +60,7 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
     /**
      * <p>Uses the file name as the bundle name.</p>
      *
-     * <hr />
+     * <hr>
      *
      * <p> {@inheritDoc}
      */
@@ -81,7 +81,7 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
      * <p>Loads the bundles from the file system instead of the JAR file, to allow modifications by
      * the end user, if a file was provided.</p>
      *
-     * <hr />
+     * <hr>
      *
      * <p> {@inheritDoc}
      */
@@ -103,10 +103,10 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
     }
 
     /**
-     * <p>The bundles are only loaded on startup, one time, so the cache is not needed.<br />
+     * <p>The bundles are only loaded on startup, one time, so the cache is not needed.<br>
      * Plus, the cache may cause problems if one reloads the plugin to update the translation.</p>
      *
-     * <hr />
+     * <hr>
      *
      * <p> {@inheritDoc}
      */

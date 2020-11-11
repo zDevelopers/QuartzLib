@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * Classes used to load & store the translations extends this class.
+ * Classes used to load &amp; store the translations extends this class.
  *
  * Translators are lazy: strings are only loaded on first use.
  */
@@ -200,7 +200,7 @@ public abstract class Translator
      * Returns the plural index to use for the given integer.
      *
      * Translators should override this to use custom plural rules loaded from the files,
-     * if available.<br /> The default implementation ignores the plural and always returns {@code
+     * if available.<br> The default implementation ignores the plural and always returns {@code
      * 0}.
      *
      * @param count The count.
