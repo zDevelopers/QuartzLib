@@ -20,6 +20,6 @@ public abstract class MockedBukkitTest {
     @After
     public void tearDown()
     {
-        MockBukkit.unload();
+        MockBukkit.unmock();
     }
 }

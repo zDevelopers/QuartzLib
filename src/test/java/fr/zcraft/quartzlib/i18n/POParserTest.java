@@ -75,8 +75,7 @@ public class POParserTest
     @Test
     public void testTranslationsCount()
     {
-        Assert.assertFalse("Translations from PO file missing", po.getTranslations().size() < 13);
-        Assert.assertFalse("Translations from PO file in a too high count", po.getTranslations().size() > 13);
+        Assert.assertEquals("Translations from PO file missing or are too many", po.getTranslations().size(), 20);
     }
 
     @Test
@@ -88,34 +87,34 @@ public class POParserTest
             {
                 case "{darkgreen}{bold}Cook":
                     Assert.assertEquals("Bad translations count for single translation", 1, translation.getTranslations().size());
-                    Assert.assertEquals("Bad translation", "{darkgreen}{bold}Cuisinier", translation.getTranslations().get(0));
+                    Assert.assertEquals("Bad translation", "{darkgreen}{bold}Cuistot", translation.getTranslations().get(0));
                     Assert.assertEquals("Bad context", "sidebar", translation.getContext());
                     break;
 
                 case "{red}{bold}♨ Toaster ♨":
                     Assert.assertEquals("Bad translations count for single translation with UTF-8", 1, translation.getTranslations().size());
-                    Assert.assertEquals("Bad translation with UTF-8", "{red}{bold}♨ Toaster ♨", translation.getTranslations().get(0));
+                    Assert.assertEquals("Bad translation with UTF-8", "{red}{bold}♨ Grille-pain ♨", translation.getTranslations().get(0));
                     Assert.assertEquals("Bad context with UTF-8 messageId", "sidebar", translation.getContext());
                     break;
 
                 case "One toast added.":
                     Assert.assertEquals("Bad translations count for translation with plural", 2, translation.getTranslations().size());
                     Assert.assertEquals("Bad extracted plural messageId", "{0} toasts added.", translation.getOriginalPlural());
-                    Assert.assertEquals("Bad singular translation", "Un toast ajouté.", translation.getTranslations().get(0));
-                    Assert.assertEquals("Bad plural translation", "{0} toasts ajoutés.", translation.getTranslations().get(1));
+                    Assert.assertEquals("Bad singular translation", "Un pain ajouté.", translation.getTranslations().get(0));
+                    Assert.assertEquals("Bad plural translation", "{0} pains ajoutés.", translation.getTranslations().get(1));
                     Assert.assertEquals("Bad null context with plurals", null, translation.getContext());
                     break;
 
                 case "There are no toasts here ...":
                     Assert.assertEquals("Bad translations count for single translation without context", 1, translation.getTranslations().size());
-                    Assert.assertEquals("Bad translation without context", "Il n'y a pas de toasts ici...", translation.getTranslations().get(0));
+                    Assert.assertEquals("Bad translation without context", "Il n'y a pas de pain grillé ici...", translation.getTranslations().get(0));
                     Assert.assertEquals("Bad null context", null, translation.getContext());
                     break;
 
                 case "  Toast #{0}":
                     Assert.assertEquals("Bad translations count for single translation with empty context", 1, translation.getTranslations().size());
-                    Assert.assertEquals("Bad translation with empty context", "  Toast no. {0}", translation.getTranslations().get(0));
-                    Assert.assertEquals("Bad empty context", "", translation.getContext());
+                    Assert.assertEquals("Bad translation with empty context", "  Pain grillé no. {0}", translation.getTranslations().get(0));
+                    Assert.assertEquals("Bad empty context", null, translation.getContext());
                     break;
 
                 case "It's just a \"toaster\"":

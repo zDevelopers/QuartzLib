@@ -93,7 +93,7 @@ public class PoTranslatorTest
     @Test
     public void testBasicTranslations()
     {
-        Assert.assertEquals("Bad translation", "Il n'y a pas de toasts ici...", translator.translate(null, "There are no toasts here ...", null, null));
+        Assert.assertEquals("Bad translation", "Il n'y a pas de pain grillé ici...", translator.translate(null, "There are no toasts here ...", null, null));
     }
 
     @Test
@@ -107,15 +107,15 @@ public class PoTranslatorTest
     public void testContexts()
     {
         Assert.assertEquals("Bad translation with context", "{gold}{bold}Cuit", translator.translate("sidebar", "{gold}{bold}Cooked", null, null));
-        Assert.assertEquals("Bad translation with context and UTF-8", "{red}{bold}♨ Toaster ♨", translator.translate("sidebar", "{red}{bold}♨ Toaster ♨", null, null));
-        Assert.assertEquals("Bad translation with empty context", "  Toast no. {0}", translator.translate("", "  Toast #{0}", null, null));
+        Assert.assertEquals("Bad translation with context and UTF-8", "{red}{bold}♨ Grille-pain ♨", translator.translate("sidebar", "{red}{bold}♨ Toaster ♨", null, null));
+        Assert.assertEquals("Bad translation with empty context", null, translator.translate("", "  Toast #{0}", null, null));
     }
 
     @Test
     public void testPlurals()
     {
-        Assert.assertEquals("Bad translation with plural (singular)", "Un toast ajouté.", translator.translate(null, "One toast added.", "{0} toasts added.", 1));
-        Assert.assertEquals("Bad translation with plural (plural)", "{0} toasts ajoutés.", translator.translate(null, "One toast added.", "{0} toasts added.", 2));
+        Assert.assertEquals("Bad translation with plural (singular)", "Un pain ajouté.", translator.translate(null, "One toast added.", "{0} toasts added.", 1));
+        Assert.assertEquals("Bad translation with plural (plural)", "{0} pains ajoutés.", translator.translate(null, "One toast added.", "{0} toasts added.", 2));
     }
 
     @Test

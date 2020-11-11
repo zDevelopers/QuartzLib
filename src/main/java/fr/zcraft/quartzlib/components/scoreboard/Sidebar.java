@@ -33,6 +33,8 @@ import com.google.common.collect.ImmutableSet;
 import fr.zcraft.quartzlib.components.scoreboard.sender.ObjectiveSender;
 import fr.zcraft.quartzlib.components.scoreboard.sender.SidebarObjective;
 import fr.zcraft.quartzlib.core.QuartzLib;
+import fr.zcraft.quartzlib.exceptions.IncompatibleMinecraftVersionException;
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -633,7 +635,11 @@ public abstract class Sidebar
             sidebar.runAutoRefresh(false);
         }
 
-        ObjectiveSender.clearForAll();
+        try {
+            ObjectiveSender.clearForAll();
+        } catch (IncompatibleMinecraftVersionException e) {
+            PluginLogger.warning("Could not properly disable Sidebar", e);
+        }
     }
 
     /**

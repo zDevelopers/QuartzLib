@@ -1,7 +1,6 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Testing data for the PO parser and translator
+# Copyright (C) 2015-2020 QuartzLib contributors
+# This file is distributed under the CeCILL-B license.
 #
 #, fuzzy
 msgid   ""
@@ -90,3 +89,38 @@ msgstr  "Il n'y a pas de pain grillé ici..."
 #, java-format
 msgid   "  Toast #{0}"
 msgstr  "  Pain grillé no. {0}"
+
+#: fr/zcraft/ztoaster/Nowhere.java:4269
+msgid   "It's just a \"toaster\""
+msgstr  "Ce n'est qu'un \"toaster\""
+
+#: fr/zcraft/ztoaster/Nowhere.java:1984
+msgid   "Multi-lines"
+"message"
+msgstr  "Message"
+"multi-ligne"
+
+#: fr/zcraft/ztoaster/Nowhere.java:1984
+msgid   "Multi-lines "
+"message with trailing space"
+msgstr  "Message"
+" multi-ligne avec une espace séparatrice explicite"
+
+#: fr/zcraft/ztoaster/Nowhere.java:1337
+msgid   "Multi-lines "
+" message with multiple trailing spaces"
+msgstr  "Message "
+" multi-ligne avec plusieurs espaces séparatrices explicites"
+
+#: src/main/java/eu/carrade/amaury/UHCReloaded/borders/BorderManager.java:426
+msgid ""
+"{gray}It will shrink by one block every {0} second(s) until {1} blocks in "
+"diameter."
+msgstr ""
+"{gray}Elle réduira d'un bloc toutes les {0} seconde(s) jusqu'à atteindre "
+"{1} blocs de diamètre."
+
+#msgid "{gray}When clicked, a sign will open; write the name of the team inside."
+#msgstr ""
+#"{gray}Cliquez ici pour ouvrir un panneau, et écrivez le nom de l'équipe "
+#"dedans."
