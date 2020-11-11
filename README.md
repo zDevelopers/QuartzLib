@@ -13,7 +13,7 @@ Currently, QuartzLib requires **Java 8** or later and **Bukkit 1.15** or later.
 
 #### I'm starting a new plugin
 
-Either create a plugin as usual and add the QuartzLib as explained below, or use [the plugin bootstrap generator](https://github.com/zDevelopers/zLib-CodeGen-Utils#plugins-bootstrap-generator) and answer “yes” when the tool asks if you want to use zLib.
+Either create a plugin as usual and add the QuartzLib as explained below, or use [the plugin bootstrap generator](https://github.com/zDevelopers/zLib-CodeGen-Utils#plugins-bootstrap-generator) and answer “yes” when the tool asks if you want to use QuartzLib.
 
 #### I want to add QuartzLib to an existing project
 
@@ -21,8 +21,8 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
    
     ```xml
         <repository>
-            <id>zDevelopers</id>
-            <url>http://maven.carrade.eu/artifactory/snapshots</url>
+            <id>QuartzLib</id>
+            <url>https://maven.pkg.github.com/zDevelopers/QuartzLib</url>
         </repository>
     ```
 
@@ -31,7 +31,7 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
     ```xml
         <dependency>
             <groupId>fr.zcraft</groupId>
-            <artifactId>zlib</artifactId>
+            <artifactId>quartzlib</artifactId>
             <version>0.99-SNAPSHOT</version>
         </dependency>
     ```
@@ -50,7 +50,7 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
                     <configuration>
                         <artifactSet>
                             <includes>
-                                <include>fr.zcraft:zlib</include>
+                                <include>fr.zcraft:quartzlib</include>
                             </includes>
                         </artifactSet>
                         <relocations>
@@ -81,5 +81,5 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
    mvn clean install
    ```
 
-You should also update your code so your main class extends [`ZPlugin`](https://jenkins.carrade.eu/job/zLib/javadoc/index.html?fr/zcraft/zlib/core/ZPlugin.html) instead of `JavaPlugin`. No other changes are required. This will allow you to use directly some useful methods to load your plugin's components.  
-Check out [the wiki](https://github.com/zDevelopers/QuartzLib/wiki/Installation) for more informations.
+You should also update your code, so your main class extends [`QuartzPlugin`](https://zdevelopers.github.io/QuartzLib/?fr/zcraft/quartzlib/core/QuartzPlugin.html) instead of `JavaPlugin`. No other changes are required. This will allow you to use directly some useful methods to load your plugin's components.  
+Check out [the wiki](https://github.com/zDevelopers/QuartzLib/wiki/Installation) for more information.
