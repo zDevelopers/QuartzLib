@@ -15,11 +15,12 @@ jobs:
       - name: Publish to GitHub Packages
         id: maven_publish
         run: |
-          REVISION_NAME=${GIT_REF_NAME:1}
+          TAG_NAME=${GIT_REF_NAME##*/}
+          REVISION_NAME=${TAG_NAME:1}
 
           mvn -B deploy "-Drevision=$REVISION_NAME"
 
-          JAR_PATH=$(ls | tail -n 1)
+          JAR_PATH=$(ls ./target/*.jar | tail -n 1)
           JAR_NAME=$(basename $JAR_PATH)
           echo "::set-output name=jar_path::$JAR_PATH"
           echo "::set-output name=jar_name::$JAR_NAME"
