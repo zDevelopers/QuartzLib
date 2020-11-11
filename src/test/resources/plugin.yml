@@ -1,0 +1,7 @@
+name: zToaster
+main: fr.zcraft.ztoaster.Toaster
+version: 0.99
+
+commands:
+   toaster:
+      description: Toaster Interface
