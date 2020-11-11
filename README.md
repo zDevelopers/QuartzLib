@@ -4,10 +4,12 @@ QuartzLib
 Helper library for Bukkit plugins development.
 ----
 
+###### (Formerly known as zLib)
+
 ### How to use this library in your plugin?
 
 If you are using Maven to build your plugin, follow these simple steps. Other builds methods are not supported (but you can use them of course).  
-Currently, the QuartzLib requires **Java 8** or later and **Bukkit 1.15** or later.
+Currently, QuartzLib requires **Java 8** or later and **Bukkit 1.15** or later.
 
 #### I'm starting a new plugin
 
