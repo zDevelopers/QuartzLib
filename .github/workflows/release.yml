@@ -1,0 +1,47 @@
+name: Publish new release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - name: Publish to GitHub Packages
+        id: maven_publish
+        run: |
+          REVISION_NAME=${GIT_REF_NAME:1}
+
+          mvn -B deploy "-Drevision=$REVISION_NAME"
+
+          JAR_PATH=$(ls | tail -n 1)
+          JAR_NAME=$(basename $JAR_PATH)
+          echo "::set-output name=jar_path::$JAR_PATH"
+          echo "::set-output name=jar_name::$JAR_NAME"
+        env:
+          GIT_REF_NAME: ${{ github.ref }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create new GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: QuartzLib ${{ github.ref }}
+          draft: true
+          prerelease: false
+      - name: Upload GitHub Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.maven_publish.outputs.jar_path }}
+          asset_name: ${{ steps.maven_publish.outputs.jar_name }}
+          asset_content_type: application/java-archive
