@@ -335,7 +335,7 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder title(ChatColor color, String... texts)
     {
-        String text = arrayToString(texts);
+        String text = String.join("", texts);
 
         if (this.title == null)
             this.title = new RawText(text);
@@ -413,9 +413,9 @@ public class ItemStackBuilder
     public ItemStackBuilder loreLine(ChatColor color, String... text)
     {
         if (color != null)
-            loreLines.add(color + arrayToString(text));
+            loreLines.add(color + String.join("", text));
         else
-            loreLines.add(arrayToString(text));
+            loreLines.add(String.join("", text));
 
         return this;
     }
@@ -668,24 +668,5 @@ public class ItemStackBuilder
     {
         this.replaceNBT = true;
         return this;
-    }
-
-    /**
-     * Concatenates a String[] to a single one.
-     *
-     * @param texts The Strings array.
-     *
-     * @return The concatenated string.
-     */
-    private String arrayToString(String... texts)
-    {
-        StringBuilder builder = new StringBuilder();
-
-        for (String text : texts)
-        {
-            builder.append(text);
-        }
-
-        return builder.toString();
     }
 }
