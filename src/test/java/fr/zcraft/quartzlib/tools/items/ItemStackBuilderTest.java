@@ -5,12 +5,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 
 public class ItemStackBuilderTest extends MockedBukkitTest {
     @Test
@@ -132,5 +131,23 @@ public class ItemStackBuilderTest extends MockedBukkitTest {
                 .resetLore()
                 .loreLine("bar").item();
         Assertions.assertEquals(Collections.singletonList("bar"), Objects.requireNonNull(itemStack11.getItemMeta()).getLore());
+    }
+
+    @Test
+    public void canCreateSkullItem ()
+    {
+        ItemStack fooSkull = new ItemStackBuilder(Material.PLAYER_HEAD)
+                .withMeta((SkullMeta s) -> s.setOwner("foo"))
+                .item();
+
+        Assertions.assertEquals(Material.PLAYER_HEAD, fooSkull.getType());
+        Assertions.assertEquals("foo", ((SkullMeta) Objects.requireNonNull(fooSkull.getItemMeta())).getOwner());
+
+        ItemStack quartz = new ItemStackBuilder(Material.QUARTZ)
+                .withMeta((SkullMeta s) -> s.setOwner("foo"))
+                .item();
+
+        Assertions.assertEquals(Material.QUARTZ, quartz.getType());
+        Assertions.assertFalse(Objects.requireNonNull(quartz.getItemMeta()) instanceof SkullMeta);
     }
 }
