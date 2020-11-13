@@ -34,8 +34,8 @@ import fr.zcraft.quartzlib.components.i18n.translators.Translator;
 import fr.zcraft.quartzlib.components.i18n.translators.properties.PropertiesTranslator;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -61,7 +61,7 @@ public class PropertiesTranslatorTest
     }
 
     @Test
-    @Before
+    @BeforeEach
     public void testTranslatorTypeFromFileName()
     {
         Assert.assertEquals("Translator instance badly loaded from file name", PropertiesTranslator.class, translator.getClass());

@@ -1,6 +1,7 @@
-# Testing data for the PO parser and translator
-# Copyright (C) 2015-2020 QuartzLib contributors
-# This file is distributed under the CeCILL-B license.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid   ""
@@ -17,110 +18,70 @@ msgstr  "Project-Id-Version: PACKAGE VERSION\n"
         "Plural-Forms: nplurals=2; plural=n>1;\n"
 
 #: fr/zcraft/ztoaster/ToasterSidebar.java:75
-msgctxt "sidebar"
 msgid   "{darkgreen}{bold}Cook"
-msgstr  "{darkgreen}{bold}Cuistot"
+msgstr  "{darkgreen}{bold}Cook"
 
 #: fr/zcraft/ztoaster/ToasterSidebar.java:78
-msgctxt "sidebar"
 msgid   "{yellow}{bold}Inside the toaster"
-msgstr  "{yellow}{bold}Dans le grille-pain"
+msgstr  "{yellow}{bold}Inside da toasterr"
 
 #: fr/zcraft/ztoaster/ToasterSidebar.java:81
-msgctxt "sidebar"
 msgid   "{gold}{bold}Cooked"
-msgstr  "{gold}{bold}Cuit"
+msgstr  "{gold}{bold}Cooked"
 
 #: fr/zcraft/ztoaster/ToasterSidebar.java:90
-msgctxt "sidebar"
 msgid   "{red}{bold}♨ Toaster ♨"
-msgstr  "{red}{bold}♨ Grille-pain ♨"
+msgstr  "{red}{bold}♨ Toaster ♨"
 
 #: fr/zcraft/ztoaster/ToasterSidebar.java:93
-msgctxt "sidebar"
 msgid   "{blue}Toaster"
-msgstr  "{blue}Grille-pain"
+msgstr  "{blue}Toaster"
 
 #: fr/zcraft/ztoaster/ToastExplorer.java:44
 msgid   "{black}Toaster contents"
-msgstr  "{black}Contenu du grille-pain"
+msgstr   "{black}Toaster contents"
 
 #. Title of the cooked toast item in GUI
 #: fr/zcraft/ztoaster/ToastExplorer.java:57
 msgid   "{white}Cooked toast #{0}"
-msgstr  "{white}Pain grillé no. {0}"
+msgstr   "{white}Cooked toast #{0}"
 
 #. Title of the raw toast item in GUI
 #: fr/zcraft/ztoaster/ToastExplorer.java:60
 msgid   "{white}Raw toast #{0}"
-msgstr  "{white}Pain pas grillé no. {0}"
+msgstr   "{white}Raw toast #{0}"
 
 #: fr/zcraft/ztoaster/commands/AddCommand.java:56
 #, possible-java-format
 msgid   "DING! Toast {0} is ready !"
-msgstr  "DING ! Le pain grillé {0} est prêt !"
+msgstr  "DING! Toast {0} is ready !"
 
 #: fr/zcraft/ztoaster/commands/AddCommand.java:64
 msgid   "{ce}Oh no! A toasted exception !"
-msgstr  "{ce}Oh non ! Une exception grillée !"
+msgstr  "{ce}Oh no! A toasted exception !"
 
 #: fr/zcraft/ztoaster/commands/AddCommand.java:65
 msgid   "{ce}See toaster logs for details."
-msgstr  "{ce}Voir les logs du grille-pain pour plus de détails."
+msgstr  "{ce}See toaster logs for details."
 
 #: fr/zcraft/ztoaster/commands/AddCommand.java:69
 #, possible-java-format
 msgid   "Toast {0} added."
-msgstr  "Pain {0} ajouté."
+msgstr  "Toast {0} added."
 
 #: fr/zcraft/ztoaster/commands/AddCommand.java:63
 #, java-format
 msgid   "One toast added."
 msgid_plural "{0} toasts added."
-msgstr[0]  "Un pain ajouté."
-msgstr[1]  "{0} pains ajoutés."
+msgstr[0]  "One toast added."
+msgstr[1]  "{0} toasts added."
 
 #. Output of the command /toaster list, without toasts.
 #: fr/zcraft/ztoaster/commands/ListCommand.java:74
 msgid   "There are no toasts here ..."
-msgstr  "Il n'y a pas de pain grillé ici..."
+msgstr  "There are no toasts here ..."
 
 #: fr/zcraft/ztoaster/commands/ListCommand.java:79
 #, java-format
 msgid   "  Toast #{0}"
-msgstr  "  Pain grillé no. {0}"
-
-#: fr/zcraft/ztoaster/Nowhere.java:4269
-msgid   "It's just a \"toaster\""
-msgstr  "Ce n'est qu'un \"toaster\""
-
-#: fr/zcraft/ztoaster/Nowhere.java:1984
-msgid   "Multi-lines"
-"message"
-msgstr  "Message"
-"multi-ligne"
-
-#: fr/zcraft/ztoaster/Nowhere.java:1984
-msgid   "Multi-lines "
-"message with trailing space"
-msgstr  "Message"
-" multi-ligne avec une espace séparatrice explicite"
-
-#: fr/zcraft/ztoaster/Nowhere.java:1337
-msgid   "Multi-lines "
-" message with multiple trailing spaces"
-msgstr  "Message "
-" multi-ligne avec plusieurs espaces séparatrices explicites"
-
-#: src/main/java/eu/carrade/amaury/UHCReloaded/borders/BorderManager.java:426
-msgid ""
-"{gray}It will shrink by one block every {0} second(s) until {1} blocks in "
-"diameter."
-msgstr ""
-"{gray}Elle réduira d'un bloc toutes les {0} seconde(s) jusqu'à atteindre "
-"{1} blocs de diamètre."
-
-#msgid "{gray}When clicked, a sign will open; write the name of the team inside."
-#msgstr ""
-#"{gray}Cliquez ici pour ouvrir un panneau, et écrivez le nom de l'équipe "
-#"dedans."
+msgstr  "  Toast #{0}"

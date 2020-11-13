@@ -67,7 +67,7 @@ import java.util.Map.Entry;
  *                  .title(ChatColor.GOLD + "The best totem of all totems")
  *
  *                  .lore(ChatColor.GRAY + "I'm better than the others.")
- *                  .emptyLore()
+ *                  .loreSeparator()
  *
  *                  // This one will be automatically wrapped to 28-characters lines so
  *                  // the rendered tooltip is not too wide.
@@ -190,9 +190,10 @@ public class ItemStackBuilder
 
             ItemMeta meta = itemStack.getItemMeta();
 
-            if (meta != null && meta.getLore() != null)
+            if (meta != null && meta.hasLore())
             {
-                loreLines.addAll(meta.getLore());
+                List<String> lore = meta.getLore();
+                if (lore != null) loreLines.addAll(lore);
             }
         }
     }
@@ -418,8 +419,8 @@ public class ItemStackBuilder
     /**
      * Adds one line of lore to the ItemStack.
      *
-     * @param text The line of lore. If several are provided, they will be all
-     *             concatenated.
+     * @param text The line of lore. If several strings are provided, they will be all
+     *             concatenated into a single line.
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
@@ -432,8 +433,8 @@ public class ItemStackBuilder
      * Adds one line of lore to the ItemStack.
      *
      * @param color The color for this line of lore.
-     * @param text  The line of lore. If several are provided, they will be all
-     *              concatenated.
+     * @param text  The line of lore. If several strings are provided, they will be all
+     *              concatenated into a single line.
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
@@ -704,7 +705,7 @@ public class ItemStackBuilder
 
     /**
      * Sets the NBT data to replace the whole data in the item stack. If not called,
-     * NBT data will be appended to the existing data, overriding concurrent keys only.
+     * NBT data will be appended to the existing data, overriding conflicting keys only.
      * If this is called, the whole NBT data will be the data set in {@link #nbt(Map)},
      * clearing any existing data.
      *
@@ -726,7 +727,6 @@ public class ItemStackBuilder
      */
     private String arrayToString(String... texts)
     {
-
         StringBuilder builder = new StringBuilder();
 
         for (String text : texts)

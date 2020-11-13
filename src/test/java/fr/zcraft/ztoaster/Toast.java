@@ -1,5 +1,5 @@
 /*
- * Copyright or © or Copr. QuartzLib contributors (2015 - 2020)
+ * Copyright or © or Copr. ZLib contributors (2015)
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
@@ -28,31 +28,32 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.quartzlib.tools.reflection;
+package fr.zcraft.ztoaster;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import junit.framework.Assert;
-import org.junit.jupiter.api.Test;
-
-public class ReflectionTest 
+public class Toast 
 {
-    @Test
-    public void testClosestType()
+    public enum CookingStatus {COOKED, NOT_COOKED}
+    
+    private CookingStatus status = CookingStatus.NOT_COOKED;
+    private final int toastId;
+    
+    public Toast()
     {
-        Class closestType = Reflection.getClosestType(ArrayList.class, Object.class, String.class, List.class, Map.class);
-        
-        Assert.assertEquals(List.class, closestType);
-        
-        closestType = Reflection.getClosestType(HashMap.class, Object.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(Object.class, closestType);
-        
-        closestType = Reflection.getClosestType(String.class, Object.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(String.class, closestType);
-        
-        closestType = Reflection.getClosestType(HashMap.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(null, closestType);
+        toastId = Toaster.newToastId();
+    }
+    
+    public CookingStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(CookingStatus status)
+    {
+        this.status = status;
+    }
+
+    public int getToastId()
+    {
+        return toastId;
     }
 }

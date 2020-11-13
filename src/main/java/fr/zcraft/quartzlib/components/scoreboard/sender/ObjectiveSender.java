@@ -32,6 +32,7 @@ package fr.zcraft.quartzlib.components.scoreboard.sender;
 
 import fr.zcraft.quartzlib.components.scoreboard.Sidebar;
 import fr.zcraft.quartzlib.exceptions.IncompatibleMinecraftVersionException;
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.NMSNetwork;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import org.apache.commons.lang.Validate;
@@ -74,9 +75,9 @@ public class ObjectiveSender
 
 
     // The NMS classes & enum values needed to send the packets.
-    private final static Class<?> packetPlayOutScoreboardObjectiveClass;
-    private final static Class<?> packetPlayOutScoreboardDisplayObjectiveClass;
-    private final static Class<?> packetPlayOutScoreboardScoreClass;
+    private static Class<?> packetPlayOutScoreboardObjectiveClass;
+    private static Class<?> packetPlayOutScoreboardDisplayObjectiveClass;
+    private static Class<?> packetPlayOutScoreboardScoreClass;
     private static Class<?> chatComponentText;
 
     private static Object enumScoreboardHealthDisplay_INTEGER = null;
@@ -167,7 +168,7 @@ public class ObjectiveSender
         }
         catch (ClassNotFoundException e)
         {
-            throw new IncompatibleMinecraftVersionException("Unable to get the required classes to send scoreboard packets", e);
+            PluginLogger.warning("Unable to get the required classes to send scoreboard packets", e);
         }
     }
 

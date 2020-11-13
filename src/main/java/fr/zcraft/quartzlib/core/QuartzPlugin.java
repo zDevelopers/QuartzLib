@@ -30,8 +30,11 @@
 package fr.zcraft.quartzlib.core;
 
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.jar.JarFile;
 
@@ -45,6 +48,16 @@ import java.util.jar.JarFile;
  */
 public abstract class QuartzPlugin extends JavaPlugin
 {
+    protected QuartzPlugin()
+    {
+        super();
+    }
+
+    protected QuartzPlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
+    {
+        super(loader, description, dataFolder, file);
+    }
+
     @Override
     public void onLoad()
     {
@@ -80,7 +93,9 @@ public abstract class QuartzPlugin extends JavaPlugin
     {
         try
         {
-            return new JarFile(getFile());
+            File file = getFile();
+            if (file == null) return null;
+            return new JarFile(file);
         }
         catch (IOException e)
         {

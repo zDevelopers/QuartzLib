@@ -1,5 +1,5 @@
 /*
- * Copyright or © or Copr. QuartzLib contributors (2015 - 2020)
+ * Copyright or © or Copr. ZLib contributors (2015)
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
@@ -28,31 +28,39 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.quartzlib.tools.reflection;
+package fr.zcraft.ztoaster.commands;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import junit.framework.Assert;
-import org.junit.jupiter.api.Test;
+import fr.zcraft.quartzlib.components.commands.Command;
+import fr.zcraft.quartzlib.components.commands.CommandException;
+import fr.zcraft.quartzlib.components.commands.CommandInfo;
+import fr.zcraft.quartzlib.components.i18n.I;
+import fr.zcraft.ztoaster.Toast;
+import fr.zcraft.ztoaster.ToasterWorker;
+import org.bukkit.entity.Player;
 
-public class ReflectionTest 
+
+@CommandInfo(name = "add", usageParameters = "[toast count]")
+public class AddCommand extends Command
 {
-    @Test
-    public void testClosestType()
+    @Override
+    protected void run() throws CommandException
     {
-        Class closestType = Reflection.getClosestType(ArrayList.class, Object.class, String.class, List.class, Map.class);
+        Player cook = playerSender();
         
-        Assert.assertEquals(List.class, closestType);
-        
-        closestType = Reflection.getClosestType(HashMap.class, Object.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(Object.class, closestType);
-        
-        closestType = Reflection.getClosestType(String.class, Object.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(String.class, closestType);
-        
-        closestType = Reflection.getClosestType(HashMap.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(null, closestType);
+        if(args.length == 0)
+        {
+            Toast toast = ToasterWorker.addToast(cook);
+            cook.sendMessage(I.t("Toast {0} added.", toast.getToastId()));
+        }
+        else
+        {
+            int toastCount = getIntegerParameter(0);
+            for(int i = toastCount; i --> 0;)
+            {
+                ToasterWorker.addToast(cook);
+            }
+            
+            cook.sendMessage(I.tn("One toast added.", "{0} toasts added.", toastCount, toastCount));
+        }
     }
 }

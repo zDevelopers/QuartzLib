@@ -1,5 +1,5 @@
 /*
- * Copyright or © or Copr. QuartzLib contributors (2015 - 2020)
+ * Copyright or © or Copr. ZLib contributors (2015)
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
@@ -28,31 +28,55 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package fr.zcraft.quartzlib.tools.reflection;
+package fr.zcraft.ztoaster.commands;
+
+import fr.zcraft.quartzlib.components.commands.Command;
+import fr.zcraft.quartzlib.components.commands.CommandException;
+import fr.zcraft.quartzlib.components.commands.CommandInfo;
+import fr.zcraft.quartzlib.components.i18n.I;
+import fr.zcraft.ztoaster.Toast;
+import fr.zcraft.ztoaster.Toaster;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import junit.framework.Assert;
-import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Collection;
 
-public class ReflectionTest 
+@CommandInfo(name = "list", usageParameters = "[cooked|not_cooked]")
+public class ListCommand extends Command
 {
-    @Test
-    public void testClosestType()
+    @Override
+    protected void run() throws CommandException
     {
-        Class closestType = Reflection.getClosestType(ArrayList.class, Object.class, String.class, List.class, Map.class);
+        if(args.length == 0)
+        {
+            showToasts(Arrays.asList(Toaster.getToasts()));
+        }
+        else
+        {
+            ArrayList<Toast> toasts = new ArrayList<Toast>();
+            Toast.CookingStatus status = getEnumParameter(0, Toast.CookingStatus.class);
+            
+            for(Toast toast : Toaster.getToasts())
+            {
+                if(toast.getStatus().equals(status))
+                    toasts.add(toast);
+            }
+            
+            showToasts(toasts);
+        }
+    }
+    
+    private void showToasts(Collection<Toast> toasts)
+    {
+        if(toasts.isEmpty())
+        {
+            // Output of the command /toaster list, without toasts.
+            info(I.t("There are no toasts here ..."));
+        }
         
-        Assert.assertEquals(List.class, closestType);
-        
-        closestType = Reflection.getClosestType(HashMap.class, Object.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(Object.class, closestType);
-        
-        closestType = Reflection.getClosestType(String.class, Object.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(String.class, closestType);
-        
-        closestType = Reflection.getClosestType(HashMap.class, String.class, List.class, Integer.class);
-        Assert.assertEquals(null, closestType);
+        for(Toast toast : toasts)
+        {
+            sender.sendMessage(I.t("  Toast #{0}", toast.getToastId()));
+        }
     }
 }
