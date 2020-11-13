@@ -37,6 +37,7 @@ import com.google.common.base.CaseFormat;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 /**
  * Easier access to Mojang's “Marc's Head Format” Heads, e.g. for use in GUIs.
@@ -127,13 +128,7 @@ public enum MojangHead
      */
     public ItemStackBuilder asItemBuilder()
     {
-        Material headMaterial = Material.matchMaterial("PLAYER_HEAD");
-
-        if (headMaterial == null)
-        {
-            headMaterial = Material.matchMaterial("SKULL_ITEM");
-        }
-
-        return new ItemStackBuilder(headMaterial).head(headName);
+        return new ItemStackBuilder(Material.PLAYER_HEAD)
+                .withMeta((SkullMeta s) -> s.setOwner(headName));
     }
 }

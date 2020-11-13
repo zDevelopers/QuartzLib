@@ -35,26 +35,17 @@ import fr.zcraft.quartzlib.components.nbt.NBT;
 import fr.zcraft.quartzlib.components.nbt.NBTCompound;
 import fr.zcraft.quartzlib.components.rawtext.RawText;
 import fr.zcraft.quartzlib.components.rawtext.RawTextPart;
-import fr.zcraft.quartzlib.tools.MinecraftVersion;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.NMSException;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.Colorable;
-import org.bukkit.material.MaterialData;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 
 /**
@@ -136,8 +127,7 @@ public class ItemStackBuilder
 
     private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
-    private DyeColor dye = null;
-    private String headOwner = null;
+    private final List<Consumer<ItemMeta>> metaConsumers = new ArrayList<>();
 
     /**
      * Creates a new ItemStackBuilder.
@@ -225,15 +215,6 @@ public class ItemStackBuilder
         
         newItemStack.setDurability(data);
 
-        if (dye != null)
-        {
-            final MaterialData materialData = newItemStack.getData();
-            if (!(materialData instanceof Colorable))
-                throw new IllegalStateException("Unable to apply dye: item is not colorable.");
-
-            ((Colorable) materialData).setColor(dye);
-        }
-
         final ItemMeta meta = newItemStack.getItemMeta();
 
         if (title != null)
@@ -241,17 +222,6 @@ public class ItemStackBuilder
 
         if (!loreLines.isEmpty() || resetLore)
             meta.setLore(loreLines);
-
-        if (headOwner != null)
-        {
-            if (!(meta instanceof SkullMeta))
-                throw new IllegalStateException("Unable to set head owner: item is not a skull.");
-
-            ((SkullMeta) meta).setOwner(headOwner);
-
-            if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER)
-                newItemStack.setDurability((short) SkullType.PLAYER.ordinal());
-        }
 
         if (hideAttributes)
         {
@@ -264,6 +234,8 @@ public class ItemStackBuilder
                 ItemUtils.hideItemAttributes(meta, hiddenAttributes);
             }
         }
+
+        metaConsumers.forEach(c -> c.accept(meta));
 
         newItemStack.setItemMeta(meta);
         newItemStack.addUnsafeEnchantments(enchantments);
@@ -363,7 +335,7 @@ public class ItemStackBuilder
      */
     public ItemStackBuilder title(ChatColor color, String... texts)
     {
-        String text = arrayToString(texts);
+        String text = String.join("", texts);
 
         if (this.title == null)
             this.title = new RawText(text);
@@ -441,9 +413,9 @@ public class ItemStackBuilder
     public ItemStackBuilder loreLine(ChatColor color, String... text)
     {
         if (color != null)
-            loreLines.add(color + arrayToString(text));
+            loreLines.add(color + String.join("", text));
         else
-            loreLines.add(arrayToString(text));
+            loreLines.add(String.join("", text));
 
         return this;
     }
@@ -570,6 +542,27 @@ public class ItemStackBuilder
     }
 
     /**
+     * Adds a consumer (or lambda) to be executed with the item's ItemMeta, allowing
+     * it to change it as the item is being created.
+     *
+     * <p>If the consumer's type does not match the item's ItemMeta, it is ignored.</p>
+     *
+     * @param consumer The consumer to be executed.
+     * @param <T> The type of the ItemMeta to accept.
+     * @return The current ItemStackBuilder instance, for method chaining.
+     */
+    public <T> ItemStackBuilder withMeta(Consumer<T> consumer)
+    {
+        this.metaConsumers.add(itemMeta -> {
+            try {
+                consumer.accept((T)itemMeta);
+            } catch (ClassCastException ignored) {}
+        });
+
+        return this;
+    }
+
+    /**
      * Adds a glow effect (a fake enchantment) to the ItemStack. This can only
      * be called once, otherwise an IllegalStateException will be thrown.
      *
@@ -653,37 +646,6 @@ public class ItemStackBuilder
     }
 
     /**
-     * Sets the dye color of the ItemStack. If the item is not colorable, an
-     * IllegalStateException will be thrown when making the item. Setting this
-     * value will override damage/data values.
-     *
-     * @param dye The dye color for the item.
-     *
-     * @return The current ItemStackBuilder instance, for methods chaining.
-     */
-    public ItemStackBuilder dye(DyeColor dye)
-    {
-        this.dye = dye;
-        return this;
-    }
-
-    /**
-     * Sets the skin name to use for this ItemStack. If the item is not of type
-     * {@link Material#PLAYER_HEAD}, an {@link IllegalStateException} will be
-     * thrown when making the item. Setting this will override the data value
-     * of the skull.
-     *
-     * @param owner The head's owner, implying the skin displayed on the head.
-     *
-     * @return The current ItemStackBuilder instance, for methods chaining.
-     */
-    public ItemStackBuilder head(String owner)
-    {
-        this.headOwner = owner;
-        return this;
-    }
-
-    /**
      * Sets the NBT tags to be set in the stack.
      * It is set last and will override some properties like
      * display names.
@@ -716,24 +678,5 @@ public class ItemStackBuilder
     {
         this.replaceNBT = true;
         return this;
-    }
-
-    /**
-     * Concatenates a String[] to a single one.
-     *
-     * @param texts The Strings array.
-     *
-     * @return The concatenated string.
-     */
-    private String arrayToString(String... texts)
-    {
-        StringBuilder builder = new StringBuilder();
-
-        for (String text : texts)
-        {
-            builder.append(text);
-        }
-
-        return builder.toString();
     }
 }
