@@ -40,6 +40,7 @@ import fr.zcraft.quartzlib.tools.reflection.NMSException;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -119,8 +120,7 @@ public class ItemStackBuilder
     private boolean resetLore = false;
 
     private boolean glowing = false;
-    private boolean hideAttributes = false;
-    private String[] hiddenAttributes = null;
+    private Set<ItemFlag> itemFlags = null;
 
     private Map<String, Object> nbt = null;
     private boolean replaceNBT = false;
@@ -223,16 +223,9 @@ public class ItemStackBuilder
         if (!loreLines.isEmpty() || resetLore)
             meta.setLore(loreLines);
 
-        if (hideAttributes)
+        if (itemFlags != null)
         {
-            if (hiddenAttributes == null)
-            {
-                ItemUtils.hideItemAttributes(meta);
-            }
-            else
-            {
-                ItemUtils.hideItemAttributes(meta, hiddenAttributes);
-            }
+            meta.addItemFlags(itemFlags.toArray(new ItemFlag[0]));
         }
 
         metaConsumers.forEach(c -> c.accept(meta));
@@ -610,25 +603,32 @@ public class ItemStackBuilder
     }
 
     /**
-     * Hides all of the attribute lines of the ItemStack. This can only be
-     * called once, otherwise an IllegalStateException will be thrown.
+     * Hides all of the attribute lines of the ItemStack.
      *
-     * @return The current ItemStackBuilder instance, for methods chaining.
+     * <p>This is equivalent to call {@link ItemStackBuilder#withFlags(ItemFlag...)} with every possible ItemFlag value.</p>
+     *
+     * @return The current ItemStackBuilder instance, for method chaining.
      */
-    public ItemStackBuilder hideAttributes()
+    public ItemStackBuilder hideAllAttributes()
     {
-        if (this.hideAttributes)
-            throw new IllegalStateException("'Hidden attributes' has already been set.");
-
-        this.hideAttributes = true;
-        return this;
+        return withFlags(ItemFlag.values());
     }
-    
-    public ItemStackBuilder hideAttributes(String... flagsNames)
+
+    /**
+     * Adds the given {@link ItemFlag}s to the built ItemStack.
+     * Flags that have already been added will be skipped.
+     *
+     * @param itemFlags The {@link ItemFlag}s to add.
+     * @return The current ItemStackBuilder instance, for method chaining.
+     */
+    public ItemStackBuilder withFlags(ItemFlag... itemFlags)
     {
-        hideAttributes();
-        this.hiddenAttributes = flagsNames;
-        
+        if (this.itemFlags == null)
+        {
+            this.itemFlags = EnumSet.noneOf(ItemFlag.class);
+        }
+        Collections.addAll(this.itemFlags, itemFlags);
+
         return this;
     }
 

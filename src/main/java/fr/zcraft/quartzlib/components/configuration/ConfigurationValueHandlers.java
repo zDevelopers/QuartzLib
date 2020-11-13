@@ -456,7 +456,7 @@ public abstract class ConfigurationValueHandlers
             item.glow(handleBoolValue(map.get("glow")));
 
         if (map.containsKey("hideAttributes") && handleBoolValue(map.get("hideAttributes")))
-            item.hideAttributes();
+            item.hideAllAttributes();
         
         if (map.containsKey("enchantments"))
             item.enchant(handleMapValue(map.get("enchantments"), Enchantment.class, Integer.class));
