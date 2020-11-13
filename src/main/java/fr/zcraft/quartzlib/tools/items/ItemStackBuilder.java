@@ -541,6 +541,16 @@ public class ItemStackBuilder
         return this;
     }
 
+    /**
+     * Adds a consumer (or lambda) to be executed with the item's ItemMeta, allowing
+     * it to change it as the item is being created.
+     *
+     * <p>If the consumer's type does not match the item's ItemMeta, it is ignored.</p>
+     *
+     * @param consumer The consumer to be executed.
+     * @param <T> The type of the ItemMeta to accept.
+     * @return The current ItemStackBuilder instance, for method chaining.
+     */
     public <T> ItemStackBuilder withMeta(Consumer<T> consumer)
     {
         this.metaConsumers.add(itemMeta -> {
