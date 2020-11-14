@@ -72,10 +72,6 @@ _Published one day_
   - `hideItemAttributes(ItemMeta)`
   - `hideItemAttributes(ItemStack)`
 
-
-
-
-
 ## QuartzLib 0.0.1
 
 _Published 12 November, 2020_
@@ -88,12 +84,12 @@ _Published 12 November, 2020_
 
 #### Moved Maven repository
 
-:warning: You must use our new (and now, stable) repository, at `https://maven.pkg.github.com/zDevelopers/QuartzLib`. To do so, put his in your `pom.xml`, instead of the old repository:
+:warning: You must use our new (and now, stable) repository, at `https://maven.zcraft.fr/QuartzLib`. To do so, put his in your `pom.xml`, instead of the old repository:
 
 ```xml
     <repository>
         <id>zdevelopers-quartzlib</id>
-        <url>https://maven.pkg.github.com/zDevelopers/QuartzLib</url>
+        <url>https://maven.zcraft.fr/QuartzLib</url>
     </repository>
 ```
 
