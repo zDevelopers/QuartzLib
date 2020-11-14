@@ -3,13 +3,16 @@ package fr.zcraft.quartzlib.tools.items;
 import fr.zcraft.quartzlib.MockedBukkitTest;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.Set;
 
 public class ItemStackBuilderTest extends MockedBukkitTest {
     @Test
@@ -149,5 +152,39 @@ public class ItemStackBuilderTest extends MockedBukkitTest {
 
         Assertions.assertEquals(Material.QUARTZ, quartz.getType());
         Assertions.assertFalse(Objects.requireNonNull(quartz.getItemMeta()) instanceof SkullMeta);
+    }
+
+    @Test
+    @Disabled
+    public void canAddFlags() {
+        ItemStack itemStack = new ItemStackBuilder(Material.QUARTZ).withFlags(ItemFlag.HIDE_ATTRIBUTES).item();
+        Set<ItemFlag> flags = Objects.requireNonNull(itemStack.getItemMeta()).getItemFlags();
+        Assertions.assertEquals(1, flags.size());
+        Assertions.assertTrue(flags.contains(ItemFlag.HIDE_ATTRIBUTES));
+
+        ItemStack itemStack2 = new ItemStackBuilder(Material.QUARTZ).withFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS).item();
+        flags = Objects.requireNonNull(itemStack2.getItemMeta()).getItemFlags();
+        Assertions.assertEquals(2, flags.size());
+        Assertions.assertTrue(flags.containsAll(Arrays.asList(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS)));
+
+        ItemStack itemStack3 = new ItemStackBuilder(Material.QUARTZ).withFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS).item();
+        flags = Objects.requireNonNull(itemStack3.getItemMeta()).getItemFlags();
+        Assertions.assertEquals(2, flags.size());
+        Assertions.assertTrue(flags.containsAll(Arrays.asList(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS)));
+
+        ItemStack itemStack4 = new ItemStackBuilder(Material.QUARTZ)
+                .withFlags(ItemFlag.HIDE_ATTRIBUTES)
+                .withFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS)
+                .item();
+        flags = Objects.requireNonNull(itemStack4.getItemMeta()).getItemFlags();
+        Assertions.assertEquals(2, flags.size());
+        Assertions.assertTrue(flags.containsAll(Arrays.asList(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS)));
+
+        ItemStack itemStack5 = new ItemStackBuilder(Material.QUARTZ)
+                .hideAllAttributes()
+                .item();
+        flags = Objects.requireNonNull(itemStack5.getItemMeta()).getItemFlags();
+        Assertions.assertEquals(ItemFlag.values().length, flags.size());
+        Assertions.assertTrue(flags.containsAll(Arrays.asList(ItemFlag.values())));
     }
 }

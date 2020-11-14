@@ -52,40 +52,6 @@ import java.util.List;
 public final class GuiUtils
 {
     /**
-     * Hides all the item attributes of the given {@link ItemMeta}.
-     *
-     * @param meta The {@link ItemMeta} to hide attributes from.
-     *
-     * @return The same item meta. The modification is applied by reference, the
-     * stack is returned for convenience reasons.
-     * @deprecated Use {@link ItemUtils#hideItemAttributes(ItemMeta)} instead.
-     */
-    @Deprecated
-    static public ItemMeta hideItemAttributes(ItemMeta meta)
-    {
-        return ItemUtils.hideItemAttributes(meta);
-    }
-
-    /**
-     * Hides all the item attributes of the given {@link ItemStack}.
-     *
-     * <p>Warning: this will update the ItemMeta, clearing the effects of, as
-     * example, {@link fr.zcraft.quartzlib.tools.items.GlowEffect}.</p>
-     *
-     * @param stack The {@link ItemStack} to hide attributes from.
-     *
-     * @return The same item stack. The modification is applied by reference,
-     * the stack is returned for convenience reasons.
-     * @deprecated Use {@link ItemUtils#hideItemAttributes(ItemStack)} instead.
-     */
-    @Deprecated
-    static public ItemStack hideItemAttributes(ItemStack stack)
-    {
-        return ItemUtils.hideItemAttributes(stack);
-    }
-
-
-    /**
      * Stores the ItemStack at the given index of a GUI's inventory. The
      * inventory is only updated the next time the Bukkit Scheduler runs (i.e.
      * next server tick).

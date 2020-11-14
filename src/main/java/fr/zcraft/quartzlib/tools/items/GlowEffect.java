@@ -34,6 +34,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -124,7 +125,7 @@ public class GlowEffect extends EnchantmentWrapper {
 			final Enchantment fakeGlow = item.getType() != Material.FISHING_ROD ? Enchantment.LURE : Enchantment.ARROW_DAMAGE;
 			final ItemMeta im = item.getItemMeta();
 			im.addEnchant(fakeGlow, 1, true);
-			ItemUtils.hideItemAttributes(im, "HIDE_ENCHANTS");
+			im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 			item.setItemMeta(im);
 		}
 	}
