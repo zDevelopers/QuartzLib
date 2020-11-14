@@ -46,7 +46,7 @@ _Published one day_
 
 #### `ItemStackBuilder`
 
-- **Breaking Change** — We renamed the `ItemStackBuilder.hideAttributes()` to `ItemStackBuilder.hideAllAttributes()` for clarity.
+- :warning: We renamed the `ItemStackBuilder.hideAttributes()` to `ItemStackBuilder.hideAllAttributes()` for clarity.
 
 
 
@@ -54,7 +54,7 @@ _Published one day_
 
 #### `ItemStackBuilder`
 
-- **Breaking Change** — We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods. The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material. For the second one, use the new ``ItemStackBuilder.withMeta()` method.
+- **Breaking Change** — We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods. The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material. For the second one, use the new `ItemStackBuilder.withMeta()` method.
 
 #### `GuiUtils`
 
