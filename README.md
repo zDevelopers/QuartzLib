@@ -32,7 +32,7 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
         <dependency>
             <groupId>fr.zcraft</groupId>
             <artifactId>quartzlib</artifactId>
-            <version>0.99-SNAPSHOT</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     ```
     
