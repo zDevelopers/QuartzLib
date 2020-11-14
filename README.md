@@ -18,16 +18,16 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
 #### I want to add QuartzLib to an existing project
 
 1. Add our Maven repository to your `pom.xml` file.
-   
+  
     ```xml
         <repository>
             <id>QuartzLib</id>
-            <url>https://maven.pkg.github.com/zDevelopers/QuartzLib</url>
+            <url>https://maven.zcraft.fr/QuartzLib</url>
         </repository>
     ```
 
 2. Add QuartzLib as a dependency.
-   
+  
     ```xml
         <dependency>
             <groupId>fr.zcraft</groupId>
@@ -37,7 +37,7 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
     ```
     
 3. Add the shading plugin to the build. Replace **`YOUR.OWN.PACKAGE`** with your own package.
-    
+  
    ```xml
         <build>
             ...
@@ -76,7 +76,7 @@ Either create a plugin as usual and add the QuartzLib as explained below, or use
    ```
    
 4. Build your project as usual, as example with the following command from your working directory, or using an integrated tool from your IDE.
-   
+  
    ```bash
    mvn clean install
    ```
