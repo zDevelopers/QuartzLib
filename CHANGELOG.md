@@ -54,15 +54,15 @@ _Published one day_
 
 ### Removed
 
-#### `ItemStackBuilder`
-
-- :warning: We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods. The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material. For the second one, use the new `ItemStackBuilder.withMeta()` method.
-
 #### `GuiUtils`
 
 - :warning: We removed the following methods from `GuiUtils`, as they were duplicates of `ItemStackBuilder` ones, or using deprecated APIs. Use `ItemStackBuilder.hideAllAttributes()` instead.
   - `GuiUtils.hideItemAttributes(ItemMeta)`
   - `GuiUtils.hideItemAttributes(ItemStack)`
+
+#### `ItemStackBuilder`
+
+- :warning: We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods. The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material. For the second one, use the new `ItemStackBuilder.withMeta()` method.
 
 #### `ItemUtils`
 
