@@ -4,6 +4,8 @@ This document explains how QuartzLib evolved from version to version, starting a
 
 We follow semantic versioning: you can tell if a version contains breaking changes by looking at the evolution of the version number.
 
+Changes marked with :warning: are **breaking changes**.
+
 
 
 ## QuartzLib 0.1
@@ -54,17 +56,17 @@ _Published one day_
 
 #### `ItemStackBuilder`
 
-- **Breaking Change** — We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods. The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material. For the second one, use the new `ItemStackBuilder.withMeta()` method.
+- :warning: We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods. The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material. For the second one, use the new `ItemStackBuilder.withMeta()` method.
 
 #### `GuiUtils`
 
-- **Breaking Change** — We removed the following methods from `GuiUtils`, as they were duplicates of `ItemStackBuilder` ones, or using deprecated APIs. Use `ItemStackBuilder.hideAllAttributes()` instead.
+- :warning: We removed the following methods from `GuiUtils`, as they were duplicates of `ItemStackBuilder` ones, or using deprecated APIs. Use `ItemStackBuilder.hideAllAttributes()` instead.
   - `GuiUtils.hideItemAttributes(ItemMeta)`
   - `GuiUtils.hideItemAttributes(ItemStack)`
 
 #### `ItemUtils`
 
-- **Breaking Change** — We removed the following methods from `ItemUtils`, as they were duplicates of `ItemStackBuilder` ones, or using deprecated APIs. Use their equivalent in `ItemStackBuilder` instead.
+- :warning: We removed the following methods from `ItemUtils`, as they were duplicates of `ItemStackBuilder` ones, or using deprecated APIs. Use their equivalent in `ItemStackBuilder` instead.
   - `hasItemFlag(ItemMeta, String)`
   - `removeItemFlags(ItemMeta, String...)`
   - `hideItemAttributes(ItemMeta)`
@@ -82,11 +84,11 @@ _Published 12 November, 2020_
 
 #### Higher base requirements
 
-**Breaking Change** — QuartzLib now requires Java 8+ (instead of 7+) and Bukkit 1.15+ (instead of 1.8.3+).
+:warning: QuartzLib now requires Java 8+ (instead of 7+) and Bukkit 1.15+ (instead of 1.8.3+).
 
 #### Moved Maven repository
 
-**Breaking Change** — You must use our new (and now, stable) repository, at `https://maven.pkg.github.com/zDevelopers/QuartzLib`. To do so, put his in your `pom.xml`, instead of the old repository:
+:warning: You must use our new (and now, stable) repository, at `https://maven.pkg.github.com/zDevelopers/QuartzLib`. To do so, put his in your `pom.xml`, instead of the old repository:
 
 ```xml
     <repository>
@@ -127,7 +129,7 @@ Finally, as the package changed too, you should update your shading settings. Up
 
 #### Renamed packages and classes
 
-**Breaking Change** — zLib is now QuartzLib, so a lot of things were renamed.
+:warning: zLib is now QuartzLib, so a lot of things were renamed.
 
 - The base package `fr.zcraft.zlib` is now `fr.zcraft.quartzlib`.
 - The `ZLib` class is now `QuartzLib`.
@@ -140,5 +142,5 @@ Just rename these references—the interfaces have remained the same.
 
 #### `RawText`
 
-- **Breaking Change** — Removed `Achievement`-related methods from the raw text component, as these are no longer supported in Minecraft 1.15+.
+- :warning: Removed `Achievement`-related methods from the raw text component, as these are no longer supported in Minecraft 1.15+.
 
