@@ -114,6 +114,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub Packages</name>
+      <!-- For public access, use https://maven.zcraft.fr/QuartzLib instead (it's the same repo under the hood). -->
 			<url>https://maven.pkg.github.com/zDevelopers/QuartzLib</url>
 		</repository>
 	</distributionManagement>
