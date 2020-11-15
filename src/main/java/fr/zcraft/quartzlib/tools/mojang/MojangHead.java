@@ -41,10 +41,12 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 /**
  * Easier access to Mojang's “Marc's Head Format” Heads, e.g. for use in GUIs.
+ *
+ * <p>See https://minecraft.gamepedia.com/Head#Mojang_Studios_skins for the complete list.</p>
  */
 public enum MojangHead
 {
-    /* Entities */
+    /* Mobs */
     ALEX,
     BLAZE,
     CAVE_SPIDER,
@@ -84,7 +86,7 @@ public enum MojangHead
     TNT("MHF_TNT"),
     TNT_2("MHF_TNT2"),
 
-    /* Miscellaneous */
+    /* Bonus */
     ARROW_UP,
     ARROW_DOWN,
     ARROW_LEFT,
@@ -126,6 +128,8 @@ public enum MojangHead
     /**
      * @return The head as an {@link ItemStackBuilder}, ready to be completed.
      */
+    // Silence the setOwner deprecation warning, because a string name is the only clean way to get a MHF head.
+    @SuppressWarnings("deprecation")
     public ItemStackBuilder asItemBuilder()
     {
         return new ItemStackBuilder(Material.PLAYER_HEAD)
