@@ -30,16 +30,12 @@
 
 package fr.zcraft.ztoaster;
 
-import fr.zcraft.quartzlib.components.commands.Commands;
 import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzlib.components.i18n.I18n;
 import fr.zcraft.quartzlib.components.scoreboard.Sidebar;
 import fr.zcraft.quartzlib.components.scoreboard.SidebarScoreboard;
 import fr.zcraft.quartzlib.core.QuartzPlugin;
 import fr.zcraft.quartzlib.tools.PluginLogger;
-import fr.zcraft.ztoaster.commands.AddCommand;
-import fr.zcraft.ztoaster.commands.ListCommand;
-import fr.zcraft.ztoaster.commands.OpenCommand;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -108,9 +104,9 @@ public class Toaster extends QuartzPlugin implements Listener {
         toasts = new ArrayList<>();
         toastCounter = 0;
 
-        loadComponents(Gui.class, Commands.class, ToasterWorker.class, SidebarScoreboard.class, I18n.class);
+        loadComponents(Gui.class, ToasterWorker.class, SidebarScoreboard.class, I18n.class);
 
-        Commands.register("toaster", AddCommand.class, OpenCommand.class, ListCommand.class);
+        // Commands.register("toaster", AddCommand.class, OpenCommand.class, ListCommand.class);
 
         I18n.useDefaultPrimaryLocale();
         I18n.setFallbackLocale(Locale.US);

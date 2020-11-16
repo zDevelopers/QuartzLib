@@ -32,8 +32,6 @@
 package fr.zcraft.quartzlib.components.rawtext;
 
 import com.google.common.base.CaseFormat;
-import fr.zcraft.quartzlib.components.commands.Command;
-import fr.zcraft.quartzlib.components.commands.Commands;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzlib.tools.reflection.NMSException;
@@ -353,20 +351,21 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return click(ActionClick.RUN_COMMAND, command);
     }
 
-    /**
+    /*
      * Adds a command executed when this text component is clicked.
      *
      * @param command The command class to execute on click.
      * @param args    The arguments to pass to the command.
      * @return The current raw text component, for method chaining.
      */
-    public T command(Class<? extends Command> command, String... args) {
+    // TODO
+    /*public T command(Class<? extends Command> command, String... args) {
         Command commandInfo = Commands.getCommandInfo(command);
         if (commandInfo == null) {
             throw new IllegalArgumentException("Unknown command");
         }
         return command(commandInfo.build(args));
-    }
+    }*/
 
     /**
      * Adds an URI to be opened when this text component is clicked.
@@ -399,7 +398,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return click(ActionClick.SUGGEST_COMMAND, suggestion);
     }
 
-    /**
+    /*
      * Adds a command to be suggested on click, i.e. the command will be placed
      * into the player's chat when clicked.
      *
@@ -407,13 +406,14 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
      * @param args    The arguments to pass to the command.
      * @return The current raw text component, for method chaining.
      */
-    public T suggest(Class<? extends Command> command, String... args) {
+    // TODO
+    /*public T suggest(Class<? extends Command> command, String... args) {
         Command commandInfo = Commands.getCommandInfo(command);
         if (commandInfo == null) {
             throw new IllegalArgumentException("Unknown command");
         }
         return click(ActionClick.SUGGEST_COMMAND, commandInfo.build(args));
-    }
+    }*/
 
     /**
      * Adds a text to be inserted on shift-click, i.e. the text will be appended
@@ -428,7 +428,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
         return (T) this;
     }
 
-    /**
+    /*
      * Adds a command to be inserted on shift-click, i.e. the command will be
      * appended to the player's chat when shift-clicked.
      *
@@ -436,13 +436,14 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
      * @param args    The arguments to pass to the command.
      * @return The current raw text component, for method chaining.
      */
-    public T insert(Class<? extends Command> command, String... args) {
+    // TODO
+    /*public T insert(Class<? extends Command> command, String... args) {
         Command commandInfo = Commands.getCommandInfo(command);
         if (commandInfo == null) {
             throw new IllegalArgumentException("Unknown command");
         }
         return insert(commandInfo.build(args));
-    }
+    }*/
 
     /**
      * Builds this chain of components into a {@link RawText} ready to be used.
