@@ -3,25 +3,23 @@ package fr.zcraft.quartzlib.components.commands.internal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 class CommandGroup extends CommandNode {
     private final Class<?> commandGroupClass;
-    private final CommandGroup parent;
+    private final Supplier<?> classInstanceSupplier;
 
     private final Map<String, CommandNode> subCommands = new HashMap<>();
 
-    public CommandGroup(Class<?> commandGroupClass, String name) {
-        super(name);
-        this.commandGroupClass = commandGroupClass;
-        this.parent = null;
-        getCommandMethods(commandGroupClass).forEach(this::addMethod);
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name) {
+        this(commandGroupClass, classInstanceSupplier, name, null);
     }
 
-    public CommandGroup(Class<?> commandGroupClass, String name, CommandGroup parent) {
-        super(name);
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, CommandGroup parent) {
+        super(name, parent);
         this.commandGroupClass = commandGroupClass;
-        this.parent = parent;
+        this.classInstanceSupplier = classInstanceSupplier;
+        DiscoveryUtils.getCommandMethods(commandGroupClass).forEach(this::addMethod);
     }
 
     public Iterable<CommandNode> getSubCommands () {
@@ -39,9 +37,15 @@ class CommandGroup extends CommandNode {
         endpoint.addMethod(method);
     }
 
-    // Private utils TODO: move to DiscoveryUtils?
+    void run(String... args) {
+        Object commandObject = classInstanceSupplier.get();
+        run(commandObject, args);
+    }
 
-    private static Stream<CommandMethod> getCommandMethods(Class<?> commandGroupClass) {
-        return Arrays.stream(commandGroupClass.getDeclaredMethods()).map(CommandMethod::new);
+    @Override
+    void run(Object instance, String[] args) {
+        String commandName = args[0];
+        CommandNode subCommand = subCommands.get(commandName);
+        subCommand.run(instance, Arrays.copyOfRange(args, 1, args.length));
     }
 }
