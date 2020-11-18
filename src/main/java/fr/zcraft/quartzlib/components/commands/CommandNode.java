@@ -1,4 +1,4 @@
-package fr.zcraft.quartzlib.components.commands.internal;
+package fr.zcraft.quartzlib.components.commands;
 
 abstract class CommandNode {
     private final String name;

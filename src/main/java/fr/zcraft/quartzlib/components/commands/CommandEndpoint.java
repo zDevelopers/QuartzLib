@@ -1,6 +1,4 @@
-package fr.zcraft.quartzlib.components.commands.internal;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+package fr.zcraft.quartzlib.components.commands;
 
 import java.util.ArrayList;
 import java.util.List;

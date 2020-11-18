@@ -1,6 +1,7 @@
-package fr.zcraft.quartzlib.components.commands.internal;
+package fr.zcraft.quartzlib.components.commands;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.StreamSupport;
@@ -16,6 +17,13 @@ class CommandWithStatics {
 }
 
 public class CommandGraphTests {
+    private CommandManager commands;
+
+    @BeforeEach
+    public void beforeEach () {
+        commands = new CommandManager();
+    }
+
     @Test public void canDiscoverBasicSubcommands() {
         class FooCommand {
             public void add () {}
@@ -23,13 +31,13 @@ public class CommandGraphTests {
             public void list () {}
         }
 
-        CommandGroup commandGroup = new CommandGroup(FooCommand.class, () -> new FooCommand(), "foo");
+        CommandGroup commandGroup = new CommandGroup(FooCommand.class, () -> new FooCommand(), "foo", new ArgumentTypeHandlerCollection());
         String[] commandNames = StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName).toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] {"add", "get", "list"}, commandNames);
     }
 
     @Test public void onlyDiscoversPublicMethods() {
-        CommandGroup commandGroup = new CommandGroup(CommandWithStatics.class, () -> new CommandWithStatics(), "foo");
+        CommandGroup commandGroup = new CommandGroup(CommandWithStatics.class, () -> new CommandWithStatics(), "foo", new ArgumentTypeHandlerCollection());
         String[] commandNames = StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName).toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] {"add", "delete"}, commandNames);
     }
@@ -43,9 +51,32 @@ public class CommandGraphTests {
             public void list () { ran[2] = true; }
         }
 
-        FooCommand f = new FooCommand();
-        CommandGroup commandGroup = new CommandGroup(FooCommand.class, () -> new FooCommand(),"foo");
-        commandGroup.run("get");
+        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.run("foo", "get");
         Assertions.assertArrayEquals(new boolean[] { false, true, false }, ran);
+    }
+
+    @Test public void canReceiveStringArguments() {
+        final String[] argValue = {""};
+
+        class FooCommand {
+            public void add (String arg) { argValue[0] = arg; }
+        }
+
+        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.run("foo", "add", "pomf");
+        Assertions.assertArrayEquals(new String[] { "pomf" }, argValue);
+    }
+
+    @Test public void canReceiveParsedArguments() {
+        final int[] argValue = {0};
+
+        class FooCommand {
+            public void add (Integer arg) { argValue[0] = arg; }
+        }
+
+        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.run("foo", "add", "42");
+        Assertions.assertArrayEquals(new int[] { 42 }, argValue);
     }
 }

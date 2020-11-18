@@ -1,4 +1,4 @@
-package fr.zcraft.quartzlib.components.commands.internal;
+package fr.zcraft.quartzlib.components.commands;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,15 +11,15 @@ class CommandGroup extends CommandNode {
 
     private final Map<String, CommandNode> subCommands = new HashMap<>();
 
-    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name) {
-        this(commandGroupClass, classInstanceSupplier, name, null);
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, ArgumentTypeHandlerCollection typeHandlerCollection) {
+        this(commandGroupClass, classInstanceSupplier, name, typeHandlerCollection, null);
     }
 
-    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, CommandGroup parent) {
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, ArgumentTypeHandlerCollection typeHandlerCollection, CommandGroup parent) {
         super(name, parent);
         this.commandGroupClass = commandGroupClass;
         this.classInstanceSupplier = classInstanceSupplier;
-        DiscoveryUtils.getCommandMethods(commandGroupClass).forEach(this::addMethod);
+        DiscoveryUtils.getCommandMethods(commandGroupClass, typeHandlerCollection).forEach(this::addMethod);
     }
 
     public Iterable<CommandNode> getSubCommands () {
