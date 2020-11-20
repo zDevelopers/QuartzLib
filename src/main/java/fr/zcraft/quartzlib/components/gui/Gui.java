@@ -104,15 +104,8 @@ public final class Gui extends QuartzComponent
         GuiBase openGui = openGuis.get(owner);
         if(openGui != null) openGui.registerClose();
         if(parent != null) ((GuiBase)gui).setParent(parent);
-        
-        RunTask.later(new Runnable() {
-            @Override
-            public void run()
-            {
-                ((GuiBase)gui).open(owner);/* JAVA GENERICS Y U NO WORK */
-            }
-        }, 0);
-        
+
+        RunTask.later(() -> ((GuiBase)gui).open(owner), 0);
         return gui;
     }
     

@@ -332,25 +332,16 @@ public abstract class Sidebar
 
         if (run)
         {
-            Runnable refreshRunnable = new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    refresh();
-                }
-            };
-
             if (async)
             {
                 refreshTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
-                        QuartzLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
+                        QuartzLib.getPlugin(), this::refresh, 1L, autoRefreshDelay
                 );
             }
             else
             {
                 refreshTask = Bukkit.getScheduler().runTaskTimer(
-                        QuartzLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
+                        QuartzLib.getPlugin(), this::refresh, 1L, autoRefreshDelay
                 );
             }
         }

@@ -123,15 +123,10 @@ abstract public class InventoryGui extends GuiBase
         // If close() is called manually, not from InventoryCloseEvent
         // Ran on the next tick because it's unsafe to call Player.closeInventory() from an
         // InventoryEvent.
-        RunTask.nextTick(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                final InventoryView openInventoryView = getPlayer().getOpenInventory();
-                if (openInventoryView != null && InventoryUtils.sameInventories(inventory, openInventoryView.getTopInventory()))
-                    getPlayer().closeInventory();
-            }
+        RunTask.nextTick(() -> {
+            final InventoryView openInventoryView = getPlayer().getOpenInventory();
+            if (openInventoryView != null && InventoryUtils.sameInventories(inventory, openInventoryView.getTopInventory()))
+                getPlayer().closeInventory();
         });
 
         super.close();
