@@ -28,72 +28,50 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-
 package fr.zcraft.ztoaster;
 
 import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzlib.components.i18n.I;
-import fr.zcraft.quartzlib.components.worker.Worker;
-import fr.zcraft.quartzlib.components.worker.WorkerCallback;
-import fr.zcraft.quartzlib.components.worker.WorkerRunnable;
+import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import org.bukkit.entity.Player;
 
-public class ToasterWorker extends Worker
+import java.util.concurrent.CompletableFuture;
+
+public class ToasterWorker
 {
     /**
      * Optimal cooking time for making carefully baked toasts.
      */
     static public int TOAST_COOKING_TIME = 4269;
-    
-    static public Toast addToast(final Player cook)
-    {
-        return ToasterWorker.addToast(new WorkerCallback<Integer>()
-        {
-            @Override
-            public void finished(Integer toastId)
-            {
-                I.sendT(cook, "DING! Toast {0} is ready !", toastId);
-                Gui.update(ToastExplorer.class);
-            }
 
-            @Override
-            public void errored(Throwable exception)
-            {
-                PluginLogger.error("Error while toasting", exception);
-                I.sendT(cook, "{ce}Oh no! A toasted exception !");
-                I.sendT(cook, "{ce}See toaster logs for details.");
-            }
-        });
-    }
-    
-    /**
-     * Creates a new toast, and adds it to the toaster queue.
-     * @param callback The callback to call when a toast is cooked.
-     * @return the newly created toast.
-     */
-    static public Toast addToast(WorkerCallback<Integer> callback)
+    static public CompletableFuture<Void> addToast(final Toast toast, final Player cook)
     {
-        final Toast newToast = Toaster.newToast();
-        final int toastId = newToast.getToastId();
-        
-        submitQuery(new WorkerRunnable()
-        {
-            @Override
-            public Object run() throws Throwable
-            {
-                PluginLogger.info("Cooking toast #{0} ...", toastId);
-                
-                Thread.sleep(TOAST_COOKING_TIME);
-                
-                PluginLogger.info("Toast #{0} cooked !", toastId);
-                
-                newToast.setStatus(Toast.CookingStatus.COOKED);
-                
-                return toastId;
-            }
-        }, callback);
-        
-        return newToast;
+        return CompletableFuture.runAsync(() -> cookToast(toast), ((Toaster)QuartzLib.getPlugin()).toasterWorker)
+                .thenRun(() -> {
+                    I.sendT(cook, "DING! Toast {0} is ready !", toast.getToastId());
+                    Gui.update(ToastExplorer.class);
+                })
+                .exceptionally((exception) -> {
+                    PluginLogger.error("Error while toasting", exception);
+                    I.sendT(cook, "{ce}Oh no! A toasted exception !");
+                    I.sendT(cook, "{ce}See toaster logs for details.");
+                    return null;
+                });
+    }
+
+    static private void cookToast(Toast toast) {
+        int toastId = toast.getToastId();
+        PluginLogger.info("Cooking toast #{0} ...", toastId);
+
+        try {
+            Thread.sleep(TOAST_COOKING_TIME);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        PluginLogger.info("Toast #{0} cooked !", toastId);
+
+        toast.setStatus(Toast.CookingStatus.COOKED);
     }
 }

@@ -35,6 +35,7 @@ import fr.zcraft.quartzlib.components.commands.CommandException;
 import fr.zcraft.quartzlib.components.commands.CommandInfo;
 import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.ztoaster.Toast;
+import fr.zcraft.ztoaster.Toaster;
 import fr.zcraft.ztoaster.ToasterWorker;
 import org.bukkit.entity.Player;
 
@@ -49,15 +50,17 @@ public class AddCommand extends Command
         
         if(args.length == 0)
         {
-            Toast toast = ToasterWorker.addToast(cook);
-            cook.sendMessage(I.t("Toast {0} added.", toast.getToastId()));
+            Toast newToast = Toaster.newToast();
+            ToasterWorker.addToast(newToast, cook);
+            cook.sendMessage(I.t("Toast {0} added.", newToast.getToastId()));
         }
         else
         {
             int toastCount = getIntegerParameter(0);
             for(int i = toastCount; i --> 0;)
             {
-                ToasterWorker.addToast(cook);
+                Toast newToast = Toaster.newToast();
+                ToasterWorker.addToast(newToast, cook);
             }
             
             cook.sendMessage(I.tn("One toast added.", "{0} toasts added.", toastCount, toastCount));

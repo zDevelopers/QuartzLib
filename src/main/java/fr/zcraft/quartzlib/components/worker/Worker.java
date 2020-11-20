@@ -29,204 +29,109 @@
  */
 package fr.zcraft.quartzlib.components.worker;
 
-import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.core.QuartzComponent;
-import fr.zcraft.quartzlib.tools.PluginLogger;
-import fr.zcraft.quartzlib.tools.reflection.Reflection;
+import fr.zcraft.quartzlib.core.QuartzLib;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * The base class for workers.
  * A worker is a thread that can handle multiple tasks, which are executed in a queue.
  * 
  */
-public abstract class Worker extends QuartzComponent
-{
-    /*===== Static API =====*/
-    static private final HashMap<Class<? extends Worker>, Worker> runningWorkers = new HashMap();
-    static private final HashMap<Class<? extends WorkerRunnable>, Worker> runnables = new HashMap();
-    
-    
-    static protected <T> Future<T> submitToMainThread(Callable<T> callable)
-    {
-        return getCallerWorkerFromRunnable()._submitToMainThread(callable);
+public class Worker extends QuartzComponent implements ExecutorService {
+    private ForkJoinPool forkJoinPool = null;
+    private final int threadCount;
+
+    public Worker () {
+        this(0);
     }
-    
-    static protected void submitQuery(WorkerRunnable runnable)
-    {
-        getCallerWorker()._submitQuery(runnable);
+
+    public Worker (int threadCount) {
+        this.threadCount = threadCount;
+        QuartzLib.loadComponent(this);
     }
-    
-    static protected void submitQuery(WorkerRunnable runnable, WorkerCallback callback)
-    {
-        getCallerWorker()._submitQuery(runnable, callback);
-    }
-    
-    static private Worker getCallerWorker()
-    {
-        Class<? extends Worker> caller = Reflection.getCallerClass(Worker.class);
-        if(caller == null) 
-            throw new IllegalAccessError("Queries must be submitted from a Worker class");
-        
-        return getWorker(caller);
-    }
-    
-    static private Worker getWorker(Class<? extends Worker> workerClass)
-    {
-        Worker worker = runningWorkers.get(workerClass);
-        if(worker == null)
-            throw new IllegalStateException("Worker '" + workerClass.getName() + "' has not been correctly initialized");
-        
-        return worker;
-    }
-    
-    static private Worker getCallerWorkerFromRunnable()
-    {
-        Class<? extends WorkerRunnable> caller = Reflection.getCallerClass(WorkerRunnable.class);
-        if(caller == null) 
-            throw new IllegalAccessError("Main thread queries must be submitted from a WorkerRunnable");
-        
-        Worker worker = runnables.get(caller);
-        if(worker == null)
-            throw new IllegalStateException("Caller runnable does not belong to any worker");
-        
-        return worker;
-    }
-    
-    private final String name;
-    private final ArrayDeque<WorkerRunnable> runQueue = new ArrayDeque<>();
-    
-    private final WorkerCallbackManager callbackManager;
-    private final WorkerMainThreadExecutor mainThreadExecutor;
-    private Thread thread;
-    
-    public Worker()
-    {
-        String tempName = null;
-        WorkerAttributes attributes = getClass().getAnnotation(WorkerAttributes.class);
-        
-        if(attributes != null)
-        {
-            tempName = attributes.name();
-            this.mainThreadExecutor = attributes.queriesMainThread() ? new WorkerMainThreadExecutor(tempName) : null;
-        }
-        else
-        {
-            this.mainThreadExecutor = null;
-        }
-        
-        if(tempName == null || tempName.isEmpty())
-            tempName = getClass().getSimpleName();
-        
-        this.name = tempName;
-        this.callbackManager = new WorkerCallbackManager(tempName);
-    }
-    
+
     @Override
-    public void onEnable()
-    {
-        if(thread != null && thread.isAlive())
-        {
-            PluginLogger.warning("Restarting thread '{0}'.", name);
-            onDisable();
+    protected void onEnable() {
+        if (this.threadCount <= 0) {
+            this.forkJoinPool = new ForkJoinPool();
+        } else {
+            this.forkJoinPool = new ForkJoinPool(threadCount);
         }
-        callbackManager.init();
-        if(mainThreadExecutor != null) mainThreadExecutor.init();
-        runningWorkers.put(getClass(), this);
-        thread = createThread();
-        thread.start();
     }
-    
+
     @Override
-    public void onDisable()
-    {
-        thread.interrupt();
-        callbackManager.exit();
-        if(mainThreadExecutor != null) mainThreadExecutor.exit();
-        thread = null;
-        runningWorkers.remove(getClass());
+    protected void onDisable() {
+        this.shutdownNow();
     }
-    
-    private void run()
-    {
-        WorkerRunnable currentRunnable;
-        
-        while(!Thread.interrupted())
-        {
-            synchronized(runQueue)
-            {
-                try
-                {
-                    while(runQueue.isEmpty()) runQueue.wait();
-                }
-                catch(InterruptedException ex)
-                {
-                    break;
-                }
-                currentRunnable = runQueue.pop();
-            }
-            
-            try
-            {
-                callbackManager.callback(currentRunnable, currentRunnable.run());
-            }
-            catch(Throwable ex)
-            {
-                callbackManager.callback(currentRunnable, null, ex);
-            }
-            runnables.remove(currentRunnable.getClass());
-        }
+
+    /* All of the overrides of the world */
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        return forkJoinPool.invokeAny(tasks);
     }
-    
-    private void _submitQuery(WorkerRunnable runnable)
-    {
-        attachRunnable(runnable);
-        synchronized(runQueue)
-        {
-            runQueue.add(runnable);
-            runQueue.notify();
-        }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return forkJoinPool.invokeAny(tasks, timeout, unit);
     }
-    
-    private void _submitQuery(WorkerRunnable runnable, WorkerCallback callback)
-    {
-        callbackManager.setupCallback(runnable, callback);
-        _submitQuery(runnable);
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+        return forkJoinPool.invokeAll(tasks, timeout, unit);
     }
-    
-    private <T> Future<T> _submitToMainThread(Callable<T> callable)
-    {
-        if(mainThreadExecutor != null) return mainThreadExecutor.submit(callable);
-        return null;
+
+    @Override
+    public void execute(Runnable task) {
+        forkJoinPool.execute(task);
     }
-    
-    private Thread createThread()
-    {
-        return new Thread(getName())
-        {
-            @Override
-            public void run()
-            {
-                Worker.this.run();
-            }
-        };
+
+    @Override
+    public <T> ForkJoinTask<T> submit(Callable<T> task) {
+        return forkJoinPool.submit(task);
     }
-    
-    private void attachRunnable(WorkerRunnable runnable)
-    {
-        if(runnable.getWorker() != null && runnable.getWorker() != this)
-            throw new IllegalArgumentException("This runnable is already attached to another worker");
-        runnable.setWorker(this);
-        runnables.put(runnable.getClass(), this);
+
+    @Override
+    public <T> ForkJoinTask<T> submit(Runnable task, T result) {
+        return forkJoinPool.submit(task, result);
     }
-    
-    public String getName()
-    {
-        return QuartzLib.getPlugin().getName() + "-" + name;
+
+    @Override
+    public ForkJoinTask<?> submit(Runnable task) {
+        return forkJoinPool.submit(task);
     }
-    
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
+        return forkJoinPool.invokeAll(tasks);
+    }
+
+    @Override
+    public void shutdown() {
+        forkJoinPool.shutdown();
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+        return forkJoinPool.shutdownNow();
+    }
+
+    @Override
+    public boolean isTerminated() {
+        return forkJoinPool.isTerminated();
+    }
+
+    @Override
+    public boolean isShutdown() {
+        return forkJoinPool.isShutdown();
+    }
+
+    @Override
+    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        return forkJoinPool.awaitTermination(timeout, unit);
+    }
 }
