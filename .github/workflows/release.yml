@@ -1,4 +1,19 @@
+# Publish to GitHub Packages and release the project.
+# To trigger, create a tag (not a release) with semantic
+# versioning (the tag must start with a v).
+#
+# git tag -a v0.2 -m "Version 0.2"
+# git push --tags
+#
+# This workflow will automatically:
+# - build the project using Maven;
+# - publish the built project as a Maven package in the project's
+#   Maven repository, at https://maven.zcraft.fr/<repo-name>;
+# - create a new draft release;
+# - attach the built project to the release.
+
 name: Publish new release
+
 on:
   push:
     tags:
@@ -8,17 +23,29 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v1
         with:
           java-version: 8
+
       - uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      - name: Extract project name
+        id: project-name
+        uses: actions/github-script@v3
+        with:
+          script: return context.repo.repo
+          result-encoding: string
+
       - name: Publish to GitHub Packages
-        id: maven_publish
+        id: maven-publish
         run: |
           TAG_NAME=${GIT_REF_NAME##*/}
           REVISION_NAME=${TAG_NAME:1}
@@ -32,22 +59,24 @@ jobs:
         env:
           GIT_REF_NAME: ${{ github.ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create new GitHub Release
-        id: create_release
+        id: create-release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: QuartzLib ${{ github.ref }}
+          release_name: ${{ steps.project-name.outputs.result }} ${{ github.ref }}
           draft: true
           prerelease: false
+
       - name: Upload GitHub Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.maven_publish.outputs.jar_path }}
-          asset_name: ${{ steps.maven_publish.outputs.jar_name }}
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ${{ steps.maven-publish.outputs.jar_path }}
+          asset_name: ${{ steps.maven-publish.outputs.jar_name }}
           asset_content_type: application/java-archive
