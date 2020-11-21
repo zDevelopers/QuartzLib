@@ -31,6 +31,7 @@ jobs:
           repository: zDevelopers/zdevelopers.github.io
           path: web
           branch: master
+          persist-credentials: false
       - name: Push built documentation to website repository
         shell: bash
         run: |
@@ -42,8 +43,6 @@ jobs:
           mkdir -p web/static/docs/
           rm -rf web/static/docs/$PROJECT_NAME_LOWER
           cp -r target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
-
-          cat ~/.gitconfig
 
           # Add, commit & push
           cd web
