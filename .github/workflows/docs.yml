@@ -38,12 +38,14 @@ jobs:
           rm -rf web/static/docs/$PROJECT_NAME_LOWER
           cp -r target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
 
+          # Go to website repo
+          cd web
+
           # Configure git for push
           git config user.name github-actions
           git config user.email github-actions@github.com
 
           # Add, commit & push
-          cd web
           git add .
           git commit -m "Updated documentation for $PROJECT_NAME"
           git push
