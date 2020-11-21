@@ -27,7 +27,7 @@ jobs:
           path: web
           branch: master
       - name: Push built documentation to website repository
-        shell: bash
+        shell: sh
         run: |
           # Extract project name
           PROJECT_NAME=${GITHUB_REPOSITORY##*/}
