@@ -40,12 +40,27 @@ jobs:
           PROJECT_NAME_LOWER=${PROJECT_NAME,,}
 
           # Create dir if needed, cleanup old doc and copy new one
+          echo ::group::Copying files to website repository
           mkdir -p web/static/docs/
           rm -rf web/static/docs/$PROJECT_NAME_LOWER
           cp -r target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
+          echo ::endgroup::
 
-          # Add, commit & push
+          # Go to website repository
           cd web
+
+          # Configure git to push to this repository
+          git config --global user.name QuartzBot
+          git config --global user.email moriplay@zcraft.fr
+          git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
+
+          # Add files
+          echo ::group::Adding files to website repository & creating commit
           git add .
           git commit -m "Updated documentation for $PROJECT_NAME"
+          echo ::endgroup::
+
+          # Push
+          echo ::group::Pushing
           git push
+          echo ::endgroup::
