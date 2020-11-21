@@ -732,7 +732,7 @@ public abstract class Command {
      */
     public void offlinePlayerParameter(final String parameter, final Consumer<UUID> callback) {
         CommandWorkers cw = new CommandWorkers();
-        cw.OfflineNameFetch(parameter, callback);
+        cw.offlineNameFetch(parameter, callback);
     }
 
     /**

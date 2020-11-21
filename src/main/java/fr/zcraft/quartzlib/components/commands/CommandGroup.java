@@ -190,6 +190,12 @@ public class CommandGroup implements TabCompleter, CommandExecutor {
         return executeMatchingCommand(sender, args);
     }
 
+    /**
+     * Computes a list of possible autocomplete suggestions for the given partial arguments.
+     * @param sender The sender of the command.
+     * @param args The partial arguments.
+     * @return A list of suggestions.
+     */
     public List<String> tabComplete(CommandSender sender, String[] args) {
         if (isShortcutCommand()) {
             return commands.get(0).tabComplete(sender, args);
@@ -202,6 +208,12 @@ public class CommandGroup implements TabCompleter, CommandExecutor {
         return tabCompleteMatching(sender, commandName, commandArgs);
     }
 
+    /**
+     * Computes a list of possible autocomplete suggestions for the given command.
+     * @param sender The sender of the command.
+     * @param commandName The name of the command
+     * @return A list of suggestions.
+     */
     public List<String> tabComplete(CommandSender sender, String commandName) {
         ArrayList<String> matchingCommands = new ArrayList<String>();
         for (Command command : commands) {
@@ -220,7 +232,7 @@ public class CommandGroup implements TabCompleter, CommandExecutor {
         if (command != null) {
             return command.tabComplete(sender, args);
         } else {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
     }
 
@@ -252,6 +264,11 @@ public class CommandGroup implements TabCompleter, CommandExecutor {
         return null;
     }
 
+    /**
+     * Return if this command matches the given name.
+     * @param name The name of the command to test for.
+     * @return if this command matches the given name.
+     */
     public boolean matches(String name) {
         name = name.toLowerCase();
         for (String commandName : names) {
@@ -262,6 +279,10 @@ public class CommandGroup implements TabCompleter, CommandExecutor {
         return false;
     }
 
+    /**
+     * Returns an array of all subcommands.
+     * @return an array of all subcommands.
+     */
     public String[] getCommandsNames() {
         String[] commandsNames = new String[commands.size()];
 
@@ -286,8 +307,8 @@ public class CommandGroup implements TabCompleter, CommandExecutor {
         if (isShortcutCommand()) {
             return "§cUsage: " + commands.get(0).getUsageString();
         }
-        return "§cUsage: /" + getUsualName() +
-                " <" + StringUtils.join(getCommandsNames(), "|") + ">";
+        return "§cUsage: /" + getUsualName()
+                + " <" + StringUtils.join(getCommandsNames(), "|") + ">";
     }
 
     public String getUsualName() {

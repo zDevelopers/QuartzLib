@@ -37,118 +37,106 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class ConfigurationMap<K, V> extends ConfigurationItem<Map<K, V>> implements Map<K,V>, Iterable<Entry<K,V>>
-{
+public class ConfigurationMap<K, V> extends ConfigurationItem<Map<K, V>> implements Map<K, V>, Iterable<Entry<K, V>> {
     private final Class<K> keyType;
     private final Class<V> valueType;
-    
-    public ConfigurationMap(String name, Map<K,V> defaultValue, Class<K> keyType, Class<V> valueType, String... deprecatedNames)
-    {
+
+    /**
+     * Creates a new configuration map.
+     */
+    public ConfigurationMap(String name, Map<K, V> defaultValue, Class<K> keyType, Class<V> valueType,
+                            String... deprecatedNames) {
         super(name, defaultValue, deprecatedNames);
         this.keyType = keyType;
         this.valueType = valueType;
     }
-    
+
     @Override
-    protected Map<K, V> getValue(Object value) throws ConfigurationParseException
-    {
-        if(value == null) return null;
-        
+    protected Map<K, V> getValue(Object value) throws ConfigurationParseException {
+        if (value == null) {
+            return null;
+        }
+
         return ConfigurationValueHandlers.handleMapValue(value, keyType, valueType, this);
     }
-    
+
     @Override
-    boolean validate()
-    {
+    boolean validate() {
         boolean isValid = super.validate();
-        
-        if(ConfigurationSection.class.isAssignableFrom(valueType))
-        {
-            for(Object value : values())
-            {
-                if(!((ConfigurationSection) value).validate())
+
+        if (ConfigurationSection.class.isAssignableFrom(valueType)) {
+            for (Object value : values()) {
+                if (!((ConfigurationSection) value).validate()) {
                     isValid = false;
+                }
             }
         }
-        
+
         return isValid;
     }
 
     @Override
-    public int size()
-    {
+    public int size() {
         return get().size();
     }
 
     @Override
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return get().isEmpty();
     }
 
     @Override
-    public boolean containsKey(Object key)
-    {
+    public boolean containsKey(Object key) {
         return get().containsKey(key);
     }
 
     @Override
-    public boolean containsValue(Object value)
-    {
+    public boolean containsValue(Object value) {
         return get().containsValue(value);
     }
 
     @Override
-    public V get(Object key)
-    {
+    public V get(Object key) {
         return get().get(key);
     }
 
     @Override
-    public V put(K key, V value)
-    {
+    public V put(K key, V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public V remove(Object key)
-    {
+    public V remove(Object key) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void putAll(Map<? extends K, ? extends V> m)
-    {
+    public void putAll(Map<? extends K, ? extends V> m) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void clear()
-    {
+    public void clear() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Set<K> keySet()
-    {
+    public Set<K> keySet() {
         return Collections.unmodifiableSet(get().keySet());
     }
 
     @Override
-    public Collection<V> values()
-    {
+    public Collection<V> values() {
         return Collections.unmodifiableCollection(get().values());
     }
 
     @Override
-    public Set<Entry<K, V>> entrySet()
-    {
+    public Set<Entry<K, V>> entrySet() {
         return Collections.unmodifiableSet(get().entrySet());
     }
 
     @Override
-    public Iterator<Entry<K, V>> iterator()
-    {
+    public Iterator<Entry<K, V>> iterator() {
         return entrySet().iterator();
     }
 }

@@ -30,18 +30,16 @@
 
 package fr.zcraft.quartzlib.components.configuration;
 
-public class ConfigurationParseException extends Exception
-{
-	private static final long serialVersionUID = 5461007750484876641L;
-	private final Object value;
-    public ConfigurationParseException(String message, Object value)
-    {
+public class ConfigurationParseException extends Exception {
+    private static final long serialVersionUID = 5461007750484876641L;
+    private final Object value;
+
+    public ConfigurationParseException(String message, Object value) {
         super(message);
         this.value = value;
     }
-    
-    public Object getValue()
-    {
+
+    public Object getValue() {
         return value;
     }
 }
