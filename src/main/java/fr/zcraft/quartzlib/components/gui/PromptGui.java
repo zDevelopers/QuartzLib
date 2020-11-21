@@ -30,12 +30,11 @@
 
 package fr.zcraft.quartzlib.components.gui;
 
-import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.Callback;
 import fr.zcraft.quartzlib.tools.MinecraftVersion;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
-import org.bukkit.Bukkit;
+import fr.zcraft.quartzlib.tools.runners.RunTask;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -176,7 +175,7 @@ public class PromptGui extends GuiBase
         setSignContents(sign, contents);
         sign.update();
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(QuartzLib.getPlugin(), () -> {
+        RunTask.later(() -> {
             try
             {
                 final Object signTileEntity = fieldTileEntitySign.get(sign);
