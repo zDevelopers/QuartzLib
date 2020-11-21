@@ -198,7 +198,6 @@ public class ItemStackBuilder
      * @return The new ItemStack. It is NOT a copy of the previously provided
      * ItemStack (if any).
      */
-    @Contract(pure = true)
     public ItemStack item()
     {
         final ItemStack newItemStack;
