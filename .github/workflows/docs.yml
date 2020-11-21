@@ -20,6 +20,11 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build JavaDoc
         run: mvn -B javadoc:javadoc --file pom.xml
+      - name: Configure Git for push to website repository
+        run: |
+          git config --global user.name QuartzBot
+          git config --global user.email moriplay@zcraft.fr
+          git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
       - name: Checkout website repository
         uses: actions/checkout@v2
         with:
@@ -38,15 +43,10 @@ jobs:
           rm -rf web/static/docs/$PROJECT_NAME_LOWER
           cp -r target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
 
-          # Go to website repo
-          cd web
-
-          # Configure git for push
-          git config --global user.name QuartzBot
-          git config --global user.email moriplay@zcraft.fr
-          git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
+          cat ~/.gitconfig
 
           # Add, commit & push
+          cd web
           git add .
           git commit -m "Updated documentation for $PROJECT_NAME"
           git push
