@@ -53,7 +53,7 @@ public final class Reflection
      *
      * @return The Bukkit's version in the package name.
      */
-    static public String getBukkitPackageVersion()
+    public static String getBukkitPackageVersion()
     {
         return getBukkitPackageName().substring("org.bukkit.craftbukkit.".length());
     }
@@ -64,7 +64,7 @@ public final class Reflection
      *
      * @return the full name of the root Bukkit package.
      */
-    static public String getBukkitPackageName()
+    public static String getBukkitPackageName()
     {
         return Bukkit.getServer().getClass().getPackage().getName();
     }
@@ -74,7 +74,7 @@ public final class Reflection
      *
      * @return the full name of the root NMS package.
      */
-    static public String getMinecraftPackageName()
+    public static String getMinecraftPackageName()
     {
         return "net.minecraft.server." + getBukkitPackageVersion();
     }
@@ -91,7 +91,7 @@ public final class Reflection
      * @return The class.
      * @throws ClassNotFoundException if no class exists with this name in the Bukkit package.
      */
-    static public Class getBukkitClassByName(String name) throws ClassNotFoundException
+    public static Class getBukkitClassByName(String name) throws ClassNotFoundException
     {
         return Class.forName(getBukkitPackageName() + "." + name);
     }
@@ -107,7 +107,7 @@ public final class Reflection
      * @return The class.
      * @throws ClassNotFoundException if no class exists with this name in the NMS package.
      */
-    static public Class getMinecraftClassByName(String name) throws ClassNotFoundException
+    public static Class getMinecraftClassByName(String name) throws ClassNotFoundException
     {
         return Class.forName(getMinecraftPackageName() + "." + name);
     }
@@ -126,7 +126,7 @@ public final class Reflection
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public Object getFieldValue(Class<?> hClass, Object instance, String name)
+    public static Object getFieldValue(Class<?> hClass, Object instance, String name)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         return getField(hClass, name).get(instance);
@@ -145,7 +145,7 @@ public final class Reflection
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public Object getFieldValue(Object instance, String name) 
+    public static Object getFieldValue(Object instance, String name)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         if(instance == null)
@@ -163,7 +163,7 @@ public final class Reflection
      * @return The {@link Field}.
      * @throws NoSuchFieldException if the class does not contains any field with this name.
      */
-    static public Field getField(Class<?> klass, String name) throws NoSuchFieldException
+    public static Field getField(Class<?> klass, String name) throws NoSuchFieldException
     {
         Field field = klass.getDeclaredField(name);
         field.setAccessible(true);
@@ -180,7 +180,7 @@ public final class Reflection
      * @return The {@link Field}.
      * @throws NoSuchFieldException if the class does not contains any field with this name.
      */
-    static public Field getField(Class<?> klass, Class<?> type) throws NoSuchFieldException
+    public static Field getField(Class<?> klass, Class<?> type) throws NoSuchFieldException
     {
         for (Field field : klass.getDeclaredFields())
         {
@@ -208,7 +208,7 @@ public final class Reflection
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public void setFieldValue(Object instance, String name, Object value) 
+    public static void setFieldValue(Object instance, String name, Object value)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         if(instance == null)
@@ -229,7 +229,7 @@ public final class Reflection
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    static public void setFieldValue(Class<?> hClass, Object instance, String name, Object value)
+    public static void setFieldValue(Class<?> hClass, Object instance, String name, Object value)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
     {
         getField(hClass, name).set(instance, value);
@@ -255,7 +255,7 @@ public final class Reflection
      *                                   invocation conversion.
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
-    static public Object call(Class<?> hClass, String name, Object... parameters)
+    public static Object call(Class<?> hClass, String name, Object... parameters)
             throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         return call(hClass, null, name, parameters);
@@ -283,7 +283,7 @@ public final class Reflection
      *                                   conversion.
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
-    static public Object call(Object instance, String name, Object... parameters)
+    public static Object call(Object instance, String name, Object... parameters)
             throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         if(instance == null)
@@ -314,7 +314,7 @@ public final class Reflection
      *                                   conversion.
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
-    static public Object call(Class<?> hClass, Object instance, String name, Object... parameters)
+    public static Object call(Class<?> hClass, Object instance, String name, Object... parameters)
             throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         Method method;
@@ -340,7 +340,7 @@ public final class Reflection
      * @param parameterTypes The parameter types to look for
      * @return If the method exists in the given class, or not
      */
-    static public boolean hasMethod(Class<?> hClass, String name, Class... parameterTypes)
+    public static boolean hasMethod(Class<?> hClass, String name, Class... parameterTypes)
     {
         try
         {
@@ -360,17 +360,17 @@ public final class Reflection
         return true;
     }
     
-    static public Method findMethod(Class<?> hClass, String name, Type... parameterTypes)
+    public static Method findMethod(Class<?> hClass, String name, Type... parameterTypes)
     {
         return findMethod(hClass, name, null, 0, parameterTypes);
     }
     
-    static public Method findMethod(Class<?> hClass, String name, int modifiers, Type... parameterTypes)
+    public static Method findMethod(Class<?> hClass, String name, int modifiers, Type... parameterTypes)
     {
         return findMethod(hClass, name, null, modifiers, parameterTypes);
     }
     
-    static public Method findMethod(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
+    public static Method findMethod(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
     {
         List<Method> methods = findAllMethods(hClass, name, returnType, modifiers, parameterTypes);
         
@@ -379,7 +379,7 @@ public final class Reflection
         return methods.get(0);
     }
     
-    static public List<Method> findAllMethods(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
+    public static List<Method> findAllMethods(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
     {
         List<Method> methods = new ArrayList<>();
         
@@ -405,7 +405,7 @@ public final class Reflection
         return methods;
     }
     
-    static private boolean nameMatches(String methodName, String pattern)
+    private static boolean nameMatches(String methodName, String pattern)
     {
         if(pattern == null) return true;
         
@@ -419,7 +419,7 @@ public final class Reflection
         }
     }
     
-    static public boolean typeIsAssignableFrom(Type source, Type destination)
+    public static boolean typeIsAssignableFrom(Type source, Type destination)
     {
         if(source instanceof ParameterizedType) source = ((ParameterizedType) source).getRawType();
         if(destination instanceof ParameterizedType) source = ((ParameterizedType) destination).getRawType();
@@ -432,7 +432,7 @@ public final class Reflection
         return source.equals(destination);
     }
     
-    static public boolean hasModifiers(int modifiers, int requiredModifiers)
+    public static boolean hasModifiers(int modifiers, int requiredModifiers)
     {
         for(int bit = Integer.SIZE; bit --> 0;)
         {
@@ -471,7 +471,7 @@ public final class Reflection
      *                                   to an enum type.
      * @throws InvocationTargetException if an exception is thrown in the constructor.
      */
-    static public <T> T instantiate(Class<T> hClass, Object... parameters)
+    public static <T> T instantiate(Class<T> hClass, Object... parameters)
             throws NoSuchMethodException, InstantiationException, 
             IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
@@ -480,7 +480,7 @@ public final class Reflection
         return constructor.newInstance(parameters);
     }
     
-    static public <T> Constructor findConstructor(Class<T> hClass, int parameterCount)
+    public static <T> Constructor findConstructor(Class<T> hClass, int parameterCount)
     {
         for(Constructor constructor: hClass.getDeclaredConstructors())
         {
@@ -499,7 +499,7 @@ public final class Reflection
      *
      * @return an array with the types of the items in the original array.
      */
-    static public Class[] getTypes(Object[] objects)
+    public static Class[] getTypes(Object[] objects)
     {
         Class[] types = new Class[objects.length];
         for (int i = 0; i < objects.length; i++)
@@ -518,7 +518,7 @@ public final class Reflection
      *
      * @return The caller class.
      */
-    static public Class<?> getCallerClass()
+    public static Class<?> getCallerClass()
     {
         final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
@@ -547,7 +547,7 @@ public final class Reflection
      * @param <T> The looked-up type.
      * @return The caller class of the specified type, or {@code null} if none found.
      */
-    static public <T> Class<? extends T> getCallerClass(Class<T> baseType)
+    public static <T> Class<? extends T> getCallerClass(Class<T> baseType)
     {
         final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
@@ -573,14 +573,14 @@ public final class Reflection
         return null;
     }
     
-    static public <T> Class<T> getDeclaringClass(T value)
+    public static <T> Class<T> getDeclaringClass(T value)
     {
         if(value == null) return null;
         if(value instanceof Enum) return ((Enum)value).getDeclaringClass();
         return (Class<T>) value.getClass();
     }
     
-    static public Class getClosestType(Class reference, Collection<Class> candidates)
+    public static Class getClosestType(Class reference, Collection<Class> candidates)
     {
         ArrayList<Class> remainingCandidates = new ArrayList(candidates);
         
@@ -611,7 +611,7 @@ public final class Reflection
         return currentBest;
     }
     
-    static public Class getClosestType(Class reference, Class... candidates)
+    public static Class getClosestType(Class reference, Class... candidates)
     {
         return getClosestType(reference, Arrays.asList(candidates));
     }

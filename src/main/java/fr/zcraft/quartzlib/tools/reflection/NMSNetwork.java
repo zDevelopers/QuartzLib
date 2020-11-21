@@ -79,7 +79,7 @@ public final class NMSNetwork
      *                                               methods and fields needed to get the player's
      *                                               connection.
      */
-    static public Object getPlayerHandle(Player player) throws InvocationTargetException
+    public static Object getPlayerHandle(Player player) throws InvocationTargetException
     {
         try
         {
@@ -105,7 +105,7 @@ public final class NMSNetwork
      *                                               methods and fields needed to get the player's
      *                                               connection.
      */
-    static public Object getPlayerConnection(Object playerHandle) throws InvocationTargetException
+    public static Object getPlayerConnection(Object playerHandle) throws InvocationTargetException
     {
         try
         {
@@ -133,7 +133,7 @@ public final class NMSNetwork
      *                                               methods and fields needed to get the player's
      *                                               connection.
      */
-    static public Object getPlayerConnection(Player player) throws InvocationTargetException
+    public static Object getPlayerConnection(Player player) throws InvocationTargetException
     {
         return getPlayerConnection(getPlayerHandle(player));
     }
@@ -154,7 +154,7 @@ public final class NMSNetwork
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
      *                                               methods and fields needed to send the packet.
      */
-    static public void sendPacket(Object playerConnection, Object packet) throws InvocationTargetException
+    public static void sendPacket(Object playerConnection, Object packet) throws InvocationTargetException
     {
         try
         {
@@ -188,7 +188,7 @@ public final class NMSNetwork
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
      *                                               methods and fields needed to send the packet.
      */
-    static public void sendPacket(Player player, Object packet) throws InvocationTargetException
+    public static void sendPacket(Player player, Object packet) throws InvocationTargetException
     {
         sendPacket(getPlayerConnection(player), packet);
     }

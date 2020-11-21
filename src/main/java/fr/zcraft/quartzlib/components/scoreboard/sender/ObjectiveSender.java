@@ -117,7 +117,7 @@ public class ObjectiveSender
 
             for (Object enumConstant : enumScoreboardHealthDisplay.getEnumConstants())
             {
-                if (Enum.class.cast(enumConstant).name().equals("INTEGER"))
+                if (((Enum) enumConstant).name().equals("INTEGER"))
                 {
                     enumScoreboardHealthDisplay_INTEGER = enumConstant;
                     break;
@@ -149,7 +149,7 @@ public class ObjectiveSender
 
             for (Object enumConstant : enumScoreboardAction.getEnumConstants())
             {
-                switch (Enum.class.cast(enumConstant).name())
+                switch (((Enum) enumConstant).name())
                 {
                     case "CHANGE":
                         enumScoreboardAction_CHANGE = enumConstant;

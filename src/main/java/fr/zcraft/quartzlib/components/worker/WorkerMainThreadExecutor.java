@@ -43,7 +43,7 @@ import java.util.concurrent.TimeoutException;
 
 class WorkerMainThreadExecutor implements Runnable
 {
-    static private final int WATCH_LOOP_DELAY = 1;
+    private static final int WATCH_LOOP_DELAY = 1;
     
     private final String name;
     private final ArrayDeque<WorkerFuture> mainThreadQueue = new ArrayDeque<>();

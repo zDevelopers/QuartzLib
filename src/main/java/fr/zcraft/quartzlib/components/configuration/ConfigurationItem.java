@@ -49,7 +49,7 @@ public class ConfigurationItem<T>
     T defaultValue;
     String[] deprecatedNames;
     
-    private Class<T> valueType;
+    private final Class<T> valueType;
     
     private ConfigurationItem parent;
     private ConfigurationInstance instance;
@@ -254,7 +254,7 @@ public class ConfigurationItem<T>
     }
 
     @Deprecated
-    static public <T> ConfigurationItem<T> item(String fieldName)
+    public static <T> ConfigurationItem<T> item(String fieldName)
     {
         return item(fieldName, null);
     }
@@ -269,7 +269,7 @@ public class ConfigurationItem<T>
      *
      * @return A ready-to-use configuration item.
      */
-    static public <T> ConfigurationItem<T> item(String fieldName, T defaultValue, String... deprecatedNames)
+    public static <T> ConfigurationItem<T> item(String fieldName, T defaultValue, String... deprecatedNames)
     {
         return new ConfigurationItem<>(fieldName, defaultValue, deprecatedNames);
     }
@@ -284,12 +284,12 @@ public class ConfigurationItem<T>
      *
      * @return A ready-to-use configuration item.
      */
-    static public <T> ConfigurationItem<T> item(String fieldName, Class<T> type, String... deprecatedNames)
+    public static <T> ConfigurationItem<T> item(String fieldName, Class<T> type, String... deprecatedNames)
     {
         return new ConfigurationItem<>(fieldName, null, type, deprecatedNames);
     }
     
-    static public <T extends ConfigurationSection> T section(String fieldName, Class<T> sectionClass, String... deprecatedNames)
+    public static <T extends ConfigurationSection> T section(String fieldName, Class<T> sectionClass, String... deprecatedNames)
     {
         T section;
         try
@@ -306,12 +306,12 @@ public class ConfigurationItem<T>
         return section;
     }
     
-    static public <T> ConfigurationList<T> list(String fieldName, Class<T> type, String... deprecatedNames)
+    public static <T> ConfigurationList<T> list(String fieldName, Class<T> type, String... deprecatedNames)
     {
         return new ConfigurationList<>(fieldName, new ArrayList<T>(), type, deprecatedNames);
     }
     
-    static public <K,V> ConfigurationMap<K,V> map(String field, Class<K> keyType, Class<V> valueType, String... deprecatedNames)
+    public static <K,V> ConfigurationMap<K,V> map(String field, Class<K> keyType, Class<V> valueType, String... deprecatedNames)
     {
         return new ConfigurationMap<>(field, new HashMap<K,V>(), keyType, valueType, deprecatedNames);
     }

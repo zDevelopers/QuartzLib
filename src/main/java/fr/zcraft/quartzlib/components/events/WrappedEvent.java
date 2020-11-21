@@ -38,7 +38,7 @@ import org.bukkit.event.Event;
  */
 public class WrappedEvent
 {
-    private Event wrappedEvent;
+    private final Event wrappedEvent;
 
     public WrappedEvent(Event event)
     {

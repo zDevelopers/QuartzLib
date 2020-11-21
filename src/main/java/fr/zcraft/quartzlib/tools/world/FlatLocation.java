@@ -182,7 +182,7 @@ public class FlatLocation extends Location
      * @param loc2 The second location.
      * @return  The distance
      */
-    static public double flatDistanceX(FlatLocation loc1, FlatLocation loc2)
+    public static double flatDistanceX(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         
@@ -206,7 +206,7 @@ public class FlatLocation extends Location
      * @param loc2 The second location.
      * @return  The block distance
      */
-    static public int flatBlockDistanceX(FlatLocation loc1, FlatLocation loc2)
+    public static int flatBlockDistanceX(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         
@@ -230,7 +230,7 @@ public class FlatLocation extends Location
      * @param loc2 The second location.
      * @return  The distance
      */
-    static public double flatDistanceY(FlatLocation loc1, FlatLocation loc2)
+    public static double flatDistanceY(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         
@@ -244,7 +244,7 @@ public class FlatLocation extends Location
      * @param loc2 The second location.
      * @return  The block distance
      */
-    static public int flatBlockDistanceY(FlatLocation loc1, FlatLocation loc2)
+    public static int flatBlockDistanceY(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         
@@ -252,7 +252,7 @@ public class FlatLocation extends Location
     }
     
     
-    static protected void checkSimilarLocations(FlatLocation loc1, FlatLocation loc2) throws IllegalArgumentException
+    protected static void checkSimilarLocations(FlatLocation loc1, FlatLocation loc2) throws IllegalArgumentException
     {
         if(loc1.getFacing() != loc2.getFacing())
             throw new IllegalArgumentException("Trying to compare two FlatLocations on different axes.");
@@ -266,7 +266,7 @@ public class FlatLocation extends Location
      * @param loc2 The second location
      * @return The new location
      */
-    static public FlatLocation minMerged(FlatLocation loc1, FlatLocation loc2)
+    public static FlatLocation minMerged(FlatLocation loc1, FlatLocation loc2)
     {
         checkSimilarLocations(loc1, loc2);
         FlatLocation loc = new FlatLocation(loc1.getWorld(), loc1.getFacing());

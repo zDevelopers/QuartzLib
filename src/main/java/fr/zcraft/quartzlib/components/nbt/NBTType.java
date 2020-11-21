@@ -201,7 +201,7 @@ enum NBTType
         }
     }
 
-    static public NBTType fromId(byte id)
+    public static NBTType fromId(byte id)
     {
         for (NBTType type : NBTType.values())
         {
@@ -212,7 +212,7 @@ enum NBTType
         throw new IllegalArgumentException("Illegal type id: " + id);
     }
 
-    static public NBTType fromNmsNbtTag(Object nmsNbtTag)
+    public static NBTType fromNmsNbtTag(Object nmsNbtTag)
     {
         try
         {
@@ -224,7 +224,7 @@ enum NBTType
         }
     }
 
-    static public NBTType fromClass(Class klass)
+    public static NBTType fromClass(Class klass)
     {
         for (NBTType type : NBTType.values())
         {

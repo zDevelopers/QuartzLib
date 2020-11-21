@@ -42,73 +42,73 @@ import java.util.concurrent.Future;
 /**
  * The base class for workers.
  * A worker is a thread that can handle multiple tasks, which are executed in a queue.
- * 
+ *
  */
 public abstract class Worker extends QuartzComponent
 {
     /*===== Static API =====*/
-    static private final HashMap<Class<? extends Worker>, Worker> runningWorkers = new HashMap();
-    static private final HashMap<Class<? extends WorkerRunnable>, Worker> runnables = new HashMap();
-    
-    
-    static protected <T> Future<T> submitToMainThread(Callable<T> callable)
+    private static final HashMap<Class<? extends Worker>, Worker> runningWorkers = new HashMap();
+    private static final HashMap<Class<? extends WorkerRunnable>, Worker> runnables = new HashMap();
+
+
+    protected static <T> Future<T> submitToMainThread(Callable<T> callable)
     {
         return getCallerWorkerFromRunnable()._submitToMainThread(callable);
     }
-    
-    static protected void submitQuery(WorkerRunnable runnable)
+
+    protected static void submitQuery(WorkerRunnable runnable)
     {
         getCallerWorker()._submitQuery(runnable);
     }
-    
-    static protected void submitQuery(WorkerRunnable runnable, WorkerCallback callback)
+
+    protected static void submitQuery(WorkerRunnable runnable, WorkerCallback callback)
     {
         getCallerWorker()._submitQuery(runnable, callback);
     }
-    
-    static private Worker getCallerWorker()
+
+    private static Worker getCallerWorker()
     {
         Class<? extends Worker> caller = Reflection.getCallerClass(Worker.class);
-        if(caller == null) 
+        if(caller == null)
             throw new IllegalAccessError("Queries must be submitted from a Worker class");
-        
+
         return getWorker(caller);
     }
-    
-    static private Worker getWorker(Class<? extends Worker> workerClass)
+
+    private static Worker getWorker(Class<? extends Worker> workerClass)
     {
         Worker worker = runningWorkers.get(workerClass);
         if(worker == null)
             throw new IllegalStateException("Worker '" + workerClass.getName() + "' has not been correctly initialized");
-        
+
         return worker;
     }
-    
-    static private Worker getCallerWorkerFromRunnable()
+
+    private static Worker getCallerWorkerFromRunnable()
     {
         Class<? extends WorkerRunnable> caller = Reflection.getCallerClass(WorkerRunnable.class);
-        if(caller == null) 
+        if(caller == null)
             throw new IllegalAccessError("Main thread queries must be submitted from a WorkerRunnable");
-        
+
         Worker worker = runnables.get(caller);
         if(worker == null)
             throw new IllegalStateException("Caller runnable does not belong to any worker");
-        
+
         return worker;
     }
-    
+
     private final String name;
     private final ArrayDeque<WorkerRunnable> runQueue = new ArrayDeque<>();
-    
+
     private final WorkerCallbackManager callbackManager;
     private final WorkerMainThreadExecutor mainThreadExecutor;
     private Thread thread;
-    
+
     public Worker()
     {
         String tempName = null;
         WorkerAttributes attributes = getClass().getAnnotation(WorkerAttributes.class);
-        
+
         if(attributes != null)
         {
             tempName = attributes.name();
@@ -118,14 +118,14 @@ public abstract class Worker extends QuartzComponent
         {
             this.mainThreadExecutor = null;
         }
-        
+
         if(tempName == null || tempName.isEmpty())
             tempName = getClass().getSimpleName();
-        
+
         this.name = tempName;
         this.callbackManager = new WorkerCallbackManager(tempName);
     }
-    
+
     @Override
     public void onEnable()
     {
@@ -140,7 +140,7 @@ public abstract class Worker extends QuartzComponent
         thread = createThread();
         thread.start();
     }
-    
+
     @Override
     public void onDisable()
     {
@@ -150,11 +150,11 @@ public abstract class Worker extends QuartzComponent
         thread = null;
         runningWorkers.remove(getClass());
     }
-    
+
     private void run()
     {
         WorkerRunnable currentRunnable;
-        
+
         while(!Thread.interrupted())
         {
             synchronized(runQueue)
@@ -169,7 +169,7 @@ public abstract class Worker extends QuartzComponent
                 }
                 currentRunnable = runQueue.pop();
             }
-            
+
             try
             {
                 callbackManager.callback(currentRunnable, currentRunnable.run());
@@ -181,7 +181,7 @@ public abstract class Worker extends QuartzComponent
             runnables.remove(currentRunnable.getClass());
         }
     }
-    
+
     private void _submitQuery(WorkerRunnable runnable)
     {
         attachRunnable(runnable);
@@ -191,19 +191,19 @@ public abstract class Worker extends QuartzComponent
             runQueue.notify();
         }
     }
-    
+
     private void _submitQuery(WorkerRunnable runnable, WorkerCallback callback)
     {
         callbackManager.setupCallback(runnable, callback);
         _submitQuery(runnable);
     }
-    
+
     private <T> Future<T> _submitToMainThread(Callable<T> callable)
     {
         if(mainThreadExecutor != null) return mainThreadExecutor.submit(callable);
         return null;
     }
-    
+
     private Thread createThread()
     {
         return new Thread(getName())
@@ -215,7 +215,7 @@ public abstract class Worker extends QuartzComponent
             }
         };
     }
-    
+
     private void attachRunnable(WorkerRunnable runnable)
     {
         if(runnable.getWorker() != null && runnable.getWorker() != this)
@@ -223,10 +223,10 @@ public abstract class Worker extends QuartzComponent
         runnable.setWorker(this);
         runnables.put(runnable.getClass(), this);
     }
-    
+
     public String getName()
     {
         return QuartzLib.getPlugin().getName() + "-" + name;
     }
-    
+
 }

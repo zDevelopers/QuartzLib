@@ -37,10 +37,10 @@ import fr.zcraft.quartzlib.tools.Callback;
 
 public abstract class ArrayPromptGui<T> extends ExplorerGui<T>
 {
-	private Callback<T> cb;
-	private String title;
-	private T[] data;
-	private boolean closeOnChoice;
+	private final Callback<T> cb;
+	private final String title;
+	private final T[] data;
+	private final boolean closeOnChoice;
 
 	/**
 	 * @param player

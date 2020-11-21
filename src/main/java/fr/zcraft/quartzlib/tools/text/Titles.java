@@ -48,9 +48,9 @@ public final class Titles
 {
     private static boolean enabled = true;
 
-    private static Class<?> packetPlayOutTitleClass;
+    private static final Class<?> packetPlayOutTitleClass;
     private static Class<?> chatSerializerClass;
-    private static Class<?> iChatBaseComponentClass;
+    private static final Class<?> iChatBaseComponentClass;
     private static Class<?> enumTitleActionClass;
 
     private static Object enumTitleActionTitle;
@@ -83,7 +83,7 @@ public final class Titles
 
             for (Object enumConstant : enumTitleActionClass.getEnumConstants())
             {
-                switch (Enum.class.cast(enumConstant).name())
+                switch (((Enum) enumConstant).name())
                 {
                     case "TITLE":
                         enumTitleActionTitle = enumConstant;

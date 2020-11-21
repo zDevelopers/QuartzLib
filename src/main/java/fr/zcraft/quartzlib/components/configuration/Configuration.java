@@ -38,7 +38,7 @@ import fr.zcraft.quartzlib.tools.Callback;
 public abstract class Configuration extends QuartzComponent
 {
     /* ===== Static API ===== */
-    static private ConfigurationInstance instance;
+    private static ConfigurationInstance instance;
     
     @Override
     protected void onEnable() 
@@ -46,7 +46,7 @@ public abstract class Configuration extends QuartzComponent
         init(this.getClass());
     }
     
-    static public void init(final Class<?> configurationClass)
+    public static void init(final Class<?> configurationClass)
     {
         instance = new ConfigurationInstance(QuartzLib.getPlugin().getConfig());
         instance.init(configurationClass);
@@ -56,7 +56,7 @@ public abstract class Configuration extends QuartzComponent
     /**
      * Saves the config.yml configuration to the disk.
      */
-    static public void save()
+    public static void save()
     {
         instance.save(true);
     }
@@ -64,7 +64,7 @@ public abstract class Configuration extends QuartzComponent
     /**
      * Reloads the config.yml configuration from the disk.
      */
-    static public void reload()
+    public static void reload()
     {
         instance.reload(true);
     }
@@ -76,7 +76,7 @@ public abstract class Configuration extends QuartzComponent
      *
      * @param callback The callback.
      */
-    static public void registerConfigurationUpdateCallback(final Callback<ConfigurationItem<?>> callback)
+    public static void registerConfigurationUpdateCallback(final Callback<ConfigurationItem<?>> callback)
     {
         instance.registerConfigurationUpdateCallback(callback);
     }

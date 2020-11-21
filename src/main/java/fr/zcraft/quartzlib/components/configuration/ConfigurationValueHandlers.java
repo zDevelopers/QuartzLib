@@ -54,7 +54,7 @@ import java.util.*;
 
 public abstract class ConfigurationValueHandlers 
 {
-    static private final Map<Class, ValueHandler> valueHandlers = new HashMap<>();
+    private static final Map<Class, ValueHandler> valueHandlers = new HashMap<>();
     
     static {
         registerHandlers(ConfigurationValueHandlers.class);
@@ -62,7 +62,7 @@ public abstract class ConfigurationValueHandlers
     
     private ConfigurationValueHandlers() {}
     
-    static public void registerHandlers(final Class<?> handlersClass)
+    public static void registerHandlers(final Class<?> handlersClass)
     {
         for(Method method : handlersClass.getMethods())
         {
@@ -83,7 +83,7 @@ public abstract class ConfigurationValueHandlers
         }
     }
     
-    static private void addHandler(final Class<?> returnType, Method method)
+    private static void addHandler(final Class<?> returnType, Method method)
     {
         ValueHandler handler = valueHandlers.get(returnType);
         
@@ -100,12 +100,12 @@ public abstract class ConfigurationValueHandlers
         handler.addHandler(parameterTypes[0], method);
     }
     
-    static public <T> T handleValue(Object obj, Class<T> outputType)  throws ConfigurationParseException
+    public static <T> T handleValue(Object obj, Class<T> outputType)  throws ConfigurationParseException
     {
         return handleValue(obj, outputType, null, null);
     }
     
-    static public <T> T handleValue(Object obj, Class<T> outputType, ConfigurationItem parent, String tag) throws ConfigurationParseException
+    public static <T> T handleValue(Object obj, Class<T> outputType, ConfigurationItem parent, String tag) throws ConfigurationParseException
     {
         if(obj == null) return null;
         if(outputType == null) return (T) obj;//yolocast, strongly deprecated
@@ -153,13 +153,13 @@ public abstract class ConfigurationValueHandlers
     /* ===== Value Handlers ===== */
     
     @ConfigurationValueHandler({Boolean.class, boolean.class})
-    static public boolean handleBoolValue(Object obj) throws ConfigurationParseException 
+    public static boolean handleBoolValue(Object obj) throws ConfigurationParseException
     {
         return Boolean.parseBoolean(obj.toString());
     }
     
     @ConfigurationValueHandler({Byte.class, byte.class})
-    static public byte handleByteValue(Object obj) throws ConfigurationParseException 
+    public static byte handleByteValue(Object obj) throws ConfigurationParseException
     {
         try
         {
@@ -172,7 +172,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler({Short.class, short.class})
-    static public short handleShortValue(Object obj) throws ConfigurationParseException 
+    public static short handleShortValue(Object obj) throws ConfigurationParseException
     {
         try
         {
@@ -186,7 +186,7 @@ public abstract class ConfigurationValueHandlers
     
     
     @ConfigurationValueHandler({Integer.class, int.class})
-    static public int handleIntValue(Object obj) throws ConfigurationParseException 
+    public static int handleIntValue(Object obj) throws ConfigurationParseException
     {
         try
         {
@@ -199,7 +199,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler({Long.class, long.class})
-    static public long handleLongValue(Object obj) throws ConfigurationParseException 
+    public static long handleLongValue(Object obj) throws ConfigurationParseException
     {
         try
         {
@@ -212,7 +212,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler({Float.class, float.class})
-    static public float handleFloatValue(Object obj) throws ConfigurationParseException 
+    public static float handleFloatValue(Object obj) throws ConfigurationParseException
     {
         try
         {
@@ -225,7 +225,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler({Double.class, double.class})
-    static public double handleDoubleValue(Object obj) throws ConfigurationParseException 
+    public static double handleDoubleValue(Object obj) throws ConfigurationParseException
     {
         try
         {
@@ -238,7 +238,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler({Character.class, char.class})
-    static public char handleCharValue(Object obj) throws ConfigurationParseException 
+    public static char handleCharValue(Object obj) throws ConfigurationParseException
     {
         String str = obj.toString();
         if(str.length() > 1)
@@ -247,13 +247,13 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public String handleStringValue(Object obj) throws ConfigurationParseException 
+    public static String handleStringValue(Object obj) throws ConfigurationParseException
     {
         return obj.toString();
     }
     
     @ConfigurationValueHandler
-    static public Locale handleLocaleValue(Object obj) throws ConfigurationParseException 
+    public static Locale handleLocaleValue(Object obj) throws ConfigurationParseException
     {
         if(obj.toString().isEmpty()) 
             return null;
@@ -268,7 +268,7 @@ public abstract class ConfigurationValueHandlers
         }
     }
     
-    static public <T> T handleEnumValue(Object obj, Class<T> enumClass) throws ConfigurationParseException
+    public static <T> T handleEnumValue(Object obj, Class<T> enumClass) throws ConfigurationParseException
     {
         if(obj == null) return null;
         
@@ -284,7 +284,7 @@ public abstract class ConfigurationValueHandlers
         }
     }
     
-    static public <T> ConfigurationSection handleConfigurationItemValue(Object obj, Class<T> sectionClass, ConfigurationItem parent, String tag) throws ConfigurationParseException
+    public static <T> ConfigurationSection handleConfigurationItemValue(Object obj, Class<T> sectionClass, ConfigurationItem parent, String tag) throws ConfigurationParseException
     {
         if(obj == null) return null;
         
@@ -311,7 +311,7 @@ public abstract class ConfigurationValueHandlers
         return section;
     }
     
-    static public <T> List<T> handleListValue(Object value, Class<T> itemType) throws ConfigurationParseException
+    public static <T> List<T> handleListValue(Object value, Class<T> itemType) throws ConfigurationParseException
     {
         if(!(value instanceof List)) 
             throw new ConfigurationParseException("List expected", value);
@@ -327,12 +327,12 @@ public abstract class ConfigurationValueHandlers
         return newList;
     }
     
-    static public <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType) throws ConfigurationParseException
+    public static <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType) throws ConfigurationParseException
     {
         return handleMapValue(value, keyType, valueType, null);
     }
     
-    static public <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType, ConfigurationItem parent) throws ConfigurationParseException
+    public static <K,V> Map<K,V> handleMapValue(Object value, Class<K> keyType, Class<V> valueType, ConfigurationItem parent) throws ConfigurationParseException
     {
         Map<String, Object> rawMap;
         
@@ -362,13 +362,13 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public Vector handleBukkitVectorValue(String str) throws ConfigurationParseException
+    public static Vector handleBukkitVectorValue(String str) throws ConfigurationParseException
     {
         return handleBukkitVectorValue(Arrays.asList(str.split(",")));
     }
     
     @ConfigurationValueHandler
-    static public Vector handleBukkitVectorValue(List list) throws ConfigurationParseException 
+    public static Vector handleBukkitVectorValue(List list) throws ConfigurationParseException
     {
         if(list.size() < 2)
             throw new ConfigurationParseException("Not enough values, at least 2 (x,z) are required.", list);
@@ -386,7 +386,7 @@ public abstract class ConfigurationValueHandlers
     }
 
     @ConfigurationValueHandler
-    static public World handleBukkitWorldValue(String str) throws ConfigurationParseException
+    public static World handleBukkitWorldValue(String str) throws ConfigurationParseException
     {
         String worldName = str.trim();
         for (World world : Bukkit.getWorlds())
@@ -397,7 +397,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public Vector handleBukkitVectorValue(Map map) throws ConfigurationParseException
+    public static Vector handleBukkitVectorValue(Map map) throws ConfigurationParseException
     {
         double x = map.containsKey("x") ? handleDoubleValue(map.get("x")) : 0;
         double y = map.containsKey("y") ? handleDoubleValue(map.get("y")) : 0;
@@ -407,7 +407,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public Enchantment handleEnchantmentValue(String value) throws ConfigurationParseException
+    public static Enchantment handleEnchantmentValue(String value) throws ConfigurationParseException
     {
         Enchantment enchantment = Enchantment.getByName(value.toUpperCase());
         if(enchantment == null) throw new ConfigurationParseException("Invalid enchantment name", value);
@@ -415,7 +415,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public ItemStack handleItemStackValue(Map map) throws ConfigurationParseException
+    public static ItemStack handleItemStackValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("type"))
             throw new ConfigurationParseException("Key 'type' required.", map);
@@ -476,7 +476,7 @@ public abstract class ConfigurationValueHandlers
     
     @ConfigurationValueHandler
     @Deprecated
-    static public Potion handlePotionValue(Map map) throws ConfigurationParseException
+    public static Potion handlePotionValue(Map map) throws ConfigurationParseException
     {
         if(!map.containsKey("effect"))
             throw new ConfigurationParseException("Potion effect is required.", map);
@@ -490,7 +490,7 @@ public abstract class ConfigurationValueHandlers
     }
 
     @ConfigurationValueHandler
-    static public PotionEffectType handlePotionEffectTypeValue(final String name) throws ConfigurationParseException
+    public static PotionEffectType handlePotionEffectTypeValue(final String name) throws ConfigurationParseException
     {
         final PotionEffectType effect = PotionEffectType.getByName(name);
 
@@ -501,13 +501,13 @@ public abstract class ConfigurationValueHandlers
     }
 
     @ConfigurationValueHandler
-    static public PotionEffect handlePotionEffectValue(final String name) throws ConfigurationParseException
+    public static PotionEffect handlePotionEffectValue(final String name) throws ConfigurationParseException
     {
         return new PotionEffect(handlePotionEffectTypeValue(name), 30, 1);
     }
 
     @ConfigurationValueHandler
-    static public PotionEffect handlePotionEffectValue(final Map<?, ?> map) throws ConfigurationParseException
+    public static PotionEffect handlePotionEffectValue(final Map<?, ?> map) throws ConfigurationParseException
     {
         final Integer color = !map.containsKey("color") || map.get("color") == null ? null : handleIntValue(map.get("color"));
 
@@ -557,7 +557,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public DyeColor handleDyeColorValue(Integer value) throws ConfigurationParseException
+    public static DyeColor handleDyeColorValue(Integer value) throws ConfigurationParseException
     {
         DyeColor color = DyeColor.getByDyeData((byte) (int) value);
         
@@ -567,7 +567,7 @@ public abstract class ConfigurationValueHandlers
         return color;
     }
     
-    static private Object getRawValue(Map map, String key)
+    private static Object getRawValue(Map map, String key)
     {
         Object value = null;
         for(Object mapKey : map.keySet())
@@ -580,7 +580,7 @@ public abstract class ConfigurationValueHandlers
     }
     
     @ConfigurationValueHandler
-    static public BannerMeta handleBannerValue(final Map map) throws ConfigurationParseException
+    public static BannerMeta handleBannerValue(final Map map) throws ConfigurationParseException
     {
         final Material bannerMaterial;
 
@@ -611,19 +611,19 @@ public abstract class ConfigurationValueHandlers
         return banner;
     }
     
-    static public <T> T getValue(Map map, String key, T defaultValue) throws ConfigurationParseException
+    public static <T> T getValue(Map map, String key, T defaultValue) throws ConfigurationParseException
     {
         return getValue(map, key, defaultValue, (Class<T>) defaultValue.getClass());
     }
     
-    static public <T> T getValue(Map map, String key, T defaultValue, Class<T> valueType) throws ConfigurationParseException
+    public static <T> T getValue(Map map, String key, T defaultValue, Class<T> valueType) throws ConfigurationParseException
     {
         Object rawValue = getRawValue(map, key);
         if(rawValue == null) return defaultValue;
         return handleValue(rawValue, valueType);
     }
     
-    static public <T> List<T> getListValue(Map map, String key, List<T> defaultValue, Class<T> valueType) throws ConfigurationParseException
+    public static <T> List<T> getListValue(Map map, String key, List<T> defaultValue, Class<T> valueType) throws ConfigurationParseException
     {
         Object rawValue = getRawValue(map, key);
         if(rawValue == null) return defaultValue;

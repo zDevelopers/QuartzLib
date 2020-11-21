@@ -37,10 +37,10 @@ import java.util.List;
  */
 public class Translation
 {
-    private String original;
+    private final String original;
     private final String originalPlural;
-    private String context;
-    private List<String> translations;
+    private final String context;
+    private final List<String> translations;
 
     public Translation(String context, String original, String originalPlural, List<String> translations)
     {

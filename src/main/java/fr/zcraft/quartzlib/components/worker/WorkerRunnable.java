@@ -34,7 +34,7 @@ public abstract class WorkerRunnable<T>
 {
     private Worker worker;
             
-    abstract public T run() throws Throwable;
+    public abstract T run() throws Throwable;
     
     Worker getWorker() {return worker;}
     void setWorker(Worker worker) {this.worker = worker;}

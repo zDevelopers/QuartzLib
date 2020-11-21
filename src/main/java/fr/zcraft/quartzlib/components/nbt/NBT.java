@@ -62,7 +62,7 @@ public abstract class NBT
      * @param value The value to JSONify.
      * @return the NBT JSON representation of the given object. 
      */
-    static public String toNBTJSONString(Object value)
+    public static String toNBTJSONString(Object value)
     {
         StringBuilder sb = new StringBuilder();
         toNBTJSONString(sb, value);
@@ -81,7 +81,7 @@ public abstract class NBT
      * @return the NBT tag for the specified item.
      * @throws NMSException 
      */
-    static public NBTCompound fromItemStack(ItemStack item) throws NMSException
+    public static NBTCompound fromItemStack(ItemStack item) throws NMSException
     {
         init();
         try
@@ -102,7 +102,7 @@ public abstract class NBT
      * @param meta The item meta to get the data from.
      * @return an NBT-like representation of the specified item meta.
      */
-    static public Map<String, Object> fromItemMeta(ItemMeta meta)
+    public static Map<String, Object> fromItemMeta(ItemMeta meta)
     {
         Map<String, Object> itemData = new HashMap<>();
 
@@ -123,7 +123,7 @@ public abstract class NBT
      * @param enchants the enchantment list to get the data from.
      * @return an NBT-like representation of the specified enchantments.
      */
-    static public List<Map<String, Object>> fromEnchantments(Map<Enchantment, Integer> enchants)
+    public static List<Map<String, Object>> fromEnchantments(Map<Enchantment, Integer> enchants)
     {
         List<Map<String, Object>> enchantList = new ArrayList<>();
         
@@ -150,7 +150,7 @@ public abstract class NBT
      * @param itemFlags item flag set to get the data from.
      * @return an NBT-like representation of the item flags (HideFlags).
      */
-    static public byte fromItemFlags(Set<ItemFlag> itemFlags)
+    public static byte fromItemFlags(Set<ItemFlag> itemFlags)
     {
         byte flags = 0;
 
@@ -194,7 +194,7 @@ public abstract class NBT
      * @see #addToItemStack(ItemStack, Map, boolean) This method is equivalent
      * to this one with replace = true.
      */
-    static public ItemStack addToItemStack(ItemStack item, Map<String, Object> tags) throws NMSException
+    public static ItemStack addToItemStack(ItemStack item, Map<String, Object> tags) throws NMSException
     {
         return addToItemStack(item, tags, true);
     }
@@ -217,7 +217,7 @@ public abstract class NBT
      * one.
      * @throws NMSException if the operation cannot be executed.
      */
-    static public ItemStack addToItemStack(final ItemStack item, final Map<String, Object> tags, final boolean replace) throws NMSException
+    public static ItemStack addToItemStack(final ItemStack item, final Map<String, Object> tags, final boolean replace) throws NMSException
     {
         init();
 
@@ -293,7 +293,7 @@ public abstract class NBT
         }
     }
 
-    static private void init() throws NMSException
+    private static void init() throws NMSException
     {
         if (MC_ITEM_STACK != null) return; // Already initialized
 
@@ -313,7 +313,7 @@ public abstract class NBT
      * @return The NMS NBT tag.
      * @throws NMSException If something goes wrong while extracting the tag.
      */
-    static private Object getMcNBTCompound(ItemStack item) throws NMSException
+    private static Object getMcNBTCompound(ItemStack item) throws NMSException
     {
         Object mcItemStack = ItemUtils.getNMSItemStack(item);
         if (mcItemStack == null) return null;
@@ -388,7 +388,7 @@ public abstract class NBT
 
     /* ========== NBT String Utilities ========== */
     
-    static private void toNBTJSONString(StringBuilder builder, Object value)
+    private static void toNBTJSONString(StringBuilder builder, Object value)
     {
         if (value == null) return;
         
@@ -402,7 +402,7 @@ public abstract class NBT
             builder.append(value.toString());
     }
     
-    static private void toNBTJSONString(StringBuilder builder, List list)
+    private static void toNBTJSONString(StringBuilder builder, List list)
     {
         builder.append("[");
         
@@ -418,7 +418,7 @@ public abstract class NBT
         builder.append("]");
     }
     
-    static private void toNBTJSONString(StringBuilder builder, Map<Object, Object> map)
+    private static void toNBTJSONString(StringBuilder builder, Map<Object, Object> map)
     {
         builder.append("{");
 
@@ -436,7 +436,7 @@ public abstract class NBT
         builder.append("}");
     }
     
-    static private void toNBTJSONString(StringBuilder builder, String value)
+    private static void toNBTJSONString(StringBuilder builder, String value)
     {
         builder.append('"');
         builder.append(value.replace("\"", "\\\""));

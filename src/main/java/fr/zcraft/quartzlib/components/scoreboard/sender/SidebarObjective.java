@@ -47,11 +47,11 @@ public class SidebarObjective
     public static final int MAX_LENGTH_OBJECTIVE_DISPLAY_NAME = 32;
     public static final int MAX_LENGTH_SCORE_NAME = 40;
 
-    private String name;
+    private final String name;
     private String displayName;
 
-    private Map<String, Integer> scores = new HashMap<>();
-    private Set<UUID> receivers = new HashSet<>();
+    private final Map<String, Integer> scores = new HashMap<>();
+    private final Set<UUID> receivers = new HashSet<>();
 
 
     /**

@@ -57,7 +57,7 @@ public class GettextPOTranslator extends Translator
      *
      * @see #getPluralIndex(Integer)
      */
-    private ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
+    private final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
 
 
     public GettextPOTranslator(Locale locale, File file)

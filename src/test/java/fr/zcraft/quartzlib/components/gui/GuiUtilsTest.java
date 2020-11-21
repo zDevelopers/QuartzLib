@@ -41,12 +41,12 @@ import java.util.List;
 
 public class GuiUtilsTest
 {
-    static private void assertLists(List<String> expected, List<String> actual)
+    private static void assertLists(List<String> expected, List<String> actual)
     {
         assertLists(null, expected, actual);
     }
 
-    static private void assertLists(String message, List<String> expected, List<String> actual)
+    private static void assertLists(String message, List<String> expected, List<String> actual)
     {
         Assert.assertEquals(message, StringUtils.join(expected, ","), StringUtils.join(actual, ","));
     }

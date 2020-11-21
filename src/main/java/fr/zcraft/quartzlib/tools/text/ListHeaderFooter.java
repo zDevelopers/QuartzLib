@@ -48,9 +48,9 @@ public final class ListHeaderFooter
 {
     private static boolean enabled = true;
 
-    private static Class<?> packetPlayOutPlayerListHeaderFooterClass;
+    private static final Class<?> packetPlayOutPlayerListHeaderFooterClass;
     private static Class<?> chatSerializerClass;
-    private static Class<?> iChatBaseComponentClass;
+    private static final Class<?> iChatBaseComponentClass;
 
     static
     {

@@ -114,7 +114,7 @@ public class RawText extends RawTextPart<RawText>
      * @param str The string to convert.
      * @return The RawText equivalent.
      */
-    static public RawText fromFormattedString(char delimiter, String str)
+    public static RawText fromFormattedString(char delimiter, String str)
     {
         return fromFormattedString(new ChatColorParser(delimiter, str), null);
     }
@@ -127,7 +127,7 @@ public class RawText extends RawTextPart<RawText>
      * @param baseComponent The converted component will be added to this component.
      * @return The RawText equivalent.
      */
-    static public RawText fromFormattedString(char delimiter, String str, RawText baseComponent)
+    public static RawText fromFormattedString(char delimiter, String str, RawText baseComponent)
     {
         return fromFormattedString(new ChatColorParser(delimiter, str), baseComponent);
     }
@@ -138,7 +138,7 @@ public class RawText extends RawTextPart<RawText>
      * @param str The string to convert.
      * @return The RawText equivalent.
      */
-    static public RawText fromFormattedString(String str)
+    public static RawText fromFormattedString(String str)
     {
         return fromFormattedString(new ChatColorParser(str), null);
     }
@@ -150,12 +150,12 @@ public class RawText extends RawTextPart<RawText>
      * @param baseComponent The converted component will be added to this component.
      * @return The RawText equivalent.
      */
-    static public RawText fromFormattedString(String str, RawText baseComponent)
+    public static RawText fromFormattedString(String str, RawText baseComponent)
     {
         return fromFormattedString(new ChatColorParser(str), baseComponent);
     }
     
-    static private RawText fromFormattedString(ChatColorParser parser, RawText baseComponent)
+    private static RawText fromFormattedString(ChatColorParser parser, RawText baseComponent)
     {
         RawTextPart text = baseComponent;
         
@@ -186,7 +186,7 @@ public class RawText extends RawTextPart<RawText>
      * @return The tellraw-compatible name.
      * @throws IllegalArgumentException if {@link ChatColor#RESET RESET} is passed.
      */
-    static public String toStyleName(ChatColor color)
+    public static String toStyleName(ChatColor color)
     {
         switch(color)
         {
@@ -205,7 +205,7 @@ public class RawText extends RawTextPart<RawText>
      * @param item The item.
      * @return The tellraw-compatible JSON.
      */
-    static public String toJSONString(ItemStack item)
+    public static String toJSONString(ItemStack item)
     {
         Map<String, Object> itemData = new HashMap<>();
         
@@ -245,19 +245,19 @@ public class RawText extends RawTextPart<RawText>
     }
     
     @Deprecated
-    static public String toJSONString(ItemMeta meta)
+    public static String toJSONString(ItemMeta meta)
     {
         return NBT.toNBTJSONString(NBT.fromItemMeta(meta));
     }
 
     @Deprecated
-    static public String toJSONString(Map<Enchantment, Integer> enchants)
+    public static String toJSONString(Map<Enchantment, Integer> enchants)
     {
         return NBT.toNBTJSONString(NBT.fromEnchantments(enchants));
     }
     
     @Deprecated
-    static public byte toJSON(Set<ItemFlag> itemFlags)
+    public static byte toJSON(Set<ItemFlag> itemFlags)
     {
         return NBT.fromItemFlags(itemFlags);
     }
@@ -268,7 +268,7 @@ public class RawText extends RawTextPart<RawText>
      * @param entity The entity.
      * @return The tellraw-compatible JSON.
      */
-    static public JSONObject toJSON(Entity entity)
+    public static JSONObject toJSON(Entity entity)
     {
         JSONObject obj = new JSONObject();
         

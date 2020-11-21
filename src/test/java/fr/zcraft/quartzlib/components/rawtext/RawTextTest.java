@@ -45,7 +45,7 @@ import java.util.HashMap;
 
 public class RawTextTest 
 {
-    static private void assertJSON(RawText part, String jsonMessage)
+    private static void assertJSON(RawText part, String jsonMessage)
     {
         JSONObject obj;
         try

@@ -57,12 +57,12 @@ import java.util.List;
  *
  * @author ProkopyL (main) and Amaury Carrade
  */
-abstract public class ActionGui extends InventoryGui
+public abstract class ActionGui extends InventoryGui
 {
     /**
      * The prefix for action handlers.
      */
-    static private final String ACTION_HANDLER_NAME = "action_";
+    private static final String ACTION_HANDLER_NAME = "action_";
     
     /**
      * The class of this GUI.
@@ -441,7 +441,7 @@ abstract public class ActionGui extends InventoryGui
     /**
      * This structure represents an action.
      */
-    static private class Action
+    private static class Action
     {
         /**
          * The name of the action.

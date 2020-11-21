@@ -38,5 +38,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 public @interface ConfigurationValueHandler
 {
-    public Class[] value() default {};
+    Class[] value() default {};
 }

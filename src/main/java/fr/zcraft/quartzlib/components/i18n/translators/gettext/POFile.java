@@ -46,7 +46,7 @@ public class POFile
 {
     private BufferedReader rawReader;
 
-    private Set<Translation> translations = new HashSet<>();
+    private final Set<Translation> translations = new HashSet<>();
 
     private String lastTranslator = null;
     private String translationTeam = null;

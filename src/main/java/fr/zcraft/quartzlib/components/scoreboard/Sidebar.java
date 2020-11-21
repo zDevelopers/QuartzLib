@@ -62,7 +62,7 @@ public abstract class Sidebar
 {
     /* ** Global attributes ** */
 
-    private static Set<Sidebar> sidebars = new CopyOnWriteArraySet<>();
+    private static final Set<Sidebar> sidebars = new CopyOnWriteArraySet<>();
 
     // Asynchronously available list of the logged in players.
     private static final Map<UUID, Player> loggedInPlayers = new ConcurrentHashMap<>();
@@ -70,7 +70,7 @@ public abstract class Sidebar
 
     /* ** This instance's attributes ** */
 
-    private Set<UUID> recipients = new CopyOnWriteArraySet<>();
+    private final Set<UUID> recipients = new CopyOnWriteArraySet<>();
 
     private int lastLineScore = 1;
 
@@ -87,7 +87,7 @@ public abstract class Sidebar
     private SidebarObjective globalObjective = null;
 
     // Other cases
-    private Map<UUID, SidebarObjective> objectives = new ConcurrentHashMap<>();
+    private final Map<UUID, SidebarObjective> objectives = new ConcurrentHashMap<>();
 
 
     public Sidebar()
@@ -555,7 +555,7 @@ public abstract class Sidebar
                         line = rawLine;
                     }
 
-                    line += deduplicationChar != null ? String.valueOf(ChatColor.COLOR_CHAR) + "" + String.valueOf(deduplicationChar) : " ";
+                    line += deduplicationChar != null ? ChatColor.COLOR_CHAR + "" + deduplicationChar : " ";
                 }
 
                 usedLines.add(line);

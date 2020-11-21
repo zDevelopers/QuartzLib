@@ -52,7 +52,7 @@ import java.util.Random;
 /**
  * Utility class for dealing with items and inventories.
  */
-abstract public class ItemUtils
+public abstract class ItemUtils
 {
     private ItemUtils() {}
 
@@ -64,7 +64,7 @@ abstract public class ItemUtils
      * @param player The player that will consume the stack.
      * @return The updated stack.
      */
-    static public ItemStack consumeItem(Player player)
+    public static ItemStack consumeItem(Player player)
     {
         ItemStack newStack = consumeItem(player, player.getItemInHand());
         player.setItemInHand(newStack);
@@ -80,7 +80,7 @@ abstract public class ItemUtils
      * @param item The stack to be consumed.
      * @return The updated stack.
      */
-    static public ItemStack consumeItem(Player player, ItemStack item)
+    public static ItemStack consumeItem(Player player, ItemStack item)
     {
         if(player.getGameMode() == GameMode.CREATIVE)
             return item;
@@ -104,7 +104,7 @@ abstract public class ItemUtils
      * @return true if the player received the item in its inventory, false if
      * it had to be totally or partially dropped on the ground.
      */
-    static public boolean give(final Player player, final ItemStack item)
+    public static boolean give(final Player player, final ItemStack item)
     {
         final Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
 
@@ -132,7 +132,7 @@ abstract public class ItemUtils
      * @param displayName The new display name of the item
      * @return The same item.
      */
-    static public ItemStack setDisplayName(ItemStack item, String displayName)
+    public static ItemStack setDisplayName(ItemStack item, String displayName)
     {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(displayName);
@@ -148,7 +148,7 @@ abstract public class ItemUtils
      *
      * @return {@code true} if similar (either both {@code null} or similar).
      */
-    static public boolean areSimilar(ItemStack first, ItemStack other)
+    public static boolean areSimilar(ItemStack first, ItemStack other)
     {
         if (first == null || other == null)
             return first == other;
@@ -169,7 +169,7 @@ abstract public class ItemUtils
      *
      * @return {@code true} if the item stack have the given display name.
      */
-    static public boolean hasDisplayName(ItemStack stack, String displayName)
+    public static boolean hasDisplayName(ItemStack stack, String displayName)
     {
         return stack != null && stack.hasItemMeta() && stack.getItemMeta().hasDisplayName() && stack.getItemMeta().getDisplayName().equals(displayName);
     }
@@ -183,7 +183,7 @@ abstract public class ItemUtils
      * @param item The item in the player's hand.
      * @param factor The amount of damage taken.
      */
-    static public void damageItemInHand(Player player, ItemStack item, int factor)
+    public static void damageItemInHand(Player player, ItemStack item, int factor)
     {
         if(player == null) throw new IllegalArgumentException("Player can't be null.");
         if (player.getGameMode() == GameMode.CREATIVE) return;
@@ -211,7 +211,7 @@ abstract public class ItemUtils
      * @param hand The hand to retrieve the item from. This will always be the main hand if
      *             the Bukkit build don't support dual-wielding.
      */
-    static public void breakItemInHand(Player player, DualWielding hand)
+    public static void breakItemInHand(Player player, DualWielding hand)
     {
         DualWielding.setItemInHand(player, hand, new ItemStack(Material.AIR));
         //player.playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 1);
@@ -223,7 +223,7 @@ abstract public class ItemUtils
      * @param player The player.
      * @param item The item to break.
      */
-    static public void breakItemInHand(Player player, ItemStack item)
+    public static void breakItemInHand(Player player, ItemStack item)
     {
         breakItemInHand(player, DualWielding.getHoldingHand(player, item));
     }
@@ -236,7 +236,7 @@ abstract public class ItemUtils
      * that).
      * @return The durability to add.
      */
-    static private short newDurability(int unbreakingLevel)
+    private static short newDurability(int unbreakingLevel)
     {
         if (new Random().nextInt(100) <= (100 / (unbreakingLevel + 1)))
         {
@@ -246,7 +246,7 @@ abstract public class ItemUtils
         return 0;
     }
     
-    static private String getI18nNameMethodName = null;
+    private static String getI18nNameMethodName = null;
 
     /**
      * Returns the name of the method used to retrieve the I18N key of the name
@@ -257,7 +257,7 @@ abstract public class ItemUtils
      *
      * @throws NMSException if the operation cannot be executed.
      */
-    static private String getI18nNameMethod(ItemStack item) throws NMSException
+    private static String getI18nNameMethod(ItemStack item) throws NMSException
     {
         if(getI18nNameMethodName != null) return getI18nNameMethodName;
         
@@ -287,7 +287,7 @@ abstract public class ItemUtils
         }
     }
     
-    static private Method registryLookupMethod = null;
+    private static Method registryLookupMethod = null;
 
     /**
      * Retrieves the method used to lookup the Minecraft internal item registry,
@@ -297,7 +297,7 @@ abstract public class ItemUtils
      *
      * @throws NMSException if the operation cannot be executed.
      */
-    static private Method getRegistryLookupMethod() throws NMSException
+    private static Method getRegistryLookupMethod() throws NMSException
     {
         if(registryLookupMethod != null) return registryLookupMethod;
         
@@ -342,7 +342,7 @@ abstract public class ItemUtils
      *
      * @throws NMSException if the operation cannot be executed.
      */
-    static public String getMinecraftId(ItemStack item) throws NMSException
+    public static String getMinecraftId(ItemStack item) throws NMSException
     {
         try
         {
@@ -372,7 +372,7 @@ abstract public class ItemUtils
      * @return The I18N key for this item.
      * @throws NMSException if the operation cannot be executed.
      */
-    static public String getI18nName(ItemStack item) throws NMSException
+    public static String getI18nName(ItemStack item) throws NMSException
     {
         if(item.getItemMeta() instanceof PotionMeta) return getI18nPotionName(item);
         
@@ -396,7 +396,7 @@ abstract public class ItemUtils
      * @return A copy of this item as a net.minecraft.server.ItemStack object.
      * @throws NMSException if the operation cannot be executed.
      */
-    static public Object asNMSCopy(ItemStack item) throws NMSException
+    public static Object asNMSCopy(ItemStack item) throws NMSException
     {
         try
         {
@@ -417,7 +417,7 @@ abstract public class ItemUtils
      * @return A copy of this item in a CraftItemStack object.
      * @throws NMSException if the operation cannot be executed.
      */
-    static public Object asCraftCopy(ItemStack item) throws NMSException
+    public static Object asCraftCopy(ItemStack item) throws NMSException
     {
         try
         {
@@ -440,7 +440,7 @@ abstract public class ItemUtils
      * NMS ItemStack object.
      * @throws NMSException if the operation cannot be executed.
      */
-    static public Object getNMSItemStack(ItemStack item) throws NMSException
+    public static Object getNMSItemStack(ItemStack item) throws NMSException
     {
         try
         {
@@ -465,7 +465,7 @@ abstract public class ItemUtils
      * new CraftItemStack will be returned.
      * @throws NMSException if the operation cannot be executed.
      */
-    static public Object getCraftItemStack(ItemStack item) throws NMSException
+    public static Object getCraftItemStack(ItemStack item) throws NMSException
     {
         try
         {
@@ -478,7 +478,7 @@ abstract public class ItemUtils
         }
     }
     
-    static private String getI18nPotionName(ItemStack item) throws NMSException
+    private static String getI18nPotionName(ItemStack item) throws NMSException
     {
         String potionKey = getI18nPotionKey(item);
         
@@ -497,7 +497,7 @@ abstract public class ItemUtils
         }
     }
     
-    static private String getI18nPotionKey(ItemStack item)
+    private static String getI18nPotionKey(ItemStack item)
     {
         switch(item.getType().name())
         {
@@ -525,7 +525,7 @@ abstract public class ItemUtils
      * @param location The location to drop the item at.
      * @param item The item to drop.
      */
-    static public void drop(Location location, ItemStack item)
+    public static void drop(Location location, ItemStack item)
     {
         location.getWorld().dropItem(location, item);
     }
@@ -535,7 +535,7 @@ abstract public class ItemUtils
      * @param location The location to drop the item at.
      * @param item The item to drop.
      */
-    static public void dropNaturally(Location location, ItemStack item)
+    public static void dropNaturally(Location location, ItemStack item)
     {
         location.getWorld().dropItemNaturally(location, item);
     }
@@ -545,7 +545,7 @@ abstract public class ItemUtils
      * @param location The location to drop the item at.
      * @param item The item to drop.
      */
-    static public void dropNaturallyLater(Location location, ItemStack item)
+    public static void dropNaturallyLater(Location location, ItemStack item)
     {
         RunTask.nextTick(() -> dropNaturally(location, item));
     }
@@ -555,7 +555,7 @@ abstract public class ItemUtils
      * @param location The location to drop the item at.
      * @param item The item to drop.
      */
-    static public void dropLater(final Location location, final ItemStack item)
+    public static void dropLater(final Location location, final ItemStack item)
     {
         RunTask.nextTick(() -> drop(location, item));
     }

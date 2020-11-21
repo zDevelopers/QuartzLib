@@ -52,34 +52,34 @@ import java.lang.reflect.Method;
 
 public class PromptGui extends GuiBase
 {
-    static private final int SIGN_LINES_COUNT = 4;
-    static private final int SIGN_COLUMNS_COUNT = 15;
+    private static final int SIGN_LINES_COUNT = 4;
+    private static final int SIGN_COLUMNS_COUNT = 15;
 
-    static private boolean isInitialized = false;
+    private static boolean isInitialized = false;
 
     /* ===== Reflection to Sign API ===== */
-    static private Field fieldTileEntitySign = null; // 1.11.2-: CraftSign.sign; 1.12+: CraftBlockEntityState.tileEntity
-    static private Field fieldTileEntitySignEditable = null; // 1.12+ only: CraftBlockEntityState.isEditable
-    static private Method methodGetHandle = null; // CraftPlayer.getHandle()
-    static private Method methodOpenSign = null; // EntityHuman.openSign()
+    private static Field fieldTileEntitySign = null; // 1.11.2-: CraftSign.sign; 1.12+: CraftBlockEntityState.tileEntity
+    private static Field fieldTileEntitySignEditable = null; // 1.12+ only: CraftBlockEntityState.isEditable
+    private static Method methodGetHandle = null; // CraftPlayer.getHandle()
+    private static Method methodOpenSign = null; // EntityHuman.openSign()
 
-    static public boolean isAvailable()
+    public static boolean isAvailable()
     {
         if (!isInitialized) init();
         return fieldTileEntitySign != null;
     }
 
-    static public void prompt(Player owner, Callback<String> callback)
+    public static void prompt(Player owner, Callback<String> callback)
     {
         prompt(owner, callback, "", null);
     }
 
-    static public void prompt(Player owner, Callback<String> callback, String contents, GuiBase parent)
+    public static void prompt(Player owner, Callback<String> callback, String contents, GuiBase parent)
     {
         Gui.open(owner, new PromptGui(callback, contents), parent);
     }
 
-    static private void init()
+    private static void init()
     {
         isInitialized = true;
 
@@ -214,7 +214,7 @@ public class PromptGui extends GuiBase
         this.close(true);
     }
 
-    static private String getSignContents(String[] lines)
+    private static String getSignContents(String[] lines)
     {
         StringBuilder content = new StringBuilder(lines[0].trim());
 
@@ -227,7 +227,7 @@ public class PromptGui extends GuiBase
         return content.toString().trim();
     }
 
-    static private void setSignContents(Sign sign, String content)
+    private static void setSignContents(Sign sign, String content)
     {
         String[] lines = new String[SIGN_LINES_COUNT + 1];
         String curLine;
@@ -256,7 +256,7 @@ public class PromptGui extends GuiBase
         }
     }
 
-    static private Location findAvailableLocation(Player player)
+    private static Location findAvailableLocation(Player player)
     {
         World world = player.getWorld();
         Chunk playerChunk = player.getLocation().getChunk();
@@ -280,7 +280,7 @@ public class PromptGui extends GuiBase
         return null;
     }
 
-    static private boolean hasSpace(World world, Location loc)
+    private static boolean hasSpace(World world, Location loc)
     {
         if (!Material.AIR.equals(world.getBlockAt(loc).getType()))
             return false;

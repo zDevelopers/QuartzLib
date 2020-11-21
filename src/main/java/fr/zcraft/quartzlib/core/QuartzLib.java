@@ -46,11 +46,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 public abstract class QuartzLib
 {
-    static private JavaPlugin plugin;
-    static private final ArrayList<Class<? extends QuartzComponent>> componentsToLoad = new ArrayList<>();
-    static private Set<QuartzComponent> loadedComponents;
+    private static JavaPlugin plugin;
+    private static final ArrayList<Class<? extends QuartzComponent>> componentsToLoad = new ArrayList<>();
+    private static Set<QuartzComponent> loadedComponents;
     
-    static private ZLibListener listener;
+    private static ZLibListener listener;
 
     /**
      * Initializes QuartzLib.
@@ -62,7 +62,7 @@ public abstract class QuartzLib
      *
      * @param plugin The plugin currently using this instance of the QuartzLib.
      */
-    static public void init(JavaPlugin plugin)
+    public static void init(JavaPlugin plugin)
     {
         QuartzLib.plugin = plugin;
         QuartzLib.loadedComponents = new CopyOnWriteArraySet<>();
@@ -107,7 +107,7 @@ public abstract class QuartzLib
      * @param componentClass The component's class.
      * @return The component instance, or null if instanciation failed.
      */
-    static public <T extends QuartzComponent> T loadComponent(Class<T> componentClass)
+    public static <T extends QuartzComponent> T loadComponent(Class<T> componentClass)
     {
         if(!isInitialized())
         {
@@ -158,7 +158,7 @@ public abstract class QuartzLib
      * @return The plugin currently using the library.
      * @throws IllegalStateException if QuartzLib was not initialized.
      */
-    static public JavaPlugin getPlugin() throws IllegalStateException
+    public static JavaPlugin getPlugin() throws IllegalStateException
     {
         checkInitialized();
         return plugin;
@@ -172,7 +172,7 @@ public abstract class QuartzLib
      * @return the loaded components.
      * @throws IllegalStateException
      */
-    static public Set<QuartzComponent> getLoadedComponents() throws IllegalStateException
+    public static Set<QuartzComponent> getLoadedComponents() throws IllegalStateException
     {
         checkInitialized();
         return ImmutableSet.copyOf(loadedComponents);
@@ -183,7 +183,7 @@ public abstract class QuartzLib
      *
      * @return {@code true} if initialized.
      */
-    static public boolean isInitialized()
+    public static boolean isInitialized()
     {
         return plugin != null;
     }
@@ -196,7 +196,7 @@ public abstract class QuartzLib
      * @param listener The listener to register.
      * @return The registered listener.
      */
-    static public <T extends Listener> T registerEvents(T listener)
+    public static <T extends Listener> T registerEvents(T listener)
     {
         Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
         FutureEvents.registerFutureEvents(listener);
@@ -207,7 +207,7 @@ public abstract class QuartzLib
      * Unregisters the given event listener from all events it is subscribed to.
      * @param listener The listener to unregister.
      */
-    static public void unregisterEvents(Listener listener)
+    public static void unregisterEvents(Listener listener)
     {
         HandlerList.unregisterAll(listener);
     }
@@ -217,13 +217,13 @@ public abstract class QuartzLib
      *
      * @throws IllegalStateException if QuartzLib is not initialized.
      */
-    static private void checkInitialized() throws IllegalStateException
+    private static void checkInitialized() throws IllegalStateException
     {
         if(plugin == null)
             throw new IllegalStateException("Assertion failed: QuartzLib is not correctly inizialized. Make sure QuartzLib.init() or QuartzLib.onLoad() is correctly called.");
     }
     
-    static private class ZLibListener implements Listener
+    private static class ZLibListener implements Listener
     {
         @EventHandler
         public void onPluginDisable(PluginDisableEvent event)

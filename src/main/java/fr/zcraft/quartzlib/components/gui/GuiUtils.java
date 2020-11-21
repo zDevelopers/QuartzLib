@@ -59,7 +59,7 @@ public final class GuiUtils
      * @param slot The slot where to put the ItemStack
      * @param item The ItemStack to set
      */
-    static public void setItemLater(InventoryGui gui, int slot, ItemStack item)
+    public static void setItemLater(InventoryGui gui, int slot, ItemStack item)
     {
         RunTask.nextTick(() -> {
             Inventory inventory = gui.getInventory();
@@ -79,7 +79,7 @@ public final class GuiUtils
      *
      * @return The constructed {@link ItemStack}.
      */
-    static public ItemStack makeItem(Material material)
+    public static ItemStack makeItem(Material material)
     {
         return makeItem(material, null, (List<String>) null);
     }
@@ -92,7 +92,7 @@ public final class GuiUtils
      *
      * @return The constructed {@link ItemStack}.
      */
-    static public ItemStack makeItem(Material material, String title)
+    public static ItemStack makeItem(Material material, String title)
     {
         return makeItem(material, title, (List<String>) null);
     }
@@ -106,7 +106,7 @@ public final class GuiUtils
      *
      * @return The constructed {@link ItemStack}.
      */
-    static public ItemStack makeItem(Material material, String title, String... loreLines)
+    public static ItemStack makeItem(Material material, String title, String... loreLines)
     {
         return makeItem(material, title, Arrays.asList(loreLines));
     }
@@ -120,7 +120,7 @@ public final class GuiUtils
      *
      * @return The constructed {@link ItemStack}.
      */
-    static public ItemStack makeItem(Material material, String title, List<String> loreLines)
+    public static ItemStack makeItem(Material material, String title, List<String> loreLines)
     {
         return makeItem(new ItemStack(material), title, loreLines);
     }
@@ -137,7 +137,7 @@ public final class GuiUtils
      *
      * @return The same {@link ItemStack}, but with an updated {@link ItemMeta}.
      */
-    static public ItemStack makeItem(ItemStack itemStack, String title, List<String> loreLines)
+    public static ItemStack makeItem(ItemStack itemStack, String title, List<String> loreLines)
     {
         ItemMeta meta = itemStack.getItemMeta();
 
@@ -160,7 +160,7 @@ public final class GuiUtils
      *
      * @return The lore lines.
      */
-    static public List<String> generateLore(String text)
+    public static List<String> generateLore(String text)
     {
         return generateLore(text, 28);
     }
@@ -174,7 +174,7 @@ public final class GuiUtils
      *
      * @return The lore lines.
      */
-    static public List<String> generateLore(String text, int lineLength)
+    public static List<String> generateLore(String text, int lineLength)
     {
         final List<String> lore = new ArrayList<>();
         final String[] segments = text.split("\n");
@@ -227,7 +227,7 @@ public final class GuiUtils
      *
      * @return A prefixed and fixed-length text.
      */
-    static public String generatePrefixedFixedLengthString(String prefix, String text)
+    public static String generatePrefixedFixedLengthString(String prefix, String text)
     {
         return generatePrefixedFixedLengthString(prefix, text, 55);
     }
@@ -241,7 +241,7 @@ public final class GuiUtils
      *
      * @return A prefixed and fixed-length text.
      */
-    static public String generatePrefixedFixedLengthString(String prefix, String text, int lineLength)
+    public static String generatePrefixedFixedLengthString(String prefix, String text, int lineLength)
     {
         final List<String> lines = generateLore(text, lineLength);
         final StringBuilder result = new StringBuilder();
@@ -263,7 +263,7 @@ public final class GuiUtils
      * @deprecated Use InventoryUtils.sameInventories() instead.
      */
     @Deprecated
-    static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
+    public static boolean sameInventories(Inventory inventory1, Inventory inventory2)
     {
         return InventoryUtils.sameInventories(inventory1, inventory2);
     }

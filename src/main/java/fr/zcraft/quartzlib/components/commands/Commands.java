@@ -40,10 +40,10 @@ public class Commands extends QuartzComponent
 {
     public static final String CHAT_PREFIX = "\u2503";
 
-    static private final List<CommandGroup> commandGroups =  new ArrayList<>();
-    static private String globalPermission;
+    private static final List<CommandGroup> commandGroups =  new ArrayList<>();
+    private static String globalPermission;
 
-    static public void registerShortcut(String commandGroupName, Class<? extends Command> commandClass, String ... shortcutNames)
+    public static void registerShortcut(String commandGroupName, Class<? extends Command> commandClass, String ... shortcutNames)
     {
         CommandGroup group = getMatchingCommandGroup(commandGroupName);
         if(group == null) throw new IllegalArgumentException("Invalid command group name: " + commandGroupName);
@@ -53,7 +53,7 @@ public class Commands extends QuartzComponent
         commandGroups.add(newCommandGroup);
     }
     
-    static public void register(String[] names, Class<? extends Command> ... commandsClasses)
+    public static void register(String[] names, Class<? extends Command> ... commandsClasses)
     {
         final CommandGroup commandGroup = new CommandGroup(names, commandsClasses);
         commandGroup.register(QuartzLib.getPlugin());
@@ -61,12 +61,12 @@ public class Commands extends QuartzComponent
         commandGroups.add(commandGroup);
     }
     
-    static public void register(String name, Class<? extends Command> ... commandsClasses)
+    public static void register(String name, Class<? extends Command> ... commandsClasses)
     {
         register(new String[] {name}, commandsClasses);
     }
     
-    static public boolean execute(CommandSender sender, String commandName, String[] args)
+    public static boolean execute(CommandSender sender, String commandName, String[] args)
     {
         CommandGroup commandGroup = getMatchingCommandGroup(commandName);
         if(commandGroup == null) return false;
@@ -74,14 +74,14 @@ public class Commands extends QuartzComponent
         return true;
     }
     
-    static public List<String> tabComplete(CommandSender sender, String commandName, String[] args)
+    public static List<String> tabComplete(CommandSender sender, String commandName, String[] args)
     {
         CommandGroup commandGroup = getMatchingCommandGroup(commandName);
         if(commandGroup == null) return new ArrayList<String>();
         return commandGroup.tabComplete(sender, args);
     }
     
-    static public Command getCommandInfo(Class<? extends Command> commandClass)
+    public static Command getCommandInfo(Class<? extends Command> commandClass)
     {
         Command command = null;
         for(CommandGroup commandGroup : commandGroups)
@@ -92,7 +92,7 @@ public class Commands extends QuartzComponent
         return command;
     }
     
-    static private CommandGroup getMatchingCommandGroup(String commandName)
+    private static CommandGroup getMatchingCommandGroup(String commandName)
     {
         for(CommandGroup commandGroup : commandGroups)
         {
@@ -103,12 +103,12 @@ public class Commands extends QuartzComponent
     }
     
     
-    static public String getGlobalPermission()
+    public static String getGlobalPermission()
     {
         return globalPermission;
     }
     
-    static public void setGlobalPermission(String permission)
+    public static void setGlobalPermission(String permission)
     {
         globalPermission = permission;
     }

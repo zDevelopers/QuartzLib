@@ -53,14 +53,14 @@ import java.util.Iterator;
 
 public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<RawTextPart>, JSONAware
 {
-    static private enum ActionClick
+    private enum ActionClick
     {
         OPEN_URL,
         RUN_COMMAND,
         SUGGEST_COMMAND
     }
     
-    static private enum ActionHover
+    private enum ActionHover
     {
         SHOW_TEXT,
         SHOW_ADVANCEMENT,
@@ -514,7 +514,7 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
      * @param value The action value.
      * @return A JSON object corresponding to the action.
      */
-    static private JSONObject actionToJSON(Enum action, Object value)
+    private static JSONObject actionToJSON(Enum action, Object value)
     {
         JSONObject obj = new JSONObject();
         obj.put("action", action.name().toLowerCase());

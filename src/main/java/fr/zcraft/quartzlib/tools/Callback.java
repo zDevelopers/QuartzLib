@@ -32,5 +32,5 @@ package fr.zcraft.quartzlib.tools;
 
 public interface Callback<T>
 {
-    public void call(T parameter);
+    void call(T parameter);
 }

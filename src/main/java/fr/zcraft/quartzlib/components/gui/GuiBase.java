@@ -37,7 +37,7 @@ import org.bukkit.event.Listener;
 
 import java.util.Locale;
 
-abstract public class GuiBase 
+public abstract class GuiBase
 {
     /**
      * The player this Gui instance is associated to.

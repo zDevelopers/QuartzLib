@@ -44,9 +44,9 @@ public class ToasterWorker extends Worker
     /**
      * Optimal cooking time for making carefully baked toasts.
      */
-    static public int TOAST_COOKING_TIME = 4269;
+    public static int TOAST_COOKING_TIME = 4269;
     
-    static public Toast addToast(final Player cook)
+    public static Toast addToast(final Player cook)
     {
         return ToasterWorker.addToast(new WorkerCallback<Integer>()
         {
@@ -72,7 +72,7 @@ public class ToasterWorker extends Worker
      * @param callback The callback to call when a toast is cooked.
      * @return the newly created toast.
      */
-    static public Toast addToast(WorkerCallback<Integer> callback)
+    public static Toast addToast(WorkerCallback<Integer> callback)
     {
         final Toast newToast = Toaster.newToast();
         final int toastId = newToast.getToastId();

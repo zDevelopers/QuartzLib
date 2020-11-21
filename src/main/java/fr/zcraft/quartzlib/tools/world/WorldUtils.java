@@ -45,7 +45,7 @@ public class WorldUtils
      * @param loc2 The second location
      * @return True if the two given locations point to the same block.
      */
-    static public boolean blockEquals(Location loc1, Location loc2)
+    public static boolean blockEquals(Location loc1, Location loc2)
     {
         return loc1.getBlockX() == loc2.getBlockX()
                 && loc1.getBlockY() == loc2.getBlockY()
@@ -59,7 +59,7 @@ public class WorldUtils
      * @param loc The location.
      * @return the orientation of the specified location, as a BlockFace.
      */
-    static public BlockFace get4thOrientation(Location loc)
+    public static BlockFace get4thOrientation(Location loc)
     {
         float yaw = Math.abs(loc.getYaw()) - 180f;
         

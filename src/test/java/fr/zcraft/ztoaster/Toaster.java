@@ -58,12 +58,12 @@ public class Toaster extends QuartzPlugin implements Listener
     /**
      * A counter for all the toasts created (until toaster restart).
      */
-    static private int toastCounter = 0;
+    private static int toastCounter = 0;
     
     /**
      * A list of all the toasts.
      */
-    static private ArrayList<Toast> toasts;
+    private static ArrayList<Toast> toasts;
 
     /**
      * The screen of the toaster.
@@ -111,7 +111,7 @@ public class Toaster extends QuartzPlugin implements Listener
     /**
      * @return The id for a new toast.
      */
-    static public int newToastId()
+    public static int newToastId()
     {
         return toastCounter++;
     }
@@ -119,7 +119,7 @@ public class Toaster extends QuartzPlugin implements Listener
     /**
      * @return an array of all the toasts ever created (until toaster restart).
      */
-    static public Toast[] getToasts()
+    public static Toast[] getToasts()
     {
         return toasts.toArray(new Toast[toasts.size()]);
     }
@@ -128,7 +128,7 @@ public class Toaster extends QuartzPlugin implements Listener
      * Adds a new toast to the world.
      * @return the newly created toast.
      */
-    static public Toast newToast()
+    public static Toast newToast()
     {
         Toast toast = new Toast();
         toasts.add(toast);

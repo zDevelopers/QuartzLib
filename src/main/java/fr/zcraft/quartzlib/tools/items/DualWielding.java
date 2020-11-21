@@ -51,10 +51,10 @@ public enum DualWielding
      */
     OFF_HAND;
     
-    static private Boolean available = null;
+    private static Boolean available = null;
     
     // Dual-wielding isn't available in all builds of Bukkit/Spigot
-    static private void init()
+    private static void init()
     {
         available = Reflection.hasMethod(PlayerInventory.class, "getItemInMainHand")
                 && Reflection.hasMethod(PlayerInventory.class, "getItemInOffHand")
@@ -62,7 +62,7 @@ public enum DualWielding
                 && Reflection.hasMethod(PlayerInventory.class, "setItemInOffHand", ItemStack.class);
     }
     
-    static private boolean checkAvailable()
+    private static boolean checkAvailable()
     {
         if (available == null) init();
         return available;
@@ -75,7 +75,7 @@ public enum DualWielding
      * @param hand The hand 
      * @return The retrieved item.
      */
-    static public ItemStack getItemInHand(Player player, DualWielding hand)
+    public static ItemStack getItemInHand(Player player, DualWielding hand)
     {
         try
         {
@@ -104,7 +104,7 @@ public enum DualWielding
      * @param hand The player's hand
      * @param item The item to put in the specified hand.
      */
-    static public void setItemInHand(Player player, DualWielding hand, ItemStack item)
+    public static void setItemInHand(Player player, DualWielding hand, ItemStack item)
     {
         if(hand == null) return;
         
@@ -142,7 +142,7 @@ public enum DualWielding
      * @param item The item
      * @return The hand holding the given item, or null if neither of them is holding it.
      */
-    static public DualWielding getHoldingHand(Player player, ItemStack item)
+    public static DualWielding getHoldingHand(Player player, ItemStack item)
     {
         if(!checkAvailable())
             return player.getItemInHand().equals(item) ? MAIN_HAND : null;

@@ -262,7 +262,7 @@ public class I18n extends QuartzComponent
         I18n.addCountToParameters = addCountToParameters;
     }
     
-    static private boolean playerLocaleWarning = false;
+    private static boolean playerLocaleWarning = false;
     
     /**
      * Return the locale used by the player's client.

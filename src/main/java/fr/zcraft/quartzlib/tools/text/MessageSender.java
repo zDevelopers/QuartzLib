@@ -637,8 +637,8 @@ public final class MessageSender
         ACTION_BAR((byte) 2, false);
 
 
-        private byte messagePositionByte;
-        private boolean isJSON;
+        private final byte messagePositionByte;
+        private final boolean isJSON;
 
         MessageType(byte messagePositionByte, boolean isJSON)
         {

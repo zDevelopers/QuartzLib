@@ -50,12 +50,12 @@ import java.lang.reflect.InvocationTargetException;
  * It allows you to create custom GUIs by simply providing an inventory
  * to fill, as well as rerouting basic events to it.
  */
-abstract public class InventoryGui extends GuiBase
+public abstract class InventoryGui extends GuiBase
 {
-    static protected final int INVENTORY_ROW_SIZE = 9;
-    static protected final int MAX_INVENTORY_COLUMN_SIZE = 6;
-    static protected final int MAX_INVENTORY_SIZE = INVENTORY_ROW_SIZE * MAX_INVENTORY_COLUMN_SIZE;
-    static protected final int MAX_TITLE_LENGTH = 32;
+    protected static final int INVENTORY_ROW_SIZE = 9;
+    protected static final int MAX_INVENTORY_COLUMN_SIZE = 6;
+    protected static final int MAX_INVENTORY_SIZE = INVENTORY_ROW_SIZE * MAX_INVENTORY_COLUMN_SIZE;
+    protected static final int MAX_TITLE_LENGTH = 32;
 
     /**
      * The size of the inventory.
@@ -81,7 +81,7 @@ abstract public class InventoryGui extends GuiBase
      * @return true if any of the event's slots is in the GUI's inventory,
      * false otherwise.
      */
-    static protected boolean affectsGui(final InventoryDragEvent event)
+    protected static boolean affectsGui(final InventoryDragEvent event)
     {
         for (int slot : event.getRawSlots())
         {
@@ -137,14 +137,14 @@ abstract public class InventoryGui extends GuiBase
      *
      * @param inventory The inventory to populate
      */
-    abstract protected void populate(final Inventory inventory);
+    protected abstract void populate(final Inventory inventory);
 
     /**
      * Raised when an action is performed on an item in the inventory.
      *
      * @param event The click event data.
      */
-    abstract protected void onClick(final InventoryClickEvent event);
+    protected abstract void onClick(final InventoryClickEvent event);
 
 
     /**
@@ -165,7 +165,7 @@ abstract public class InventoryGui extends GuiBase
      * @return {@code true} if the event's slot is in the GUI's inventory,
      * {@code false} otherwise.
      */
-    static protected boolean affectsGui(final InventoryClickEvent event)
+    protected static boolean affectsGui(final InventoryClickEvent event)
     {
         return event.getRawSlot() < event.getInventory().getSize();
     }

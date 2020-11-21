@@ -39,81 +39,81 @@ import java.util.logging.Logger;
 
 public final class PluginLogger
 {
-    static private Thread mainThread;
-    static private HashMap<Thread, PluginThreadLogger> loggers;
+    private static Thread mainThread;
+    private static HashMap<Thread, PluginThreadLogger> loggers;
 
     private PluginLogger() {}
     
-    static public void init()
+    public static void init()
     {
         mainThread = Thread.currentThread();
         loggers = new HashMap<>();
     }
     
-    static public void log(Level level, String message, Throwable ex)
+    public static void log(Level level, String message, Throwable ex)
     {
         getLogger().log(level, message, ex);
     }
     
-    static public void log(Level level, String message, Object...args)
+    public static void log(Level level, String message, Object...args)
     {
         getLogger().log(level, message, args);
     }
         
-    static public void log(Level level, String message, Throwable ex, Object... args)
+    public static void log(Level level, String message, Throwable ex, Object... args)
     {
         log(level, message, args);
         log(level, "Exception : ", ex);
     }
     
-    static public void info(String message, Object...args)
+    public static void info(String message, Object...args)
     {
         log(Level.INFO, message, args);
     }
     
-    static public void warning(String message, Object... args)
+    public static void warning(String message, Object... args)
     {
         log(Level.WARNING, message, args);
     }
     
-    static public void warning(String message, Throwable ex)
+    public static void warning(String message, Throwable ex)
     {
         log(Level.WARNING, message, ex);
     }
     
-    static public void warning(String message, Throwable ex, Object... args)
+    public static void warning(String message, Throwable ex, Object... args)
     {
         log(Level.WARNING, message, ex, args);
     }
     
-    static public void error(String message)
+    public static void error(String message)
     {
         log(Level.SEVERE, message);
     }
     
-    static public void error(String message, Throwable ex)
+    public static void error(String message, Throwable ex)
     {
         log(Level.SEVERE, message, ex);
     }
     
-    static public void error(String message, Throwable ex, Object... args)
+    public static void error(String message, Throwable ex, Object... args)
     {
         log(Level.SEVERE, message, ex, args);
     }
 
-    static public void error(String message, Object... args)
+    public static void error(String message, Object... args)
     {
         log(Level.SEVERE, message, args);
     }
     
-    static private Logger getLogger()
+    private static Logger getLogger()
     {
         Thread currentThread = Thread.currentThread();
         if(currentThread.equals(mainThread)) return QuartzLib.getPlugin().getLogger();
         return getLogger(currentThread);
     }
     
-    static private Logger getLogger(Thread thread)
+    private static Logger getLogger(Thread thread)
     {
         PluginThreadLogger logger = loggers.get(thread);
         if(logger == null)
@@ -124,7 +124,7 @@ public final class PluginLogger
         return logger;
     }
     
-    static private class PluginThreadLogger extends Logger
+    private static class PluginThreadLogger extends Logger
     {
         private final String loggerName;
         public PluginThreadLogger(Thread thread)

@@ -42,7 +42,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * This class provides various utilities for inventory management.
  */
-abstract public class InventoryUtils 
+public abstract class InventoryUtils
 {
     private InventoryUtils() {}
     
@@ -53,7 +53,7 @@ abstract public class InventoryUtils
      * @param inventory2 The other inventory.
      * @return {@code true} if the two inventories are the same one.
      */
-    static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
+    public static boolean sameInventories(Inventory inventory1, Inventory inventory2)
     {
         if (inventory1 == inventory2)
         {
@@ -115,7 +115,7 @@ abstract public class InventoryUtils
         
     }
     
-    static public void updateInventoryLater(final Inventory inventory)
+    public static void updateInventoryLater(final Inventory inventory)
     {
         RunTask.nextTick(() -> {
             for(HumanEntity entity : inventory.getViewers())

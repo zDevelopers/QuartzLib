@@ -57,7 +57,7 @@ import java.util.Collections;
  *
  * @author ProkopyL and Amaury Carrade
  */
-abstract public class ExplorerGui<T> extends ActionGui
+public abstract class ExplorerGui<T> extends ActionGui
 {
     /**
      * The explorer GUI's reading mode.
@@ -612,7 +612,7 @@ abstract public class ExplorerGui<T> extends ActionGui
      */
     protected boolean onPutItem(ItemStack item) { return true; }
 
-    static private final class ExplorerGuiEvent
+    private static final class ExplorerGuiEvent
     {
         //2D Explorer
         public final int xData;

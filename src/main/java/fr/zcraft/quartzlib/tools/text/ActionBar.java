@@ -44,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ActionBar
 {
-    private static Map<UUID, String> actionMessages = new ConcurrentHashMap<>();
+    private static final Map<UUID, String> actionMessages = new ConcurrentHashMap<>();
 
     private static Runnable actionMessagesUpdater = null;
     private static BukkitTask actionMessagesUpdaterTask = null;

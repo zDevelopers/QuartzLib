@@ -137,7 +137,7 @@ public class ChatColorParser implements Iterator<ChatColoredString>, Iterable<Ch
         return new ChatColoredString(currentModifiers, string.substring(previousPos + 2));
     }
     
-    static public void applyModifier(Set<ChatColor> currentModifiers, ChatColor newModifier)
+    public static void applyModifier(Set<ChatColor> currentModifiers, ChatColor newModifier)
     {
         if(newModifier == ChatColor.RESET)
         {

@@ -32,6 +32,6 @@ package fr.zcraft.quartzlib.components.worker;
 
 public interface WorkerCallback<T>
 {
-    public void finished(T result);
-    public void errored(Throwable exception);
+    void finished(T result);
+    void errored(Throwable exception);
 }

@@ -130,7 +130,7 @@ public class HelpCommand extends Command
         String fileName = "help/"+ commandGroup.getUsualName() + 
                     "/" + command.getName() + ".txt";
         
-        StringBuilder result = new StringBuilder("");
+        StringBuilder result = new StringBuilder();
         
         InputStream stream = getClass().getClassLoader().getResourceAsStream(fileName);
         if(stream == null) return "";

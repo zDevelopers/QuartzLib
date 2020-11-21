@@ -60,33 +60,33 @@ public final class UUIDFetcher
 	 * The maximal amount of usernames to send to mojang per request This allows not to overload
 	 * Mojang's service with too many usernames at a time
 	 */
-	static private final int MOJANG_USERNAMES_PER_REQUEST = 100;
+	private static final int MOJANG_USERNAMES_PER_REQUEST = 100;
 
 	/**
 	 * The maximal amount of requests to send to Mojang The time limit for this amount is
 	 * MOJANG_MAX_REQUESTS_TIME Read : You can only send MOJANG_MAX_REQUESTS in
 	 * MOJANG_MAX_REQUESTS_TIME seconds
 	 */
-	static private final int MOJANG_MAX_REQUESTS = 600;
+	private static final int MOJANG_MAX_REQUESTS = 600;
 
 	/**
 	 * The timeframe for the Mojang request limit (in seconds)
 	 */
-	static private final int MOJANG_MAX_REQUESTS_TIME = 600;
+	private static final int MOJANG_MAX_REQUESTS_TIME = 600;
 
 	/**
 	 * The minimum time between two requests to Mojang (in milliseconds)
 	 */
-	static private final int TIME_BETWEEN_REQUESTS = 200;
+	private static final int TIME_BETWEEN_REQUESTS = 200;
 
 	/**
 	 * The (approximative) timestamp of the date when Mojang name changing feature was announced to
 	 * be released
 	 */
-	static private final int NAME_CHANGE_TIMESTAMP = 1420844400;
+	private static final int NAME_CHANGE_TIMESTAMP = 1420844400;
 
-	static private final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
-	static private final String TIMED_PROFILE_URL = "https://api.mojang.com/users/profiles/minecraft/";
+	private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
+	private static final String TIMED_PROFILE_URL = "https://api.mojang.com/users/profiles/minecraft/";
 
 
 	private UUIDFetcher() {}
@@ -108,7 +108,7 @@ public final class UUIDFetcher
 	 * @throws InterruptedException If the thread is interrupted while sleeping when the system wait
 	 *                              because of the Mojang API rate limit.
 	 */
-	static public UUID fetch(String name) throws IOException, InterruptedException
+	public static UUID fetch(String name) throws IOException, InterruptedException
 	{
 		final List<String> nameCollection = Collections.singletonList(name);
 
@@ -138,7 +138,7 @@ public final class UUIDFetcher
 	 * @throws InterruptedException If the thread is interrupted while sleeping when the system wait
 	 *                              because of the Mojang API rate limit.
 	 */
-	static public Map<String, UUID> fetch(List<String> names) throws IOException, InterruptedException
+	public static Map<String, UUID> fetch(List<String> names) throws IOException, InterruptedException
 	{
 		return fetch(names, MOJANG_USERNAMES_PER_REQUEST);
 	}
@@ -163,7 +163,7 @@ public final class UUIDFetcher
 	 * @throws InterruptedException If the thread is interrupted while sleeping when the system wait
 	 *                              because of the Mojang API rate limit.
 	 */
-	static public Map<String, UUID> fetch(List<String> names, int limitByRequest) throws IOException, InterruptedException
+	public static Map<String, UUID> fetch(List<String> names, int limitByRequest) throws IOException, InterruptedException
 	{
 		Map<String, UUID> UUIDs = new HashMap<>();
 		int requests = (names.size() / limitByRequest) + 1;
@@ -198,7 +198,7 @@ public final class UUIDFetcher
 	 * @return A map linking a player name to his Mojang {@link UUID}.
 	 * @throws IOException If an exception occurs while contacting the Mojang API.
 	 */
-	static private Map<String, UUID> rawFetch(List<String> names) throws IOException
+	private static Map<String, UUID> rawFetch(List<String> names) throws IOException
 	{
 		Map<String, UUID> uuidMap = new HashMap<>();
 		HttpURLConnection connection = getPOSTConnection(PROFILE_URL);
@@ -271,7 +271,7 @@ public final class UUIDFetcher
 	 * @throws InterruptedException If the thread is interrupted while sleeping when the system wait
 	 *                              because of the Mojang API rate limit.
 	 */
-	static public void fetchRemaining(Collection<String> names, Map<String, UUID> uuids) throws IOException, InterruptedException
+	public static void fetchRemaining(Collection<String> names, Map<String, UUID> uuids) throws IOException, InterruptedException
 	{
 		ArrayList<String> remainingNames = new ArrayList<>();
 
@@ -312,7 +312,7 @@ public final class UUIDFetcher
 	 * @return An internal object containing the current player name and his UUID.
 	 * @throws IOException If an exception occurs while contacting the Mojang API.
 	 */
-	static private User fetchOriginalUUID(String name) throws IOException
+	private static User fetchOriginalUUID(String name) throws IOException
 	{
 		HttpURLConnection connection = getGETConnection(TIMED_PROFILE_URL + name + "?at=" + NAME_CHANGE_TIMESTAMP);
 
@@ -343,7 +343,7 @@ public final class UUIDFetcher
 	 * @return A POST connection to this URL.
 	 * @throws IOException If an exception occurred while contacting the server.
 	 */
-	static private HttpURLConnection getPOSTConnection(String url) throws IOException
+	private static HttpURLConnection getPOSTConnection(String url) throws IOException
 	{
 		HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
 		connection.setRequestMethod("POST");
@@ -363,7 +363,7 @@ public final class UUIDFetcher
 	 * @return A GET connection to this URL.
 	 * @throws IOException If an exception occurred while contacting the server.
 	 */
-	static private HttpURLConnection getGETConnection(String url) throws IOException
+	private static HttpURLConnection getGETConnection(String url) throws IOException
 	{
 		HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
 		connection.setRequestMethod("GET");
@@ -428,7 +428,7 @@ public final class UUIDFetcher
 	/**
 	 * Internal representation of an user with a (current) player name and an UUID.
 	 */
-	static private class User
+	private static class User
 	{
 		public String name;
 		public UUID uuid;

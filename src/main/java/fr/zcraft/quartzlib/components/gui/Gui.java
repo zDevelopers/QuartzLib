@@ -72,7 +72,7 @@ public final class Gui extends QuartzComponent
      *
      * @param listenerClass The listener's class to register. No-args constructor required.
      */
-    static protected void registerListener(Class<? extends Listener> listenerClass)
+    protected static void registerListener(Class<? extends Listener> listenerClass)
     {
         if(guiListeners.containsKey(listenerClass))
             return;
@@ -99,13 +99,13 @@ public final class Gui extends QuartzComponent
      * @param parent The parent of the newly created GUI. Can be null.
      * @return The opened GUI.
      */
-    static public <T extends GuiBase> T open(final Player owner, final T gui, final GuiBase parent)
+    public static <T extends GuiBase> T open(final Player owner, final T gui, final GuiBase parent)
     {
         GuiBase openGui = openGuis.get(owner);
         if(openGui != null) openGui.registerClose();
-        if(parent != null) ((GuiBase)gui).setParent(parent);
+        if(parent != null) gui.setParent(parent);
 
-        RunTask.later(() -> ((GuiBase)gui).open(owner), 0);
+        RunTask.later(() -> gui.open(owner), 0);
         return gui;
     }
     
@@ -116,7 +116,7 @@ public final class Gui extends QuartzComponent
      * @param gui The GUI.
      * @return The opened GUI.
      */
-    static public <T extends GuiBase> T open(Player owner, T gui)
+    public static <T extends GuiBase> T open(Player owner, T gui)
     {
         return open(owner, gui, null);
     }
@@ -125,7 +125,7 @@ public final class Gui extends QuartzComponent
      * Closes any open GUI for a given player.
      * @param owner The player.
      */
-    static public void close(Player owner)
+    public static void close(Player owner)
     {
         GuiBase openGui = openGuis.get(owner);
         if(openGui != null) openGui.close();
@@ -135,7 +135,7 @@ public final class Gui extends QuartzComponent
      * Closes any GUI of this type (or subclass of it).
      * @param guiClass The GUI class.
      */
-    static public void close(Class<? extends GuiBase> guiClass)
+    public static void close(Class<? extends GuiBase> guiClass)
     {
         for (GuiBase openGui : openGuis.values())
         {
@@ -151,10 +151,10 @@ public final class Gui extends QuartzComponent
      * @param entity The GUI's viewer.
      * @return the currently opened GUI.
      */
-    static public GuiBase getOpenGui(HumanEntity entity)
+    public static GuiBase getOpenGui(HumanEntity entity)
     {
         if(!(entity instanceof Player)) return null;
-        return openGuis.get((Player) entity);
+        return openGuis.get(entity);
     }
 
     /**
@@ -166,7 +166,7 @@ public final class Gui extends QuartzComponent
      * @param guiClass The GUI class.
      * @return the currently opened GUI.
      */
-    static public <T extends GuiBase> T getOpenGui(HumanEntity entity, Class<T> guiClass)
+    public static <T extends GuiBase> T getOpenGui(HumanEntity entity, Class<T> guiClass)
     {
         GuiBase openGui = getOpenGui(entity);
         if(openGui == null) return null;
@@ -178,7 +178,7 @@ public final class Gui extends QuartzComponent
      * Updates any GUI of this type (or subclass of it).
      * @param guiClass The GUI class.
      */
-    static public void update(Class<? extends GuiBase> guiClass)
+    public static void update(Class<? extends GuiBase> guiClass)
     {
         for(GuiBase openGui : openGuis.values())
         {

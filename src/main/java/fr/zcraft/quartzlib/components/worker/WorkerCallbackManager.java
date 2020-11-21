@@ -39,7 +39,7 @@ import java.util.HashMap;
 
 class WorkerCallbackManager implements Runnable
 {
-    static private final int WATCH_LOOP_DELAY = 5;
+    private static final int WATCH_LOOP_DELAY = 5;
     
     private final HashMap<WorkerRunnable, WorkerRunnableInfo> callbacks;
     private final ArrayDeque<WorkerRunnableInfo> callbackQueue;
