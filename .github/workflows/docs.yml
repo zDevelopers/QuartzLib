@@ -6,24 +6,29 @@ jobs:
   javadoc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
         with:
           java-version: 8
-      - uses: actions/cache@v2
+      - name: Cache all the things
+        uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build JavaDoc
         run: mvn -B javadoc:javadoc --file pom.xml
-      - name: Push to website repository
+      - name: Checkout website repository
         uses: actions/checkout@v2
         with:
           repository: zDevelopers/zdevelopers.github.io
           path: web
           branch: master
-      - run: |
+      - name: Push built documentation to website repository
+        shell: bash
+        run: |
           # Extract project name
           PROJECT_NAME=${GITHUB_REPOSITORY##*/}
           PROJECT_NAME_LOWER=${echo $PROJECT_NAME | tr '[:upper:]' '[:lower:]'}
