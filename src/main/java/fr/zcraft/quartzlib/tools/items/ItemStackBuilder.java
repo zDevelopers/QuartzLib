@@ -258,7 +258,6 @@ public class ItemStackBuilder
      * 
      * @return The new CraftItemStack.
      */
-    @Contract(pure = true)
     public ItemStack craftItem()
     {
         final ItemStack bukkitItem = item();
