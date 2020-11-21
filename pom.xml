@@ -79,6 +79,11 @@
 			<artifactId>bukkit</artifactId>
 			<version>1.15-R0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>19.0.0</version>
+		</dependency>
 
 		<!--
 			TEMP DEPENDENCY: it was removed from Bukkit dependencies in 1.14, but is still available at runtime.

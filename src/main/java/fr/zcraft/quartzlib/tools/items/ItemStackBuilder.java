@@ -43,6 +43,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -110,24 +113,24 @@ import java.util.function.Consumer;
  */
 public class ItemStackBuilder
 {
-    private final ItemStack itemStack;
-    private Material material;
+    @Nullable private final ItemStack itemStack;
+    @Nullable private Material material;
     private int amount = 1;
     private short data = 0;
 
-    private RawTextPart title = null;
-    private final List<String> loreLines = new ArrayList<>();
+    @Nullable private RawTextPart<?> title = null;
+    @NotNull private final List<String> loreLines = new ArrayList<>();
     private boolean resetLore = false;
 
     private boolean glowing = false;
-    private Set<ItemFlag> itemFlags = null;
+    @Nullable private Set<ItemFlag> itemFlags = null;
 
-    private Map<String, Object> nbt = null;
+    @Nullable private Map<String, Object> nbt = null;
     private boolean replaceNBT = false;
 
-    private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+    @NotNull private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
-    private final List<Consumer<ItemMeta>> metaConsumers = new ArrayList<>();
+    @NotNull private final List<Consumer<ItemMeta>> metaConsumers = new ArrayList<>();
 
     /**
      * Creates a new ItemStackBuilder.
@@ -155,7 +158,7 @@ public class ItemStackBuilder
      * @param material This ItemStack's material.
      * @param amount   This ItemStack's amount.
      */
-    public ItemStackBuilder(Material material, int amount)
+    public ItemStackBuilder(@Nullable Material material, int amount)
     {
         this.material = material;
         this.amount = amount;
@@ -168,7 +171,7 @@ public class ItemStackBuilder
      * @param itemStack A base ItemStack to modify. This ItemStack will NOT be
      *                  cloned!
      */
-    public ItemStackBuilder(ItemStack itemStack)
+    public ItemStackBuilder(@Nullable ItemStack itemStack)
     {
         this.itemStack = itemStack;
         this.material = null;
@@ -201,6 +204,8 @@ public class ItemStackBuilder
         
         if (itemStack == null)
         {
+            if (material == null) throw new IllegalStateException("Cannot build item without a specified material");
+
             newItemStack = new ItemStack(material, amount);
         }
         else
@@ -215,7 +220,8 @@ public class ItemStackBuilder
         
         newItemStack.setDurability(data);
 
-        final ItemMeta meta = newItemStack.getItemMeta();
+        // Looking at the Bukkit impl I have no idea in which case getItemMeta() could return null
+        final ItemMeta meta = Objects.requireNonNull(newItemStack.getItemMeta());
 
         if (title != null)
             meta.setDisplayName(ChatColor.RESET + title.build().toFormattedText());
@@ -307,7 +313,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder title(RawTextPart text)
+    public ItemStackBuilder title(RawTextPart<?> text)
     {
         if (this.title != null)
             throw new IllegalStateException("Title has already been defined.");
@@ -420,7 +426,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreLine(RawTextPart rawText)
+    public ItemStackBuilder loreLine(RawTextPart<?> rawText)
     {
         return loreLine(rawText.toFormattedText());
     }
