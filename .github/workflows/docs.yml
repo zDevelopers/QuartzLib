@@ -20,11 +20,6 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build JavaDoc
         run: mvn -B javadoc:javadoc --file pom.xml
-      - name: Configure Git for push to website repository
-        run: |
-          git config --global user.name QuartzBot
-          git config --global user.email moriplay@zcraft.fr
-          git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
       - name: Checkout website repository
         uses: actions/checkout@v2
         with:
@@ -40,11 +35,9 @@ jobs:
           PROJECT_NAME_LOWER=${PROJECT_NAME,,}
 
           # Create dir if needed, cleanup old doc and copy new one
-          echo ::group::Copying files to website repository
           mkdir -p web/static/docs/
           rm -rf web/static/docs/$PROJECT_NAME_LOWER
           cp -r target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
-          echo ::endgroup::
 
           # Go to website repository
           cd web
@@ -55,12 +48,12 @@ jobs:
           git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
 
           # Add files
-          echo "::group::Adding files to website repository & creating commit"
+          echo ::group::Commit
           git add .
           git commit -m "Updated documentation for $PROJECT_NAME"
           echo ::endgroup::
 
           # Push
-          echo ::group::Pushing
-          git push
+          echo ::group::Push
+          git push https://QuartzBot:${{ secrets.QUARTZ_BOT_TOKEN }}@github.com/zDevelopers/zdevelopers.github.io.git
           echo ::endgroup::
