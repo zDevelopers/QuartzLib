@@ -31,7 +31,6 @@
 package fr.zcraft.quartzlib.components.gui;
 
 import fr.zcraft.quartzlib.tools.items.InventoryUtils;
-import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -62,7 +61,15 @@ public final class GuiUtils
      */
     static public void setItemLater(InventoryGui gui, int slot, ItemStack item)
     {
-        RunTask.nextTick(new CreateDisplayItemTask(gui.getInventory(), item, slot));
+        RunTask.nextTick(() -> {
+            Inventory inventory = gui.getInventory();
+
+            inventory.setItem(slot, item);
+            for (HumanEntity player : inventory.getViewers())
+            {
+                ((Player) player).updateInventory();
+            }
+        });
     }
 
     /**
@@ -262,30 +269,4 @@ public final class GuiUtils
     }
 
 
-    /**
-     * Implements a bukkit runnable that updates an inventory slot later.
-     */
-    static private class CreateDisplayItemTask implements Runnable
-    {
-        private final Inventory inventory;
-        private final ItemStack item;
-        private final int slot;
-
-        public CreateDisplayItemTask(Inventory inventory, ItemStack item, int slot)
-        {
-            this.inventory = inventory;
-            this.item = item;
-            this.slot = slot;
-        }
-
-        @Override
-        public void run()
-        {
-            inventory.setItem(slot, item);
-            for (HumanEntity player : inventory.getViewers())
-            {
-                ((Player) player).updateInventory();
-            }
-        }
-    }
 }

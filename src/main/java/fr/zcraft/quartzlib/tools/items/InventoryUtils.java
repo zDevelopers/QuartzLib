@@ -117,21 +117,7 @@ abstract public class InventoryUtils
     
     static public void updateInventoryLater(final Inventory inventory)
     {
-        RunTask.nextTick(new UpdateInventoryTask(inventory));
-    }
-    
-    static private class UpdateInventoryTask implements Runnable
-    {
-        private final Inventory inventory;
-        
-        public UpdateInventoryTask(Inventory inventory)
-        {
-            this.inventory = inventory;
-        }
-
-        @Override
-        public void run()
-        {
+        RunTask.nextTick(() -> {
             for(HumanEntity entity : inventory.getViewers())
             {
                 if(entity instanceof Player)
@@ -139,6 +125,7 @@ abstract public class InventoryUtils
                     ((Player)entity).updateInventory();
                 }
             }
-        }
+        });
     }
+
 }

@@ -35,6 +35,8 @@ import fr.zcraft.quartzlib.components.scoreboard.sender.SidebarObjective;
 import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.exceptions.IncompatibleMinecraftVersionException;
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import fr.zcraft.quartzlib.tools.runners.RunAsyncTask;
+import fr.zcraft.quartzlib.tools.runners.RunTask;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -332,26 +334,13 @@ public abstract class Sidebar
 
         if (run)
         {
-            Runnable refreshRunnable = new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    refresh();
-                }
-            };
-
             if (async)
             {
-                refreshTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
-                        QuartzLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
-                );
+                refreshTask = RunAsyncTask.timer(this::refresh, 1, autoRefreshDelay);
             }
             else
             {
-                refreshTask = Bukkit.getScheduler().runTaskTimer(
-                        QuartzLib.getPlugin(), refreshRunnable, 1l, autoRefreshDelay
-                );
+                refreshTask = RunTask.timer(this::refresh, 1, autoRefreshDelay);
             }
         }
     }

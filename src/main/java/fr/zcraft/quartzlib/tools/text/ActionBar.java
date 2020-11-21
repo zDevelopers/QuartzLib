@@ -158,18 +158,13 @@ public final class ActionBar
     {
         if(actionMessagesUpdater != null) return;
 
-        actionMessagesUpdater = new Runnable()
-        {
-            @Override
-            public void run()
+        actionMessagesUpdater = () -> {
+            for (Map.Entry<UUID, String> entry : actionMessages.entrySet())
             {
-                for (Map.Entry<UUID, String> entry : actionMessages.entrySet())
+                Player player = Bukkit.getPlayer(entry.getKey());
+                if (player != null && player.isOnline())
                 {
-                    Player player = Bukkit.getPlayer(entry.getKey());
-                    if (player != null && player.isOnline())
-                    {
-                        MessageSender.sendActionBarMessage(player, entry.getValue());
-                    }
+                    MessageSender.sendActionBarMessage(player, entry.getValue());
                 }
             }
         };

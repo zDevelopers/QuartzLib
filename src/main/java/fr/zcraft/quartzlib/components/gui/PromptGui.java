@@ -30,12 +30,11 @@
 
 package fr.zcraft.quartzlib.components.gui;
 
-import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.Callback;
 import fr.zcraft.quartzlib.tools.MinecraftVersion;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
-import org.bukkit.Bukkit;
+import fr.zcraft.quartzlib.tools.runners.RunTask;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -176,27 +175,22 @@ public class PromptGui extends GuiBase
         setSignContents(sign, contents);
         sign.update();
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(QuartzLib.getPlugin(), new Runnable()
-        {
-            @Override
-            public void run()
+        RunTask.later(() -> {
+            try
             {
-                try
-                {
-                    final Object signTileEntity = fieldTileEntitySign.get(sign);
-                    final Object playerEntity = methodGetHandle.invoke(player);
+                final Object signTileEntity = fieldTileEntitySign.get(sign);
+                final Object playerEntity = methodGetHandle.invoke(player);
 
-                    // In Minecraft 1.12+, there's a lock on the signs to avoid them
-                    // to be edited after they are loaded into the game.
-                    if (fieldTileEntitySignEditable != null)
-                        fieldTileEntitySignEditable.set(signTileEntity, true);
+                // In Minecraft 1.12+, there's a lock on the signs to avoid them
+                // to be edited after they are loaded into the game.
+                if (fieldTileEntitySignEditable != null)
+                    fieldTileEntitySignEditable.set(signTileEntity, true);
 
-                    methodOpenSign.invoke(playerEntity, signTileEntity);
-                }
-                catch (final Throwable e)
-                {
-                    PluginLogger.error("Error while opening Sign prompt", e);
-                }
+                methodOpenSign.invoke(playerEntity, signTileEntity);
+            }
+            catch (final Throwable e)
+            {
+                PluginLogger.error("Error while opening Sign prompt", e);
             }
         }, 3);
     }

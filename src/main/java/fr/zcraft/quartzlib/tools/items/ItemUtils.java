@@ -547,7 +547,7 @@ abstract public class ItemUtils
      */
     static public void dropNaturallyLater(Location location, ItemStack item)
     {
-        RunTask.nextTick(new DropLaterTask(location, item, true));
+        RunTask.nextTick(() -> dropNaturally(location, item));
     }
     
     /**
@@ -555,35 +555,9 @@ abstract public class ItemUtils
      * @param location The location to drop the item at.
      * @param item The item to drop.
      */
-    static public void dropLater(Location location, ItemStack item)
+    static public void dropLater(final Location location, final ItemStack item)
     {
-        RunTask.nextTick(new DropLaterTask(location, item, false));
+        RunTask.nextTick(() -> drop(location, item));
     }
-    
-    static private class DropLaterTask implements Runnable
-    {
-        private final Location location;
-        private final ItemStack item;
-        private final boolean naturally;
-        
-        public DropLaterTask(Location location, ItemStack item, boolean naturally)
-        {
-            this.location = location;
-            this.item = item;
-            this.naturally = naturally;
-        }
-        
-        @Override
-        public void run()
-        {
-            if(naturally)
-            {
-                dropNaturally(location, item);
-            }
-            else
-            {
-                drop(location, item);
-            }
-        }
-    }
+
 }

@@ -42,6 +42,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.permissions.ServerOperator;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
@@ -64,7 +65,7 @@ public final class UpdateChecker implements Listener
     private static PlayerNotificationFilter playerNotificationFilter;
 
     private static BukkitTask checkTask = null;
-    private static Set<UUID> notificationSentTo = new HashSet<>();
+    private static final Set<UUID> notificationSentTo = new HashSet<>();
 
     /**
      * Boots up the update checker.
@@ -144,7 +145,7 @@ public final class UpdateChecker implements Listener
     public static void boot(final String spigotIdentifier, final ConsoleNotificationSender onUpdateSentToConsole, final PlayerNotificationSender onUpdateSentToPlayer, final PlayerNotificationFilter filter)
     {
         consoleNotificationSender = onUpdateSentToConsole != null ? consoleNotificationSender : getDefaultConsoleNotificationSender();
-        playerNotificationFilter = filter != null ? filter : getDefaultPlayerNotificationFilter();
+        playerNotificationFilter = filter != null ? filter : ServerOperator::isOp;
         playerNotificationSender = onUpdateSentToPlayer != null ? onUpdateSentToPlayer : getDefaultPlayerNotificationSender();
 
         final List<String> identifierParts = Arrays.asList(spigotIdentifier.split("\\."));
@@ -172,53 +173,43 @@ public final class UpdateChecker implements Listener
             return;
         }
 
-        checkTask = RunAsyncTask.timer(new Runnable()
-        {
-            @Override
-            public void run()
+        checkTask = RunAsyncTask.timer(() -> {
+            try (final InputStream inputStream = checkURI.openStream(); Scanner scanner = new Scanner(inputStream))
             {
-                try (final InputStream inputStream = checkURI.openStream(); Scanner scanner = new Scanner(inputStream))
+                if (scanner.hasNext())
                 {
-                    if (scanner.hasNext())
+                    final String version = scanner.next().trim();
+
+                    // If there is an update, we notify the console and the online allowed players.
+                    // Then, we register the events in this class to notify other allowed players when they
+                    // log in.
+                    // Finally, we stop the check task, as there is no point in checking again and again.
+                    if (!version.equalsIgnoreCase(QuartzLib.getPlugin().getDescription().getVersion().trim()))
                     {
-                        final String version = scanner.next().trim();
+                        newVersion = version;
 
-                        // If there is an update, we notify the console and the online allowed players.
-                        // Then, we register the events in this class to notify other allowed players when they
-                        // log in.
-                        // Finally, we stop the check task, as there is no point in checking again and again.
-                        if (!version.equalsIgnoreCase(QuartzLib.getPlugin().getDescription().getVersion().trim()))
-                        {
-                            newVersion = version;
+                        // To send the notifications, we go back to the main thread.
+                        RunTask.nextTick(() -> {
+                            consoleNotificationSender.send(version, resourceURI);
 
-                            // To send the notifications, we go back to the man thread.
-                            RunTask.nextTick(new Runnable()
+                            for (final Player player : Bukkit.getOnlinePlayers())
                             {
-                                @Override
-                                public void run()
+                                if (playerNotificationFilter.check(player))
                                 {
-                                    consoleNotificationSender.send(version, resourceURI);
-
-                                    for (final Player player : Bukkit.getOnlinePlayers())
-                                    {
-                                        if (playerNotificationFilter.check(player))
-                                        {
-                                            playerNotificationSender.send(version, resourceURI, player);
-                                            notificationSentTo.add(player.getUniqueId());
-                                        }
-                                    }
+                                    playerNotificationSender.send(version, resourceURI, player);
+                                    notificationSentTo.add(player.getUniqueId());
                                 }
-                            });
+                            }
+                        });
 
-                            QuartzLib.registerEvents(new UpdateChecker());
+                        QuartzLib.registerEvents(new UpdateChecker());
 
-                            checkTask.cancel();
-                            checkTask = null;
-                        }
+                        checkTask.cancel();
+                        checkTask = null;
                     }
                 }
-                catch (IOException ignored) {}
             }
+            catch (IOException ignored) {}
         }, 40L, 20 * 3600 * 2L);
     }
 
@@ -229,16 +220,11 @@ public final class UpdateChecker implements Listener
 
         if (newVersion != null && !notificationSentTo.contains(player.getUniqueId()) && playerNotificationFilter.check(player))
         {
-            RunTask.later(new Runnable()
-            {
-                @Override
-                public void run()
+            RunTask.later(() -> {
+                if (player.isOnline())
                 {
-                    if (player.isOnline())
-                    {
-                        playerNotificationSender.send(newVersion, resourceURI, player);
-                        notificationSentTo.add(player.getUniqueId());
-                    }
+                    playerNotificationSender.send(newVersion, resourceURI, player);
+                    notificationSentTo.add(player.getUniqueId());
                 }
             }, 160L);
         }
@@ -246,60 +232,39 @@ public final class UpdateChecker implements Listener
 
     private static ConsoleNotificationSender getDefaultConsoleNotificationSender()
     {
-        return new ConsoleNotificationSender()
-        {
-            @Override
-            public void send(String version, URI link)
-            {
-                PluginLogger.warning("A new version of " + QuartzLib.getPlugin().getDescription().getName() + " is available! Latest version is " + version + ", and you're running " + QuartzLib.getPlugin().getDescription().getVersion());
-                PluginLogger.warning("Download the new version here: " + link);
-            }
+        return (version, link) -> {
+            PluginLogger.warning("A new version of " + QuartzLib.getPlugin().getDescription().getName() + " is available! Latest version is " + version + ", and you're running " + QuartzLib.getPlugin().getDescription().getVersion());
+            PluginLogger.warning("Download the new version here: " + link);
         };
     }
 
     private static PlayerNotificationSender getDefaultPlayerNotificationSender()
     {
-        return new PlayerNotificationSender()
-        {
-            @Override
-            public void send(String version, URI link, Player player)
-            {
-                final RawText hover = new RawText()
-                        .then(I.t("Click here to open"))
-                        .then("\n")
-                        .then(link.toString().replaceFirst("https://", "").replaceFirst("www\\.", "")).color(ChatColor.GRAY)
-                        .build();
+        return (version, link, player) -> {
+            final RawText hover = new RawText()
+                    .then(I.t("Click here to open"))
+                    .then("\n")
+                    .then(link.toString().replaceFirst("https://", "").replaceFirst("www\\.", "")).color(ChatColor.GRAY)
+                    .build();
 
-                MessageSender.sendSystemMessage(player, "");
-                MessageSender.sendSystemMessage(player, new RawText()
+            MessageSender.sendSystemMessage(player, "");
+            MessageSender.sendSystemMessage(player, new RawText()
+                    .uri(link)
+                    .hover(hover)
+                    .then("\u2726 ")
+                        .color(ChatColor.GOLD)
+                    .then(I.t("{0} {1} is available!", QuartzLib.getPlugin().getDescription().getName(), version))
+                        .color(ChatColor.GOLD)
+                        .style(ChatColor.BOLD)
+                    .build()
+            );
+            MessageSender.sendSystemMessage(player, new RawText()
+                    .then(I.t("You're still running {0}. Click here to update.", QuartzLib.getPlugin().getDescription().getVersion()))
+                        .color(ChatColor.YELLOW)
                         .uri(link)
                         .hover(hover)
-                        .then("\u2726 ")
-                            .color(ChatColor.GOLD)
-                        .then(I.t("{0} {1} is available!", QuartzLib.getPlugin().getDescription().getName(), version))
-                            .color(ChatColor.GOLD)
-                            .style(ChatColor.BOLD)
-                        .build()
-                );
-                MessageSender.sendSystemMessage(player, new RawText()
-                        .then(I.t("You're still running {0}. Click here to update.", QuartzLib.getPlugin().getDescription().getVersion()))
-                            .color(ChatColor.YELLOW)
-                            .uri(link)
-                            .hover(hover)
-                        .build()
-                );
-            }
-        };
-    }
-
-    private static PlayerNotificationFilter getDefaultPlayerNotificationFilter()
-    {
-        return new PlayerNotificationFilter() {
-            @Override
-            public boolean check(Player player)
-            {
-                return player.isOp();
-            }
+                    .build()
+            );
         };
     }
 
