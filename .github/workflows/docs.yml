@@ -42,9 +42,9 @@ jobs:
           cd web
 
           # Configure git for push
-          git config user.name QuartzBot
-          git config user.email moriplay@zcraft.fr
-          git config user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
+          git config --global user.name QuartzBot
+          git config --global user.email moriplay@zcraft.fr
+          git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
 
           # Add, commit & push
           git add .
