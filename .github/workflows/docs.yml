@@ -17,10 +17,27 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build JavaDoc
         run: mvn -B javadoc:javadoc --file pom.xml
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+      - name: Push to website repository
+        uses: actions/checkout@v2
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: target/site/apidocs
-          CLEAN: true
+          repository: zDevelopers/zdevelopers.github.io
+          path: web
+          branch: master
+      - run: |
+          # Extract project name
+          PROJECT_NAME=${GITHUB_REPOSITORY##*/}
+          PROJECT_NAME_LOWER=${echo $PROJECT_NAME | tr '[:upper:]' '[:lower:]'}
+
+          # Create dir if needed, cleanup old doc and copy new one
+          mkdir -p web/static/docs/
+          rm -rf web/static/docs/$PROJECT_NAME_LOWER
+          cp -r target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
+
+          # Configure git for push
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          # Add, commit & push
+          git add .
+          git commit -m "Updated documentation for $PROJECT_NAME"
+          git push
