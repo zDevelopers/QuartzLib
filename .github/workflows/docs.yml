@@ -42,11 +42,6 @@ jobs:
           # Go to website repository
           cd web
 
-          # Configure git to push to this repository
-          git config --global user.name QuartzBot
-          git config --global user.email moriplay@zcraft.fr
-          git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
-
           # Add files
           echo ::group::Commit
           git add .
