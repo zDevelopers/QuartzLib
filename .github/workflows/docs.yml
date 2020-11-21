@@ -27,11 +27,11 @@ jobs:
           path: web
           branch: master
       - name: Push built documentation to website repository
-        shell: sh
+        shell: bash
         run: |
           # Extract project name
           PROJECT_NAME=${GITHUB_REPOSITORY##*/}
-          PROJECT_NAME_LOWER=${echo $PROJECT_NAME | tr '[:upper:]' '[:lower:]'}
+          PROJECT_NAME_LOWER=${PROJECT_NAME,,}
 
           # Create dir if needed, cleanup old doc and copy new one
           mkdir -p web/static/docs/
