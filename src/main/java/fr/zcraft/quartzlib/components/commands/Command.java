@@ -31,15 +31,20 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.CommandException.Reason;
+import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzlib.components.rawtext.RawText;
 import fr.zcraft.quartzlib.core.QuartzLib;
+import fr.zcraft.quartzlib.tools.PluginLogger;
+import fr.zcraft.quartzlib.tools.mojang.UUIDFetcher;
 import fr.zcraft.quartzlib.tools.text.RawMessage;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -792,8 +797,18 @@ abstract public class Command
      * @param callback A consumer that will use the offline player's UUID
      */
     public void offlinePlayerParameter(final String parameter, final Consumer<UUID> callback){
-        CommandWorkers cw=new CommandWorkers();
-        cw.OfflineNameFetch(parameter,callback);
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                return UUIDFetcher.fetch(parameter);
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        })
+        .exceptionally((e) -> {
+            PluginLogger.warning(I.t("Error while getting player UUID"));
+            return null;
+        })
+        .thenAccept(callback);
     }
     /**
      * Retrieves a player from its name at the given index, or aborts the

@@ -35,6 +35,7 @@ import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzlib.components.i18n.I18n;
 import fr.zcraft.quartzlib.components.scoreboard.Sidebar;
 import fr.zcraft.quartzlib.components.scoreboard.SidebarScoreboard;
+import fr.zcraft.quartzlib.components.worker.Worker;
 import fr.zcraft.quartzlib.core.QuartzPlugin;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.ztoaster.commands.AddCommand;
@@ -70,6 +71,8 @@ public class Toaster extends QuartzPlugin implements Listener
      */
     private Sidebar toasterSidebar;
 
+    public Worker toasterWorker;
+
     protected Toaster(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
     {
         super(loader, description, dataFolder, file);
@@ -82,8 +85,10 @@ public class Toaster extends QuartzPlugin implements Listener
         
         toasts = new ArrayList<>();
         toastCounter = 0;
+
+        toasterWorker = new Worker(1); // Our toaster is single-slot!
         
-        loadComponents(Gui.class, Commands.class, ToasterWorker.class, SidebarScoreboard.class, I18n.class);
+        loadComponents(Gui.class, Commands.class, SidebarScoreboard.class, I18n.class);
         
         Commands.register("toaster", AddCommand.class, OpenCommand.class, ListCommand.class);
 

@@ -43,6 +43,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Supplier;
 
 public abstract class QuartzLib
 {
@@ -50,7 +51,7 @@ public abstract class QuartzLib
     static private final ArrayList<Class<? extends QuartzComponent>> componentsToLoad = new ArrayList<>();
     static private Set<QuartzComponent> loadedComponents;
     
-    static private ZLibListener listener;
+    static private QuartzLibListener listener;
 
     /**
      * Initializes QuartzLib.
@@ -81,14 +82,14 @@ public abstract class QuartzLib
      * @param component The component to load.
      * @throws IllegalStateException if QuartzLib was not initialized.
      */
-    static <T extends QuartzComponent> T loadComponent(T component) throws IllegalStateException
+    static public <T extends QuartzComponent> T loadComponent(T component) throws IllegalStateException
     {
         checkInitialized();
         
         //Make sure any loaded component will be correctly unloaded.
         if(listener == null)
         {
-            QuartzLib.listener = registerEvents(new ZLibListener());
+            QuartzLib.listener = registerEvents(new QuartzLibListener());
         }
         
         if(loadedComponents.add(component))
@@ -170,7 +171,7 @@ public abstract class QuartzLib
      * This returns a copy of the components list,
      *
      * @return the loaded components.
-     * @throws IllegalStateException
+     * @throws IllegalStateException if QuartzLib was not initialized.
      */
     static public Set<QuartzComponent> getLoadedComponents() throws IllegalStateException
     {
@@ -220,10 +221,10 @@ public abstract class QuartzLib
     static private void checkInitialized() throws IllegalStateException
     {
         if(plugin == null)
-            throw new IllegalStateException("Assertion failed: QuartzLib is not correctly inizialized. Make sure QuartzLib.init() or QuartzLib.onLoad() is correctly called.");
+            throw new IllegalStateException("Assertion failed: QuartzLib is not correctly initialized. Make sure QuartzLib.init() or QuartzPlugin.onLoad() is correctly called.");
     }
     
-    static private class ZLibListener implements Listener
+    static private class QuartzLibListener implements Listener
     {
         @EventHandler
         public void onPluginDisable(PluginDisableEvent event)
