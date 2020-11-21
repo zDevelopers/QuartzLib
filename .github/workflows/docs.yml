@@ -55,7 +55,7 @@ jobs:
           git config --global user.password ${{ secrets.QUARTZ_BOT_TOKEN }}
 
           # Add files
-          echo ::group::Adding files to website repository & creating commit
+          echo "::group::Adding files to website repository & creating commit"
           git add .
           git commit -m "Updated documentation for $PROJECT_NAME"
           echo ::endgroup::
