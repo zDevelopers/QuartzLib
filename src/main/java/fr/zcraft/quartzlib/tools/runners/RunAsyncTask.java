@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.runners;
 
 import fr.zcraft.quartzlib.core.QuartzLib;
@@ -39,108 +40,95 @@ import org.bukkit.scheduler.BukkitTask;
 /**
  * This utility class shortens the code used to execute asynchronous tasks.
  */
-public final class RunAsyncTask
-{
-	private static final BukkitScheduler scheduler = Bukkit.getScheduler();
+public final class RunAsyncTask {
+    private static final BukkitScheduler scheduler = Bukkit.getScheduler();
 
-	private RunAsyncTask() {}
+    private RunAsyncTask() {
+    }
 
-	/**
-	 * Returns a task that will run asynchronously on the next server tick.
-	 *
-	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b></p>
-	 *
-	 * @param runnable The task to be run.
-	 *
-	 * @return The BukkitTask that will run.
-	 */
-	public static BukkitTask nextTick(Runnable runnable)
-	{
-		return scheduler.runTaskAsynchronously(QuartzLib.getPlugin(), runnable);
-	}
+    /**
+     * Returns a task that will run asynchronously on the next server tick.
+     *
+     * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+     * assure the thread-safety of asynchronous tasks.</b></p>
+     *
+     * @param runnable The task to be run.
+     * @return The BukkitTask that will run.
+     */
+    public static BukkitTask nextTick(Runnable runnable) {
+        return scheduler.runTaskAsynchronously(QuartzLib.getPlugin(), runnable);
+    }
 
-	/**
-	 * Returns a task that will run asynchronously after the specified number of server ticks.
-	 *
-	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b></p>
-	 *
-	 * @param runnable The task to be run.
-	 * @param delay    The ticks to wait before running the task.
-	 *
-	 * @return The BukkitTask that will run.
-	 */
-	public static BukkitTask later(Runnable runnable, long delay)
-	{
-		return scheduler.runTaskLaterAsynchronously(QuartzLib.getPlugin(), runnable, delay);
-	}
+    /**
+     * Returns a task that will run asynchronously on the next server tick.
+     *
+     * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+     * assure the thread-safety of asynchronous tasks.</b></p>
+     *
+     * @param runnable The task to be run.
+     * @return The BukkitTask that will run.
+     */
+    public static BukkitTask nextTick(BukkitRunnable runnable) {
+        return runnable.runTaskAsynchronously(QuartzLib.getPlugin());
+    }
 
-	/**
-	 * Returns a task that will repeatedly run asynchronously until cancelled, starting after the
-	 * specified number of server ticks.
-	 *
-	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b></p>
-	 *
-	 * @param runnable The task to be run.
-	 * @param wait     The ticks to wait before running the task.
-	 * @param period   The ticks to wait between runs
-	 *
-	 * @return The BukkitTask that will run.
-	 */
-	public static BukkitTask timer(Runnable runnable, long wait, long period)
-	{
-		return scheduler.runTaskTimerAsynchronously(QuartzLib.getPlugin(), runnable, wait, period);
-	}
+    /**
+     * Returns a task that will run asynchronously after the specified number of server ticks.
+     *
+     * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+     * assure the thread-safety of asynchronous tasks.</b></p>
+     *
+     * @param runnable The task to be run.
+     * @param delay    The ticks to wait before running the task.
+     * @return The BukkitTask that will run.
+     */
+    public static BukkitTask later(Runnable runnable, long delay) {
+        return scheduler.runTaskLaterAsynchronously(QuartzLib.getPlugin(), runnable, delay);
+    }
 
+    /**
+     * Returns a task that will repeatedly run asynchronously until cancelled, starting after the
+     * specified number of server ticks.
+     *
+     * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+     * assure the thread-safety of asynchronous tasks.</b></p>
+     *
+     * @param runnable The task to be run.
+     * @param wait     The ticks to wait before running the task.
+     * @param period   The ticks to wait between runs
+     * @return The BukkitTask that will run.
+     */
+    public static BukkitTask timer(Runnable runnable, long wait, long period) {
+        return scheduler.runTaskTimerAsynchronously(QuartzLib.getPlugin(), runnable, wait, period);
+    }
 
-	/**
-	 * Returns a task that will run asynchronously on the next server tick.
-	 *
-	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b></p>
-	 *
-	 * @param runnable The task to be run.
-	 *
-	 * @return The BukkitTask that will run.
-	 */
-	public static BukkitTask nextTick(BukkitRunnable runnable)
-	{
-		return runnable.runTaskAsynchronously(QuartzLib.getPlugin());
-	}
+    /**
+     * Returns a task that will run asynchronously after the specified number of server ticks.
+     *
+     * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+     * assure the thread-safety of asynchronous tasks.</b></p>
+     *
+     * @param runnable The task to be run.
+     * @param delay    The ticks to wait before running the task.
+     * @return The BukkitTask that will run.
+     */
+    public static BukkitTask later(BukkitRunnable runnable, long delay) {
+        return runnable.runTaskLaterAsynchronously(QuartzLib.getPlugin(), delay);
+    }
 
-	/**
-	 * Returns a task that will run asynchronously after the specified number of server ticks.
-	 *
-	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b></p>
-	 *
-	 * @param runnable The task to be run.
-	 * @param delay    The ticks to wait before running the task.
-	 *
-	 * @return The BukkitTask that will run.
-	 */
-	public static BukkitTask later(BukkitRunnable runnable, long delay)
-	{
-		return runnable.runTaskLaterAsynchronously(QuartzLib.getPlugin(), delay);
-	}
-
-	/**
-	 * Returns a task that will repeatedly run asynchronously until cancelled, starting after the
-	 * specified number of server ticks.
-	 *
-	 * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
-	 * assure the thread-safety of asynchronous tasks.</b></p>
-	 *
-	 * @param runnable The task to be run.
-	 * @param wait     The ticks to wait before running the task.
-	 * @param period   The ticks to wait between runs
-	 *
-	 * @return The BukkitTask that will run.
-	 */
-	public static BukkitTask timer(BukkitRunnable runnable, long wait, long period)
-	{
-		return runnable.runTaskTimerAsynchronously(QuartzLib.getPlugin(), wait, period);
-	}
+    /**
+     * Returns a task that will repeatedly run asynchronously until cancelled, starting after the
+     * specified number of server ticks.
+     *
+     * <p><b>Asynchronous tasks should never access any API in Bukkit. Great care should be taken to
+     * assure the thread-safety of asynchronous tasks.</b></p>
+     *
+     * @param runnable The task to be run.
+     * @param wait     The ticks to wait before running the task.
+     * @param period   The ticks to wait between runs
+     * @return The BukkitTask that will run.
+     */
+    public static BukkitTask timer(BukkitRunnable runnable, long wait, long period) {
+        return runnable.runTaskTimerAsynchronously(QuartzLib.getPlugin(), wait, period);
+    }
 }

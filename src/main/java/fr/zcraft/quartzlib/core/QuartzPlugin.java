@@ -27,40 +27,35 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.core;
 
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import java.io.File;
+import java.io.IOException;
+import java.util.jar.JarFile;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.jar.JarFile;
-
 /**
  * The base class of any plugin using QuartzLib.
- *
- * To use QuartzLib, you have to use this class instead of {@link JavaPlugin},
+ * <p>To use QuartzLib, you have to use this class instead of {@link JavaPlugin},
  * and to add calls to the {@code super} methods of
  * {@link JavaPlugin#onEnable()} and {@link JavaPlugin#onDisable()} (if you use
- * them).
+ * them).</p>
  */
-public abstract class QuartzPlugin extends JavaPlugin
-{
-    protected QuartzPlugin()
-    {
+public abstract class QuartzPlugin extends JavaPlugin {
+    protected QuartzPlugin() {
         super();
     }
 
-    protected QuartzPlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
-    {
+    protected QuartzPlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
         super(loader, description, dataFolder, file);
     }
 
     @Override
-    public void onLoad()
-    {
+    public void onLoad() {
         QuartzLib.init(this);
     }
 
@@ -70,35 +65,34 @@ public abstract class QuartzPlugin extends JavaPlugin
      * @param components The base classes of the components to load.
      */
     @SafeVarargs
-    public final void loadComponents(Class<? extends QuartzComponent>... components)
-    {
-        for (Class<? extends QuartzComponent> componentClass : components)
-        {
+    public final void loadComponents(Class<? extends QuartzComponent>... components) {
+        for (Class<? extends QuartzComponent> componentClass : components) {
             QuartzLib.loadComponent(componentClass);
         }
     }
-    
+
     /**
      * Tries to load a given component.
-     * @param <T> The type of the component.
+     *
+     * @param <T>            The type of the component.
      * @param componentClass The component's class.
      * @return The component instance, or null if instanciation failed.
      */
-    public <T extends QuartzComponent> T loadComponent(Class<T> componentClass)
-    {
+    public <T extends QuartzComponent> T loadComponent(Class<T> componentClass) {
         return QuartzLib.loadComponent(componentClass);
     }
 
-    public JarFile getJarFile()
-    {
-        try
-        {
+    /**
+     * Gets the .jar file this plugin is loaded by, or null if it wasn't found.
+     */
+    public JarFile getJarFile() {
+        try {
             File file = getFile();
-            if (file == null) return null;
+            if (file == null) {
+                return null;
+            }
             return new JarFile(file);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             PluginLogger.error("Unable to load JAR file {0}", e, getFile().getAbsolutePath());
             return null;
         }

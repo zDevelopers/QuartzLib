@@ -30,129 +30,121 @@
 
 package fr.zcraft.quartzlib.tools.text;
 
-import org.bukkit.ChatColor;
-
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
 
-public class ChatColorParser implements Iterator<ChatColoredString>, Iterable<ChatColoredString>
-{
+public class ChatColorParser implements Iterator<ChatColoredString>, Iterable<ChatColoredString> {
     private final char delimiter;
     private final String string;
-    
+    private final Set<ChatColor> currentModifiers = EnumSet.noneOf(ChatColor.class);
     private int previousPos = -2;
     private int currentPos = -1;
-    private final Set<ChatColor> currentModifiers = EnumSet.noneOf(ChatColor.class);
-    
     private boolean done = false;
     private ChatColoredString nextString;
-    
-    public ChatColorParser(String string)
-    {
+
+    public ChatColorParser(String string) {
         this('§', string);
     }
-    
-    public ChatColorParser(char delimiter, String string)
-    {
+
+    /**
+     * Creates a new chat color parser.
+     */
+    public ChatColorParser(char delimiter, String string) {
         this.string = string;
         this.delimiter = delimiter;
-        
+
         nextString = fetchNextPos();
     }
-    
+
+    /**
+     * Apply a given modifier to the current mutable set of modifiers.
+     */
+    public static void applyModifier(Set<ChatColor> currentModifiers, ChatColor newModifier) {
+        if (newModifier == ChatColor.RESET) {
+            currentModifiers.clear();
+            return;
+        } else if (newModifier.isColor()) {
+            for (ChatColor color : ChatColor.values()) {
+                if (!color.isColor()) {
+                    continue;
+                }
+                currentModifiers.remove(color);
+            }
+        }
+
+        currentModifiers.add(newModifier);
+    }
+
     @Override
-    public boolean hasNext()
-    {
+    public boolean hasNext() {
         return nextString != null;
     }
 
     @Override
-    public ChatColoredString next()
-    {
-        if(nextString == null)
+    public ChatColoredString next() {
+        if (nextString == null) {
             throw new NoSuchElementException();
-        
+        }
+
         ChatColoredString currentString = nextString;
         nextString = fetchNextPos();
         return currentString;
     }
 
     @Override
-    public void remove() 
-    {
+    public void remove() {
         throw new UnsupportedOperationException("remove");
     }
 
     @Override
-    public Iterator<ChatColoredString> iterator()
-    {
+    public @NotNull Iterator<ChatColoredString> iterator() {
         return this;
     }
-    
-    private ChatColor getCurrentColor()
-    {
+
+    private ChatColor getCurrentColor() {
         ChatColor color = ChatColor.getByChar(string.charAt(currentPos + 1));
-        if(color == null)
+        if (color == null) {
             throw new IllegalArgumentException("Invalid token : invalid color code :" + string.charAt(currentPos + 1));
-        
+        }
+
         return color;
     }
-    
-    private ChatColoredString fetchNextPos()
-    {
-        if(done)
+
+    private ChatColoredString fetchNextPos() {
+        if (done) {
             return null;
-        
-        while(true)
-        {
+        }
+
+        while (true) {
             currentPos = string.indexOf(delimiter, currentPos + 1);
-            if(currentPos == -1) 
-            {
+            if (currentPos == -1) {
                 done = true;
                 break;
             }
-            
-            if(currentPos >= string.length() - 1)
+
+            if (currentPos >= string.length() - 1) {
                 throw new IllegalArgumentException("Invalid token : found delimiter without color code.");
-            
-            //Color code mode
-            if(currentPos == previousPos + 2)
-            {       
-                applyModifier(currentModifiers, getCurrentColor());
             }
-            else
-            {
-                ChatColoredString str = new ChatColoredString(currentModifiers, string.substring(previousPos + 2, currentPos));
-                
+
+            //Color code mode
+            if (currentPos == previousPos + 2) {
+                applyModifier(currentModifiers, getCurrentColor());
+            } else {
+                ChatColoredString str =
+                        new ChatColoredString(currentModifiers, string.substring(previousPos + 2, currentPos));
+
                 applyModifier(currentModifiers, getCurrentColor());
                 previousPos = currentPos;
                 return str;
             }
-            
+
             previousPos = currentPos;
         }
-        
+
         return new ChatColoredString(currentModifiers, string.substring(previousPos + 2));
-    }
-    
-    public static void applyModifier(Set<ChatColor> currentModifiers, ChatColor newModifier)
-    {
-        if(newModifier == ChatColor.RESET)
-        {
-            currentModifiers.clear();
-            return;
-        }
-        else if(newModifier.isColor())
-        {
-            for(ChatColor color : ChatColor.values())
-            {
-                if(!color.isColor()) continue;
-                currentModifiers.remove(color);
-            }
-        }
-        
-        currentModifiers.add(newModifier);
     }
 }

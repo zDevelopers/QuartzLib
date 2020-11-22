@@ -13,13 +13,13 @@ import java.util.HashMap;
 
 class ValueHandler<T> {
     private final Class<T> outputType;
-    private final HashMap<Class, Method> methods = new HashMap();
+    private final HashMap<Class<?>, Method> methods = new HashMap<>();
 
     public ValueHandler(Class<T> outputType) {
         this.outputType = outputType;
     }
 
-    public void addHandler(Class inputType, Method method) {
+    public void addHandler(Class<?> inputType, Method method) {
         if (methods.containsKey(inputType)) {
             throw new IllegalStateException(
                     "Value handler already registered for type " + outputType.getName() + " with input " + inputType);
@@ -36,7 +36,7 @@ class ValueHandler<T> {
 
         Method handler = null;
 
-        Class inputType = Reflection.getClosestType(inputValue.getClass(), methods.keySet());
+        Class<?> inputType = Reflection.getClosestType(inputValue.getClass(), methods.keySet());
         if (inputType != null) {
             handler = methods.get(inputType);
         }

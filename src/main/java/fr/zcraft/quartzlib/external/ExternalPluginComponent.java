@@ -108,6 +108,7 @@ public class ExternalPluginComponent<T extends Plugin> extends QuartzComponent {
 
     /**
      * Returns the name of the external plugin.
+     *
      * @return The specified name of the external plugin.
      */
     public String getPluginName() {

@@ -30,7 +30,7 @@
 
 package fr.zcraft.quartzlib.tools;
 
-public interface Callback<T>
-{
+public interface Callback<T> {
+
     void call(T parameter);
 }

@@ -27,15 +27,20 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.reflection;
 
-import org.bukkit.Bukkit;
-
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.bukkit.Bukkit;
 
 
 /**
@@ -44,100 +49,86 @@ import java.util.List;
  * @author ProkopyL
  * @author Amaury Carrade
  */
-public final class Reflection
-{
-    private Reflection() {}
+public final class Reflection {
+    private Reflection() {
+    }
 
     /**
      * Returns the Bukkit's current version, as read in the Bukkit's package name.
      *
      * @return The Bukkit's version in the package name.
      */
-    public static String getBukkitPackageVersion()
-    {
+    public static String getBukkitPackageVersion() {
         return getBukkitPackageName().substring("org.bukkit.craftbukkit.".length());
     }
-    
+
     /**
      * Returns the full name of the root Bukkit package: something like
      * "org.bukkit.craftbukkit.v1_8_R3".
      *
      * @return the full name of the root Bukkit package.
      */
-    public static String getBukkitPackageName()
-    {
+    public static String getBukkitPackageName() {
         return Bukkit.getServer().getClass().getPackage().getName();
     }
-    
+
     /**
      * Returns the full name of the root NMS package: something like "net.minecraft.server.v1_8_R3".
      *
      * @return the full name of the root NMS package.
      */
-    public static String getMinecraftPackageName()
-    {
+    public static String getMinecraftPackageName() {
         return "net.minecraft.server." + getBukkitPackageVersion();
     }
-    
+
     /**
      * Returns the {@link Class} of a Bukkit class from it's name (without the main Bukkit
      * package).
-     *
-     * As example, with "Server", this method returns the {@code org.bukkit.craftbukkit.v1_X_RX.Server}
-     * class.
+     * <p>For example, with "Server", this method returns the {@code org.bukkit.craftbukkit.v1_X_RX.Server} class.</p>
      *
      * @param name The Bukkit's class name (without the main Bukkit package).
-     *
      * @return The class.
      * @throws ClassNotFoundException if no class exists with this name in the Bukkit package.
      */
-    public static Class getBukkitClassByName(String name) throws ClassNotFoundException
-    {
+    public static Class<?> getBukkitClassByName(String name) throws ClassNotFoundException {
         return Class.forName(getBukkitPackageName() + "." + name);
     }
-    
+
     /**
      * Returns the {@link Class} of a NMS class from it's name (without the main NMS package).
-     *
-     * As example, with "Server", this method returns the {@code net.minecraft.server.v1_X_RX.Server}
-     * class.
+     * <p>For example, with "Server", this method returns the {@code net.minecraft.server.v1_X_RX.Server} class.</p>
      *
      * @param name The NMS' class name (without the main Bukkit package).
-     *
      * @return The class.
      * @throws ClassNotFoundException if no class exists with this name in the NMS package.
      */
-    public static Class getMinecraftClassByName(String name) throws ClassNotFoundException
-    {
+    public static Class getMinecraftClassByName(String name) throws ClassNotFoundException {
         return Class.forName(getMinecraftPackageName() + "." + name);
     }
-    
+
 
     /**
      * Returns the value of a field (regardless of its visibility) for the given instance.
      *
-     * @param hClass   The instance's class.
+     * @param klass   The instance's class.
      * @param instance The instance.
      * @param name     The field's name.
-     *
      * @return The field's value for the given instance.
      * @throws NoSuchFieldException     if the field does not exists.
-     * @throws IllegalArgumentException if {@code instance} is not an instance of {@code hClass}.
+     * @throws IllegalArgumentException if {@code instance} is not an instance of {@code klass}.
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    public static Object getFieldValue(Class<?> hClass, Object instance, String name)
-            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
-    {
-        return getField(hClass, name).get(instance);
+    public static Object getFieldValue(Class<?> klass, Object instance, String name)
+            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        return getField(klass, name).get(instance);
     }
-    
+
     /**
      * Returns the value of a field (regardless of its visibility) for the given instance.
      *
      * @param instance The instance.
      * @param name     The field's name.
-     *
      * @return The field's value for the given instance.
      * @throws NoSuchFieldException     if the field does not exists.
      * @throws IllegalArgumentException if {@code instance} is not an instance of itself (should
@@ -146,54 +137,49 @@ public final class Reflection
      *                                  access control.
      */
     public static Object getFieldValue(Object instance, String name)
-            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
-    {
-        if(instance == null)
+            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        if (instance == null) {
             throw new IllegalArgumentException("Cannot infer object type : instance is null.");
+        }
         return getFieldValue(instance.getClass(), instance, name);
     }
-    
+
 
     /**
      * Makes the {@link Field} with the given name in the given class accessible, and returns it.
      *
      * @param klass The field's parent class.
      * @param name  The field's name.
-     *
      * @return The {@link Field}.
      * @throws NoSuchFieldException if the class does not contains any field with this name.
      */
-    public static Field getField(Class<?> klass, String name) throws NoSuchFieldException
-    {
+    public static Field getField(Class<?> klass, String name) throws NoSuchFieldException {
         Field field = klass.getDeclaredField(name);
         field.setAccessible(true);
         return field;
     }
-    
+
     /**
      * Finds the first {@link Field} in the given class with the given type, makes it accessible,
      * and returns it.
      *
      * @param klass The field's parent class.
      * @param type  The field's class.
-     *
      * @return The {@link Field}.
      * @throws NoSuchFieldException if the class does not contains any field with this name.
      */
-    public static Field getField(Class<?> klass, Class<?> type) throws NoSuchFieldException
-    {
-        for (Field field : klass.getDeclaredFields())
-        {
-            if (typeIsAssignableFrom(field.getType(), type))
-            {
+    public static Field getField(Class<?> klass, Class<?> type) throws NoSuchFieldException {
+        for (Field field : klass.getDeclaredFields()) {
+            if (typeIsAssignableFrom(field.getType(), type)) {
                 field.setAccessible(true);
                 return field;
             }
         }
 
-        throw new NoSuchFieldException("Class " + klass.getName() + " does not define any field of type " + type.getName());
+        throw new NoSuchFieldException(
+                "Class " + klass.getName() + " does not define any field of type " + type.getName());
     }
-    
+
 
     /**
      * Update the field with the given name in the given instance using the given value.
@@ -201,7 +187,6 @@ public final class Reflection
      * @param instance The instance to update.
      * @param name     The name of the field to be updated.
      * @param value    The new value of the field.
-     *
      * @throws NoSuchFieldException     if no field with the given name was found.
      * @throws IllegalArgumentException if {@code instance} is not an instance of itself (should
      *                                  never happens).
@@ -209,40 +194,37 @@ public final class Reflection
      *                                  access control.
      */
     public static void setFieldValue(Object instance, String name, Object value)
-            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
-    {
-        if(instance == null)
+            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        if (instance == null) {
             throw new IllegalArgumentException("Cannot infer object type : instance is null.");
+        }
         setFieldValue(instance.getClass(), instance, name, value);
     }
-    
+
     /**
      * Update the field with the given name in the given instance using the given value.
      *
-     * @param hClass   The field's parent class.
+     * @param klass   The field's parent class.
      * @param instance The instance to update.
      * @param name     The name of the field to be updated.
      * @param value    The new value of the field.
-     *
      * @throws NoSuchFieldException     if no field with the given name was found.
-     * @throws IllegalArgumentException if {@code instance} is not an instance of {@code hClass}.
+     * @throws IllegalArgumentException if {@code instance} is not an instance of {@code klass}.
      * @throws IllegalAccessException   if the field cannot be accessed due to a Java language
      *                                  access control.
      */
-    public static void setFieldValue(Class<?> hClass, Object instance, String name, Object value)
-            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
-    {
-        getField(hClass, name).set(instance, value);
+    public static void setFieldValue(Class<?> klass, Object instance, String name, Object value)
+            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        getField(klass, name).set(instance, value);
     }
-    
+
 
     /**
      * Calls the given static method of the given class, passing the given parameters to it.
      *
-     * @param hClass     The method's parent class.
+     * @param klass     The method's parent class.
      * @param name       The method's name.
      * @param parameters The parameters to be passed to the method.
-     *
      * @return the object the called method returned.
      * @throws NoSuchMethodException     if no method with this name is defined in the class.
      * @throws IllegalAccessException    if the method cannot be accessed due to a Java language
@@ -255,19 +237,17 @@ public final class Reflection
      *                                   invocation conversion.
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
-    public static Object call(Class<?> hClass, String name, Object... parameters)
-            throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
-    {
-        return call(hClass, null, name, parameters);
+    public static Object call(Class<?> klass, String name, Object... parameters)
+            throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        return call(klass, null, name, parameters);
     }
-    
+
     /**
      * Calls the given method on the given instance, passing the given parameters to it.
      *
      * @param instance   The object the method is invoked from.
      * @param name       The method's name.
      * @param parameters The parameters to be passed to the method.
-     *
      * @return the object the called method returned.
      * @throws NoSuchMethodException     if no method with this name is defined in the class.
      * @throws IllegalAccessException    if the method cannot be accessed due to a Java language
@@ -284,21 +264,20 @@ public final class Reflection
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
     public static Object call(Object instance, String name, Object... parameters)
-            throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
-    {
-        if(instance == null)
+            throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        if (instance == null) {
             throw new IllegalArgumentException("Cannot infer object type : instance is null.");
+        }
         return call(instance.getClass(), instance, name, parameters);
     }
-    
+
     /**
      * Calls the given method on the given instance, passing the given parameters to it.
      *
-     * @param hClass     The method's parent class.
+     * @param klass     The method's parent class.
      * @param instance   The object the method is invoked from.
      * @param name       The method's name.
      * @param parameters The parameters to be passed to the method.
-     *
      * @return the object the called method returned.
      * @throws NoSuchMethodException     if no method with this name is defined in the class.
      * @throws IllegalAccessException    if the method cannot be accessed due to a Java language
@@ -314,147 +293,158 @@ public final class Reflection
      *                                   conversion.
      * @throws InvocationTargetException if an exception is thrown by the called method.
      */
-    public static Object call(Class<?> hClass, Object instance, String name, Object... parameters)
-            throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
-    {
+    public static Object call(Class<?> klass, Object instance, String name, Object... parameters)
+            throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Method method;
-        final Class[] types = getTypes(parameters);
+        final Class<?>[] types = getTypes(parameters);
 
-        try
-        {
-            method = hClass.getMethod(name, types);
-        }
-        catch (NoSuchMethodException ex)
-        {
-            method = hClass.getDeclaredMethod(name, types);
+        try {
+            method = klass.getMethod(name, types);
+        } catch (NoSuchMethodException ex) {
+            method = klass.getDeclaredMethod(name, types);
         }
 
         method.setAccessible(true);
         return method.invoke(instance, parameters);
     }
-    
+
     /**
      * Returns if a given class has a method matching the given parameters.
-     * @param hClass The class.
-     * @param name The name of the method to look for
+     *
+     * @param klass         The class.
+     * @param name           The name of the method to look for
      * @param parameterTypes The parameter types to look for
      * @return If the method exists in the given class, or not
      */
-    public static boolean hasMethod(Class<?> hClass, String name, Class... parameterTypes)
-    {
-        try
-        {
-            try
-            {
-                hClass.getMethod(name, parameterTypes);
+    public static boolean hasMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
+        try {
+            try {
+                klass.getMethod(name, parameterTypes);
+            } catch (NoSuchMethodException ex) {
+                klass.getDeclaredMethod(name, parameterTypes);
             }
-            catch (NoSuchMethodException ex)
-            {
-                hClass.getDeclaredMethod(name, parameterTypes);
-            }
-        }
-        catch (NoSuchMethodException | SecurityException ex)
-        {
+        } catch (NoSuchMethodException | SecurityException ex) {
             return false;
         }
         return true;
     }
-    
-    public static Method findMethod(Class<?> hClass, String name, Type... parameterTypes)
-    {
-        return findMethod(hClass, name, null, 0, parameterTypes);
+
+    public static Method findMethod(Class<?> klass, String name, Type... parameterTypes) {
+        return findMethod(klass, name, null, 0, parameterTypes);
     }
-    
-    public static Method findMethod(Class<?> hClass, String name, int modifiers, Type... parameterTypes)
-    {
-        return findMethod(hClass, name, null, modifiers, parameterTypes);
+
+    public static Method findMethod(Class<?> klass, String name, int modifiers, Type... parameterTypes) {
+        return findMethod(klass, name, null, modifiers, parameterTypes);
     }
-    
-    public static Method findMethod(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
-    {
-        List<Method> methods = findAllMethods(hClass, name, returnType, modifiers, parameterTypes);
-        
-        if(methods.isEmpty()) return null;
-        
+
+    /**
+     * Finds a method of a given name on a given class matching the return type, modifiers and parameters.
+     */
+    public static Method findMethod(Class<?> klass, String name, Type returnType, int modifiers,
+                                    Type... parameterTypes) {
+        List<Method> methods = findAllMethods(klass, name, returnType, modifiers, parameterTypes);
+
+        if (methods.isEmpty()) {
+            return null;
+        }
+
         return methods.get(0);
     }
-    
-    public static List<Method> findAllMethods(Class<?> hClass, String name, Type returnType, int modifiers, Type... parameterTypes)
-    {
+
+    /**
+     * Lists all methods on the given class matching the return type, modifiers and parameters.
+     */
+    public static List<Method> findAllMethods(Class<?> klass, String name, Type returnType, int modifiers,
+                                              Type... parameterTypes) {
         List<Method> methods = new ArrayList<>();
-        
-        methods: for(Method method : hClass.getMethods())
-        {
-            if(!nameMatches(method.getName(), name)) continue;
-            if(!hasModifiers(method.getModifiers(), modifiers)) continue;
-            if(returnType != null && !typeIsAssignableFrom(method.getGenericReturnType(), returnType)) continue;
-            
-            Type[] methodTypes = method.getGenericParameterTypes();
-            if(parameterTypes.length != methodTypes.length) continue;
-            
-            for(int i = 0; i < methodTypes.length; ++i)
-            {
-                if(parameterTypes[i] == null) continue;
-                if(!typeIsAssignableFrom(parameterTypes[i], methodTypes[i]))
-                    continue methods;
+
+        methods:
+        for (Method method : klass.getMethods()) {
+            if (!nameMatches(method.getName(), name)) {
+                continue;
             }
-            
+            if (!hasModifiers(method.getModifiers(), modifiers)) {
+                continue;
+            }
+            if (returnType != null && !typeIsAssignableFrom(method.getGenericReturnType(), returnType)) {
+                continue;
+            }
+
+            Type[] methodTypes = method.getGenericParameterTypes();
+            if (parameterTypes.length != methodTypes.length) {
+                continue;
+            }
+
+            for (int i = 0; i < methodTypes.length; ++i) {
+                if (parameterTypes[i] == null) {
+                    continue;
+                }
+                if (!typeIsAssignableFrom(parameterTypes[i], methodTypes[i])) {
+                    continue methods;
+                }
+            }
+
             methods.add(method);
         }
-        
+
         return methods;
     }
-    
-    private static boolean nameMatches(String methodName, String pattern)
-    {
-        if(pattern == null) return true;
-        
-        if(pattern.startsWith("!"))
-        {
-            return !pattern.equals(methodName);
+
+    private static boolean nameMatches(String methodName, String pattern) {
+        if (pattern == null) {
+            return true;
         }
-        else
-        {
+
+        if (pattern.startsWith("!")) {
+            return !pattern.equals(methodName);
+        } else {
             return pattern.equals(methodName);
         }
     }
-    
-    public static boolean typeIsAssignableFrom(Type source, Type destination)
-    {
-        if(source instanceof ParameterizedType) source = ((ParameterizedType) source).getRawType();
-        if(destination instanceof ParameterizedType) source = ((ParameterizedType) destination).getRawType();
 
-        if(source instanceof Class && destination instanceof Class)
-        {
-            return ((Class<?>)destination).isAssignableFrom((Class) source);
+    /**
+     * Returns if a type is assignable from another.
+     */
+    public static boolean typeIsAssignableFrom(Type source, Type destination) {
+        if (source instanceof ParameterizedType) {
+            source = ((ParameterizedType) source).getRawType();
         }
-        
+        if (destination instanceof ParameterizedType) {
+            source = ((ParameterizedType) destination).getRawType();
+        }
+
+        if (source instanceof Class && destination instanceof Class) {
+            return ((Class<?>) destination).isAssignableFrom((Class) source);
+        }
+
         return source.equals(destination);
     }
-    
-    public static boolean hasModifiers(int modifiers, int requiredModifiers)
-    {
-        for(int bit = Integer.SIZE; bit --> 0;)
-        {
+
+    /**
+     * Checks if a modifier int contains the given modifiers.
+     */
+    public static boolean hasModifiers(int modifiers, int requiredModifiers) {
+        for (int bit = Integer.SIZE; bit-- > 0; ) {
             int modifier = 1 << bit;
             boolean modifierRequired = (requiredModifiers & modifier) != 0;
             boolean modifierPresent = (modifiers & modifier) != 0;
-            
-            if(modifierRequired && !modifierPresent) return false;
+
+            if (modifierRequired && !modifierPresent) {
+                return false;
+            }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Creates and returns an instance of the given class, passing the given parameters to the
      * appropriate constructor.
      *
      * @param <T>        The type of the object to be instanciated.
-     * @param hClass     The class to be instantiated.
+     * @param klass     The class to be instantiated.
      * @param parameters The parameters to be passed to the constructor. This also determines which
      *                   constructor will be called.
-     *
      * @return the created instance.
      * @throws NoSuchMethodException     if no constructor with these parameters types exists.
      * @throws InstantiationException    if the class cannot be instantiated, due to a
@@ -471,21 +461,22 @@ public final class Reflection
      *                                   to an enum type.
      * @throws InvocationTargetException if an exception is thrown in the constructor.
      */
-    public static <T> T instantiate(Class<T> hClass, Object... parameters)
-            throws NoSuchMethodException, InstantiationException, 
-            IllegalAccessException, IllegalArgumentException, InvocationTargetException
-    {
-        Constructor<T> constructor = hClass.getDeclaredConstructor(getTypes(parameters));
+    public static <T> T instantiate(Class<T> klass, Object... parameters)
+            throws NoSuchMethodException, InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Constructor<T> constructor = klass.getDeclaredConstructor(getTypes(parameters));
         constructor.setAccessible(true);
         return constructor.newInstance(parameters);
     }
-    
-    public static <T> Constructor findConstructor(Class<T> hClass, int parameterCount)
-    {
-        for(Constructor constructor: hClass.getDeclaredConstructors())
-        {
-            if(constructor.getParameterTypes().length == parameterCount)
+
+    /**
+     * Finds a matching constructor.
+     */
+    public static <T> Constructor<?> findConstructor(Class<T> klass, int parameterCount) {
+        for (Constructor<?> constructor : klass.getDeclaredConstructors()) {
+            if (constructor.getParameterTypes().length == parameterCount) {
                 return constructor;
+            }
         }
         return null;
     }
@@ -496,14 +487,11 @@ public final class Reflection
      * the given array, in the same order.
      *
      * @param objects The original array.
-     *
      * @return an array with the types of the items in the original array.
      */
-    public static Class[] getTypes(Object[] objects)
-    {
+    public static Class[] getTypes(Object[] objects) {
         Class[] types = new Class[objects.length];
-        for (int i = 0; i < objects.length; i++)
-        {
+        for (int i = 0; i < objects.length; i++) {
             types[i] = objects[i].getClass();
         }
         return types;
@@ -512,25 +500,19 @@ public final class Reflection
     /**
      * Returns the first class in the call hierarchy that have a defined name
      * (i.e. the first non-anonymous caller class), excluding the very first one.
-     *
-     * In other words, return the named class that called the method this method
-     * is called from.
+     * <p>In other words, return the named class that called the method this method
+     * is called from.</p>
      *
      * @return The caller class.
      */
-    public static Class<?> getCallerClass()
-    {
+    public static Class<?> getCallerClass() {
         final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-        for (int i = 3; i < stackTrace.length; i++)
-        {
-            final Class caller;
-            try
-            {
+        for (int i = 3; i < stackTrace.length; i++) {
+            final Class<?> caller;
+            try {
                 caller = Class.forName(stackTrace[i].getClassName());
-            }
-            catch (ClassNotFoundException ex)
-            {
+            } catch (ClassNotFoundException ex) {
                 continue;
             }
 
@@ -544,75 +526,83 @@ public final class Reflection
      * Returns the first class in the call stack with the specified type.
      *
      * @param baseType The type to lookup for.
-     * @param <T> The looked-up type.
+     * @param <T>      The looked-up type.
      * @return The caller class of the specified type, or {@code null} if none found.
      */
-    public static <T> Class<? extends T> getCallerClass(Class<T> baseType)
-    {
+    public static <T> Class<? extends T> getCallerClass(Class<T> baseType) {
         final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-        for (int i = 2; i < stackTrace.length; i++)
-        {
-            if (stackTrace[i].getClassName().equals(baseType.getName()))
+        for (int i = 2; i < stackTrace.length; i++) {
+            if (stackTrace[i].getClassName().equals(baseType.getName())) {
                 continue;
+            }
 
             final Class caller;
-            try
-            {
+            try {
                 caller = Class.forName(stackTrace[i].getClassName());
-            }
-            catch (ClassNotFoundException ex)
-            {
+            } catch (ClassNotFoundException ex) {
                 continue;
             }
 
-            if (baseType.isAssignableFrom(caller))
+            if (baseType.isAssignableFrom(caller)) {
                 return caller;
+            }
         }
 
         return null;
     }
-    
-    public static <T> Class<T> getDeclaringClass(T value)
-    {
-        if(value == null) return null;
-        if(value instanceof Enum) return ((Enum)value).getDeclaringClass();
+
+    /**
+     * Returns the class of the value, or the declaring class if value is an enum.
+     */
+    public static <T> Class<T> getDeclaringClass(T value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Enum) {
+            return ((Enum) value).getDeclaringClass();
+        }
         return (Class<T>) value.getClass();
     }
-    
-    public static Class getClosestType(Class reference, Collection<Class> candidates)
-    {
-        ArrayList<Class> remainingCandidates = new ArrayList(candidates);
-        
-        
+
+    /**
+     * Finds the type that is "closest" to the given type in the candidate list.
+     */
+    public static Class<?> getClosestType(Class<?> reference, Collection<Class<?>> candidates) {
+        ArrayList<Class<?>> remainingCandidates = new ArrayList<>(candidates);
+
+
         //Remove incompatible candidates
-        for(Class klass : candidates)
-        {
-            if(!klass.isAssignableFrom(reference))
+        for (Class<?> klass : candidates) {
+            if (!klass.isAssignableFrom(reference)) {
                 remainingCandidates.remove(klass);
+            }
         }
-        
-        
-        if(remainingCandidates.isEmpty()) return null;
-        if(remainingCandidates.size() == 1) return remainingCandidates.get(0);
-        
-        
-        Class currentBest = remainingCandidates.get(0);
+
+
+        if (remainingCandidates.isEmpty()) {
+            return null;
+        }
+        if (remainingCandidates.size() == 1) {
+            return remainingCandidates.get(0);
+        }
+
+
+        Class<?> currentBest = remainingCandidates.get(0);
         //Find best candidate
-        for(Class klass : remainingCandidates)
-        {
-            if(klass == currentBest) continue;
-            if(currentBest.isAssignableFrom(klass))
-            {
+        for (Class<?> klass : remainingCandidates) {
+            if (klass == currentBest) {
+                continue;
+            }
+            if (currentBest.isAssignableFrom(klass)) {
                 currentBest = klass;
             }
         }
-        
+
         return currentBest;
     }
-    
-    public static Class getClosestType(Class reference, Class... candidates)
-    {
+
+    public static Class<?> getClosestType(Class<?> reference, Class<?>... candidates) {
         return getClosestType(reference, Arrays.asList(candidates));
     }
 }

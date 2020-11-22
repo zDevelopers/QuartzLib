@@ -27,9 +27,11 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.items;
 
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import java.lang.reflect.Field;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -37,8 +39,6 @@ import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.lang.reflect.Field;
 
 /**
  * A fake enchantment to add a glowing effect on any item.
@@ -48,149 +48,148 @@ import java.lang.reflect.Field;
  * @author Amaury Carrade
  */
 public class GlowEffect extends EnchantmentWrapper {
-	private static final int ENCHANTMENT_ID = 254;
-	private static final String ENCHANTMENT_NAME = "GlowEffect";
-	private static Enchantment glow;
+    private static final int ENCHANTMENT_ID = 254;
+    private static final String ENCHANTMENT_NAME = "GlowEffect";
+    private static Enchantment glow;
 
-	protected GlowEffect(String id) {
+    protected GlowEffect(String id) {
+        super(id);
+    }
 
-		super(id);
+    /**
+     * Registers, if needed, and returns the fake enchantment to apply on items.
+     *
+     * @return an instance of the fake enchantment.
+     */
+    private static Enchantment getGlow() {
+        if (glow != null) {
+            return glow;
+        }
 
-	}
+        try {
+            // We change this to force Bukkit to accept a new enchantment.
+            // Thanks to Cybermaxke on BukkitDev.
+            Field acceptingNewField = Enchantment.class.getDeclaredField("acceptingNew");
+            acceptingNewField.setAccessible(true);
+            acceptingNewField.set(null, true);
+        } catch (Exception e) {
+            PluginLogger.error("Unable to re-enable enchantments registrations", e);
+        }
 
-	/**
-	 * Registers, if needed, and returns the fake enchantment to apply on items.
-	 *
-	 * @return an instance of the fake enchantment.
-	 */
-	private static Enchantment getGlow() {
-		if (glow != null) {
-			return glow;
-		}
+        try {
+            try {
+                glow = new GlowEffect("LURE");
+                Enchantment.registerEnchantment(glow);
+            } catch (NoSuchMethodError e) {
+                // 1.13+
 
-		try {
-			// We change this to force Bukkit to accept a new enchantment.
-			// Thanks to Cybermaxke on BukkitDev.
-			Field acceptingNewField = Enchantment.class.getDeclaredField("acceptingNew");
-			acceptingNewField.setAccessible(true);
-			acceptingNewField.set(null, true);
-		} catch (Exception e) {
-			PluginLogger.error("Unable to re-enable enchantments registrations", e);
-		}
+            }
 
-		try {
-			try {
-				glow = new GlowEffect("LURE");
-				Enchantment.registerEnchantment(glow);
-			} catch (NoSuchMethodError e) {
-				// 1.13+
+        } catch (IllegalArgumentException e) {
+            // If the enchantment is already registered - happens on server
+            // reload
+            glow = Enchantment.getByName("LURE"); // getByID required - by
+            // name it doesn't work
+            // (returns null).
+        }
 
-			}
+        return glow;
+    }
 
-		} catch (IllegalArgumentException e) {
-			// If the enchantment is already registered - happens on server
-			// reload
-			glow = Enchantment.getByName("LURE"); // getByID required - by
-														// name it doesn't work
-														// (returns null).
-		}
+    /**
+     * Adds a glowing effect to the given item stack.
+     * <p>Warning: this effect is a bit unstable: it will be thrown away if the
+     * item's meta is updated. So add it at the end.</p>
+     *
+     * @param item The item.
+     */
+    public static void addGlow(ItemStack item) {
+        if (item == null) {
+            return;
+        }
 
-		return glow;
-	}
+        final Enchantment glow = getGlow();
 
-	/**
-	 * Adds a glowing effect to the given item stack.
-	 * <p>
-	 * Warning: this effect is a bit unstable: it will be thrown away if the
-	 * item's meta is updated. So add it at the end.
-	 *
-	 * @param item The item.
-	 */
-	public static void addGlow(ItemStack item)
-	{
-		if (item == null)
-			return;
+        if (glow != null) {
+            item.addEnchantment(glow, 1);
+        } else {
+            //from https://github.com/zDevelopers/QuartzLib/pull/21/files#diff-cd248f55f1484c684edc6fa27c585899L167-R44
+            if (item.getItemMeta().hasEnchants()) {
+                return;
+            }
 
-		final Enchantment glow = getGlow();
+            final Enchantment fakeGlow =
+                    item.getType() != Material.FISHING_ROD ? Enchantment.LURE : Enchantment.ARROW_DAMAGE;
+            final ItemMeta im = item.getItemMeta();
+            im.addEnchant(fakeGlow, 1, true);
+            im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(im);
+        }
+    }
 
-		if (glow != null)
-		{
-			item.addEnchantment(glow, 1);
-		}
-		else
-		{
-			//from https://github.com/zDevelopers/QuartzLib/pull/21/files#diff-cd248f55f1484c684edc6fa27c585899L167-R44
-			if (item.getItemMeta().hasEnchants()) return;
+    /**
+     * Removes a previously-added glowing effect from the given item.
+     *
+     * @param item The item.
+     */
+    public static void removeGlow(ItemStack item) {
+        if (item == null) {
+            return;
+        }
 
-			final Enchantment fakeGlow = item.getType() != Material.FISHING_ROD ? Enchantment.LURE : Enchantment.ARROW_DAMAGE;
-			final ItemMeta im = item.getItemMeta();
-			im.addEnchant(fakeGlow, 1, true);
-			im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-			item.setItemMeta(im);
-		}
-	}
+        Enchantment glow = getGlow();
+        if (glow != null) {
+            item.removeEnchantment(glow);
+        }
+    }
 
-	/**
-	 * Removes a previously-added glowing effect from the given item.
-	 *
-	 * @param item
-	 *            The item.
-	 */
-	public static void removeGlow(ItemStack item) {
-		if (item == null)
-			return;
+    /**
+     * Returns if the give item has the glowing effect applied to it.
+     *
+     * @param item The item.
+     * @return if the give item has the glowing effect applied to it.
+     */
+    public static boolean hasGlow(ItemStack item) {
+        if (item == null) {
+            return false;
+        }
 
-		Enchantment glow = getGlow();
-		if (glow != null)
-			item.removeEnchantment(glow);
-	}
+        Enchantment glow = getGlow();
+        if (glow != null) {
+            return item.getEnchantmentLevel(glow) > 0;
+        }
+        return false;
+    }
 
-	/**
-	 * Returns if the give item has the glowing effect applied to it.
-	 * 
-	 * @param item
-	 *            The item.
-	 * @return if the give item has the glowing effect applied to it.
-	 */
-	public static boolean hasGlow(ItemStack item) {
-		if (item == null)
-			return false;
+    /* ** Enchantment properties overwritten ** */
 
-		Enchantment glow = getGlow();
-		if (glow != null)
-			return item.getEnchantmentLevel(glow) > 0;
-		return false;
-	}
+    @Override
+    public boolean canEnchantItem(ItemStack item) {
+        return true;
+    }
 
-	/* ** Enchantment properties overwritten ** */
+    @Override
+    public boolean conflictsWith(Enchantment other) {
+        return false;
+    }
 
-	@Override
-	public boolean canEnchantItem(ItemStack item) {
-		return true;
-	}
+    @Override
+    public EnchantmentTarget getItemTarget() {
+        return null;
+    }
 
-	@Override
-	public boolean conflictsWith(Enchantment other) {
-		return false;
-	}
+    @Override
+    public int getMaxLevel() {
+        return 5;
+    }
 
-	@Override
-	public EnchantmentTarget getItemTarget() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return ENCHANTMENT_NAME;
+    }
 
-	@Override
-	public int getMaxLevel() {
-		return 5;
-	}
-
-	@Override
-	public String getName() {
-		return ENCHANTMENT_NAME;
-	}
-
-	@Override
-	public int getStartLevel() {
-		return 1;
-	}
+    @Override
+    public int getStartLevel() {
+        return 1;
+    }
 }

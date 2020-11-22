@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzlib.tools.mojang;
 
 import com.google.common.base.CaseFormat;
@@ -44,8 +45,7 @@ import org.bukkit.inventory.meta.SkullMeta;
  *
  * <p>See https://minecraft.gamepedia.com/Head#Mojang_Studios_skins for the complete list.</p>
  */
-public enum MojangHead
-{
+public enum MojangHead {
     /* Mobs */
     ALEX,
     BLAZE,
@@ -92,46 +92,42 @@ public enum MojangHead
     ARROW_LEFT,
     ARROW_RIGHT,
     EXCLAMATION,
-    QUESTION
-
-    ;
+    QUESTION;
 
 
     private final String headName;
 
-    MojangHead()
-    {
+    MojangHead() {
         this.headName = "MHF_" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name());
     }
 
-    MojangHead(final String headName)
-    {
+    MojangHead(final String headName) {
         this.headName = headName;
     }
 
     /**
+     * Returns the head's name.
      * @return The Mojang head's name, to be used as skull owner.
      */
-    public String getHeadName()
-    {
+    public String getHeadName() {
         return headName;
     }
 
     /**
+     * Returns the head as an ItemStack.
      * @return The head as an ItemStack (of type {@link Material#PLAYER_HEAD}).
      */
-    public ItemStack asItem()
-    {
+    public ItemStack asItem() {
         return asItemBuilder().item();
     }
 
     /**
+     * Returns the head as an ItemStackBuilder.
      * @return The head as an {@link ItemStackBuilder}, ready to be completed.
      */
     // Silence the setOwner deprecation warning, because a string name is the only clean way to get a MHF head.
     @SuppressWarnings("deprecation")
-    public ItemStackBuilder asItemBuilder()
-    {
+    public ItemStackBuilder asItemBuilder() {
         return new ItemStackBuilder(Material.PLAYER_HEAD)
                 .withMeta((SkullMeta s) -> s.setOwner(headName));
     }

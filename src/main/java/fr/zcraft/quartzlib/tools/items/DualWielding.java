@@ -31,17 +31,15 @@
 package fr.zcraft.quartzlib.tools.items;
 
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
+import java.lang.reflect.InvocationTargetException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * This class provides various utilities for handling dual-wielding.
  */
-public enum DualWielding 
-{
+public enum DualWielding {
     /**
      * Represents the main hand of the player.
      */
@@ -50,39 +48,39 @@ public enum DualWielding
      * Represents the off hand of the player.
      */
     OFF_HAND;
-    
+
     private static Boolean available = null;
-    
+
     // Dual-wielding isn't available in all builds of Bukkit/Spigot
-    private static void init()
-    {
+    private static void init() {
         available = Reflection.hasMethod(PlayerInventory.class, "getItemInMainHand")
                 && Reflection.hasMethod(PlayerInventory.class, "getItemInOffHand")
                 && Reflection.hasMethod(PlayerInventory.class, "setItemInMainHand", ItemStack.class)
                 && Reflection.hasMethod(PlayerInventory.class, "setItemInOffHand", ItemStack.class);
     }
-    
-    private static boolean checkAvailable()
-    {
-        if (available == null) init();
+
+    private static boolean checkAvailable() {
+        if (available == null) {
+            init();
+        }
         return available;
     }
-    
+
     /**
      * Retrieves the item in the given player's hand.
      * If dual-wielding is not available, it is retrieved from the players' only hand.
+     *
      * @param player The player to get the item from
-     * @param hand The hand 
+     * @param hand   The hand
      * @return The retrieved item.
      */
-    public static ItemStack getItemInHand(Player player, DualWielding hand)
-    {
-        try
-        {
-            if(!checkAvailable()) return player.getItemInHand();
-            
-            switch(hand)
-            {
+    public static ItemStack getItemInHand(Player player, DualWielding hand) {
+        try {
+            if (!checkAvailable()) {
+                return player.getItemInHand();
+            }
+
+            switch (hand) {
                 case MAIN_HAND:
                     return (ItemStack) Reflection.call(player.getInventory(), "getItemInMainHand");
                 case OFF_HAND:
@@ -90,34 +88,32 @@ public enum DualWielding
                 default:
                     return player.getItemInHand();
             }
-        }
-        catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex)
-        {
+        } catch (NoSuchMethodException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException ex) {
             return player.getItemInHand();
         }
     }
-    
+
     /**
      * Sets the item in the given player's hand.
      * If dual-wielding is not available, it is put in the players' only hand.
+     *
      * @param player The player
-     * @param hand The player's hand
-     * @param item The item to put in the specified hand.
+     * @param hand   The player's hand
+     * @param item   The item to put in the specified hand.
      */
-    public static void setItemInHand(Player player, DualWielding hand, ItemStack item)
-    {
-        if(hand == null) return;
-        
-        if(!checkAvailable())
-        {
+    public static void setItemInHand(Player player, DualWielding hand, ItemStack item) {
+        if (hand == null) {
+            return;
+        }
+
+        if (!checkAvailable()) {
             player.setItemInHand(item);
             return;
         }
-            
-        try
-        {
-            switch(hand)
-            {
+
+        try {
+            switch (hand) {
                 case MAIN_HAND:
                     Reflection.call(player.getInventory(), "setItemInMainHand", item);
                     break;
@@ -127,32 +123,34 @@ public enum DualWielding
                 default:
                     player.setItemInHand(item);
             }
-        }
-        catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex)
-        {
+        } catch (NoSuchMethodException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException ex) {
             player.setItemInHand(item);
         }
     }
-    
+
     /**
      * Returns which player's hand is holding the specific item.
-     * If dual-wielding is not available, the item is tested against the 
+     * If dual-wielding is not available, the item is tested against the
      * player's only hand.
+     *
      * @param player The player
-     * @param item The item
+     * @param item   The item
      * @return The hand holding the given item, or null if neither of them is holding it.
      */
-    public static DualWielding getHoldingHand(Player player, ItemStack item)
-    {
-        if(!checkAvailable())
+    public static DualWielding getHoldingHand(Player player, ItemStack item) {
+        if (!checkAvailable()) {
             return player.getItemInHand().equals(item) ? MAIN_HAND : null;
-        
-        if(getItemInHand(player, OFF_HAND).equals(item))
+        }
+
+        if (getItemInHand(player, OFF_HAND).equals(item)) {
             return OFF_HAND;
-        
-        if(getItemInHand(player, MAIN_HAND).equals(item))
+        }
+
+        if (getItemInHand(player, MAIN_HAND).equals(item)) {
             return MAIN_HAND;
-        
+        }
+
         return null;
     }
 }
