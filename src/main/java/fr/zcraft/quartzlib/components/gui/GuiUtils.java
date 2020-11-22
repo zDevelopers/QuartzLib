@@ -32,6 +32,10 @@ package fr.zcraft.quartzlib.components.gui;
 
 import fr.zcraft.quartzlib.tools.items.InventoryUtils;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -40,16 +44,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 
 /**
  * Various utility methods for GUIs.
  */
-public final class GuiUtils
-{
+public final class GuiUtils {
     /**
      * Stores the ItemStack at the given index of a GUI's inventory. The
      * inventory is only updated the next time the Bukkit Scheduler runs (i.e.
@@ -59,14 +58,12 @@ public final class GuiUtils
      * @param slot The slot where to put the ItemStack
      * @param item The ItemStack to set
      */
-    public static void setItemLater(InventoryGui gui, int slot, ItemStack item)
-    {
+    public static void setItemLater(InventoryGui gui, int slot, ItemStack item) {
         RunTask.nextTick(() -> {
             Inventory inventory = gui.getInventory();
 
             inventory.setItem(slot, item);
-            for (HumanEntity player : inventory.getViewers())
-            {
+            for (HumanEntity player : inventory.getViewers()) {
                 ((Player) player).updateInventory();
             }
         });
@@ -76,11 +73,9 @@ public final class GuiUtils
      * One-liner to construct an {@link ItemStack}.
      *
      * @param material The stack's material.
-     *
      * @return The constructed {@link ItemStack}.
      */
-    public static ItemStack makeItem(Material material)
-    {
+    public static ItemStack makeItem(Material material) {
         return makeItem(material, null, (List<String>) null);
     }
 
@@ -89,11 +84,9 @@ public final class GuiUtils
      *
      * @param material The stack's material.
      * @param title    The stack's title.
-     *
      * @return The constructed {@link ItemStack}.
      */
-    public static ItemStack makeItem(Material material, String title)
-    {
+    public static ItemStack makeItem(Material material, String title) {
         return makeItem(material, title, (List<String>) null);
     }
 
@@ -103,11 +96,9 @@ public final class GuiUtils
      * @param material  The stack's material.
      * @param title     The stack's title.
      * @param loreLines The stack's lore lines.
-     *
      * @return The constructed {@link ItemStack}.
      */
-    public static ItemStack makeItem(Material material, String title, String... loreLines)
-    {
+    public static ItemStack makeItem(Material material, String title, String... loreLines) {
         return makeItem(material, title, Arrays.asList(loreLines));
     }
 
@@ -117,35 +108,32 @@ public final class GuiUtils
      * @param material  The stack's material.
      * @param title     The stack's title.
      * @param loreLines The stack's lore lines.
-     *
      * @return The constructed {@link ItemStack}.
      */
-    public static ItemStack makeItem(Material material, String title, List<String> loreLines)
-    {
+    public static ItemStack makeItem(Material material, String title, List<String> loreLines) {
         return makeItem(new ItemStack(material), title, loreLines);
     }
 
     /**
      * One-liner to update an {@link ItemStack}'s {@link ItemMeta}.
-     *
-     * If the stack is a map, it's attributes will be hidden.
+     * <p>If the stack is a map, it's attributes will be hidden.</p>
      *
      * @param itemStack The original {@link ItemStack}. This stack will be
      *                  directly modified.
      * @param title     The stack's title.
      * @param loreLines A list containing the stack's lines.
-     *
      * @return The same {@link ItemStack}, but with an updated {@link ItemMeta}.
      */
-    public static ItemStack makeItem(ItemStack itemStack, String title, List<String> loreLines)
-    {
-        ItemMeta meta = itemStack.getItemMeta();
+    public static ItemStack makeItem(ItemStack itemStack, String title, List<String> loreLines) {
+        ItemMeta meta = Objects.requireNonNull(itemStack.getItemMeta());
 
-        if (title != null)
+        if (title != null) {
             meta.setDisplayName(title);
+        }
 
-        if (loreLines != null)
+        if (loreLines != null) {
             meta.setLore(loreLines);
+        }
 
         itemStack.setItemMeta(meta);
         return itemStack;
@@ -157,11 +145,9 @@ public final class GuiUtils
      * 28 characters or less.
      *
      * @param text The text.
-     *
      * @return The lore lines.
      */
-    public static List<String> generateLore(String text)
-    {
+    public static List<String> generateLore(String text) {
         return generateLore(text, 28);
     }
 
@@ -171,11 +157,9 @@ public final class GuiUtils
      *
      * @param text       The text.
      * @param lineLength The maximal length of a line.
-     *
      * @return The lore lines.
      */
-    public static List<String> generateLore(String text, int lineLength)
-    {
+    public static List<String> generateLore(String text, int lineLength) {
         final List<String> lore = new ArrayList<>();
         final String[] segments = text.split("\n");
 
@@ -183,12 +167,10 @@ public final class GuiUtils
 
         // We divide by segments of blocks without line break to keep
         // these breaks in the final result
-        for (String segment : segments)
-        {
+        for (String segment : segments) {
             segment = previousSegmentFormatting + segment;
 
-            if (ChatColor.stripColor(segment).length() <= lineLength)
-            {
+            if (ChatColor.stripColor(segment).length() <= lineLength) {
                 lore.add(segment);
                 continue;
             }
@@ -196,22 +178,21 @@ public final class GuiUtils
             final String[] words = segment.split(" ");
             String currentLine = "";
 
-            for (final String word : words)
-            {
-                if (ChatColor.stripColor(currentLine + word).length() > lineLength && ChatColor.stripColor(word).length() <= lineLength)
-                {
+            for (final String word : words) {
+                if (ChatColor.stripColor(currentLine + word).length() > lineLength
+                        && ChatColor.stripColor(word).length() <= lineLength) {
                     lore.add(currentLine.trim());
-                    currentLine = ChatColor.getLastColors(currentLine) + word + " "; // It's important to preserve the formatting
-                }
-                else
-                {
+                    currentLine = ChatColor.getLastColors(currentLine) + word
+                            + " "; // It's important to preserve the formatting
+                } else {
                     currentLine += word + " ";
                 }
             }
 
             // Don't forget the last line...
-            if (!ChatColor.stripColor(currentLine.trim()).isEmpty())
+            if (!ChatColor.stripColor(currentLine.trim()).isEmpty()) {
                 lore.add(currentLine.trim());
+            }
 
             previousSegmentFormatting = ChatColor.getLastColors(lore.get(lore.size() - 1));
         }
@@ -224,11 +205,9 @@ public final class GuiUtils
      *
      * @param text   The original text.
      * @param prefix The prefix to add to each line.
-     *
      * @return A prefixed and fixed-length text.
      */
-    public static String generatePrefixedFixedLengthString(String prefix, String text)
-    {
+    public static String generatePrefixedFixedLengthString(String prefix, String text) {
         return generatePrefixedFixedLengthString(prefix, text, 55);
     }
 
@@ -238,16 +217,15 @@ public final class GuiUtils
      * @param text       The original text.
      * @param prefix     The prefix to add to each line.
      * @param lineLength The maximal length of each line.
-     *
      * @return A prefixed and fixed-length text.
      */
-    public static String generatePrefixedFixedLengthString(String prefix, String text, int lineLength)
-    {
+    public static String generatePrefixedFixedLengthString(String prefix, String text, int lineLength) {
         final List<String> lines = generateLore(text, lineLength);
         final StringBuilder result = new StringBuilder();
 
-        for (final String line : lines)
+        for (final String line : lines) {
             result.append(prefix).append(line).append('\n');
+        }
 
         return result.toString().trim();
     }
@@ -258,13 +236,11 @@ public final class GuiUtils
      *
      * @param inventory1 The first inventory.
      * @param inventory2 The other inventory.
-     *
      * @return {@code true} if the two inventories are the same one.
      * @deprecated Use InventoryUtils.sameInventories() instead.
      */
     @Deprecated
-    public static boolean sameInventories(Inventory inventory1, Inventory inventory2)
-    {
+    public static boolean sameInventories(Inventory inventory1, Inventory inventory2) {
         return InventoryUtils.sameInventories(inventory1, inventory2);
     }
 

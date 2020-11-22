@@ -31,182 +31,170 @@
 package fr.zcraft.quartzlib.components.worker;
 
 import fr.zcraft.quartzlib.core.QuartzLib;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
-
 import java.util.ArrayDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 
-class WorkerMainThreadExecutor implements Runnable
-{
+class WorkerMainThreadExecutor implements Runnable {
     private static final int WATCH_LOOP_DELAY = 1;
-    
+
     private final String name;
     private final ArrayDeque<WorkerFuture> mainThreadQueue = new ArrayDeque<>();
     private BukkitTask mainThreadTask;
-    
-    public WorkerMainThreadExecutor(String name)
-    {
+
+    public WorkerMainThreadExecutor(String name) {
         this.name = name;
     }
-    
-    public void init()
-    {
+
+    public void init() {
         mainThreadTask = Bukkit.getScheduler().runTaskTimer(QuartzLib.getPlugin(), this, 0, WATCH_LOOP_DELAY);
     }
-    
-    public void exit()
-    {
+
+    public void exit() {
         mainThreadTask.cancel();
         mainThreadTask = null;
     }
-    
-    public <T> Future<T> submit(Callable<T> callable)
-    {
+
+    public <T> Future<T> submit(Callable<T> callable) {
         WorkerFuture<T> future = new WorkerFuture<T>(callable);
-        synchronized(mainThreadQueue)
-        {
+        synchronized (mainThreadQueue) {
             mainThreadQueue.add(future);
         }
         return future;
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         WorkerFuture currentFuture;
-        synchronized(mainThreadQueue)
-        {
-            if(mainThreadQueue.isEmpty()) return;
+        synchronized (mainThreadQueue) {
+            if (mainThreadQueue.isEmpty()) {
+                return;
+            }
             currentFuture = mainThreadQueue.pop();
         }
-        
+
         currentFuture.runCallable();
     }
-    
-    private class WorkerFuture<T> implements Future<T>
-    {
+
+    private class WorkerFuture<T> implements Future<T> {
         private final Callable<T> callable;
         private boolean isCancelled;
         private boolean isDone;
         private Exception executionException;
         private T value;
-        
-        public WorkerFuture(Callable<T> callable)
-        {
+
+        public WorkerFuture(Callable<T> callable) {
             this.callable = callable;
         }
-        
-        public void runCallable()
-        {
-            try
-            {
+
+        public void runCallable() {
+            try {
                 value = callable.call();
-            }
-            catch(Exception ex)
-            {
+            } catch (Exception ex) {
                 executionException = ex;
-            }
-            finally
-            {
+            } finally {
                 isDone = true;
-                synchronized(this){this.notifyAll();}
+                synchronized (this) {
+                    this.notifyAll();
+                }
             }
         }
 
         @Override
-        public boolean cancel(boolean mayInterruptIfRunning)
-        {
-            if(this.isCancelled || this.isDone) return false;
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            if (this.isCancelled || this.isDone) {
+                return false;
+            }
             this.isCancelled = true;
             this.isDone = true;
             return true;
         }
 
         @Override
-        public boolean isCancelled()
-        {
+        public boolean isCancelled() {
             return this.isCancelled;
         }
 
         @Override
-        public boolean isDone()
-        {
+        public boolean isDone() {
             return this.isDone;
         }
 
         @Override
-        public T get() throws InterruptedException, ExecutionException
-        {
+        public T get() throws InterruptedException, ExecutionException {
             waitForCompletion();
-            if(executionException != null) throw new ExecutionException(executionException);
+            if (executionException != null) {
+                throw new ExecutionException(executionException);
+            }
             return value;
         }
 
         @Override
-        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException
-        {
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             waitForCompletion(timeout, unit);
-            if(executionException != null) throw new ExecutionException(executionException);
+            if (executionException != null) {
+                throw new ExecutionException(executionException);
+            }
             return value;
         }
-        
-        private void waitForCompletion(long timeout) throws InterruptedException, TimeoutException
-        {
-            synchronized(this)
-            {
+
+        private void waitForCompletion(long timeout) throws InterruptedException, TimeoutException {
+            synchronized (this) {
                 long remainingTime;
                 long timeoutTime = System.currentTimeMillis() + timeout;
-                while(!isDone) 
-                {
+                while (!isDone) {
                     remainingTime = timeoutTime - System.currentTimeMillis();
-                    if(remainingTime <= 0) throw new TimeoutException();
+                    if (remainingTime <= 0) {
+                        throw new TimeoutException();
+                    }
                     this.wait(remainingTime);
                 }
             }
         }
-        
-        private void waitForCompletion() throws InterruptedException
-        {
-            synchronized(this)
-            {
-                while(!isDone) this.wait();
+
+        private void waitForCompletion() throws InterruptedException {
+            synchronized (this) {
+                while (!isDone) {
+                    this.wait();
+                }
             }
         }
-        
-        private void waitForCompletion(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException
-        {
+
+        private void waitForCompletion(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             long millis = 0;
-            switch(unit)
-            {
+            switch (unit) {
                 case NANOSECONDS:
-                    millis = timeout / 10^6;
+                    millis = timeout / 10 ^ 6;
                     break;
                 case MICROSECONDS:
-                    millis = timeout / 10^3;
+                    millis = timeout / 10 ^ 3;
                     break;
-                case MILLISECONDS: 
+                case MILLISECONDS:
                     millis = timeout;
                     break;
                 case SECONDS:
-                    millis = timeout * 10^3;
+                    millis = timeout * 10 ^ 3;
                     break;
-                case MINUTES: 
-                    millis = timeout * 10^3 * 60;
+                case MINUTES:
+                    millis = timeout * 10 ^ 3 * 60;
                     break;
-                case HOURS: 
-                    millis = timeout * 10^3 * 3600;
+                case HOURS:
+                    millis = timeout * 10 ^ 3 * 3600;
                     break;
                 case DAYS:
-                    millis = timeout * 10^3 * 3600 * 24;
+                    millis = timeout * 10 ^ 3 * 3600 * 24;
+                    break;
+                default:
+                    break;
             }
             waitForCompletion(millis);
         }
-        
-        
+
+
     }
 }

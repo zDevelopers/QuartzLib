@@ -27,13 +27,13 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.worker;
 
-import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.core.QuartzComponent;
+import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
-
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -42,190 +42,172 @@ import java.util.concurrent.Future;
 /**
  * The base class for workers.
  * A worker is a thread that can handle multiple tasks, which are executed in a queue.
- *
  */
-public abstract class Worker extends QuartzComponent
-{
+public abstract class Worker extends QuartzComponent {
     /*===== Static API =====*/
     private static final HashMap<Class<? extends Worker>, Worker> runningWorkers = new HashMap();
     private static final HashMap<Class<? extends WorkerRunnable>, Worker> runnables = new HashMap();
-
-
-    protected static <T> Future<T> submitToMainThread(Callable<T> callable)
-    {
-        return getCallerWorkerFromRunnable()._submitToMainThread(callable);
-    }
-
-    protected static void submitQuery(WorkerRunnable runnable)
-    {
-        getCallerWorker()._submitQuery(runnable);
-    }
-
-    protected static void submitQuery(WorkerRunnable runnable, WorkerCallback callback)
-    {
-        getCallerWorker()._submitQuery(runnable, callback);
-    }
-
-    private static Worker getCallerWorker()
-    {
-        Class<? extends Worker> caller = Reflection.getCallerClass(Worker.class);
-        if(caller == null)
-            throw new IllegalAccessError("Queries must be submitted from a Worker class");
-
-        return getWorker(caller);
-    }
-
-    private static Worker getWorker(Class<? extends Worker> workerClass)
-    {
-        Worker worker = runningWorkers.get(workerClass);
-        if(worker == null)
-            throw new IllegalStateException("Worker '" + workerClass.getName() + "' has not been correctly initialized");
-
-        return worker;
-    }
-
-    private static Worker getCallerWorkerFromRunnable()
-    {
-        Class<? extends WorkerRunnable> caller = Reflection.getCallerClass(WorkerRunnable.class);
-        if(caller == null)
-            throw new IllegalAccessError("Main thread queries must be submitted from a WorkerRunnable");
-
-        Worker worker = runnables.get(caller);
-        if(worker == null)
-            throw new IllegalStateException("Caller runnable does not belong to any worker");
-
-        return worker;
-    }
-
     private final String name;
     private final ArrayDeque<WorkerRunnable> runQueue = new ArrayDeque<>();
-
     private final WorkerCallbackManager callbackManager;
     private final WorkerMainThreadExecutor mainThreadExecutor;
     private Thread thread;
 
-    public Worker()
-    {
+    /**
+     * Creates a new worker.
+     */
+    public Worker() {
         String tempName = null;
         WorkerAttributes attributes = getClass().getAnnotation(WorkerAttributes.class);
 
-        if(attributes != null)
-        {
+        if (attributes != null) {
             tempName = attributes.name();
             this.mainThreadExecutor = attributes.queriesMainThread() ? new WorkerMainThreadExecutor(tempName) : null;
-        }
-        else
-        {
+        } else {
             this.mainThreadExecutor = null;
         }
 
-        if(tempName == null || tempName.isEmpty())
+        if (tempName == null || tempName.isEmpty()) {
             tempName = getClass().getSimpleName();
+        }
 
         this.name = tempName;
         this.callbackManager = new WorkerCallbackManager(tempName);
     }
 
+    protected static <T> Future<T> submitToMainThread(Callable<T> callable) {
+        return getCallerWorkerFromRunnable().internalSubmitToMainThread(callable);
+    }
+
+    protected static void submitQuery(WorkerRunnable runnable) {
+        getCallerWorker().internalSubmitQuery(runnable);
+    }
+
+    protected static void submitQuery(WorkerRunnable runnable, WorkerCallback callback) {
+        getCallerWorker().internalSubmitQuery(runnable, callback);
+    }
+
+    private static Worker getCallerWorker() {
+        Class<? extends Worker> caller = Reflection.getCallerClass(Worker.class);
+        if (caller == null) {
+            throw new IllegalAccessError("Queries must be submitted from a Worker class");
+        }
+
+        return getWorker(caller);
+    }
+
+    private static Worker getWorker(Class<? extends Worker> workerClass) {
+        Worker worker = runningWorkers.get(workerClass);
+        if (worker == null) {
+            throw new IllegalStateException(
+                    "Worker '" + workerClass.getName() + "' has not been correctly initialized");
+        }
+
+        return worker;
+    }
+
+    private static Worker getCallerWorkerFromRunnable() {
+        Class<? extends WorkerRunnable> caller = Reflection.getCallerClass(WorkerRunnable.class);
+        if (caller == null) {
+            throw new IllegalAccessError("Main thread queries must be submitted from a WorkerRunnable");
+        }
+
+        Worker worker = runnables.get(caller);
+        if (worker == null) {
+            throw new IllegalStateException("Caller runnable does not belong to any worker");
+        }
+
+        return worker;
+    }
+
     @Override
-    public void onEnable()
-    {
-        if(thread != null && thread.isAlive())
-        {
+    public void onEnable() {
+        if (thread != null && thread.isAlive()) {
             PluginLogger.warning("Restarting thread '{0}'.", name);
             onDisable();
         }
         callbackManager.init();
-        if(mainThreadExecutor != null) mainThreadExecutor.init();
+        if (mainThreadExecutor != null) {
+            mainThreadExecutor.init();
+        }
         runningWorkers.put(getClass(), this);
         thread = createThread();
         thread.start();
     }
 
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         thread.interrupt();
         callbackManager.exit();
-        if(mainThreadExecutor != null) mainThreadExecutor.exit();
+        if (mainThreadExecutor != null) {
+            mainThreadExecutor.exit();
+        }
         thread = null;
         runningWorkers.remove(getClass());
     }
 
-    private void run()
-    {
+    private void run() {
         WorkerRunnable currentRunnable;
 
-        while(!Thread.interrupted())
-        {
-            synchronized(runQueue)
-            {
-                try
-                {
-                    while(runQueue.isEmpty()) runQueue.wait();
-                }
-                catch(InterruptedException ex)
-                {
+        while (!Thread.interrupted()) {
+            synchronized (runQueue) {
+                try {
+                    while (runQueue.isEmpty()) {
+                        runQueue.wait();
+                    }
+                } catch (InterruptedException ex) {
                     break;
                 }
                 currentRunnable = runQueue.pop();
             }
 
-            try
-            {
+            try {
                 callbackManager.callback(currentRunnable, currentRunnable.run());
-            }
-            catch(Throwable ex)
-            {
+            } catch (Throwable ex) {
                 callbackManager.callback(currentRunnable, null, ex);
             }
             runnables.remove(currentRunnable.getClass());
         }
     }
 
-    private void _submitQuery(WorkerRunnable runnable)
-    {
+    private void internalSubmitQuery(WorkerRunnable runnable) {
         attachRunnable(runnable);
-        synchronized(runQueue)
-        {
+        synchronized (runQueue) {
             runQueue.add(runnable);
             runQueue.notify();
         }
     }
 
-    private void _submitQuery(WorkerRunnable runnable, WorkerCallback callback)
-    {
+    private void internalSubmitQuery(WorkerRunnable runnable, WorkerCallback callback) {
         callbackManager.setupCallback(runnable, callback);
-        _submitQuery(runnable);
+        internalSubmitQuery(runnable);
     }
 
-    private <T> Future<T> _submitToMainThread(Callable<T> callable)
-    {
-        if(mainThreadExecutor != null) return mainThreadExecutor.submit(callable);
+    private <T> Future<T> internalSubmitToMainThread(Callable<T> callable) {
+        if (mainThreadExecutor != null) {
+            return mainThreadExecutor.submit(callable);
+        }
         return null;
     }
 
-    private Thread createThread()
-    {
-        return new Thread(getName())
-        {
+    private Thread createThread() {
+        return new Thread(getName()) {
             @Override
-            public void run()
-            {
+            public void run() {
                 Worker.this.run();
             }
         };
     }
 
-    private void attachRunnable(WorkerRunnable runnable)
-    {
-        if(runnable.getWorker() != null && runnable.getWorker() != this)
+    private void attachRunnable(WorkerRunnable runnable) {
+        if (runnable.getWorker() != null && runnable.getWorker() != this) {
             throw new IllegalArgumentException("This runnable is already attached to another worker");
+        }
         runnable.setWorker(this);
         runnables.put(runnable.getClass(), this);
     }
 
-    public String getName()
-    {
+    public String getName() {
         return QuartzLib.getPlugin().getName() + "-" + name;
     }
 

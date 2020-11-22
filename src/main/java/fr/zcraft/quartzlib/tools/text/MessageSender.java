@@ -45,7 +45,7 @@ public final class MessageSender
 {
     private static boolean enabled = true;
 
-    private final static String nmsVersion = Reflection.getBukkitPackageVersion();
+    private static final String nmsVersion = Reflection.getBukkitPackageVersion();
 
     private static Class<?> packetPlayOutChatClass;
     private static Class<?> chatSerializerClass;

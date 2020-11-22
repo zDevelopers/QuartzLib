@@ -27,22 +27,20 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.scoreboard;
 
 import fr.zcraft.quartzlib.core.QuartzComponent;
 
 
-public class SidebarScoreboard extends QuartzComponent
-{
+public class SidebarScoreboard extends QuartzComponent {
     @Override
-    protected void onEnable()
-    {
+    protected void onEnable() {
         Sidebar.init();
     }
 
     @Override
-    protected void onDisable()
-    {
+    protected void onDisable() {
         Sidebar.exit();
     }
 }

@@ -27,17 +27,16 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.nbt;
 
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
-
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 
 
-enum NBTType
-{
+enum NbtType {
     TAG_END((byte) 0, null, Void.class),
     TAG_BYTE((byte) 1, "NBTTagByte", byte.class, Byte.class),
     TAG_SHORT((byte) 2, "NBTTagShort", short.class, Short.class),
@@ -57,17 +56,42 @@ enum NBTType
     private final String nmsClassName;
     private Class nmsClass;
 
-    NBTType(byte id, String nmsClassName, Class... types)
-    {
+    NbtType(byte id, String nmsClassName, Class... types) {
         this.id = id;
         this.types = types;
         this.nmsClassName = nmsClassName;
     }
 
-    public String getNmsTagFieldName()
-    {
-        switch (this)
-        {
+    public static NbtType fromId(byte id) {
+        for (NbtType type : NbtType.values()) {
+            if (id == type.id) {
+                return type;
+            }
+        }
+
+        throw new IllegalArgumentException("Illegal type id: " + id);
+    }
+
+    public static NbtType fromNmsNbtTag(Object nmsNbtTag) {
+        try {
+            return fromId((byte) Reflection.call(nmsNbtTag, "getTypeId"));
+        } catch (Exception ex) {
+            throw new NBTException("Unable to retrieve type of nbt tag", ex);
+        }
+    }
+
+    public static NbtType fromClass(Class klass) {
+        for (NbtType type : NbtType.values()) {
+            if (type.isAssignableFrom(klass)) {
+                return type;
+            }
+        }
+
+        throw new IllegalArgumentException("Illegal type class: " + klass);
+    }
+
+    public String getNmsTagFieldName() {
+        switch (this) {
             case TAG_COMPOUND:
                 return "map";
             case TAG_LIST:
@@ -77,161 +101,106 @@ enum NBTType
         }
     }
 
-    public Class[] getJavaTypes()
-    {
+    public Class[] getJavaTypes() {
         return types;
     }
 
-    public boolean isAssignableFrom(Class otherType)
-    {
-        for (Class type : types)
-        {
-            if (type.isAssignableFrom(otherType))
+    public boolean isAssignableFrom(Class otherType) {
+        for (Class type : types) {
+            if (type.isAssignableFrom(otherType)) {
                 return true;
+            }
         }
 
         return false;
     }
 
-    public int getId()
-    {
+    public int getId() {
         return id;
     }
 
-    public String getNMSClassName()
-    {
+    public String getNmsClassName() {
         return nmsClassName;
     }
 
-    public Class getNMSClass()
-    {
-        if (nmsClassName == null)
+    public Class getNmsClass() {
+        if (nmsClassName == null) {
             return null;
-
-        try
-        {
-            if (nmsClass == null)
-                nmsClass = Reflection.getMinecraftClassByName(nmsClassName);
         }
-        catch (Exception ex)
-        {
+
+        try {
+            if (nmsClass == null) {
+                nmsClass = Reflection.getMinecraftClassByName(nmsClassName);
+            }
+        } catch (Exception ex) {
             throw new NBTException("Unable to retrieve NBT tag class", ex);
         }
 
         return nmsClass;
     }
 
-    public Object newTag(Object value)
-    {
-        if (value == null)
+    public Object newTag(Object value) {
+        if (value == null) {
             throw new IllegalArgumentException("Contents of a tag cannot be null");
-        if (!isAssignableFrom(value.getClass()))
-            throw new IllegalArgumentException("Invalid content type '" + value.getClass() + "' for tag " + nmsClassName);
+        }
+        if (!isAssignableFrom(value.getClass())) {
+            throw new IllegalArgumentException(
+                    "Invalid content type '" + value.getClass() + "' for tag " + nmsClassName);
+        }
 
-        try
-        {
+        try {
             final Object tag;
-            switch (this)
-            {            
+            switch (this) {
                 case TAG_COMPOUND:
-                    tag = Reflection.instantiate(getNMSClass());
-                    if (value instanceof NBTCompound)
-                    {
+                    tag = Reflection.instantiate(getNmsClass());
+                    if (value instanceof NBTCompound) {
                         setData(tag, ((NBTCompound) value).nmsNbtMap);
-                    }
-                    else
-                    {
+                    } else {
                         new NBTCompound(tag).putAll((Map) value);
                     }
                     break;
 
                 case TAG_LIST:
-                    tag = Reflection.instantiate(getNMSClass());
-                    if (value instanceof NBTList)
-                    {
+                    tag = Reflection.instantiate(getNmsClass());
+                    if (value instanceof NBTList) {
                         setData(tag, ((NBTList) value).nmsNbtList);
-                    }
-                    else
-                    {
+                    } else {
                         new NBTList(tag).addAll((List) value);
                     }
 
                     // If a NBTTagList is built from scratch, the NMS object is created lately
                     // and may not have the list's type registered at this point.
-                    NBTList.guessAndWriteTypeToNBTTagList(tag);
+                    NBTList.guessAndWriteTypeToNbtTagList(tag);
                     break;
 
                 default:
-                	Constructor cons=Reflection.findConstructor(getNMSClass(), 1);
-                	cons.setAccessible(true);
-                	tag=cons.newInstance(value);
+                    Constructor cons = Reflection.findConstructor(getNmsClass(), 1);
+                    cons.setAccessible(true);
+                    tag = cons.newInstance(value);
             }
-            
+
             return tag;
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             throw new NBTException("Unable to create NBT tag", ex);
         }
     }
 
-    public Object getData(Object nmsNBTTag)
-    {
-        if (nmsNBTTag == null)
+    public Object getData(Object nmsNbtTag) {
+        if (nmsNbtTag == null) {
             return null;
-        try
-        {
-            return Reflection.getFieldValue(nmsNBTTag, getNmsTagFieldName());
         }
-        catch (Exception ex)
-        {
+        try {
+            return Reflection.getFieldValue(nmsNbtTag, getNmsTagFieldName());
+        } catch (Exception ex) {
             throw new NBTException("Unable to retrieve NBT tag data", ex);
         }
     }
 
-    public void setData(Object nmsNBTTag, Object value)
-    {
-        try
-        {
-            Reflection.setFieldValue(nmsNBTTag, getNmsTagFieldName(), value);
-        }
-        catch (Exception ex)
-        {
+    public void setData(Object nmsNbtTag, Object value) {
+        try {
+            Reflection.setFieldValue(nmsNbtTag, getNmsTagFieldName(), value);
+        } catch (Exception ex) {
             throw new NBTException("Unable to set NBT tag data", ex);
         }
-    }
-
-    public static NBTType fromId(byte id)
-    {
-        for (NBTType type : NBTType.values())
-        {
-            if (id == type.id)
-                return type;
-        }
-
-        throw new IllegalArgumentException("Illegal type id: " + id);
-    }
-
-    public static NBTType fromNmsNbtTag(Object nmsNbtTag)
-    {
-        try
-        {
-            return fromId((byte) Reflection.call(nmsNbtTag, "getTypeId"));
-        }
-        catch (Exception ex)
-        {
-            throw new NBTException("Unable to retrieve type of nbt tag", ex);
-        }
-    }
-
-    public static NBTType fromClass(Class klass)
-    {
-        for (NBTType type : NBTType.values())
-        {
-            if (type.isAssignableFrom(klass))
-                return type;
-        }
-
-        throw new IllegalArgumentException("Illegal type class: " + klass);
     }
 }

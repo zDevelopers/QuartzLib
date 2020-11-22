@@ -27,43 +27,41 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.quartzlib.components.scoreboard.sender;
 
-import org.apache.commons.lang.Validate;
+package fr.zcraft.quartzlib.components.scoreboard.sender;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.apache.commons.lang.Validate;
 
 
 /**
  * Represents an objective behind a {@link fr.zcraft.quartzlib.components.scoreboard.Sidebar Sidebar}.
  */
-public class SidebarObjective
-{
+public class SidebarObjective {
     public static final int MAX_LENGTH_OBJECTIVE_NAME = 16;
     public static final int MAX_LENGTH_OBJECTIVE_DISPLAY_NAME = 32;
     public static final int MAX_LENGTH_SCORE_NAME = 40;
 
     private final String name;
-    private String displayName;
-
     private final Map<String, Integer> scores = new HashMap<>();
     private final Set<UUID> receivers = new HashSet<>();
+    private String displayName;
 
 
     /**
      * Constructs a new sidebar objective.
      *
-     * @param name The name of the objective.
+     * @param name        The name of the objective.
      * @param displayName The display name of this objective (i.e. the title of the sidebar).
      */
-    public SidebarObjective(String name, String displayName)
-    {
-        if(name == null)
+    public SidebarObjective(String name, String displayName) {
+        if (name == null) {
             name = Math.abs(UUID.randomUUID().getLeastSignificantBits()) + "";
+        }
 
         this.name = name.substring(0, Math.min(MAX_LENGTH_OBJECTIVE_NAME, name.length()));
         setDisplayName(displayName);
@@ -74,16 +72,14 @@ public class SidebarObjective
      *
      * @param displayName The display name of this objective (i.e. the title of the sidebar).
      */
-    public SidebarObjective(String displayName)
-    {
+    public SidebarObjective(String displayName) {
         this(null, displayName);
     }
 
     /**
      * Constructs a new sidebar objective with a random name and without display name.
      */
-    public SidebarObjective()
-    {
+    public SidebarObjective() {
         this(null);
     }
 
@@ -91,36 +87,30 @@ public class SidebarObjective
     /**
      * Sets a score.
      *
-     * @param name The name of the score.
+     * @param name  The name of the score.
      * @param score The score associated.
      * @return {@code true} if a previous score was overwritten by this one.
      */
-    public boolean setScore(String name, Integer score)
-    {
+    public boolean setScore(String name, Integer score) {
         Validate.notNull(name, "The score name cannot be null!");
         Validate.notNull(score, "The score cannot be null!");
 
-        if(name.length() > MAX_LENGTH_SCORE_NAME)
+        if (name.length() > MAX_LENGTH_SCORE_NAME) {
             name = name.substring(0, MAX_LENGTH_SCORE_NAME);
+        }
 
         return scores.put(name, score) != null;
     }
 
-    public boolean removeScore(String name)
-    {
+    /**
+     * Removes a score.
+     * @param name The name of the score.
+     * @return {@code true} if a previous score existed with this name.
+     */
+    public boolean removeScore(String name) {
         Validate.notNull(name, "The score name cannot be null!");
 
         return scores.remove(name) != null;
-    }
-
-    /**
-     * Sets the objective's display name (i.e. the title of the sidebar).
-     *
-     * @param displayName The new display name.
-     */
-    public void setDisplayName(String displayName)
-    {
-        this.displayName = displayName != null ? displayName.substring(0, Math.min(MAX_LENGTH_OBJECTIVE_DISPLAY_NAME, displayName.length())) : "";
     }
 
     /**
@@ -128,8 +118,7 @@ public class SidebarObjective
      *
      * @param id The player's UUID.
      */
-    public void addReceiver(UUID id)
-    {
+    public void addReceiver(UUID id) {
         receivers.add(id);
     }
 
@@ -138,29 +127,33 @@ public class SidebarObjective
      *
      * @param id The player's UUID.
      */
-    public void removeReceiver(UUID id)
-    {
+    public void removeReceiver(UUID id) {
         receivers.remove(id);
     }
 
-
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public String getDisplayName()
-    {
+    public String getDisplayName() {
         return displayName;
     }
 
-    public Map<String, Integer> getScores()
-    {
+    /**
+     * Sets the objective's display name (i.e. the title of the sidebar).
+     *
+     * @param displayName The new display name.
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName != null
+                ? displayName.substring(0, Math.min(MAX_LENGTH_OBJECTIVE_DISPLAY_NAME, displayName.length())) : "";
+    }
+
+    public Map<String, Integer> getScores() {
         return scores;
     }
 
-    public Set<UUID> getReceivers()
-    {
+    public Set<UUID> getReceivers() {
         return receivers;
     }
 }

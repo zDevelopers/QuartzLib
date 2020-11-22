@@ -37,6 +37,9 @@ import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzlib.tools.reflection.NMSException;
 import fr.zcraft.quartzlib.tools.text.ChatColorParser;
 import fr.zcraft.quartzlib.tools.text.ChatColoredString;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -44,10 +47,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -95,15 +94,12 @@ import java.util.Set;
  *     RawMessage.broadcast(text.build());
  * </pre>
  */
-public class RawText extends RawTextPart<RawText>
-{
-    public RawText()
-    {
+public class RawText extends RawTextPart<RawText> {
+    public RawText() {
         super("");
     }
 
-    public RawText(String text)
-    {
+    public RawText(String text) {
         super(text);
     }
 
@@ -111,24 +107,22 @@ public class RawText extends RawTextPart<RawText>
      * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
      *
      * @param delimiter The formatters delimiter (vanilla Minecraft uses §)
-     * @param str The string to convert.
+     * @param str       The string to convert.
      * @return The RawText equivalent.
      */
-    public static RawText fromFormattedString(char delimiter, String str)
-    {
+    public static RawText fromFormattedString(char delimiter, String str) {
         return fromFormattedString(new ChatColorParser(delimiter, str), null);
     }
 
     /**
      * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
      *
-     * @param delimiter The formatters delimiter (vanilla Minecraft uses §)
-     * @param str The string to convert.
+     * @param delimiter     The formatters delimiter (vanilla Minecraft uses §)
+     * @param str           The string to convert.
      * @param baseComponent The converted component will be added to this component.
      * @return The RawText equivalent.
      */
-    public static RawText fromFormattedString(char delimiter, String str, RawText baseComponent)
-    {
+    public static RawText fromFormattedString(char delimiter, String str, RawText baseComponent) {
         return fromFormattedString(new ChatColorParser(delimiter, str), baseComponent);
     }
 
@@ -138,44 +132,38 @@ public class RawText extends RawTextPart<RawText>
      * @param str The string to convert.
      * @return The RawText equivalent.
      */
-    public static RawText fromFormattedString(String str)
-    {
+    public static RawText fromFormattedString(String str) {
         return fromFormattedString(new ChatColorParser(str), null);
     }
 
     /**
      * Converts a Minecraft-formatted string (with formatters like §a) to a raw text component.
      *
-     * @param str The string to convert.
+     * @param str           The string to convert.
      * @param baseComponent The converted component will be added to this component.
      * @return The RawText equivalent.
      */
-    public static RawText fromFormattedString(String str, RawText baseComponent)
-    {
+    public static RawText fromFormattedString(String str, RawText baseComponent) {
         return fromFormattedString(new ChatColorParser(str), baseComponent);
     }
-    
-    private static RawText fromFormattedString(ChatColorParser parser, RawText baseComponent)
-    {
+
+    private static RawText fromFormattedString(ChatColorParser parser, RawText baseComponent) {
         RawTextPart text = baseComponent;
-        
-        for (ChatColoredString coloredString : parser)
-        {
-            if (text == null)
-            {
+
+        for (ChatColoredString coloredString : parser) {
+            if (text == null) {
                 text = new RawText(coloredString.getString());
-            }
-            else
-            {
+            } else {
                 text = text.then(coloredString.getString());
             }
-            
+
             text.style(coloredString.getModifiers());
         }
-        
-        if (text == null)
+
+        if (text == null) {
             throw new IllegalArgumentException("Invalid input string");
-        
+        }
+
         return text.build();
     }
 
@@ -186,11 +174,9 @@ public class RawText extends RawTextPart<RawText>
      * @return The tellraw-compatible name.
      * @throws IllegalArgumentException if {@link ChatColor#RESET RESET} is passed.
      */
-    public static String toStyleName(ChatColor color)
-    {
-        switch(color)
-        {
-            case RESET: 
+    public static String toStyleName(ChatColor color) {
+        switch (color) {
+            case RESET:
                 throw new IllegalArgumentException("Control code 'RESET' is not a valid style");
             case MAGIC:
                 return "obfuscated";
@@ -205,60 +191,56 @@ public class RawText extends RawTextPart<RawText>
      * @param item The item.
      * @return The tellraw-compatible JSON.
      */
-    public static String toJSONString(ItemStack item)
-    {
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public static String toJSONString(ItemStack item) {
         Map<String, Object> itemData = new HashMap<>();
-        
+
         String itemId = null;
-        try
-        {
+        try {
             itemId = ItemUtils.getMinecraftId(item);
-        }
-        catch (NMSException ex)
-        {
+        } catch (NMSException ex) {
             PluginLogger.warning("NMS Exception while parsing ItemStack to JSON String", ex);
         }
-        
-        if (itemId == null) itemId = String.valueOf(item.getType().getId());
+
+        if (itemId == null) {
+            itemId = String.valueOf(item.getType().getId());
+        }
 
         itemData.put("id", itemId);
         itemData.put("Damage", item.getDurability());
         itemData.put("Count", item.getAmount());
 
-        try
-        {
+        try {
             itemData.put("tag", NBT.fromItemStack(item));
-        }
-        catch (NMSException ex)
-        {
+        } catch (NMSException ex) {
             PluginLogger.warning("Unable to retrieve NBT data", ex);
             Map<String, Object> tag = new HashMap<>();
-            
+
             tag.put("display", NBT.fromItemMeta(item.getItemMeta()));
             tag.put("ench", NBT.fromEnchantments(item.getEnchantments()));
             tag.put("HideFlags", NBT.fromItemFlags(item.getItemMeta().getItemFlags()));
 
             itemData.put("tag", tag);
         }
-        
+
         return NBT.toNBTJSONString(itemData);
     }
-    
+
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     @Deprecated
-    public static String toJSONString(ItemMeta meta)
-    {
+    public static String toJSONString(ItemMeta meta) {
         return NBT.toNBTJSONString(NBT.fromItemMeta(meta));
     }
 
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     @Deprecated
-    public static String toJSONString(Map<Enchantment, Integer> enchants)
-    {
+    public static String toJSONString(Map<Enchantment, Integer> enchants) {
         return NBT.toNBTJSONString(NBT.fromEnchantments(enchants));
     }
-    
+
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     @Deprecated
-    public static byte toJSON(Set<ItemFlag> itemFlags)
-    {
+    public static byte toJSON(Set<ItemFlag> itemFlags) {
         return NBT.fromItemFlags(itemFlags);
     }
 
@@ -268,22 +250,21 @@ public class RawText extends RawTextPart<RawText>
      * @param entity The entity.
      * @return The tellraw-compatible JSON.
      */
-    public static JSONObject toJSON(Entity entity)
-    {
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public static JSONObject toJSON(Entity entity) {
         JSONObject obj = new JSONObject();
-        
+
         String name = entity.getCustomName();
-        if(name == null || name.isEmpty())
+        if (name == null || name.isEmpty()) {
             name = entity.getName();
-        
+        }
+
         obj.put("name", name);
         obj.put("type", CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, entity.getType().toString()));
         obj.put("id", entity.getUniqueId().toString());
-        
+
         return obj;
     }
-
-
 
 
 }

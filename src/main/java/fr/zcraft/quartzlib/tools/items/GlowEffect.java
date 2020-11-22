@@ -48,8 +48,8 @@ import java.lang.reflect.Field;
  * @author Amaury Carrade
  */
 public class GlowEffect extends EnchantmentWrapper {
-	private final static int ENCHANTMENT_ID = 254;
-	private final static String ENCHANTMENT_NAME = "GlowEffect";
+	private static final int ENCHANTMENT_ID = 254;
+	private static final String ENCHANTMENT_NAME = "GlowEffect";
 	private static Enchantment glow;
 
 	protected GlowEffect(String id) {

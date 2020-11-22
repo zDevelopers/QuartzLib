@@ -43,10 +43,10 @@ import java.lang.reflect.Method;
  */
 public final class NMSNetwork
 {
-    private final static Class<?> craftPlayerClass;
-    private final static Class<?> entityPlayerClass;
-    private final static Class<?> packetClass;
-    private final static Method sendPacketMethod;
+    private static final Class<?> craftPlayerClass;
+    private static final Class<?> entityPlayerClass;
+    private static final Class<?> packetClass;
+    private static final Method sendPacketMethod;
 
     static
     {

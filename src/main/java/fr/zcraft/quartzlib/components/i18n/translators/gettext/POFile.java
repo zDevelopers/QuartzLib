@@ -27,13 +27,26 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.i18n.translators.gettext;
 
 import fr.zcraft.quartzlib.components.i18n.translators.Translation;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -42,12 +55,9 @@ import java.util.*;
  * <p>Note: this parser does not support PO file without a blank line between each translation entry
  * currently.</p>
  */
-public class POFile
-{
-    private BufferedReader rawReader;
-
+public class POFile {
     private final Set<Translation> translations = new HashSet<>();
-
+    private BufferedReader rawReader;
     private String lastTranslator = null;
     private String translationTeam = null;
     private String reportErrorsTo = null;
@@ -57,41 +67,39 @@ public class POFile
 
 
     /**
+     * Creates a new PO file parser.
      * @param reader The string this parser will have to parse.
      */
-    public POFile(BufferedReader reader)
-    {
+    public POFile(BufferedReader reader) {
         this.rawReader = reader;
     }
 
     /**
+     * Creates a new PO file parser.
      * @param reader The string this parser will have to parse.
      */
-    public POFile(Reader reader)
-    {
+    public POFile(Reader reader) {
         this.rawReader = new BufferedReader(reader);
     }
 
     /**
+     * Creates a new PO file parser.
      * @param file The file this parser will have to parse.
-     *
      * @throws FileNotFoundException if the file does not exist, is a directory rather than a
      *                               regular file, or for some other reason cannot be opened for
      *                               reading.
      */
-    public POFile(File file) throws FileNotFoundException
-    {
+    public POFile(File file) throws FileNotFoundException {
         this(new BufferedReader(
                 new InputStreamReader(
                         new FileInputStream(file), StandardCharsets.UTF_8)));
-        //this(new FileReader(file));
     }
 
     /**
+     * Creates a new PO file parser.
      * @param raw The string this parser will have to parse.
      */
-    public POFile(String raw)
-    {
+    public POFile(String raw) {
         this(new StringReader(raw));
     }
 
@@ -99,18 +107,17 @@ public class POFile
     /**
      * Parses the string and extracts translations and metadata.
      *
-     * The PO file is only computed one time (because the buffer is consumed). Other calls does
-     * nothing.
+     * <p>The PO file is only computed one time (because the buffer is consumed). Other calls does
+     * nothing.</p>
      *
      * @throws CannotParsePOException if the PO file cannot be parsed.
      */
-    public void parse() throws CannotParsePOException
-    {
-        if (rawReader == null)
+    public void parse() throws CannotParsePOException {
+        if (rawReader == null) {
             return;
+        }
 
-        try
-        {
+        try {
             String line;
             Integer lineNumber = 0;
 
@@ -118,54 +125,44 @@ public class POFile
             // then we extract and save them when we hit a blank line, acting as a separator between
             // translations.
 
-            Map<String, String> tokens    = new HashMap<>();
-            String              lastToken = null;
+            Map<String, String> tokens = new HashMap<>();
+            String lastToken = null;
 
-            while ((line = rawReader.readLine()) != null)
-            {
+            while ((line = rawReader.readLine()) != null) {
                 lineNumber++;
 
                 // We don't care about trailing whitespaces
                 line = line.trim();
 
                 // File parsing
-                if (!line.isEmpty())
-                {
+                if (!line.isEmpty()) {
                     // Comments
-                    if (line.startsWith("#"))
+                    if (line.startsWith("#")) {
                         continue;
-
-                        // Continued values of tokens on another line
-                    else if (line.startsWith("\""))
-                    {
-                        if (lastToken == null)
+                    } else if (line.startsWith("\"")) { // Continued values of tokens on another line
+                        if (lastToken == null) {
                             throw new CannotParsePOException("Unnamed token value", lineNumber);
+                        }
 
                         String value = extractTokenValue(line);
                         String currentTokenValue = tokens.get(lastToken);
 
                         tokens.put(lastToken, currentTokenValue + value);
-                    }
-
-                    // Beginning of a new token
-                    else
-                    {
+                    } else { // Beginning of a new token
                         String[] lineParts = line.split(" ", 2);
-                        if (line.length() < 2)
+                        if (line.length() < 2) {
                             throw new CannotParsePOException("Malformed token line", lineNumber);
+                        }
 
                         // The first string before a space is the token name, according to the spec (like
                         // msgid, msgstr...). The other parts are the token value.
                         tokens.put(lineParts[0], extractTokenValue(lineParts[1]));
                         lastToken = lineParts[0];
                     }
-                }
-
-                // Analysis
-                else
-                {
-                    if (!tokens.isEmpty())
+                } else { // Analysis
+                    if (!tokens.isEmpty()) {
                         analyseEntry(tokens);
+                    }
 
                     tokens.clear();
                     lastToken = null;
@@ -173,24 +170,19 @@ public class POFile
             }
 
             // If the file doesn't ends with an blank line
-            if (!tokens.isEmpty())
+            if (!tokens.isEmpty()) {
                 analyseEntry(tokens);
-        }
-        catch (IOException e)
-        {
+            }
+        } catch (IOException e) {
             throw new CannotParsePOException("An IO exception occurred while parsing the file", e);
-        }
-        finally
-        {
-            try
-            {
-                if (rawReader != null)
-                {
+        } finally {
+            try {
+                if (rawReader != null) {
                     rawReader.close();
                     rawReader = null;
                 }
+            } catch (IOException ignored) {
             }
-            catch (IOException ignored) {}
         }
     }
 
@@ -200,32 +192,24 @@ public class POFile
      * <p>As example, « {@code "Raw \"value\""} » is converted into « {@code Raw "value"} ».</p>
      *
      * @param raw The raw token value.
-     *
      * @return The extracted value.
      */
-    private String extractTokenValue(String raw)
-    {
+    private String extractTokenValue(String raw) {
         final StringBuilder extracted = new StringBuilder();
-        Boolean inString = false;
+        boolean inString = false;
 
-        for (int i = 0; i < raw.length(); i++)
-        {
+        for (int i = 0; i < raw.length(); i++) {
             char character = raw.charAt(i);
-            if (character == '"')
-            {
-                if (i == 0 || raw.charAt(i - 1) != '\\')
-                {
+            if (character == '"') {
+                if (i == 0 || raw.charAt(i - 1) != '\\') {
                     inString = !inString;
-                    if (!inString)
+                    if (!inString) {
                         break;
-                }
-                else
-                {
+                    }
+                } else {
                     extracted.append('"');
                 }
-            }
-            else if (inString && !(character == '\\' && i != raw.length() - 1 && raw.charAt(i + 1) == '"'))
-            {
+            } else if (inString && !(character == '\\' && i != raw.length() - 1 && raw.charAt(i + 1) == '"')) {
                 extracted.append(character);
             }
         }
@@ -233,37 +217,33 @@ public class POFile
         return extracted.toString();
     }
 
-    private void analyseEntry(Map<String, String> tokens)
-    {
+    private void analyseEntry(Map<String, String> tokens) {
         // If there isn't any `msgid` token, the section is invalid and skipped.
-        if (!tokens.containsKey("msgid"))
+        if (!tokens.containsKey("msgid")) {
             return;
+        }
 
         String msgid = tokens.get("msgid");
 
         // Translation entry
-        if (!msgid.isEmpty())
-        {
-            String msgid_plural = tokens.get("msgid_plural");  // Null if unset—that's exactly what we want.
-            String msgctxt      = tokens.get("msgctxt");       // Same.
+        if (!msgid.isEmpty()) {
+            String msgidPlural = tokens.get("msgid_plural");  // Null if unset—that's exactly what we want.
+            String msgctxt = tokens.get("msgctxt");       // Same.
 
             // msgstr can be in two different formats:
             // - msgstr: then there is only one translation;
             // - msgstr[i]: then multiple translations are available (for plurals).
             List<String> msgstr;
 
-            if (tokens.containsKey("msgstr"))
-            {
+            if (tokens.containsKey("msgstr")) {
                 msgstr = Collections.singletonList(tokens.get("msgstr"));
-            }
-            else
-            {
+            } else {
                 msgstr = new ArrayList<>();
-                for (int i = 0; ; i++)
-                {
+                for (int i = 0; ; i++) {
                     String tokenValue = tokens.get("msgstr[" + i + "]");
-                    if (tokenValue == null)
+                    if (tokenValue == null) {
                         break;
+                    }
 
                     // Elements are added ordered, so the index is the good one.
                     msgstr.add(tokenValue);
@@ -271,31 +251,28 @@ public class POFile
             }
 
             // No translation available, skipped.
-            if (msgstr.isEmpty() || msgstr.get(0).trim().isEmpty())
+            if (msgstr.isEmpty() || msgstr.get(0).trim().isEmpty()) {
                 return;
+            }
 
-            translations.add(new Translation(msgctxt, msgid, msgid_plural, msgstr));
-        }
-
-        // Metadata
-        else
-        {
+            translations.add(new Translation(msgctxt, msgid, msgidPlural, msgstr));
+        } else { // Metadata
             String rawMetadata = tokens.get("msgstr");
-            if (rawMetadata == null)
+            if (rawMetadata == null) {
                 return;
+            }
 
             // Ensures both interpreted and written line breaks are interpreted
             String[] metadata = rawMetadata.split("(\\\\n)|\n");
-            for (String meta : metadata)
-            {
+            for (String meta : metadata) {
                 String[] metaParts = meta.split(":");
-                if (metaParts.length < 2)
+                if (metaParts.length < 2) {
                     continue;
+                }
 
                 String value = metaParts[1].trim();
 
-                switch (metaParts[0].trim().toLowerCase())
-                {
+                switch (metaParts[0].trim().toLowerCase()) {
                     case "last-translator":
                         lastTranslator = value;
                         break;
@@ -310,25 +287,27 @@ public class POFile
 
                     case "plural-forms":
                         String[] parts = value.split(";", 2);
-                        if (parts.length < 2)
+                        if (parts.length < 2) {
                             break;
+                        }
 
-                        try
-                        {
+                        try {
                             pluralCount = Integer.valueOf(parts[0].split("=")[1]);
                             pluralFormScript = parts[1];
 
-                            if (pluralFormScript.endsWith(";"))
+                            if (pluralFormScript.endsWith(";")) {
                                 pluralFormScript = pluralFormScript.substring(0, pluralFormScript.length() - 1);
+                            }
 
                             // Converts “plural=<script>” to “<script>”
-                            if (pluralFormScript.contains("="))
+                            if (pluralFormScript.contains("=")) {
                                 pluralFormScript = pluralFormScript.split("=")[1];
-                        }
-                        catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored)
-                        {
+                            }
+                        } catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
                             // Well, invalid.
                         }
+                        break;
+                    default:
                         break;
                 }
             }
@@ -336,51 +315,50 @@ public class POFile
     }
 
     /**
+     * Gets the translations extracted from the PO file.
      * @return The translations extracted from the PO file.
      */
-    public Set<Translation> getTranslations()
-    {
+    public Set<Translation> getTranslations() {
         return translations;
     }
 
     /**
+     * Gets the last translator.
      * @return The last translator.
      */
-    public String getLastTranslator()
-    {
+    public String getLastTranslator() {
         return lastTranslator;
     }
 
     /**
+     * Gets the name of the translation team.
      * @return The name of the translation team.
      */
-    public String getTranslationTeam()
-    {
+    public String getTranslationTeam() {
         return translationTeam;
     }
 
     /**
+     * Gets the person to contact if there is an error in the translations.
      * @return The person to contact if there is an error in the translations.
      */
-    public String getReportErrorsTo()
-    {
+    public String getReportErrorsTo() {
         return reportErrorsTo;
     }
 
     /**
+     * Gets the number of plural forms in this PO/language.
      * @return The number of plural forms in this PO/language.
      */
-    public Integer getPluralCount()
-    {
+    public Integer getPluralCount() {
         return pluralCount;
     }
 
     /**
-     * @return The script to execute to determine which translation has to be used for a given
-     * number.
+     * Gets the script to execute to determine which translation has to be used for a given number.
+     * @return The script to execute to determine which translation has to be used for a given number.
      */
-    public String getPluralFormScript()
-    {
+    public String getPluralFormScript() {
         return pluralFormScript;
     }
 
@@ -388,30 +366,24 @@ public class POFile
     /**
      * Thrown if the file cannot be parsed.
      */
-    public class CannotParsePOException extends RuntimeException
-    {
-        public CannotParsePOException(String message)
-        {
+    public static class CannotParsePOException extends RuntimeException {
+        public CannotParsePOException(String message) {
             super(message);
         }
 
-        public CannotParsePOException(String message, Integer line)
-        {
+        public CannotParsePOException(String message, Integer line) {
             super(message + " [" + line + "]");
         }
 
-        public CannotParsePOException(Throwable cause)
-        {
+        public CannotParsePOException(Throwable cause) {
             super(cause);
         }
 
-        public CannotParsePOException(String message, Throwable cause)
-        {
+        public CannotParsePOException(String message, Throwable cause) {
             super(message, cause);
         }
 
-        public CannotParsePOException(String message, Integer line, Throwable cause)
-        {
+        public CannotParsePOException(String message, Integer line, Throwable cause) {
             super(message + " [" + line + "]", cause);
         }
     }

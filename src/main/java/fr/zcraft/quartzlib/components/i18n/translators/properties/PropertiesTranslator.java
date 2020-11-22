@@ -27,12 +27,12 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.i18n.translators.properties;
 
 import fr.zcraft.quartzlib.components.i18n.I18n;
 import fr.zcraft.quartzlib.components.i18n.translators.Translation;
 import fr.zcraft.quartzlib.components.i18n.translators.Translator;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Locale;
@@ -75,51 +75,43 @@ import java.util.ResourceBundle;
  * key in the file somewhere, with a non-empty value. The keys above will in this case no longer be
  * special.</p>
  */
-public class PropertiesTranslator extends Translator
-{
+public class PropertiesTranslator extends Translator {
     private static final String METADATA_DISABLED = "quartzlib-i18n-no-metadata";
-    private static final String METADATA_AUTHOR   = "meta-author";
-    private static final String METADATA_TEAM     = "meta-team";
-    private static final String METADATA_REPORTS  = "meta-reports";
+    private static final String METADATA_AUTHOR = "meta-author";
+    private static final String METADATA_TEAM = "meta-team";
+    private static final String METADATA_REPORTS = "meta-reports";
 
     private String author = null;
-    private String team   = null;
+    private String team = null;
     private String report = null;
 
 
-    public PropertiesTranslator(Locale locale, File file)
-    {
+    public PropertiesTranslator(Locale locale, File file) {
         super(locale, file);
     }
 
-    public PropertiesTranslator(Locale locale, String resourceReference)
-    {
+    public PropertiesTranslator(Locale locale, String resourceReference) {
         super(locale, resourceReference);
     }
 
     @Override
-    protected void load()
-    {
-        final ZLibResourceBundleControl control = file != null ? new ZLibResourceBundleControl(file) : new ZLibResourceBundleControl(resourceReference);
+    protected void load() {
+        final ZLibResourceBundleControl control =
+                file != null ? new ZLibResourceBundleControl(file) : new ZLibResourceBundleControl(resourceReference);
 
-        final ResourceBundle bundle   = ResourceBundle.getBundle(control.toBundleName(I18n.getI18nDirectory(), locale), locale, control);
+        final ResourceBundle bundle =
+                ResourceBundle.getBundle(control.toBundleName(I18n.getI18nDirectory(), locale), locale, control);
         final boolean disableMetadata = bundle.containsKey(METADATA_DISABLED);
 
-        for (final String key : bundle.keySet())
-        {
+        for (final String key : bundle.keySet()) {
             final String value = bundle.getString(key);
 
-            if (disableMetadata)
-            {
-                if (!key.equals(METADATA_DISABLED))
-                {
+            if (disableMetadata) {
+                if (!key.equals(METADATA_DISABLED)) {
                     registerTranslation(new Translation(null, key, null, Collections.singletonList(value)));
                 }
-            }
-            else
-            {
-                switch (key)
-                {
+            } else {
+                switch (key) {
                     case METADATA_AUTHOR:
                         author = value;
                         break;
@@ -144,32 +136,27 @@ public class PropertiesTranslator extends Translator
     }
 
     @Override
-    public String getLastTranslator()
-    {
+    public String getLastTranslator() {
         return author;
     }
 
     @Override
-    public String getTranslationTeam()
-    {
+    public String getTranslationTeam() {
         return team;
     }
 
     @Override
-    public String getReportErrorsTo()
-    {
+    public String getReportErrorsTo() {
         return report;
     }
 
     /**
      * The context should always be ignored.
      *
-     * <p>
      * {@inheritDoc}
      */
     @Override
-    protected String getContextKey(String context)
-    {
+    protected String getContextKey(String context) {
         return NO_CONTEXT_KEY;
     }
 }

@@ -59,7 +59,7 @@ public final class TextualBanners
      * The map containing all the supported characters. White color represents the background and
      * black color the font color.
      */
-    private final static Map<Character, BannerMeta> chars = new HashMap<>();
+    private static final Map<Character, BannerMeta> chars = new HashMap<>();
 
     static
     {
