@@ -474,7 +474,6 @@ public abstract class RawTextPart<T extends RawTextPart<T>> implements Iterable<
      *
      * @return A JSON object corresponding to this raw text component.
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public JSONObject toJSON() {
         JSONObject obj = new JSONObject();
         if (translate) {

@@ -84,7 +84,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
  *     {@link I#tc I.tc}("other_context", "greetings.hi")    # Returns "Hi!"
  * </pre>
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class YAMLTranslator extends Translator {
     private String author = null;
     private String team = null;

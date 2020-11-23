@@ -133,8 +133,9 @@ public class Attribute {
         Long uuidMost = getUUIDMost();
         Long uuidLeast = getUUIDLeast();
 
-        if (uuidMost == null || uuidLeast == null)
+        if (uuidMost == null || uuidLeast == null) {
             return null;
+        }
 
         return new UUID(uuidMost, uuidLeast);
     }
@@ -222,7 +223,7 @@ public class Attribute {
     /**
      * Sets the slot for which this modfier applies.
      *
-     * @param slotName
+     * @param slotName The name of the slot.
      */
     public final void setSlotName(String slotName) {
         nbt.put("Slot", slotName);
@@ -240,7 +241,7 @@ public class Attribute {
     /**
      * Sets the amount of the modification.
      *
-     * @param amount
+     * @param amount The amount fo the modification.
      */
     public final void setAmount(double amount) {
         nbt.put("Amount", amount);

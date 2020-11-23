@@ -30,30 +30,27 @@
 
 package fr.zcraft.ztoaster;
 
-public class Toast 
-{
-    public enum CookingStatus {COOKED, NOT_COOKED}
-    
-    private CookingStatus status = CookingStatus.NOT_COOKED;
+public class Toast {
     private final int toastId;
-    
-    public Toast()
-    {
+    private CookingStatus status = CookingStatus.NOT_COOKED;
+
+    public Toast() {
         toastId = Toaster.newToastId();
     }
-    
-    public CookingStatus getStatus()
-    {
+
+    public CookingStatus getStatus() {
         return status;
     }
 
-    public void setStatus(CookingStatus status)
-    {
+    public void setStatus(CookingStatus status) {
         this.status = status;
     }
 
-    public int getToastId()
-    {
+    public int getToastId() {
         return toastId;
+    }
+
+    public enum CookingStatus {
+        COOKED, NOT_COOKED
     }
 }

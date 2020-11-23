@@ -36,46 +36,37 @@ import fr.zcraft.quartzlib.components.commands.CommandInfo;
 import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.ztoaster.Toast;
 import fr.zcraft.ztoaster.Toaster;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 @CommandInfo(name = "list", usageParameters = "[cooked|not_cooked]")
-public class ListCommand extends Command
-{
+public class ListCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
-        if(args.length == 0)
-        {
+    protected void run() throws CommandException {
+        if (args.length == 0) {
             showToasts(Arrays.asList(Toaster.getToasts()));
-        }
-        else
-        {
+        } else {
             ArrayList<Toast> toasts = new ArrayList<Toast>();
             Toast.CookingStatus status = getEnumParameter(0, Toast.CookingStatus.class);
-            
-            for(Toast toast : Toaster.getToasts())
-            {
-                if(toast.getStatus().equals(status))
+
+            for (Toast toast : Toaster.getToasts()) {
+                if (toast.getStatus().equals(status)) {
                     toasts.add(toast);
+                }
             }
-            
+
             showToasts(toasts);
         }
     }
-    
-    private void showToasts(Collection<Toast> toasts)
-    {
-        if(toasts.isEmpty())
-        {
+
+    private void showToasts(Collection<Toast> toasts) {
+        if (toasts.isEmpty()) {
             // Output of the command /toaster list, without toasts.
             info(I.t("There are no toasts here ..."));
         }
-        
-        for(Toast toast : toasts)
-        {
+
+        for (Toast toast : toasts) {
             sender.sendMessage(I.t("  Toast #{0}", toast.getToastId()));
         }
     }

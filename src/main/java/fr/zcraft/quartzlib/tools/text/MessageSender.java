@@ -229,8 +229,8 @@ public final class MessageSender {
     /**
      * Sends a message.
      *
-     * <p><strong>WARNING:</strong> don't use this method to send action bars, as they does NOT support JSON (the JSON code
-     * would be displayed in the action bar).</p>
+     * <p><strong>WARNING:</strong> don't use this method to send action bars, as they does NOT support JSON
+     * (the JSON code would be displayed in the action bar).</p>
      *
      * @param receiver The receiver of the message.
      * @param json     The JSON message to be sent.
@@ -250,7 +250,6 @@ public final class MessageSender {
      *     </li>
      * </ul>
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static boolean sendJSONMessage(Player receiver, String json, MessageType type) {
         return sendChatPacket(receiver, json, type);
     }
@@ -280,7 +279,6 @@ public final class MessageSender {
      *     </li>
      * </ul>
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static boolean sendJSONMessage(UUID receiver, String json, MessageType type) {
         Player player = Bukkit.getPlayer(receiver);
 
@@ -611,7 +609,6 @@ public final class MessageSender {
          * Returns if the chat packet wants a JSON-formatted message.
          * @return {@code true} if the chat packet wants a JSON-formatted message, {@code false} else.
          */
-        @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
         public boolean isJSON() {
             if (isJson) {
                 return true;

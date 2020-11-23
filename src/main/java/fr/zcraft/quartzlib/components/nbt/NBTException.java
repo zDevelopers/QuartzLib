@@ -33,7 +33,6 @@ package fr.zcraft.quartzlib.components.nbt;
 /**
  * Represents an exception thrown while accessing Minecraft NBT data.
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class NBTException extends RuntimeException {
     public NBTException(String text, Throwable cause) {
         super(text, cause);

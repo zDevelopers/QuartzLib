@@ -44,7 +44,6 @@ import org.jetbrains.annotations.NotNull;
  * <p>It implements all operations of {@link java.util.Map} with a String key,
  * as well as a few specific operations for NBT data.</p>
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class NBTCompound implements Map<String, Object> {
     private final Object parent;
     private final Object parentKey;

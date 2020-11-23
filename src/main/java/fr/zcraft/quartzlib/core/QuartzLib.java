@@ -118,8 +118,7 @@ public abstract class QuartzLib {
 
     /**
      * Unloads all the registered components and the core tools used.
-     * <p>
-     * This method is automatically called when the plugin is unloaded.
+     * <p>This method is automatically called when the plugin is unloaded.</p>
      *
      * @throws IllegalStateException if QuartzLib was not initialized.
      */
@@ -149,11 +148,10 @@ public abstract class QuartzLib {
 
     /**
      * Returns the currently loaded QuartzLib components.
-     * <p>
-     * This returns a copy of the components list,
+     * <p>This returns a copy of the components list</p>
      *
      * @return the loaded components.
-     * @throws IllegalStateException
+     * @throws IllegalStateException if QuartzLib was not properly initialized.
      */
     public static Set<QuartzComponent> getLoadedComponents() throws IllegalStateException {
         checkInitialized();
@@ -200,7 +198,8 @@ public abstract class QuartzLib {
     private static void checkInitialized() throws IllegalStateException {
         if (plugin == null) {
             throw new IllegalStateException(
-                    "Assertion failed: QuartzLib is not correctly inizialized. Make sure QuartzLib.init() or QuartzLib.onLoad() is correctly called.");
+                    "Assertion failed: QuartzLib is not correctly inizialized. "
+                            + "Make sure QuartzLib.init() or QuartzLib.onLoad() is correctly called.");
         }
     }
 

@@ -191,7 +191,6 @@ public class RawText extends RawTextPart<RawText> {
      * @param item The item.
      * @return The tellraw-compatible JSON.
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static String toJSONString(ItemStack item) {
         Map<String, Object> itemData = new HashMap<>();
 
@@ -226,19 +225,16 @@ public class RawText extends RawTextPart<RawText> {
         return NBT.toNBTJSONString(itemData);
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     @Deprecated
     public static String toJSONString(ItemMeta meta) {
         return NBT.toNBTJSONString(NBT.fromItemMeta(meta));
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     @Deprecated
     public static String toJSONString(Map<Enchantment, Integer> enchants) {
         return NBT.toNBTJSONString(NBT.fromEnchantments(enchants));
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     @Deprecated
     public static byte toJSON(Set<ItemFlag> itemFlags) {
         return NBT.fromItemFlags(itemFlags);
@@ -250,7 +246,6 @@ public class RawText extends RawTextPart<RawText> {
      * @param entity The entity.
      * @return The tellraw-compatible JSON.
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static JSONObject toJSON(Entity entity) {
         JSONObject obj = new JSONObject();
 

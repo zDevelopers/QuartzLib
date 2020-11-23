@@ -582,7 +582,8 @@ public abstract class Sidebar {
                 }
 
                 spacesInBlankLines++;
-            } else if (automaticDeduplication) { // If the deduplication is enabled, we add spaces until the line is unique.
+            } else if (automaticDeduplication) {
+                // If the deduplication is enabled, we add spaces until the line is unique.
                 String rawLine = line;
 
                 // The deduplication string used.

@@ -100,6 +100,7 @@ public final class RunTask {
     public static BukkitTask timer(Runnable runnable, long wait, long period) {
         return scheduler.runTaskTimer(QuartzLib.getPlugin(), runnable, wait, period);
     }
+
     /**
      * Returns a task that will repeatedly run until cancelled, starting after the specified number
      * of server ticks.

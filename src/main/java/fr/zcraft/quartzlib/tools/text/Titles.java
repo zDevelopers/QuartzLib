@@ -274,7 +274,8 @@ public final class Titles {
                                 .newInstance(fadeIn, stay, fadeOut)
                 );
             }
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException | InstantiationException
+                | IllegalAccessException | InvocationTargetException e) {
             throw new IncompatibleMinecraftVersionException("Error while sending a TIMES title packet",
                     e instanceof InvocationTargetException ? e.getCause() : e);
         }
@@ -297,7 +298,8 @@ public final class Titles {
                     .newInstance(action, baseComponent);
 
             NMSNetwork.sendPacket(connection, titlePacket);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException | InstantiationException
+                | IllegalAccessException | InvocationTargetException e) {
             throw new IncompatibleMinecraftVersionException("Error while sending a " + action + " title packet",
                     e instanceof InvocationTargetException ? e.getCause() : e);
         }

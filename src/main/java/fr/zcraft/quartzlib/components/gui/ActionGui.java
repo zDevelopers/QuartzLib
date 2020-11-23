@@ -48,11 +48,10 @@ import org.bukkit.inventory.meta.ItemMeta;
  * This class implements an action-based GUI.
  * Actions are buttons which trigger an event when getting clicked on by the user.
  * They are represented by (customizable) items, which are immutable by the user.
- * <p>
- * Events handlers are (usually private) methods implemented in the derived
+ * <p>Events handlers are (usually private) methods implemented in the derived
  * class(es). They are named using the pattern 'action_[action name]', and
  * are called when the associated action is triggered. They take an optional
- * argument (add it if you need it): the {@link InventoryClickEvent} triggered.
+ * argument (add it if you need it): the {@link InventoryClickEvent} triggered.</p>
  *
  * @author ProkopyL (main) and Amaury Carrade
  */

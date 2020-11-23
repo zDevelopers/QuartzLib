@@ -45,7 +45,6 @@ import org.jetbrains.annotations.NotNull;
  * This class represents the NBT List tag type.
  * <p>It implements all operations of {@link java.util.List}, as well as a few specific operations for NBT data.</p>
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class NBTList implements List<Object> {
     private final Object parent;
     private final Object parentKey;

@@ -235,7 +235,8 @@ public abstract class NBT {
             }
 
             return craftItemStack;
-        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException | NMSException e) {
+        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException
+                | IllegalAccessException | NMSException e) {
             throw new NMSException("Cannot set item stack tags", e);
         }
     }
@@ -277,7 +278,6 @@ public abstract class NBT {
      * @return The NMS NBT tag.
      * @throws NMSException If something goes wrong while extracting the tag.
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     private static Object getMcNBTCompound(ItemStack item) throws NMSException {
         Object mcItemStack = ItemUtils.getNMSItemStack(item);
         if (mcItemStack == null) {
@@ -292,7 +292,9 @@ public abstract class NBT {
 
                 try {
                     Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tag);
-                } catch (NoSuchMethodException e) { // If the set method change—more resilient, as the setTag will only update the field without any kind of callback.
+                } catch (NoSuchMethodException e) {
+                    // If the set method change—more resilient,
+                    // as the setTag will only update the field without any kind of callback.
                     Reflection.setFieldValue(MC_ITEM_STACK, mcItemStack, "tag", tag);
                 }
             }
@@ -356,14 +358,12 @@ public abstract class NBT {
      * @param value The value to JSONify.
      * @return the NBT JSON representation of the given object.
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static String toNBTJSONString(Object value) {
         StringBuilder sb = new StringBuilder();
         toNBTJSONString(sb, value);
         return sb.toString();
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     private static void toNBTJSONString(StringBuilder builder, Object value) {
         if (value == null) {
             return;
@@ -380,7 +380,6 @@ public abstract class NBT {
         }
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     private static void toNBTJSONString(StringBuilder builder, List list) {
         builder.append("[");
 
@@ -396,7 +395,6 @@ public abstract class NBT {
         builder.append("]");
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     private static void toNBTJSONString(StringBuilder builder, Map<Object, Object> map) {
         builder.append("{");
 
@@ -414,7 +412,6 @@ public abstract class NBT {
         builder.append("}");
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     private static void toNBTJSONString(StringBuilder builder, String value) {
         builder.append('"');
         builder.append(value.replace("\"", "\\\""));

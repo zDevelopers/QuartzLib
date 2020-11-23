@@ -639,7 +639,6 @@ public class ItemStackBuilder {
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see #nbt(Map) The method to set NBT data.
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public ItemStackBuilder replaceNBT() {
         this.replaceNbt = true;
         return this;

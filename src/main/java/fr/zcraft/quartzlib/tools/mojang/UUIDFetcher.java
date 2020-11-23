@@ -54,7 +54,6 @@ import org.json.simple.parser.ParseException;
  *
  * @author ProkopyL and Amaury Carrade (documentation only).
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public final class UUIDFetcher {
     /**
      * The maximal amount of usernames to send to mojang per request. This allows not to overload

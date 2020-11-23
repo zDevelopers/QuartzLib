@@ -153,7 +153,7 @@ public abstract class ItemUtils {
                 && ((!first.hasItemMeta() && !other.hasItemMeta())
                 || (!first.getItemMeta().hasDisplayName() && !other.getItemMeta().hasDisplayName())
                 || (first.getItemMeta().getDisplayName().equals(other.getItemMeta().getDisplayName()))
-        );
+            );
     }
 
     /**
@@ -291,17 +291,17 @@ public abstract class ItemUtils {
         }
 
         try {
-            Class MinecraftItem = Reflection.getMinecraftClassByName("Item");
-            Object MaterialsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
+            Class minecraftItem = Reflection.getMinecraftClassByName("Item");
+            Object materialsRegistry = Reflection.getFieldValue(minecraftItem, null, "REGISTRY");
 
-            Method getMethod = Reflection.findMethod(MaterialsRegistry.getClass(), "get", (Type) null);
+            Method getMethod = Reflection.findMethod(materialsRegistry.getClass(), "get", (Type) null);
 
             if (getMethod == null) {
                 throw new NMSException("Method RegistryMaterials.get() not found.");
             }
 
             registryLookupMethod = Reflection.findMethod(
-                    MaterialsRegistry.getClass(),
+                    materialsRegistry.getClass(),
                     "!get",
                     getMethod.getGenericParameterTypes()[0],
                     0,
@@ -326,7 +326,7 @@ public abstract class ItemUtils {
      *
      * @param item An item.
      * @return The Minecraft name of this item, or null if the item's material
-     * is invalid.
+     *      is invalid.
      * @throws NMSException if the operation cannot be executed.
      */
     public static String getMinecraftId(ItemStack item) throws NMSException {
@@ -337,10 +337,10 @@ public abstract class ItemUtils {
             }
 
             Object minecraftItem = Reflection.getFieldValue(craftItemStack, "item");
-            Class<?> MinecraftItem = Reflection.getMinecraftClassByName("Item");
-            Object ItemsRegistry = Reflection.getFieldValue(MinecraftItem, null, "REGISTRY");
+            Class<?> minecraftItemClass = Reflection.getMinecraftClassByName("Item");
+            Object itemsRegistry = Reflection.getFieldValue(minecraftItemClass, null, "REGISTRY");
 
-            Object minecraftKey = getRegistryLookupMethod().invoke(ItemsRegistry, minecraftItem);
+            Object minecraftKey = getRegistryLookupMethod().invoke(itemsRegistry, minecraftItem);
 
             return minecraftKey.toString();
         } catch (Exception ex) {
@@ -379,8 +379,8 @@ public abstract class ItemUtils {
      */
     public static Object asNMSCopy(ItemStack item) throws NMSException {
         try {
-            Class<?> CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            return CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+            Class<?> craftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            return craftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
         } catch (Exception ex) {
             throw new NMSException("Unable to retreive NMS copy", ex);
         }
@@ -395,8 +395,8 @@ public abstract class ItemUtils {
      */
     public static Object asCraftCopy(ItemStack item) throws NMSException {
         try {
-            Class<?> CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            return CraftItemStack.getMethod("asCraftCopy", ItemStack.class).invoke(null, item);
+            Class<?> craftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            return craftItemStack.getMethod("asCraftCopy", ItemStack.class).invoke(null, item);
         } catch (Exception ex) {
             throw new NMSException("Unable to retreive Craft copy", ex);
         }
@@ -407,16 +407,16 @@ public abstract class ItemUtils {
      *
      * @param item An item.
      * @return A NMS ItemStack for this item. If the item was a CraftItemStack,
-     * this will be the item's handle directly; in the other cases, a copy in a
-     * NMS ItemStack object.
+     *      this will be the item's handle directly; in the other cases, a copy in a
+     *      NMS ItemStack object.
      * @throws NMSException if the operation cannot be executed.
      */
     public static Object getNMSItemStack(ItemStack item) throws NMSException {
         try {
-            Class<?> CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            return CraftItemStack.isAssignableFrom(item.getClass())
-                    ? Reflection.getFieldValue(CraftItemStack, item, "handle")
-                    : CraftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+            Class<?> craftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            return craftItemStack.isAssignableFrom(item.getClass())
+                    ? Reflection.getFieldValue(craftItemStack, item, "handle")
+                    : craftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
         } catch (Exception ex) {
             throw new NMSException("Unable to retrieve NMS copy", ex);
         }
@@ -427,14 +427,14 @@ public abstract class ItemUtils {
      *
      * @param item An item.
      * @return A CraftItemStack for this item. If the item was initially a
-     * CraftItemStack, it is returned directly. In the other cases, a copy in a
-     * new CraftItemStack will be returned.
+     *      CraftItemStack, it is returned directly. In the other cases, a copy in a
+     *      new CraftItemStack will be returned.
      * @throws NMSException if the operation cannot be executed.
      */
     public static Object getCraftItemStack(ItemStack item) throws NMSException {
         try {
-            Class<?> CraftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
-            return CraftItemStack.isAssignableFrom(item.getClass()) ? CraftItemStack.cast(item) : asCraftCopy(item);
+            Class<?> craftItemStack = Reflection.getBukkitClassByName("inventory.CraftItemStack");
+            return craftItemStack.isAssignableFrom(item.getClass()) ? craftItemStack.cast(item) : asCraftCopy(item);
         } catch (Exception ex) {
             throw new NMSException("Unable to retrieve CraftItemStack copy", ex);
         }
@@ -444,13 +444,13 @@ public abstract class ItemUtils {
         String potionKey = getI18nPotionKey(item);
 
         try {
-            Class<?> PotionUtil = Reflection.getMinecraftClassByName("PotionUtil");
-            Class<?> PotionRegistry = Reflection.getMinecraftClassByName("PotionRegistry");
-            Class<?> ItemStackClass = Reflection.getMinecraftClassByName("ItemStack");
-            Object registry = Reflection.findMethod(PotionUtil, null, PotionRegistry, 0, ItemStackClass)
+            Class<?> potionUtil = Reflection.getMinecraftClassByName("PotionUtil");
+            Class<?> potionRegistry = Reflection.getMinecraftClassByName("PotionRegistry");
+            Class<?> itemStackClass = Reflection.getMinecraftClassByName("ItemStack");
+            Object registry = Reflection.findMethod(potionUtil, null, potionRegistry, 0, itemStackClass)
                     .invoke(null, asNMSCopy(item));
 
-            return (String) Reflection.findMethod(PotionRegistry, null, String.class, 0, String.class)
+            return (String) Reflection.findMethod(potionRegistry, null, String.class, 0, String.class)
                     .invoke(registry, potionKey);
         } catch (Exception ex) {
             throw new NMSException("Unable to retrieve Minecraft I18n name", ex);

@@ -41,7 +41,6 @@ import org.bukkit.entity.Player;
  *
  * @author Amaury Carrade
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public final class NMSNetwork {
     private static final Class<?> craftPlayerClass;
     private static final Class<?> entityPlayerClass;

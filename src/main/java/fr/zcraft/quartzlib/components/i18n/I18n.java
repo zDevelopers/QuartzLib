@@ -290,11 +290,8 @@ public class I18n extends QuartzComponent {
 
     /**
      * Loads a file into the translations system.
-     * <p>
-     * If this file is a directory, all files inside will be loaded, recursively.
-     * <p>
-     * The locale will be extracted from the file name, and the format, from the
-     * file's extension.
+     * <p>If this file is a directory, all files inside will be loaded, recursively.</p>
+     * <p>The locale will be extracted from the file name, and the format, from the file's extension.</p>
      *
      * @param file The file to load.
      */
@@ -307,11 +304,8 @@ public class I18n extends QuartzComponent {
 
     /**
      * Loads a file into the translations system.
-     * <p>
-     * If this file is a directory, all files inside will be loaded, recursively.
-     * <p>
-     * The locale will be extracted from the file name, and the format, from the
-     * file's extension.
+     * <p>If this file is a directory, all files inside will be loaded, recursively.</p>
+     * <p>The locale will be extracted from the file name, and the format, from the file's extension.</p>
      *
      * @param file     The file to load.
      * @param priority The priority to set for this translator. Translators with
@@ -361,7 +355,7 @@ public class I18n extends QuartzComponent {
      *
      * @param locale The locale.
      * @return The chain, in an ordered {@link TreeSet}. Will never be {@code null}, but can
-     * be empty if no translator was registered for that locale.
+     *      be empty if no translator was registered for that locale.
      */
     private static Set<Translator> getTranslatorsChain(final Locale locale) {
         Set<Translator> translators = I18n.translators.get(locale);
@@ -386,7 +380,7 @@ public class I18n extends QuartzComponent {
      * @param count           The count of items to use to choose the singular or plural form.
      *                        {@code null} if this translation does not have a plural form.
      * @return The non-formatted translated string, if one of the translators was able to
-     * translate it; else, {@code null}.
+     *      translate it; else, {@code null}.
      */
     private static String translateFromChain(Set<Translator> chain, String context, String messageId,
                                              String messageIdPlural, Integer count) {
@@ -439,9 +433,8 @@ public class I18n extends QuartzComponent {
         // We first try the given locale, or a close one, if non-null.
         if (locale != null) {
             // We first try the given locale
-            if ((translated =
-                    translateFromChain(getTranslatorsChain(locale), context, messageId, messageIdPlural, count)) !=
-                    null) {
+            translated = translateFromChain(getTranslatorsChain(locale), context, messageId, messageIdPlural, count);
+            if (translated != null) {
                 usedLocale = locale;
             } else {
                 // Then, we lookup for a close locale (same language and country, then same language)
@@ -459,8 +452,8 @@ public class I18n extends QuartzComponent {
                 }
 
                 if (perfect != null && (translated =
-                        translateFromChain(getTranslatorsChain(perfect), context, messageId, messageIdPlural, count)) !=
-                        null) {
+                        translateFromChain(getTranslatorsChain(perfect), context, messageId, messageIdPlural, count))
+                        != null) {
                     usedLocale = perfect;
                 } else {
                     for (Locale closeLocale : close) {
@@ -476,13 +469,13 @@ public class I18n extends QuartzComponent {
 
         // If we still don't have anything, we try the primary then fallback locales
         if (translated == null && primaryLocale != null && (translated =
-                translateFromChain(getTranslatorsChain(primaryLocale), context, messageId, messageIdPlural, count)) !=
-                null) {
+                translateFromChain(getTranslatorsChain(primaryLocale), context, messageId, messageIdPlural, count))
+                != null) {
             usedLocale = primaryLocale;
         }
         if (translated == null && fallbackLocale != null && (translated =
-                translateFromChain(getTranslatorsChain(fallbackLocale), context, messageId, messageIdPlural, count)) !=
-                null) {
+                translateFromChain(getTranslatorsChain(fallbackLocale), context, messageId, messageIdPlural, count))
+                != null) {
             usedLocale = fallbackLocale;
         }
 
@@ -511,9 +504,9 @@ public class I18n extends QuartzComponent {
         // often badly displays them (dashed square with NBSP inside).
         return formatter.format(parameters)
                 .replace("\u00A0", " ").replace("\u2007", " ").replace("\u202F", " ")  // Non-breaking spaces
-                .replace("\u2009", " ")                                                // Thin space
+                .replace("\u2009", " ") // Thin space
                 .replace("\u2060",
-                        "");                                                // “WORD-JOINER” non-breaking space (zero-width)
+                        ""); // “WORD-JOINER” non-breaking space (zero-width)
     }
 
     /**
@@ -627,7 +620,7 @@ public class I18n extends QuartzComponent {
      *
      * @param locale A locale.
      * @return The last translator for this locale; may be an empty string
-     * if none found.
+     *      if none found.
      */
     public static String getLastTranslator(Locale locale) {
         return StringUtils.join(getLastTranslators(locale), ", ");
@@ -654,7 +647,7 @@ public class I18n extends QuartzComponent {
      *
      * @param locale A locale.
      * @return The last translator for this locale; may be an empty string
-     * if none found.
+     *      if none found.
      */
     public static String getTranslationTeam(Locale locale) {
         return StringUtils.join(getTranslationTeams(locale), ", ");
@@ -681,7 +674,7 @@ public class I18n extends QuartzComponent {
      *
      * @param locale A locale.
      * @return The receiver of the error reports for this locale; may be an
-     * empty string if none found.
+     *      empty string if none found.
      */
     public static String getReportErrorsTo(Locale locale) {
         return StringUtils.join(getAllReportErrorsTo(locale), ", ");
