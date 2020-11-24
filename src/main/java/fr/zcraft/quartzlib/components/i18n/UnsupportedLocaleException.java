@@ -27,18 +27,16 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.i18n;
 
 import java.util.Locale;
 
+public class UnsupportedLocaleException extends IllegalArgumentException {
 
-public class UnsupportedLocaleException extends IllegalArgumentException
-{
+    private static final long serialVersionUID = -2746324692893193071L;
 
-	private static final long serialVersionUID = -2746324692893193071L;
-
-	public UnsupportedLocaleException(Locale locale)
-    {
+    public UnsupportedLocaleException(Locale locale) {
         super("Unsupported locale " + locale);
     }
 }

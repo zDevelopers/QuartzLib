@@ -27,16 +27,16 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.text;
 
 import fr.zcraft.quartzlib.components.rawtext.RawText;
 import fr.zcraft.quartzlib.exceptions.IncompatibleMinecraftVersionException;
 import fr.zcraft.quartzlib.tools.reflection.NMSNetwork;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
+import java.lang.reflect.InvocationTargetException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-
-import java.lang.reflect.InvocationTargetException;
 
 
 /**
@@ -44,39 +44,33 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author Amaury Carrade
  */
-public final class ListHeaderFooter
-{
+public final class ListHeaderFooter {
+    private static final Class<?> packetPlayOutPlayerListHeaderFooterClass;
+    private static final Class<?> iChatBaseComponentClass;
     private static boolean enabled = true;
-
-    private static Class<?> packetPlayOutPlayerListHeaderFooterClass;
     private static Class<?> chatSerializerClass;
-    private static Class<?> iChatBaseComponentClass;
 
-    static
-    {
-        try
-        {
-            packetPlayOutPlayerListHeaderFooterClass = Reflection.getMinecraftClassByName("PacketPlayOutPlayerListHeaderFooter");
+    static {
+        try {
+            packetPlayOutPlayerListHeaderFooterClass =
+                    Reflection.getMinecraftClassByName("PacketPlayOutPlayerListHeaderFooter");
             iChatBaseComponentClass = Reflection.getMinecraftClassByName("IChatBaseComponent");
 
-            try
-            {
+            try {
                 chatSerializerClass = Reflection.getMinecraftClassByName("ChatSerializer");
-            }
-            catch (ClassNotFoundException e)
-            {
+            } catch (ClassNotFoundException e) {
                 chatSerializerClass = Reflection.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             enabled = false;
-            throw new IncompatibleMinecraftVersionException("Unable to load classes needed to send player list header and footer.", e);
+            throw new IncompatibleMinecraftVersionException(
+                    "Unable to load classes needed to send player list header and footer.", e);
         }
     }
 
 
-    private ListHeaderFooter() {}
+    private ListHeaderFooter() {
+    }
 
 
     /**
@@ -85,11 +79,9 @@ public final class ListHeaderFooter
      * @param player The receiver of the header &amp; footers.
      * @param header The header.
      * @param footer The footer.
-     *
      * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static void sendListHeaderFooter(Player player, String header, String footer)
-    {
+    public static void sendListHeaderFooter(Player player, String header, String footer) {
         sendRawListHeaderFooter(
                 player,
                 "{\"text\": \"" + (header != null ? header.replace("\"", "\\\"") : "") + "\"}",
@@ -103,11 +95,9 @@ public final class ListHeaderFooter
      * @param player The receiver of the header &amp; footers.
      * @param header The header.
      * @param footer The footer.
-     *
      * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static void sendListHeaderFooter(Player player, RawText header, RawText footer)
-    {
+    public static void sendListHeaderFooter(Player player, RawText header, RawText footer) {
         sendRawListHeaderFooter(
                 player,
                 header != null ? header.toJSONString() : "{\"text\": \"\"}",
@@ -116,35 +106,58 @@ public final class ListHeaderFooter
     }
 
     /**
+     * Sends the player list headers and footers to the whole server.
+     *
+     * @param header The header.
+     * @param footer The footer.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
+     */
+    public static void sendListHeaderFooter(String header, String footer) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            sendListHeaderFooter(player, header, footer);
+        }
+    }
+
+    /**
+     * Sends the player list headers and footers to the whole server.
+     *
+     * @param header The header.
+     * @param footer The footer.
+     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
+     */
+    public static void sendListHeaderFooter(RawText header, RawText footer) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            sendListHeaderFooter(player, header, footer);
+        }
+    }
+
+    /**
      * Sends the player list headers and footers to the given player.
      *
      * @param player    The receiver of the header &amp; footers.
      * @param rawHeader The header (raw JSON message).
      * @param rawFooter The footer (raw JSON message).
-     *
      * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static void sendRawListHeaderFooter(Player player, String rawHeader, String rawFooter)
-    {
-        if (!enabled) return;
+    public static void sendRawListHeaderFooter(Player player, String rawHeader, String rawFooter) {
+        if (!enabled) {
+            return;
+        }
 
-        try
-        {
-            final Object serializedHeader = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawHeader));
-            final Object serializedFooter = iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawFooter));
+        try {
+            final Object serializedHeader = iChatBaseComponentClass
+                    .cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawHeader));
+            final Object serializedFooter = iChatBaseComponentClass
+                    .cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", rawFooter));
 
             // 1.11-
-            try
-            {
-                final Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor(iChatBaseComponentClass).newInstance(serializedHeader);
+            try {
+                final Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor(iChatBaseComponentClass)
+                        .newInstance(serializedHeader);
                 Reflection.setFieldValue(packet, "b", serializedFooter);
 
                 NMSNetwork.sendPacket(player, packet);
-            }
-
-            // 1.12+
-            catch (NoSuchMethodException e)
-            {
+            } catch (NoSuchMethodException e) { // 1.12+
                 final Object packet = packetPlayOutPlayerListHeaderFooterClass.getConstructor().newInstance();
 
                 Reflection.setFieldValue(packet, "a", serializedHeader);
@@ -152,42 +165,9 @@ public final class ListHeaderFooter
 
                 NMSNetwork.sendPacket(player, packet);
             }
-        }
-        catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchFieldException e)
-        {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException
+                | InstantiationException | NoSuchFieldException e) {
             throw new IncompatibleMinecraftVersionException("Unable to send player list header and footer.", e);
-        }
-    }
-
-    /**
-     * Sends the player list headers and footers to the whole server.
-     *
-     * @param header The header.
-     * @param footer The footer.
-     *
-     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
-     */
-    public static void sendListHeaderFooter(String header, String footer)
-    {
-        for (Player player : Bukkit.getOnlinePlayers())
-        {
-            sendListHeaderFooter(player, header, footer);
-        }
-    }
-
-    /**
-     * Sends the player list headers and footers to the whole server.
-     *
-     * @param header The header.
-     * @param footer The footer.
-     *
-     * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
-     */
-    public static void sendListHeaderFooter(RawText header, RawText footer)
-    {
-        for (Player player : Bukkit.getOnlinePlayers())
-        {
-            sendListHeaderFooter(player, header, footer);
         }
     }
 
@@ -196,13 +176,10 @@ public final class ListHeaderFooter
      *
      * @param rawHeader The header (raw JSON message).
      * @param rawFooter The footer (raw JSON message).
-     *
      * @throws IncompatibleMinecraftVersionException if an error is encountered while sending the title.
      */
-    public static void sendRawListHeaderFooter(String rawHeader, String rawFooter)
-    {
-        for (Player player : Bukkit.getOnlinePlayers())
-        {
+    public static void sendRawListHeaderFooter(String rawHeader, String rawFooter) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             sendRawListHeaderFooter(player, rawHeader, rawFooter);
         }
     }

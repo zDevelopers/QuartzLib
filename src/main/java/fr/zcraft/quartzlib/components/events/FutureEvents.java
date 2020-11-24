@@ -27,10 +27,17 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.events;
 
 import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -43,65 +50,54 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.TimedRegisteredListener;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
-
-public final class FutureEvents
-{
+public final class FutureEvents {
     /**
      * Registers the future events in a listener.
      *
-     * <p>This method will scan the methods of the given listener. To be registered as future events, the methods must:</p>
+     * <p>This method will scan the methods of the given listener.
+     * To be registered as future events, the methods must:</p>
      * <ul>
      *     <li>be annotated with {@link FutureEventHandler @FutureEventHandler};</li>
      *     <li>accept only one argument of type {@link WrappedEvent}.</li>
      * </ul>
      *
-     * <p>These listeners are unregistered the same way as Bukkit ones, with {@link HandlerList#unregisterAll(Listener)}.</p>
+     * <p>These listeners are unregistered the same way as Bukkit ones,
+     * with {@link HandlerList#unregisterAll(Listener)}.</p>
      *
      * @param listener The listener to register.
      */
-    public static void registerFutureEvents(final Listener listener)
-    {
-        if (!QuartzLib.isInitialized() || !QuartzLib.getPlugin().isEnabled())
-            throw new IllegalPluginAccessException("Plugin attempted to register the future listener " + listener + " while not enabled or QuartzLib not initialized!");
+    public static void registerFutureEvents(final Listener listener) {
+        if (!QuartzLib.isInitialized() || !QuartzLib.getPlugin().isEnabled()) {
+            throw new IllegalPluginAccessException("Plugin attempted to register the future listener " + listener
+                    + " while not enabled or QuartzLib not initialized!");
+        }
 
         final Map<Class<? extends Event>, Set<RegisteredListener>> registeredListeners = new HashMap<>();
 
-        for (final Method method : listener.getClass().getDeclaredMethods())
-        {
+        for (final Method method : listener.getClass().getDeclaredMethods()) {
             final FutureEventHandler annotation = method.getAnnotation(FutureEventHandler.class);
             if (annotation == null
                     || method.getParameterTypes().length != 1
-                    || !WrappedEvent.class.isAssignableFrom(method.getParameterTypes()[0]))
+                    || !WrappedEvent.class.isAssignableFrom(method.getParameterTypes()[0])) {
                 continue;
+            }
 
             Class<?> eventClass;
-            try
-            {
+            try {
                 eventClass = Class.forName(annotation.event());
-            }
-            catch (ClassNotFoundException e)
-            {
-                try
-                {
+            } catch (ClassNotFoundException e) {
+                try {
                     eventClass = Class.forName("org.bukkit.event." + annotation.event());
-                }
-                catch (ClassNotFoundException e1)
-                {
+                } catch (ClassNotFoundException e1) {
                     // The event class cannot be found: this event is not compatible with this version. Aborting...
                     continue;
                 }
             }
 
-            if (!Event.class.isAssignableFrom(eventClass))
-            {
-                PluginLogger.error("Cannot register a future event handler with a non-event class ({0})", eventClass.getName());
+            if (!Event.class.isAssignableFrom(eventClass)) {
+                PluginLogger.error("Cannot register a future event handler with a non-event class ({0})",
+                        eventClass.getName());
                 continue;
             }
 
@@ -111,35 +107,34 @@ public final class FutureEvents
 
             final EventExecutor executor = new EventExecutor() {
                 @Override
-                public void execute(Listener listener, Event event) throws EventException
-                {
-                    try
-                    {
-                        if (finalEventClass.isAssignableFrom(event.getClass()))
-                        {
+                public void execute(Listener listener, Event event) throws EventException {
+                    try {
+                        if (finalEventClass.isAssignableFrom(event.getClass())) {
                             final WrappedEvent wrap = new WrappedEvent(event);
                             method.invoke(listener, wrap);
                         }
-                    }
-                    catch (InvocationTargetException e)
-                    {
+                    } catch (InvocationTargetException e) {
                         throw new EventException(e.getCause());
-                    }
-                    catch (Throwable t)
-                    {
+                    } catch (Throwable t) {
                         throw new EventException(t);
                     }
                 }
             };
 
             final RegisteredListener registeredListener;
-            if (Bukkit.getServer().getPluginManager().useTimings())
-                registeredListener = new TimedRegisteredListener(listener, executor, annotation.priority(), QuartzLib.getPlugin(), annotation.ignoreCancelled());
-            else
-                registeredListener = new RegisteredListener(listener, executor, annotation.priority(), QuartzLib.getPlugin(), annotation.ignoreCancelled());
+            if (Bukkit.getServer().getPluginManager().useTimings()) {
+                registeredListener =
+                        new TimedRegisteredListener(listener, executor, annotation.priority(), QuartzLib.getPlugin(),
+                                annotation.ignoreCancelled());
+            } else {
+                registeredListener =
+                        new RegisteredListener(listener, executor, annotation.priority(), QuartzLib.getPlugin(),
+                                annotation.ignoreCancelled());
+            }
 
-            if (!registeredListeners.containsKey(eventClass))
+            if (!registeredListeners.containsKey(eventClass)) {
                 registeredListeners.put((Class<? extends Event>) eventClass, new HashSet<RegisteredListener>());
+            }
 
             registeredListeners.get(eventClass).add(registeredListener);
         }
@@ -148,34 +143,30 @@ public final class FutureEvents
         final PluginManager pm = Bukkit.getServer().getPluginManager();
 
         // Methods cannot be retrieved using the Reflection shortcut because NoSuchMethodExceptions are thrown
-        try
-        {
-            Method getRegistrationClass = SimplePluginManager.class.getDeclaredMethod("getRegistrationClass", Class.class);
+        try {
+            Method getRegistrationClass =
+                    SimplePluginManager.class.getDeclaredMethod("getRegistrationClass", Class.class);
             getRegistrationClass.setAccessible(true);
 
             Method getEventListeners = SimplePluginManager.class.getDeclaredMethod("getEventListeners", Class.class);
             getEventListeners.setAccessible(true);
 
-            for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : registeredListeners.entrySet())
-            {
-                try
-                {
-                    HandlerList handlerList = (HandlerList) getEventListeners.invoke(pm, getRegistrationClass.invoke(pm, entry.getKey()));
+            for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : registeredListeners.entrySet()) {
+                try {
+                    HandlerList handlerList =
+                            (HandlerList) getEventListeners.invoke(pm, getRegistrationClass.invoke(pm, entry.getKey()));
                     handlerList.registerAll(entry.getValue());
-                }
-                catch (IllegalAccessException e)
-                {
+                } catch (IllegalAccessException e) {
                     PluginLogger.error("Cannot register future event handler, is your Bukkit version supported?", e);
-                }
-                catch (InvocationTargetException e)
-                {
-                    PluginLogger.error("Error while registering future event handler, is your Bukkit version supported?", e.getCause());
+                } catch (InvocationTargetException e) {
+                    PluginLogger
+                            .error("Error while registering future event handler, is your Bukkit version supported?",
+                                    e.getCause());
                 }
             }
-        }
-        catch (NoSuchMethodException e)
-        {
-            PluginLogger.error("Cannot load methods needed to register future event handlers, is your Bukkit version supported?", e);
+        } catch (NoSuchMethodException e) {
+            PluginLogger.error("Cannot load methods needed to register future event handlers,"
+                            + "is your Bukkit version supported?", e);
         }
     }
 }

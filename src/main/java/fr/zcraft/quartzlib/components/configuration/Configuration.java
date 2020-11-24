@@ -30,24 +30,19 @@
 
 package fr.zcraft.quartzlib.components.configuration;
 
-import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.core.QuartzComponent;
+import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.Callback;
 
 
-public abstract class Configuration extends QuartzComponent
-{
+public abstract class Configuration extends QuartzComponent {
     /* ===== Static API ===== */
-    static private ConfigurationInstance instance;
-    
-    @Override
-    protected void onEnable() 
-    {
-        init(this.getClass());
-    }
-    
-    static public void init(final Class<?> configurationClass)
-    {
+    private static ConfigurationInstance instance;
+
+    /**
+     * Initializes the configuration based on a given class.
+     */
+    public static void init(final Class<?> configurationClass) {
         instance = new ConfigurationInstance(QuartzLib.getPlugin().getConfig());
         instance.init(configurationClass);
         instance.onEnable();
@@ -56,28 +51,30 @@ public abstract class Configuration extends QuartzComponent
     /**
      * Saves the config.yml configuration to the disk.
      */
-    static public void save()
-    {
+    public static void save() {
         instance.save(true);
     }
 
     /**
      * Reloads the config.yml configuration from the disk.
      */
-    static public void reload()
-    {
+    public static void reload() {
         instance.reload(true);
     }
 
     /**
      * Registers a callback called when the configuration is updated someway.
      *
-     * Callbacks are not called when the configuration is reloaded fully.
+     * <p>Callbacks are not called when the configuration is reloaded fully.</p>
      *
      * @param callback The callback.
      */
-    static public void registerConfigurationUpdateCallback(final Callback<ConfigurationItem<?>> callback)
-    {
+    public static void registerConfigurationUpdateCallback(final Callback<ConfigurationItem<?>> callback) {
         instance.registerConfigurationUpdateCallback(callback);
+    }
+
+    @Override
+    protected void onEnable() {
+        init(this.getClass());
     }
 }

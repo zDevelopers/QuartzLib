@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools;
 
 import java.io.BufferedReader;
@@ -36,76 +37,70 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 
-public final class FileUtils
-{
-    private FileUtils() {}
+public final class FileUtils {
+    private FileUtils() {
+    }
 
     /**
      * Reads a file, returns its content into a String. Returns an empty string if the file is
      * unreachable.
      *
      * @param file The file to read.
-     *
      * @return The file content.
      */
-    public static String readFile(File file)
-    {
+    public static String readFile(File file) {
         BufferedReader reader = null;
 
-        try
-        {
+        try {
             StringBuilder content = new StringBuilder();
             reader = new BufferedReader(new FileReader(file));
 
-            for (String line; (line = reader.readLine()) != null; )
+            for (String line; (line = reader.readLine()) != null; ) {
                 content.append(line).append('\n');
+            }
 
             return content.toString();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             return "";
-        }
-        finally
-        {
-            if (reader != null)
-                try { reader.close(); } catch (IOException ignored) {}
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
     /**
      * Writes the given content into the file, replacing its content.
      *
-     * @param file The file to write into.
+     * @param file    The file to write into.
      * @param content The content to write into the file.
      */
-    public static void writeFile(File file, String content) throws IOException
-    {
+    public static void writeFile(File file, String content) throws IOException {
         writeFile(file, content, true);
     }
 
     /**
      * Writes the given content into the file.
      *
-     * @param file The file to write into.
-     * @param content The content to write into the file.
+     * @param file      The file to write into.
+     * @param content   The content to write into the file.
      * @param overwrite {@code true} to overwrite, {@code false} to append.
-     *
      * @throws IOException if the file cannot be written to.
      */
-    public static void writeFile(File file, String content, boolean overwrite) throws IOException
-    {
+    public static void writeFile(File file, String content, boolean overwrite) throws IOException {
         FileWriter writer = null;
 
-        try
-        {
+        try {
             writer = new FileWriter(file, !overwrite);
             writer.write(content);
             writer.close();
-        }
-        finally
-        {
-            if (writer != null) writer.close();
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
         }
     }
 }

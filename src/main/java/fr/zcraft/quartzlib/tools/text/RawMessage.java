@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.text;
 
 import fr.zcraft.quartzlib.components.rawtext.RawText;
@@ -43,73 +44,39 @@ import org.bukkit.entity.Player;
  * formatted, the message will not be sent and a Runtime exception containing the exception throw by
  * the vanilla /tellraw command will be thrown.</p>
  */
-public final class RawMessage
-{
-    private RawMessage() {}
+public final class RawMessage {
+    private RawMessage() {
+    }
 
     /**
      * Sends raw text to the given command sender.
-     * 
+     *
      * <p>If the command sender is a Player, the JSON representation is used (using tellraw).
      * Otherwise, the message is converted to formatted text and is sent normally.</p>
      *
-     * @param commandSender  The receiver of the message.
-     * @param text The JSON message.
-     *
+     * @param commandSender The receiver of the message.
+     * @param text          The JSON message.
      * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
      *                          the message).
      */
-    public static void send(CommandSender commandSender, RawText text)
-    {
-        if(commandSender instanceof Player)
-        {
+    public static void send(CommandSender commandSender, RawText text) {
+        if (commandSender instanceof Player) {
             send((Player) commandSender, text.toJSONString());
-        }
-        else
-        {
+        } else {
             commandSender.sendMessage(text.toFormattedText());
         }
     }
-    
-    
+
     /**
      * Sends a raw JSON message to the given player.
      *
-     * @param player  The receiver of the message.
-     * @param json The JSON message.
-     *
+     * @param player The receiver of the message.
+     * @param json   The JSON message.
      * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
      *                          the message).
      */
-    public static void send(Player player, String json)
-    {
+    public static void send(Player player, String json) {
         send(player.getName(), json);
-    }
-
-    /**
-     * Broadcasts a raw JSON message to the server.
-     *
-     * @param json The JSON message.
-     *
-     * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
-     *                          the message).
-     */
-    public static void broadcast(String json)
-    {
-        send("@a", json);
-    }
-
-    /**
-     * Broadcasts a raw JSON message to the server.
-     *
-     * @param text The message.
-     *
-     * @throws RuntimeException if a problem is encountered while sending the message.
-     */
-    public static void broadcast(RawText text)
-    {
-        send("@a", text.toJSONString());
-        Bukkit.getConsoleSender().sendMessage(text.toFormattedText());
     }
 
     /**
@@ -117,13 +84,11 @@ public final class RawMessage
      *
      * @param selector The receiver(s) of the message. Spaces are disallowed. This has to be a valid
      *                 Minecraft selector, like {@code @a}, or {@code @r[m=0]}.
-     * @param text  The JSON message.
-     *
+     * @param text     The JSON message.
      * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
      *                          the message).
      */
-    public static void send(String selector, RawText text)
-    {
+    public static void send(String selector, RawText text) {
         send(selector, text.toJSONString());
     }
 
@@ -132,20 +97,39 @@ public final class RawMessage
      *
      * @param selector The receiver(s) of the message. Spaces are disallowed. This has to be a valid
      *                 Minecraft selector, like {@code @a}, or {@code @r[m=0]}.
-     * @param json  The JSON message.
-     *
+     * @param json     The JSON message.
      * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
      *                          the message).
      */
-    public static void send(String selector, String json)
-    {
-        try
-        {
+    public static void send(String selector, String json) {
+        try {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + selector + " " + json);
-        }
-        catch (CommandException e)
-        {
-            throw new RuntimeException("Unable to send raw message to " + selector + ", is the JSON valid? ", e.getCause() != null ? e.getCause() : e);
+        } catch (CommandException e) {
+            throw new RuntimeException("Unable to send raw message to " + selector + ", is the JSON valid? ",
+                    e.getCause() != null ? e.getCause() : e);
         }
     }
+
+    /**
+     * Broadcasts a raw JSON message to the server.
+     *
+     * @param json The JSON message.
+     * @throws RuntimeException if the JSON is invalid (or other problem encountered while sending
+     *                          the message).
+     */
+    public static void broadcast(String json) {
+        send("@a", json);
+    }
+
+    /**
+     * Broadcasts a raw JSON message to the server.
+     *
+     * @param text The message.
+     * @throws RuntimeException if a problem is encountered while sending the message.
+     */
+    public static void broadcast(RawText text) {
+        send("@a", text.toJSONString());
+        Bukkit.getConsoleSender().sendMessage(text.toFormattedText());
+    }
+
 }

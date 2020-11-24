@@ -38,11 +38,9 @@ import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.ztoaster.ToastExplorer;
 
 @CommandInfo(name = "open")
-public class OpenCommand extends Command
-{
+public class OpenCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
+    protected void run() throws CommandException {
         Gui.open(playerSender(), new ToastExplorer());
     }
 }

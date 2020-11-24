@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib;
 
 import java.io.File;
@@ -36,31 +37,32 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 
-public class TestsUtils
-{
-    public static InputStream getResource(String name)
-    {
+public class TestsUtils {
+    public static InputStream getResource(String name) {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         return loader.getResourceAsStream(name);
     }
 
-    public static File tempResource(String name) throws IOException
-    {
+    /**
+     * Writes a resource to a temporary file.
+     */
+    public static File tempResource(String name) throws IOException {
         String[] fileNameParts = name.split("\\.");
         String extension = null;
-        if (fileNameParts.length >= 2)
+        if (fileNameParts.length >= 2) {
             extension = fileNameParts[fileNameParts.length - 1];
+        }
 
         InputStream inputStream = getResource(name);
-        File tempFile = File.createTempFile("quartzlib-unit-tests-" + name.replace(".", "-"), ".tmp" + (extension != null ? "." + extension : ""));
+        File tempFile = File.createTempFile("quartzlib-unit-tests-" + name.replace(".", "-"),
+                ".tmp" + (extension != null ? "." + extension : ""));
 
         OutputStream outputStream = new FileOutputStream(tempFile);
 
         int read;
         byte[] bytes = new byte[1024];
 
-        while ((read = inputStream.read(bytes)) != -1)
-        {
+        while ((read = inputStream.read(bytes)) != -1) {
             outputStream.write(bytes, 0, read);
         }
 

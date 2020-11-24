@@ -37,19 +37,25 @@ import fr.zcraft.quartzlib.components.rawtext.RawText;
 import fr.zcraft.quartzlib.components.rawtext.RawTextPart;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.NMSException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Consumer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
 
 
 /**
@@ -111,32 +117,33 @@ import java.util.function.Consumer;
  *                  .craftItem();
  * </pre>
  */
-public class ItemStackBuilder
-{
-    @Nullable private final ItemStack itemStack;
-    @Nullable private Material material;
+public class ItemStackBuilder {
+    @Nullable
+    private final ItemStack itemStack;
+    @NotNull
+    private final List<String> loreLines = new ArrayList<>();
+    @NotNull
+    private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+    @NotNull
+    private final List<Consumer<ItemMeta>> metaConsumers = new ArrayList<>();
+    @Nullable
+    private Material material;
     private int amount = 1;
     private short data = 0;
-
-    @Nullable private RawTextPart<?> title = null;
-    @NotNull private final List<String> loreLines = new ArrayList<>();
+    @Nullable
+    private RawTextPart<?> title = null;
     private boolean resetLore = false;
-
     private boolean glowing = false;
-    @Nullable private Set<ItemFlag> itemFlags = null;
-
-    @Nullable private Map<String, Object> nbt = null;
-    private boolean replaceNBT = false;
-
-    @NotNull private final HashMap<Enchantment, Integer> enchantments = new HashMap<>();
-
-    @NotNull private final List<Consumer<ItemMeta>> metaConsumers = new ArrayList<>();
+    @Nullable
+    private Set<ItemFlag> itemFlags = null;
+    @Nullable
+    private Map<String, Object> nbt = null;
+    private boolean replaceNbt = false;
 
     /**
      * Creates a new ItemStackBuilder.
      */
-    public ItemStackBuilder()
-    {
+    public ItemStackBuilder() {
         this.material = null;
         this.itemStack = null;
     }
@@ -146,8 +153,7 @@ public class ItemStackBuilder
      *
      * @param material This ItemStack's material.
      */
-    public ItemStackBuilder(Material material)
-    {
+    public ItemStackBuilder(Material material) {
         this(material, 1);
     }
 
@@ -158,8 +164,7 @@ public class ItemStackBuilder
      * @param material This ItemStack's material.
      * @param amount   This ItemStack's amount.
      */
-    public ItemStackBuilder(@Nullable Material material, int amount)
-    {
+    public ItemStackBuilder(@Nullable Material material, int amount) {
         this.material = material;
         this.amount = amount;
         this.itemStack = null;
@@ -171,66 +176,63 @@ public class ItemStackBuilder
      * @param itemStack A base ItemStack to modify. This ItemStack will NOT be
      *                  cloned!
      */
-    public ItemStackBuilder(@Nullable ItemStack itemStack)
-    {
+    public ItemStackBuilder(@Nullable ItemStack itemStack) {
         this.itemStack = itemStack;
         this.material = null;
-        
-        if (itemStack != null)
-        {
+
+        if (itemStack != null) {
             this.amount = itemStack.getAmount();
             this.data = itemStack.getDurability();
 
             ItemMeta meta = itemStack.getItemMeta();
 
-            if (meta != null && meta.hasLore())
-            {
+            if (meta != null && meta.hasLore()) {
                 List<String> lore = meta.getLore();
-                if (lore != null) loreLines.addAll(lore);
+                if (lore != null) {
+                    loreLines.addAll(lore);
+                }
             }
         }
     }
 
     /**
-     * Creates (or updates) the ItemStack, with all the previously provided
-     * parameters.
+     * Creates (or updates) the ItemStack, with all the previously provided parameters.
      *
-     * @return The new ItemStack. It is NOT a copy of the previously provided
-     * ItemStack (if any).
+     * @return The new ItemStack. It is NOT a copy of the previously provided ItemStack (if any).
      */
-    public ItemStack item()
-    {
+    public ItemStack item() {
         final ItemStack newItemStack;
-        
-        if (itemStack == null)
-        {
-            if (material == null) throw new IllegalStateException("Cannot build item without a specified material");
+
+        if (itemStack == null) {
+            if (material == null) {
+                throw new IllegalStateException("Cannot build item without a specified material");
+            }
 
             newItemStack = new ItemStack(material, amount);
-        }
-        else
-        {
+        } else {
             newItemStack = itemStack;
 
-            if (material != null)
+            if (material != null) {
                 newItemStack.setType(material);
+            }
 
             newItemStack.setAmount(amount);
         }
-        
+
         newItemStack.setDurability(data);
 
         // Looking at the Bukkit impl I have no idea in which case getItemMeta() could return null
         final ItemMeta meta = Objects.requireNonNull(newItemStack.getItemMeta());
 
-        if (title != null)
+        if (title != null) {
             meta.setDisplayName(ChatColor.RESET + title.build().toFormattedText());
+        }
 
-        if (!loreLines.isEmpty() || resetLore)
+        if (!loreLines.isEmpty() || resetLore) {
             meta.setLore(loreLines);
+        }
 
-        if (itemFlags != null)
-        {
+        if (itemFlags != null) {
             meta.addItemFlags(itemFlags.toArray(new ItemFlag[0]));
         }
 
@@ -239,41 +241,35 @@ public class ItemStackBuilder
         newItemStack.setItemMeta(meta);
         newItemStack.addUnsafeEnchantments(enchantments);
 
-        if (glowing)
+        if (glowing) {
             GlowEffect.addGlow(newItemStack);
+        }
 
         return newItemStack;
     }
-    
+
     /**
      * Creates (or updates) the ItemStack, with all the previously provided
-     * parameters, and returns it as a CraftItemStack (the Bukkit internal 
+     * parameters, and returns it as a CraftItemStack (the Bukkit internal
      * ItemStack representation).
-     * 
-     * Unlike ItemStacks, CraftItemStacks are registered into NMS, and therefore
-     * will be able to hold NBT data (such as attributes and such).
-     * 
-     * Note that the returned ItemStack WILL be a copy of the previously 
-     * provided one (if any).
-     * 
+     * <p>Unlike ItemStacks, CraftItemStacks are registered into NMS, and therefore
+     * will be able to hold NBT data (such as attributes and such).</p>
+     * <p>Note that the returned ItemStack WILL be a copy of the previously
+     * provided one (if any).</p>
+     *
      * @return The new CraftItemStack.
      */
-    public ItemStack craftItem()
-    {
+    public ItemStack craftItem() {
         final ItemStack bukkitItem = item();
-        try
-        {
+        try {
             ItemStack craftCopy = (ItemStack) ItemUtils.asCraftCopy(bukkitItem);
 
-            if (nbt != null && !nbt.isEmpty())
-            {
-                craftCopy = NBT.addToItemStack(craftCopy, nbt, replaceNBT);
+            if (nbt != null && !nbt.isEmpty()) {
+                craftCopy = NBT.addToItemStack(craftCopy, nbt, replaceNbt);
             }
 
             return craftCopy;
-        }
-        catch (NMSException ex)
-        {
+        } catch (NMSException ex) {
             PluginLogger.warning("CraftItem failed", ex);
             return bukkitItem;
         }
@@ -283,11 +279,9 @@ public class ItemStackBuilder
      * Defines the material of the ItemStack.
      *
      * @param material The material
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder material(Material material)
-    {
+    public ItemStackBuilder material(Material material) {
         this.material = material;
         return this;
     }
@@ -296,11 +290,9 @@ public class ItemStackBuilder
      * Defines the amount of the ItemStack.
      *
      * @param amount The amount.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder amount(int amount)
-    {
+    public ItemStackBuilder amount(int amount) {
         this.amount = amount;
         return this;
     }
@@ -310,13 +302,12 @@ public class ItemStackBuilder
      * otherwise an IllegalStateException will be thrown.
      *
      * @param text The text of the title.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder title(RawTextPart<?> text)
-    {
-        if (this.title != null)
+    public ItemStackBuilder title(RawTextPart<?> text) {
+        if (this.title != null) {
             throw new IllegalStateException("Title has already been defined.");
+        }
 
         this.title = text;
         return this;
@@ -329,20 +320,20 @@ public class ItemStackBuilder
      * @param color The color for this piece of text.
      * @param texts The text. If several are provided, they will be all
      *              concatenated.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder title(ChatColor color, String... texts)
-    {
+    public ItemStackBuilder title(ChatColor color, String... texts) {
         String text = String.join("", texts);
 
-        if (this.title == null)
+        if (this.title == null) {
             this.title = new RawText(text);
-        else
+        } else {
             this.title = this.title.then(text);
+        }
 
-        if (color != null)
+        if (color != null) {
             this.title.color(color);
+        }
 
         return this;
     }
@@ -353,11 +344,9 @@ public class ItemStackBuilder
      *
      * @param texts The text. If several strings are provided, they will be all
      *              concatenated.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder title(String... texts)
-    {
+    public ItemStackBuilder title(String... texts) {
         return title(null, texts);
     }
 
@@ -365,11 +354,9 @@ public class ItemStackBuilder
      * Adds one or more lines of lore to the ItemStack.
      *
      * @param lines The lines of lore.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder lore(String... lines)
-    {
+    public ItemStackBuilder lore(String... lines) {
         loreLines.addAll(Arrays.asList(lines));
         return this;
     }
@@ -378,11 +365,9 @@ public class ItemStackBuilder
      * Adds one or more lines of lore to the ItemStack.
      *
      * @param lines The lines of lore.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder lore(List<String> lines)
-    {
+    public ItemStackBuilder lore(List<String> lines) {
         loreLines.addAll(lines);
         return this;
     }
@@ -392,11 +377,9 @@ public class ItemStackBuilder
      *
      * @param text The line of lore. If several strings are provided, they will be all
      *             concatenated into a single line.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreLine(String... text)
-    {
+    public ItemStackBuilder loreLine(String... text) {
         return loreLine(null, text);
     }
 
@@ -406,15 +389,14 @@ public class ItemStackBuilder
      * @param color The color for this line of lore.
      * @param text  The line of lore. If several strings are provided, they will be all
      *              concatenated into a single line.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreLine(ChatColor color, String... text)
-    {
-        if (color != null)
+    public ItemStackBuilder loreLine(ChatColor color, String... text) {
+        if (color != null) {
             loreLines.add(color + String.join("", text));
-        else
+        } else {
             loreLines.add(String.join("", text));
+        }
 
         return this;
     }
@@ -423,11 +405,9 @@ public class ItemStackBuilder
      * Adds one line of lore to the ItemStack.
      *
      * @param rawText The line of lore.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreLine(RawTextPart<?> rawText)
-    {
+    public ItemStackBuilder loreLine(RawTextPart<?> rawText) {
         return loreLine(rawText.toFormattedText());
     }
 
@@ -436,12 +416,10 @@ public class ItemStackBuilder
      * tooltip is not too large.
      *
      * @param text The text.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see GuiUtils#generateLore(String)
      */
-    public ItemStackBuilder longLore(String text)
-    {
+    public ItemStackBuilder longLore(String text) {
         return lore(GuiUtils.generateLore(text));
     }
 
@@ -451,12 +429,10 @@ public class ItemStackBuilder
      *
      * @param text       The text.
      * @param lineLength The max length of a line.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see GuiUtils#generateLore(String, int)
      */
-    public ItemStackBuilder longLore(String text, int lineLength)
-    {
+    public ItemStackBuilder longLore(String text, int lineLength) {
         return lore(GuiUtils.generateLore(text, lineLength));
     }
 
@@ -466,12 +442,10 @@ public class ItemStackBuilder
      *
      * @param color The color for this line of lore.
      * @param text  The text.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see GuiUtils#generateLore(String)
      */
-    public ItemStackBuilder longLore(ChatColor color, String text)
-    {
+    public ItemStackBuilder longLore(ChatColor color, String text) {
         return longLore(color + text);
     }
 
@@ -482,12 +456,10 @@ public class ItemStackBuilder
      * @param color      The color for this line of lore.
      * @param text       The text.
      * @param lineLength The max length of a line.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see GuiUtils#generateLore(String, int)
      */
-    public ItemStackBuilder longLore(ChatColor color, String text, int lineLength)
-    {
+    public ItemStackBuilder longLore(ChatColor color, String text, int lineLength) {
         return longLore(color + text, lineLength);
     }
 
@@ -496,8 +468,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder loreSeparator()
-    {
+    public ItemStackBuilder loreSeparator() {
         loreLines.add("");
         return this;
     }
@@ -518,8 +489,7 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder resetLore()
-    {
+    public ItemStackBuilder resetLore() {
         loreLines.clear();
         resetLore = true;
         return this;
@@ -531,12 +501,27 @@ public class ItemStackBuilder
      *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder glow()
-    {
-        if (this.glowing)
+    public ItemStackBuilder glow() {
+        if (this.glowing) {
             throw new IllegalStateException("Glowing has already been set.");
+        }
 
         this.glowing = true;
+        return this;
+    }
+
+    /**
+     * Adds a glow effect (a fake enchantment) to the ItemStack. This can only
+     * be called once, otherwise an IllegalStateException will be thrown.
+     *
+     * @param glow If the glow effect has to be applied. If false, nothing will
+     *             be done.
+     * @return The current ItemStackBuilder instance, for methods chaining.
+     */
+    public ItemStackBuilder glow(boolean glow) {
+        if (glow) {
+            glow();
+        }
         return this;
     }
 
@@ -547,32 +532,17 @@ public class ItemStackBuilder
      * <p>If the consumer's type does not match the item's ItemMeta, it is ignored.</p>
      *
      * @param consumer The consumer to be executed.
-     * @param <T> The type of the ItemMeta to accept.
+     * @param <T>      The type of the ItemMeta to accept.
      * @return The current ItemStackBuilder instance, for method chaining.
      */
-    public <T> ItemStackBuilder withMeta(Consumer<T> consumer)
-    {
+    public <T> ItemStackBuilder withMeta(Consumer<T> consumer) {
         this.metaConsumers.add(itemMeta -> {
             try {
-                consumer.accept((T)itemMeta);
-            } catch (ClassCastException ignored) {}
+                consumer.accept((T) itemMeta);
+            } catch (ClassCastException ignored) {
+            }
         });
 
-        return this;
-    }
-
-    /**
-     * Adds a glow effect (a fake enchantment) to the ItemStack. This can only
-     * be called once, otherwise an IllegalStateException will be thrown.
-     *
-     * @param glow If the glow effect has to be applied. If false, nothing will
-     *             be done.
-     *
-     * @return The current ItemStackBuilder instance, for methods chaining.
-     */
-    public ItemStackBuilder glow(boolean glow)
-    {
-        if (glow) glow();
         return this;
     }
 
@@ -582,11 +552,9 @@ public class ItemStackBuilder
      * @param enchantment The enchantment
      * @param level       The enchantment level. The enchant is added with the
      *                    unsafe method, so you can put any number here.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder enchant(Enchantment enchantment, int level)
-    {
+    public ItemStackBuilder enchant(Enchantment enchantment, int level) {
         enchantments.put(enchantment, level);
         return this;
     }
@@ -595,14 +563,11 @@ public class ItemStackBuilder
      * Enchants the ItemStack with all the enchantments in the given map.
      *
      * @param enchantments A map enchant → enchant level.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see #enchant(Enchantment, int)
      */
-    public ItemStackBuilder enchant(Map<Enchantment, Integer> enchantments)
-    {
-        for (Entry<Enchantment, Integer> entry : enchantments.entrySet())
-        {
+    public ItemStackBuilder enchant(Map<Enchantment, Integer> enchantments) {
+        for (Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
             enchant(entry.getKey(), entry.getValue());
         }
         return this;
@@ -611,12 +576,12 @@ public class ItemStackBuilder
     /**
      * Hides all of the attribute lines of the ItemStack.
      *
-     * <p>This is equivalent to call {@link ItemStackBuilder#withFlags(ItemFlag...)} with every possible ItemFlag value.</p>
+     * <p>This is equivalent to call {@link ItemStackBuilder#withFlags(ItemFlag...)}
+     * with every possible ItemFlag value.</p>
      *
      * @return The current ItemStackBuilder instance, for method chaining.
      */
-    public ItemStackBuilder hideAllAttributes()
-    {
+    public ItemStackBuilder hideAllAttributes() {
         return withFlags(ItemFlag.values());
     }
 
@@ -627,10 +592,8 @@ public class ItemStackBuilder
      * @param itemFlags The {@link ItemFlag}s to add.
      * @return The current ItemStackBuilder instance, for method chaining.
      */
-    public ItemStackBuilder withFlags(ItemFlag... itemFlags)
-    {
-        if (this.itemFlags == null)
-        {
+    public ItemStackBuilder withFlags(ItemFlag... itemFlags) {
+        if (this.itemFlags == null) {
             this.itemFlags = EnumSet.noneOf(ItemFlag.class);
         }
         Collections.addAll(this.itemFlags, itemFlags);
@@ -642,11 +605,9 @@ public class ItemStackBuilder
      * Sets the data (= damage) value of the ItemStack.
      *
      * @param data The data value.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      */
-    public ItemStackBuilder data(short data)
-    {
+    public ItemStackBuilder data(short data) {
         this.data = data;
         return this;
     }
@@ -660,13 +621,11 @@ public class ItemStackBuilder
      * NBT data will <strong>only be added if you retrieve the item using {@link #craftItem()}</strong>.
      *
      * @param compound A map containing the NBT tags to apply to the item.
-     *
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see NBTCompound#toHashMap() A method to export the data inside a compound as an independent HashMap.
      * @see #replaceNBT() Option to replace the whole NBT data
      */
-    public ItemStackBuilder nbt(Map<String, Object> compound)
-    {
+    public ItemStackBuilder nbt(Map<String, Object> compound) {
         this.nbt = compound;
         return this;
     }
@@ -680,9 +639,8 @@ public class ItemStackBuilder
      * @return The current ItemStackBuilder instance, for methods chaining.
      * @see #nbt(Map) The method to set NBT data.
      */
-    public ItemStackBuilder replaceNBT()
-    {
-        this.replaceNBT = true;
+    public ItemStackBuilder replaceNBT() {
+        this.replaceNbt = true;
         return this;
     }
 }

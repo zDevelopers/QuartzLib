@@ -27,114 +27,106 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.i18n.translators.gettext;
 
 import fr.zcraft.quartzlib.components.i18n.translators.Translation;
 import fr.zcraft.quartzlib.components.i18n.translators.Translator;
 import fr.zcraft.quartzlib.tools.PluginLogger;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.io.File;
 import java.io.Reader;
 import java.util.Locale;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 
 /**
  * Loads Gettext .po files (uncompiled).
  */
-public class GettextPOTranslator extends Translator
-{
-    private POFile source = null;
-
+public class GettextPOTranslator extends Translator {
     /**
      * A script engine used to compute plural rules.
      *
-     * The official documentation mentions that the plural determination script is in C format, but
+     * <p>The official documentation mentions that the plural determination script is in C format, but
      * the JavaScript format is the same for these scripts (containing only basic mathematics and
-     * ternary operators), excepted for the booleans, but this case is handled manually.
+     * ternary operators), excepted for the booleans, but this case is handled manually.</p>
      *
      * @see #getPluralIndex(Integer)
      */
-    private ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
+    private final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
+    private POFile source = null;
 
 
-    public GettextPOTranslator(Locale locale, File file)
-    {
+    public GettextPOTranslator(Locale locale, File file) {
         super(locale, file);
     }
 
-    public GettextPOTranslator(Locale locale, String resourceReference)
-    {
+    public GettextPOTranslator(Locale locale, String resourceReference) {
         super(locale, resourceReference);
     }
 
     @Override
-    protected void load()
-    {
-        try
-        {
+    protected void load() {
+        try {
             final Reader reader = getReader();
-            if (reader == null) return;
+            if (reader == null) {
+                return;
+            }
 
             source = new POFile(getReader());
 
             source.parse();
 
-            for (final Translation translation : source.getTranslations())
-            {
+            for (final Translation translation : source.getTranslations()) {
                 registerTranslation(translation);
             }
-        }
-        catch (POFile.CannotParsePOException e)
-        {
+        } catch (POFile.CannotParsePOException e) {
             PluginLogger.error("Cannot parse the {0} translations file.", e, getFilePath());
             source = null;
         }
     }
 
     @Override
-    public Integer getPluralIndex(Integer count)
-    {
-        if (source == null) return count != 1 ? 1 : 0;
+    public Integer getPluralIndex(Integer count) {
+        if (source == null) {
+            return count != 1 ? 1 : 0;
+        }
 
-        try
-        {
+        try {
             scriptEngine.put("n", count);
             Object rawPluralIndex = scriptEngine.eval(source.getPluralFormScript());
 
             // If the index is a boolean, as some po files use the C handling of booleans, we convert them
             // into the appropriate numbers.
             // Else, we try to convert the output to an integer.
-            Integer pluralIndex = rawPluralIndex instanceof Boolean ? (((Boolean) rawPluralIndex) ? 1 : 0) : (rawPluralIndex instanceof Number ? ((Number) rawPluralIndex).intValue() : Integer.valueOf(rawPluralIndex.toString()));
-            if (pluralIndex <= source.getPluralCount())
+            Integer pluralIndex = rawPluralIndex instanceof Boolean ? (((Boolean) rawPluralIndex) ? 1 : 0) :
+                    (rawPluralIndex instanceof Number ? ((Number) rawPluralIndex).intValue() :
+                            Integer.valueOf(rawPluralIndex.toString()));
+            if (pluralIndex <= source.getPluralCount()) {
                 return pluralIndex;
-            else
+            } else {
                 return 0;
-        }
-        catch (ScriptException | NumberFormatException e)
-        {
-            PluginLogger.error("Invalid plural script for language {0}: “{1}”", e, getLocale(), source.getPluralFormScript());
+            }
+        } catch (ScriptException | NumberFormatException e) {
+            PluginLogger.error("Invalid plural script for language {0}: “{1}”", e, getLocale(),
+                    source.getPluralFormScript());
             return 0;
         }
     }
 
     @Override
-    public String getLastTranslator()
-    {
+    public String getLastTranslator() {
         return source != null ? source.getLastTranslator() : null;
     }
 
     @Override
-    public String getTranslationTeam()
-    {
+    public String getTranslationTeam() {
         return source != null ? source.getTranslationTeam() : null;
     }
 
     @Override
-    public String getReportErrorsTo()
-    {
+    public String getReportErrorsTo() {
         return source != null ? source.getReportErrorsTo() : null;
     }
 }

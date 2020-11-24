@@ -27,93 +27,86 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.gui;
 
+import fr.zcraft.quartzlib.tools.Callback;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import fr.zcraft.quartzlib.tools.Callback;
+public abstract class ArrayPromptGui<T> extends ExplorerGui<T> {
+    private final Callback<T> cb;
+    private final String title;
+    private final T[] data;
+    private final boolean closeOnChoice;
 
-public abstract class ArrayPromptGui<T> extends ExplorerGui<T>
-{
-	private Callback<T> cb;
-	private String title;
-	private T[] data;
-	private boolean closeOnChoice;
+    /**
+     * Creates a new Array prompt GUI.
+     *
+     * @param player        The player making the choice
+     * @param title         The gui title
+     * @param data          An array of datas to display
+     * @param closeOnChoice If true, close the interface when the player has choosen
+     * @param callback      Callback called when the player made a choice
+     */
+    public <A> ArrayPromptGui(Player player, String title, T[] data, boolean closeOnChoice, Callback<T> callback) {
+        this.cb = callback;
+        this.title = title;
+        this.data = data;
+        this.closeOnChoice = closeOnChoice;
 
-	/**
-	 * @param player
-	 *            The player making the choice
-	 * @param title
-	 *            The gui title
-	 * @param data
-	 *            An array of datas to display
-	 * @param closeOnChoice
-	 *            If true, close the interface when the player has choosen
-	 * @param callback
-	 *            Callback called when the player made a choice
-	 */
-	public <A> ArrayPromptGui(Player player, String title, T[] data, boolean closeOnChoice, Callback<T> callback) {
-		this.cb = callback;
-		this.title = title;
-		this.data = data;
-		this.closeOnChoice = closeOnChoice;
+        Gui.open(player, this);
+    }
 
-		Gui.open(player, this);
-	}
+    /**
+     * @param player        The player making the choice
+     * @param title         The gui title
+     * @param data          An array of datas to display
+     * @param closeOnChoice Close the interface when the player has choosen if true
+     * @see #onClick(Object)
+     * <p>
+     * Constructor with no callback argument. Note that you must override
+     * the onClick method if you use this constructor
+     * </p>
+     */
+    public <A> ArrayPromptGui(Player player, String title, T[] data, boolean closeOnChoice) {
+        this(player, title, data, closeOnChoice, null);
+    }
 
-	/**
-	 * @see #onClick(Object)
-	 * 
-	 *      Constructor with no callback argument. Note that you must override
-	 *      the onClick method if you use this constructor
-	 * 
-	 * @param player
-	 *            The player making the choice
-	 * @param title
-	 *            The gui title
-	 * @param data
-	 *            An array of datas to display
-	 * @param closeOnChoice
-	 *            Close the interface when the player has choosen if true
-	 */
-	public <A> ArrayPromptGui(Player player, String title, T[] data, boolean closeOnChoice) {
-		this(player, title, data, closeOnChoice, null);
-	}
+    /**
+     * Convert an object to an ItemStack.
+     *
+     * @return The ItemStack to display
+     */
+    public abstract ItemStack getViewItem(T data);
 
-	/**
-	 * Convert an object to an ItemStack
-	 * 
-	 * @return The ItemStack to display
-	 */
-	public abstract ItemStack getViewItem(T data);
+    /**
+     * Called when player made a choice if no callback was provided.
+     *
+     * @param data The data given to the callback.
+     */
+    public void onClick(T data) {
+        throw new NotImplementedException("Override this method or use a callback.");
+    }
 
-	/**
-	 * Called when player made a choice if no callback was provided
-	 * 
-	 * @param data
-	 */
-	public void onClick(T data) {
-		throw new NotImplementedException("Override this method or use a callback.");
-	}
+    @Override
+    protected void onRightClick(T data) {
+        if (cb != null) {
+            cb.call(data);
+        } else {
+            onClick(data);
+        }
 
-	@Override
-	protected void onRightClick(T data) {
+        if (closeOnChoice) {
+            close();
+        }
+    }
 
-		if (cb != null)
-			cb.call(data);
-		else
-			onClick(data);
-
-		if (closeOnChoice)
-			close();
-	}
-
-	@Override
-	protected void onUpdate() {
-		setTitle(title);
-		setMode(Mode.READONLY);
-		setData(data);
-	}
+    @Override
+    protected void onUpdate() {
+        setTitle(title);
+        setMode(Mode.READONLY);
+        setData(data);
+    }
 }

@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.scoreboard;
 
 import fr.zcraft.quartzlib.components.scoreboard.sender.ObjectiveSender;
@@ -38,24 +39,20 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 
-class OnlinePlayersListener implements Listener
-{
+class OnlinePlayersListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent ev)
-    {
+    public void onPlayerJoin(PlayerJoinEvent ev) {
         Sidebar.updateLoggedInPlayers();
         ObjectiveSender.handleLogin(ev.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerLeft(PlayerQuitEvent ev)
-    {
+    public void onPlayerLeft(PlayerQuitEvent ev) {
         Sidebar.updateLoggedInPlayers();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerLeft(PlayerKickEvent ev)
-    {
+    public void onPlayerLeft(PlayerKickEvent ev) {
         Sidebar.updateLoggedInPlayers();
     }
 }

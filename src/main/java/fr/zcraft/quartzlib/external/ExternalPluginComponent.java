@@ -40,84 +40,78 @@ import org.bukkit.plugin.Plugin;
  * When enabled, the plugin will be looked for using the provided name, and
  * casted to the given class.
  * If any of this fails, the component will not be enabled.
- * Note these components may even fail during instanciation (if the other 
+ * Note these components may even fail during instanciation (if the other
  * plugin's classes are not found).
+ *
  * @param <T> The class of the plugin to interface with.
  */
-public class ExternalPluginComponent<T extends Plugin> extends QuartzComponent
-{
+public class ExternalPluginComponent<T extends Plugin> extends QuartzComponent {
     private final String pluginName;
     private T plugin;
-    
+
     /**
-     * 
+     * Instantiates a new external plugin component with the given name.
+     *
      * @param pluginName The name of the plugin to interface with.
      */
-    protected ExternalPluginComponent(String pluginName)
-    {
+    protected ExternalPluginComponent(String pluginName) {
         this.pluginName = pluginName;
     }
-    
+
     @Override
-    protected final void onEnable()
-    {
+    protected final void onEnable() {
         Plugin bukkitPlugin = Bukkit.getServer().getPluginManager().getPlugin(pluginName);
-        if(bukkitPlugin == null)
-        {
+        if (bukkitPlugin == null) {
             setEnabled(false);
             return;
-        }
-        else if (!bukkitPlugin.isEnabled())
-        {
+        } else if (!bukkitPlugin.isEnabled()) {
             // We try to load the plugin (required if we're a startup plugin
             // depending on a non-startup one).
             Bukkit.getServer().getPluginManager().enablePlugin(bukkitPlugin);
-            if (!bukkitPlugin.isEnabled())
-            {
+            if (!bukkitPlugin.isEnabled()) {
                 setEnabled(false);
                 return;
             }
         }
-        
-        try
-        {
+
+        try {
             plugin = (T) bukkitPlugin;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             PluginLogger.error("Exception while loading plugin '{0}'. Is it up-to-date ?", e, pluginName);
             this.setEnabled(false);
             return;
         }
-        
+
         onLoad();
     }
-    
+
     /**
      * Returns the external plugin.
      * If this component failed to inizialize, an IllegalStateException will be
      * thrown.
+     *
      * @return The external plugin.
      */
-    protected T get()
-    {
-        if(!this.isEnabled())
+    protected T get() {
+        if (!this.isEnabled()) {
             throw new IllegalStateException("External plugin " + pluginName + " could not be loaded.");
+        }
         return plugin;
     }
-    
+
     /**
      * This method is called after the external plugin has been found.
      * It replaces onEnable().
      */
-    protected void onLoad() {}
-    
+    protected void onLoad() {
+    }
+
     /**
-     * 
+     * Returns the name of the external plugin.
+     *
      * @return The specified name of the external plugin.
      */
-    public String getPluginName()
-    {
+    public String getPluginName() {
         return pluginName;
     }
 }

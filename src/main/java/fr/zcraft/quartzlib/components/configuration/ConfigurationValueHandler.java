@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.configuration;
 
 import java.lang.annotation.ElementType;
@@ -36,7 +37,9 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface ConfigurationValueHandler
-{
-    public Class[] value() default {};
+public @interface ConfigurationValueHandler {
+    /**
+     * The list of classes for value handlers.
+     */
+    Class[] value() default {};
 }

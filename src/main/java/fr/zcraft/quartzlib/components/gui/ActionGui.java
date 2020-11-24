@@ -32,6 +32,11 @@ package fr.zcraft.quartzlib.components.gui;
 
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -39,37 +44,29 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
 /**
  * This class implements an action-based GUI.
  * Actions are buttons which trigger an event when getting clicked on by the user.
  * They are represented by (customizable) items, which are immutable by the user.
- * 
- * Events handlers are (usually private) methods implemented in the derived 
- * class(es). They are named using the pattern 'action_[action name]', and 
+ * <p>Events handlers are (usually private) methods implemented in the derived
+ * class(es). They are named using the pattern 'action_[action name]', and
  * are called when the associated action is triggered. They take an optional
- * argument (add it if you need it): the {@link InventoryClickEvent} triggered.
+ * argument (add it if you need it): the {@link InventoryClickEvent} triggered.</p>
  *
  * @author ProkopyL (main) and Amaury Carrade
  */
-abstract public class ActionGui extends InventoryGui
-{
+public abstract class ActionGui extends InventoryGui {
     /**
      * The prefix for action handlers.
      */
-    static private final String ACTION_HANDLER_NAME = "action_";
-    
+    private static final String ACTION_HANDLER_NAME = "action_";
+
     /**
      * The class of this GUI.
      * Useful to retrieve methods from the derived classes.
      */
     private final Class<? extends ActionGui> guiClass = this.getClass();
-    
+
     /**
      * A map containing all the actions defined by the derived class, indexed by
      * their position in the inventory.
@@ -78,64 +75,60 @@ abstract public class ActionGui extends InventoryGui
 
 
     /* ===== Protected API ===== */
-    
+
     /**
      * Creates a new action, represented by the given item.
      * The item's metadata is changed to use the given title and lore.
      *
-     * @param name The identifier of the action.
-     * @param slot The slot the action will be placed on.
-     * @param material The material used to represent the action.
-     * @param title The title the item will show.
+     * @param name      The identifier of the action.
+     * @param slot      The slot the action will be placed on.
+     * @param material  The material used to represent the action.
+     * @param title     The title the item will show.
      * @param loreLines The lore the item will show.
      */
-    protected void action(String name, int slot, Material material, String title, String ... loreLines)
-    {
+    protected void action(String name, int slot, Material material, String title, String... loreLines) {
         action(name, slot, new ItemStack(material), title, Arrays.asList(loreLines));
     }
-    
+
     /**
      * Creates a new action, represented by the given item.
      * The item's metadata is changed to use the given title and lore.
      *
-     * @param name The identifier of the action.
-     * @param slot The slot the action will be placed on.
-     * @param item The item used to represent the action.
-     * @param title The title the item will show.
+     * @param name      The identifier of the action.
+     * @param slot      The slot the action will be placed on.
+     * @param item      The item used to represent the action.
+     * @param title     The title the item will show.
      * @param loreLines The lore the item will show.
      */
-    protected void action(String name, int slot, ItemStack item, String title, String ... loreLines)
-    {
+    protected void action(String name, int slot, ItemStack item, String title, String... loreLines) {
         action(name, slot, item, title, Arrays.asList(loreLines));
     }
-    
+
     /**
      * Creates a new action, represented by the given item.
      * The item's metadata is changed to use the given title and lore.
      *
-     * @param name The identifier of the action.
-     * @param slot The slot the action will be placed on.
-     * @param item The item used to represent the action.
-     * @param title The title the item will show.
+     * @param name      The identifier of the action.
+     * @param slot      The slot the action will be placed on.
+     * @param item      The item used to represent the action.
+     * @param title     The title the item will show.
      * @param loreLines The lore the item will show.
      */
-    protected void action(String name, int slot, ItemStack item, String title, List<String> loreLines)
-    {
+    protected void action(String name, int slot, ItemStack item, String title, List<String> loreLines) {
         action(name, slot, GuiUtils.makeItem(item, title, loreLines));
     }
-    
+
     /**
      * Creates a new action, represented by the given material.
      *
-     * @param name The identifier of the action.
-     * @param slot The slot the action will be placed on.
+     * @param name     The identifier of the action.
+     * @param slot     The slot the action will be placed on.
      * @param material The material used to represent the action.
      */
-    protected void action(String name, int slot, Material material)
-    {
+    protected void action(String name, int slot, Material material) {
         action(name, slot, GuiUtils.makeItem(material));
     }
-    
+
     /**
      * Creates a new action, and adds it to the GUI.
      *
@@ -143,11 +136,10 @@ abstract public class ActionGui extends InventoryGui
      * @param slot The slot the action will be placed on.
      * @param item The item used to represent the action.
      */
-    protected void action(String name, int slot, ItemStackBuilder item)
-    {
+    protected void action(String name, int slot, ItemStackBuilder item) {
         action(name, slot, item.item());
     }
-    
+
     /**
      * Creates a new action, represented by no item.
      * This action will not be rendered to the user until
@@ -156,67 +148,67 @@ abstract public class ActionGui extends InventoryGui
      *
      * @param name The identifier of the action.
      * @param slot The slot the action will be placed on.
-     * @return an {@link fr.zcraft.quartzlib.tools.items.ItemStackBuilder} ItemStackBuilder to build the representing item
+     * @return an {@link fr.zcraft.quartzlib.tools.items.ItemStackBuilder}
+     *     ItemStackBuilder to build the representing item
      */
-    protected ItemStackBuilder action(String name, int slot)
-    {
+    protected ItemStackBuilder action(String name, int slot) {
         return action(name, slot, (ItemStack) null);
     }
-    
+
     /**
      * Creates a new action, and adds it to the GUI.
      *
      * @param name The identifier of the action.
      * @param slot The slot the action will be placed on.
      * @param item The item used to represent the action.
-     * @return an {@link fr.zcraft.quartzlib.tools.items.ItemStackBuilder} ItemStackBuilder to build the representing item, or null if it was already specified.
+     * @return an {@link fr.zcraft.quartzlib.tools.items.ItemStackBuilder} ItemStackBuilder to build the representing
+     *     item, or null if it was already specified.
      */
-    protected ItemStackBuilder action(String name, int slot, ItemStack item)
-    {
-        if(slot > getSize() || slot < 0) 
+    protected ItemStackBuilder action(String name, int slot, ItemStack item) {
+        if (slot > getSize() || slot < 0) {
             throw new IllegalArgumentException("Illegal slot ID");
-        
+        }
+
         Action action = new Action(name, slot, item, getActionHandler(guiClass, name));
-        
+
         action(action);
-        
-        if(item == null) return action.updateItem();
+
+        if (item == null) {
+            return action.updateItem();
+        }
         return null;
     }
-    
+
     /**
      * Adds an action to the GUI.
      *
      * @param action The {@link fr.zcraft.quartzlib.components.gui.ActionGui.Action} to register.
      */
-    private void action(Action action)
-    {
+    private void action(Action action) {
         actions.put(action.slot, action);
     }
-    
+
     /**
      * Updates the action represented by the given name.
      *
-     * @param name The name of the action to update.
-     * @param item The new material to affect to the action.
+     * @param name  The name of the action to update.
+     * @param item  The new material to affect to the action.
      * @param title The new title to affect to the action.
      * @throws IllegalArgumentException If no action has the given name.
      */
-    protected void updateAction(String name, Material item, String title)
-    {
+    protected void updateAction(String name, Material item, String title) {
         updateAction(name, new ItemStack(item), title);
     }
-    
+
     /**
      * Updates the action represented by the given name.
      *
-     * @param name The name of the action to update.
-     * @param item The new item to affect to the action.
+     * @param name  The name of the action to update.
+     * @param item  The new item to affect to the action.
      * @param title The new title to affect to the action.
      * @throws IllegalArgumentException If no action has the given name.
      */
-    protected void updateAction(String name, ItemStack item, String title)
-    {
+    protected void updateAction(String name, ItemStack item, String title) {
         updateAction(name, item);
 
         ItemMeta meta = item.getItemMeta();
@@ -231,18 +223,15 @@ abstract public class ActionGui extends InventoryGui
      * @param item The new item to affect to the action.
      * @throws IllegalArgumentException If no action has the given name.
      */
-    protected void updateAction(String name, ItemStack item)
-    {
+    protected void updateAction(String name, ItemStack item) {
         getAction(name).item = item;
     }
-    
-    protected ItemStackBuilder updateAction(String name, Material material)
-    {
+
+    protected ItemStackBuilder updateAction(String name, Material material) {
         return updateAction(name).material(material);
     }
-    
-    protected ItemStackBuilder updateAction(String name)
-    {
+
+    protected ItemStackBuilder updateAction(String name) {
         return getAction(name).updateItem();
     }
 
@@ -253,32 +242,31 @@ abstract public class ActionGui extends InventoryGui
      * @return The action represented by the given name.
      * @throws IllegalArgumentException If no action has the given name.
      */
-    private Action getAction(String name) throws IllegalArgumentException
-    {
-        for(Action action : actions.values())
-        {
-            if(action.name.equals(name)) return action;
+    private Action getAction(String name) throws IllegalArgumentException {
+        for (Action action : actions.values()) {
+            if (action.name.equals(name)) {
+                return action;
+            }
         }
         throw new IllegalArgumentException("Unknown action name : " + name);
     }
-    
+
     /**
      * Raised when the Gui needs to be updated.
      * Use this method to create your actions.
      */
     @Override
     protected abstract void onUpdate();
-    
+
     /**
      * Raised when an action without any event handler has been triggered.
      *
-     * @param name The name of the triggered action.
-     * @param slot The slot of the action.
-     * @param item The item of the action.
+     * @param name  The name of the triggered action.
+     * @param slot  The slot of the action.
+     * @param item  The item of the action.
      * @param event The {@link InventoryClickEvent} raised when this action was triggered.
      */
-    protected void unknown_action(String name, int slot, ItemStack item, InventoryClickEvent event)
-    {
+    protected void unknown_action(String name, int slot, ItemStack item, InventoryClickEvent event) {
         unknown_action(name, slot, item);
     }
 
@@ -289,160 +277,153 @@ abstract public class ActionGui extends InventoryGui
      * @param slot The slot of the action.
      * @param item The item of the action.
      */
-    protected void unknown_action(String name, int slot, ItemStack item) {}
+    protected void unknown_action(String name, int slot, ItemStack item) {
+    }
 
 
     @Override
-    public void update()
-    {
+    public void update() {
         actions.clear();
         super.update();
     }
-    
+
     @Override
-    protected void populate(Inventory inventory)
-    {
-        for(Action action : actions.values())
-        {
+    protected void populate(Inventory inventory) {
+        for (Action action : actions.values()) {
             inventory.setItem(action.slot, action.getItem());
         }
     }
 
     @Override
-    protected void onClick(InventoryClickEvent event)
-    {
-        if(event.getRawSlot() >= event.getInventory().getSize()) //The user clicked in its own inventory
-        {
-            if(!event.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY))
+    protected void onClick(InventoryClickEvent event) {
+        if (event.getRawSlot() >= event.getInventory().getSize()) { // The user clicked in their own inventory
+            if (!event.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY)) {
                 return;
+            }
         }
 
         event.setCancelled(true);
-        
+
         callAction(actions.get(event.getRawSlot()), event);
     }
-    
+
     /**
      * Triggers the given action's event handler.
+     *
      * @param action The action to trigger.
      */
-    private void callAction(Action action, InventoryClickEvent event)
-    {
-        if(action == null) return;
+    private void callAction(Action action, InventoryClickEvent event) {
+        if (action == null) {
+            return;
+        }
 
-        if(action.callback == null)
-        {
+        if (action.callback == null) {
             unknown_action(action.name, action.slot, action.item);
             return;
         }
-        
-        try
-        {
-            if(action.callback.getParameterTypes().length == 1)
-            {
+
+        try {
+            if (action.callback.getParameterTypes().length == 1) {
                 action.callback.invoke(this, event);
-            }
-            else
-            {
+            } else {
                 action.callback.invoke(this);
             }
-        }
-        catch (IllegalAccessException | IllegalArgumentException ex)
-        {
+        } catch (IllegalAccessException | IllegalArgumentException ex) {
             PluginLogger.error("Could not invoke GUI action handler", ex);
-        }
-        catch (InvocationTargetException ex)
-        {
-            PluginLogger.error("Error while invoking action handler {0} of GUI {1}", 
+        } catch (InvocationTargetException ex) {
+            PluginLogger.error("Error while invoking action handler {0} of GUI {1}",
                     ex.getCause(), action.name, guiClass.getName());
         }
     }
-    
+
     /**
      * Returns if the given method is a valid action handler.
      * An action handler is valid only if it is accessible and parameter types matches.
+     *
      * @param method The method to test
      * @return true if the given method is valid, false otherwise.
      */
-    private boolean isActionHandlerValid(Method method)
-    {
+    private boolean isActionHandlerValid(Method method) {
         int parameterCount = method.getParameterTypes().length;
 
-        if(parameterCount >= 2) return false;
-        if(parameterCount == 1)
-            if(method.getParameterTypes()[0] != InventoryClickEvent.class) 
-                return false;
-        
-        try
-        {
-            method.setAccessible(true);
+        if (parameterCount >= 2) {
+            return false;
         }
-        catch(SecurityException ex)
-        {
+        if (parameterCount == 1) {
+            if (method.getParameterTypes()[0] != InventoryClickEvent.class) {
+                return false;
+            }
+        }
+
+        try {
+            method.setAccessible(true);
+        } catch (SecurityException ex) {
             return false;
         }
         return true;
     }
-    
+
     /**
      * Retrieves the event handler matching the given name from a class (or any of its parents).
      *
      * @param klass The class to retrieve the event handler from.
-     * @param name The name of the action.
+     * @param name  The name of the action.
      * @return The event handler matching the action name, or null if none was found.
      */
-    private Method getActionHandler(Class<?> klass, String name)
-    {
-        if (name == null || name.isEmpty())
+    private Method getActionHandler(Class<?> klass, String name) {
+        if (name == null || name.isEmpty()) {
             return null;
+        }
 
-        do
-        {
+        do {
             GuiAction actionAnnotation;
             String methodName;
-            
-            for(Method method : klass.getDeclaredMethods())
-            {
+
+            for (Method method : klass.getDeclaredMethods()) {
                 actionAnnotation = method.getAnnotation(GuiAction.class);
-                if(actionAnnotation == null) continue;
-                if(!(actionAnnotation.value() == null || actionAnnotation.value().isEmpty()))
-                {
-                    if(actionAnnotation.value().equals(name)) 
-                        if(isActionHandlerValid(method)) 
-                            return method;
+                if (actionAnnotation == null) {
+                    continue;
                 }
-                else
-                {
-                    methodName = method.getName();
-                    if(methodName.equals(name)) 
-                        if(isActionHandlerValid(method)) 
+                if (!(actionAnnotation.value() == null || actionAnnotation.value().isEmpty())) {
+                    if (actionAnnotation.value().equals(name)) {
+                        if (isActionHandlerValid(method)) {
                             return method;
-                    
-                    if(methodName.startsWith(ACTION_HANDLER_NAME))
-                        if(methodName.substring(ACTION_HANDLER_NAME.length()).equals(name))
-                            if(isActionHandlerValid(method))
+                        }
+                    }
+                } else {
+                    methodName = method.getName();
+                    if (methodName.equals(name)) {
+                        if (isActionHandlerValid(method)) {
+                            return method;
+                        }
+                    }
+
+                    if (methodName.startsWith(ACTION_HANDLER_NAME)) {
+                        if (methodName.substring(ACTION_HANDLER_NAME.length()).equals(name)) {
+                            if (isActionHandlerValid(method)) {
                                 return method;
+                            }
+                        }
+                    }
                 }
             }
             klass = klass.getSuperclass();
         } while (klass != null);
-        
+
         return null;
     }
-    
+
     /**
-     * @return if this GUI has any actions defined.
+     * Returns if this GUI has any actions defined.
      */
-    protected boolean hasActions()
-    {
+    protected boolean hasActions() {
         return !actions.isEmpty();
     }
-    
+
     /**
      * This structure represents an action.
      */
-    static private class Action
-    {
+    private static class Action {
         /**
          * The name of the action.
          */
@@ -455,49 +436,43 @@ abstract public class ActionGui extends InventoryGui
          * The item this action will be represented by.
          */
         public ItemStack item;
-        
+
         public ItemStackBuilder builder;
-        
+
         /**
          * The callback this action will call when triggered.
          */
         public Method callback;
-        
-        public Action(String name, int slot, ItemStack item, Method callback)
-        {
+
+        public Action(String name, int slot, ItemStack item, Method callback) {
             this.name = name;
             this.slot = slot;
             this.item = item;
             this.callback = callback;
             this.builder = null;
         }
-        
-        public Action(String name, int slot, ItemStackBuilder builder, Method callback)
-        {
+
+        public Action(String name, int slot, ItemStackBuilder builder, Method callback) {
             this.name = name;
             this.slot = slot;
             this.item = null;
             this.callback = callback;
             this.builder = builder;
         }
-        
-        public ItemStack getItem()
-        {
-            if(item == null)
-            {
+
+        public ItemStack getItem() {
+            if (item == null) {
                 item = builder.item();
             }
-            
+
             return item;
         }
-        
-        public ItemStackBuilder updateItem()
-        {
-            if(builder == null)
-            {
+
+        public ItemStackBuilder updateItem() {
+            if (builder == null) {
                 builder = new ItemStackBuilder(item);
             }
-            
+
             item = null;
             return builder;
         }

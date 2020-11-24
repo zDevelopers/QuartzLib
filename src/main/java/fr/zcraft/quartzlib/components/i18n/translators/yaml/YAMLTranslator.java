@@ -27,19 +27,19 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.i18n.translators.yaml;
 
 import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzlib.components.i18n.translators.Translation;
 import fr.zcraft.quartzlib.components.i18n.translators.Translator;
 import fr.zcraft.quartzlib.tools.PluginLogger;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 
 /**
@@ -76,8 +76,7 @@ import java.util.Map;
  *         greetings:
  *             hi: "Hi!"
  * </pre>
- *
- * With this structure, the keys are retrieved as follow:
+ * <p>With this structure, the keys are retrieved as follow:</p>
  *
  * <pre>
  *     {@link I#t I.t}("greetings.hi")                       # Returns "Hi there"
@@ -85,60 +84,53 @@ import java.util.Map;
  *     {@link I#tc I.tc}("other_context", "greetings.hi")    # Returns "Hi!"
  * </pre>
  */
-public class YAMLTranslator extends Translator
-{
-    private String author  = null;
-    private String team    = null;
+public class YAMLTranslator extends Translator {
+    private String author = null;
+    private String team = null;
     private String reports = null;
 
-    public YAMLTranslator(Locale locale, File file)
-    {
+    public YAMLTranslator(Locale locale, File file) {
         super(locale, file);
     }
 
-    public YAMLTranslator(Locale locale, String resourceReference)
-    {
+    public YAMLTranslator(Locale locale, String resourceReference) {
         super(locale, resourceReference);
     }
 
     @Override
-    protected void load()
-    {
+    protected void load() {
         final YamlConfiguration configuration = YamlConfiguration.loadConfiguration(getReader());
 
-        if (configuration.getKeys(false).isEmpty())
-        {
+        if (configuration.getKeys(false).isEmpty()) {
             PluginLogger.error("Cannot load the {0} translation file.", getFilePath());
             return;
         }
 
-        for (final Map.Entry<String, Object> entry : configuration.getValues(false).entrySet())
-        {
-            if (entry.getValue() instanceof ConfigurationSection)
-            {
+        for (final Map.Entry<String, Object> entry : configuration.getValues(false).entrySet()) {
+            if (entry.getValue() instanceof ConfigurationSection) {
                 final ConfigurationSection context = (ConfigurationSection) entry.getValue();
                 final String contextName = entry.getKey().equals("keys") ? null : entry.getKey();
 
-                for (Map.Entry<String, Object> translationEntry : context.getValues(true).entrySet())
-                    if (!(translationEntry.getValue() instanceof ConfigurationSection))
-                        registerTranslation(new Translation(contextName, translationEntry.getKey(), null, Collections.singletonList(translationEntry.getValue().toString())));
-            }
-            else
-            {
+                for (Map.Entry<String, Object> translationEntry : context.getValues(true).entrySet()) {
+                    if (!(translationEntry.getValue() instanceof ConfigurationSection)) {
+                        registerTranslation(new Translation(contextName, translationEntry.getKey(), null,
+                                Collections.singletonList(translationEntry.getValue().toString())));
+                    }
+                }
+            } else {
                 final String value = entry.getValue().toString();
 
-                switch (entry.getKey().toLowerCase())
-                {
+                switch (entry.getKey().toLowerCase()) {
                     case "author":
                         author = value;
                         break;
-
                     case "team":
                         team = value;
                         break;
-
                     case "reports":
                         reports = value;
+                        break;
+                    default:
                         break;
                 }
             }
@@ -146,20 +138,17 @@ public class YAMLTranslator extends Translator
     }
 
     @Override
-    public String getLastTranslator()
-    {
+    public String getLastTranslator() {
         return author;
     }
 
     @Override
-    public String getTranslationTeam()
-    {
+    public String getTranslationTeam() {
         return team != null ? team : author;
     }
 
     @Override
-    public String getReportErrorsTo()
-    {
+    public String getReportErrorsTo() {
         return reports != null ? reports : author;
     }
 }

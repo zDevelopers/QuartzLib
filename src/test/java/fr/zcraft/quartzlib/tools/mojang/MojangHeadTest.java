@@ -1,15 +1,14 @@
 package fr.zcraft.quartzlib.tools.mojang;
 
 import fr.zcraft.quartzlib.MockedBukkitTest;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
 
 class MojangHeadTest extends MockedBukkitTest {
     @Test

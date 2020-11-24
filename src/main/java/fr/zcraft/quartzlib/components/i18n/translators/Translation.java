@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.i18n.translators;
 
 import java.util.List;
@@ -35,15 +36,16 @@ import java.util.List;
 /**
  * Represents a translation.
  */
-public class Translation
-{
-    private String original;
+public class Translation {
+    private final String original;
     private final String originalPlural;
-    private String context;
-    private List<String> translations;
+    private final String context;
+    private final List<String> translations;
 
-    public Translation(String context, String original, String originalPlural, List<String> translations)
-    {
+    /**
+     * Creates a new translation.
+     */
+    public Translation(String context, String original, String originalPlural, List<String> translations) {
         this.context = context;
         this.original = original;
         this.originalPlural = originalPlural;
@@ -51,35 +53,35 @@ public class Translation
     }
 
     /**
+     * Gets the original, untranslated, string.
      * @return The original, untranslated, string.
      */
-    public String getOriginal()
-    {
+    public String getOriginal() {
         return original;
     }
 
     /**
+     * Gets the original, untranslated, plural form.
      * @return The original, untranslated, plural form.
      */
-    public String getOriginalPlural()
-    {
+    public String getOriginalPlural() {
         return originalPlural;
     }
 
     /**
-     * @return The translation context; {@code null} if no context was set. Note that an empty
-     * context string and a {@code null} one do not mean the same thing.
+     * Gets the translation context.
+     * @return The translation context, or {@code null} if no context was set. Note that an empty
+     *     context string and a {@code null} one do not mean the same thing.
      */
-    public String getContext()
-    {
+    public String getContext() {
         return context;
     }
 
     /**
-     * @return All the translations available.
+     * Gets all of the available translations.
+     * @return All the available translations.
      */
-    public List<String> getTranslations()
-    {
+    public List<String> getTranslations() {
         return translations;
     }
 }

@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.world;
 
 import org.bukkit.Location;
@@ -35,46 +36,48 @@ import org.bukkit.block.BlockFace;
 /**
  * Utility class for dealing with worlds and locations.
  */
-public class WorldUtils 
-{
+public class WorldUtils {
     /**
      * Returns if the two given locations point to the same block, i.e if their
      * block coordinates are equal.
-     * 
+     *
      * @param loc1 The first location
      * @param loc2 The second location
      * @return True if the two given locations point to the same block.
      */
-    static public boolean blockEquals(Location loc1, Location loc2)
-    {
+    public static boolean blockEquals(Location loc1, Location loc2) {
         return loc1.getBlockX() == loc2.getBlockX()
                 && loc1.getBlockY() == loc2.getBlockY()
                 && loc1.getBlockZ() == loc2.getBlockZ();
     }
-    
+
     /**
      * Returns the orientation of the specified location, as a BlockFace.
      * The precision of the returned BlockFace is restricted to NORTH, SOUTH,
      * EAST and WEST only.
+     *
      * @param loc The location.
      * @return the orientation of the specified location, as a BlockFace.
      */
-    static public BlockFace get4thOrientation(Location loc)
-    {
+    public static BlockFace get4thOrientation(Location loc) {
         float yaw = Math.abs(loc.getYaw()) - 180f;
-        
-        if(yaw <= 45 && yaw > -45)
+
+        if (yaw <= 45 && yaw > -45) {
             return BlockFace.NORTH;
-        
-        if(yaw <= -45 && yaw > -135)
+        }
+
+        if (yaw <= -45 && yaw > -135) {
             return BlockFace.WEST;
-        
-        if(yaw <= -135 || yaw > 135)
+        }
+
+        if (yaw <= -135 || yaw > 135) {
             return BlockFace.SOUTH;
-        
-        if(yaw <= 135 && yaw > 45)
+        }
+
+        if (yaw <= 135 && yaw > 45) {
             return BlockFace.EAST;
-        
+        }
+
         return BlockFace.SELF;
     }
 }

@@ -40,26 +40,20 @@ import org.bukkit.entity.Player;
 
 
 @CommandInfo(name = "add", usageParameters = "[toast count]")
-public class AddCommand extends Command
-{
+public class AddCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
+    protected void run() throws CommandException {
         Player cook = playerSender();
-        
-        if(args.length == 0)
-        {
+
+        if (args.length == 0) {
             Toast toast = ToasterWorker.addToast(cook);
             cook.sendMessage(I.t("Toast {0} added.", toast.getToastId()));
-        }
-        else
-        {
+        } else {
             int toastCount = getIntegerParameter(0);
-            for(int i = toastCount; i --> 0;)
-            {
+            for (int i = toastCount; i-- > 0; ) {
                 ToasterWorker.addToast(cook);
             }
-            
+
             cook.sendMessage(I.tn("One toast added.", "{0} toasts added.", toastCount, toastCount));
         }
     }

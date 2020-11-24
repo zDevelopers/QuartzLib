@@ -30,156 +30,147 @@
 
 package fr.zcraft.quartzlib.components.nbt;
 
-import org.bukkit.inventory.ItemStack;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This class represents the NBT Compound tag type.
- * 
- * It implements all operations of {@link java.util.Map} with a String key, as well as a few specific operations for NBT data.
+ * <p>It implements all operations of {@link java.util.Map} with a String key,
+ * as well as a few specific operations for NBT data.</p>
  */
-public class NBTCompound implements Map<String, Object>
-{
-    private Object nmsNbtTag;
-    Map<String, Object> nmsNbtMap;
-    
+public class NBTCompound implements Map<String, Object> {
     private final Object parent;
     private final Object parentKey;
-    
+    Map<String, Object> nmsNbtMap;
+    private Object nmsNbtTag;
+
     /**
      * Created a new empty NBT compound.
      * It is not linked to any item, therefore it is equivalent of using directly
      * a {@link java.util.Map}&lt;{@link java.lang.String},{@link java.lang.Object}&gt;.
      */
-    public NBTCompound()
-    {
+    public NBTCompound() {
         this.nmsNbtTag = null;
         this.nmsNbtMap = new HashMap<>();
         this.parent = null;
         this.parentKey = null;
     }
-    
-    NBTCompound(Object nativeNBTTag)
-    {
-        this.nmsNbtTag = nativeNBTTag;
-        if(nativeNBTTag == null)
-        {
+
+    NBTCompound(Object nativeNbtTag) {
+        this.nmsNbtTag = nativeNbtTag;
+        if (nativeNbtTag == null) {
             this.nmsNbtMap = new HashMap<>();
-        }
-        else
-        {
-            this.nmsNbtMap = (Map<String, Object>) NBTType.TAG_COMPOUND.getData(nmsNbtTag);
+        } else {
+            this.nmsNbtMap = (Map<String, Object>) NbtType.TAG_COMPOUND.getData(nmsNbtTag);
         }
 
         this.parent = null;
         this.parentKey = null;
     }
-    
-    NBTCompound(NBTCompound parent, String key)
-    {
+
+    NBTCompound(NBTCompound parent, String key) {
         this.parent = parent;
         this.parentKey = key;
         this.nmsNbtMap = null;
         this.nmsNbtTag = null;
     }
-    
-    NBTCompound(NBTList parent, int index)
-    {
+
+    NBTCompound(NBTList parent, int index) {
         this.parent = parent;
         this.parentKey = index;
         this.nmsNbtMap = null;
         this.nmsNbtTag = null;
     }
-    
-    private Map<String, Object> getNbtMap()
-    {
-        if(nmsNbtMap == null)
-        {
+
+    private Map<String, Object> getNbtMap() {
+        if (nmsNbtMap == null) {
             nmsNbtMap = new HashMap<>();
-            if(nmsNbtTag != null)
-            {
-                NBTType.TAG_COMPOUND.setData(nmsNbtTag, nmsNbtMap);
-            }
-            else
-            {
-                nmsNbtTag = NBTType.TAG_COMPOUND.newTag(nmsNbtMap);
-                NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtTag);
-                
-                if(parent != null && parentKey != null)
-                {
-                    if(parent instanceof NBTCompound)
-                    {
-                        ((NBTCompound)parent).put((String)parentKey, this);
-                    }
-                    else if(parent instanceof NBTList)
-                    {
-                        ((NBTList)parent).set((Integer)parentKey, this);
+            if (nmsNbtTag != null) {
+                NbtType.TAG_COMPOUND.setData(nmsNbtTag, nmsNbtMap);
+            } else {
+                nmsNbtTag = NbtType.TAG_COMPOUND.newTag(nmsNbtMap);
+                NbtType.TAG_LIST.setData(nmsNbtTag, nmsNbtTag);
+
+                if (parent != null && parentKey != null) {
+                    if (parent instanceof NBTCompound) {
+                        ((NBTCompound) parent).put((String) parentKey, this);
+                    } else if (parent instanceof NBTList) {
+                        ((NBTList) parent).set((Integer) parentKey, this);
                     }
                 }
             }
         }
-        
+
         return nmsNbtMap;
     }
 
     /**
+     * Returns the NMS NBTTagCompound instance.
      * @return The NMS NBTTagCompound instance.
      */
-    Object getNBTTagCompound()
-    {
+    Object getNbtTagCompound() {
         return nmsNbtTag;
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
-     * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
+     * Returns the value to which the specified key is mapped,
+     *     or the specified default value if this map contains no mapping for the key.
+     * If a value is present, but could not be coerced to the given type,
+     *     it is ignored and the default value is returned instead.
      *
-     * @param <T> The type to coerce the mapped value to.
-     * @param key The key
+     * @param <T>          The type to coerce the mapped value to.
+     * @param key          The key
      * @param defaultValue The default value.
-     * @return the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
+     * @return the value to which the specified key is mapped,
+     *     or the specified default value if this map contains no mapping for the key.
      */
-    public <T> T get(String key, T defaultValue)
-    {
+    public <T> T get(String key, T defaultValue) {
         return get(key, defaultValue, defaultValue == null ? null : (Class<T>) defaultValue.getClass());
     }
-    
+
     /**
-     * Returns the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
-     * If a value is present, but could not be coerced to the given type, it is ignored and the default value is returned instead.
-     * This version of the method is recommended if the defaultValue parameter is null, so it can have enough type information to protect against wrong NBT types.
+     * Returns the value to which the specified key is mapped,
+     *     or the specified default value if this map contains no mapping for the key.
+     * If a value is present, but could not be coerced to the given type,
+     *     it is ignored and the default value is returned instead.
+     * This version of the method is recommended if the defaultValue parameter is null,
+     *     so it can have enough type information to protect against wrong NBT types.
      *
-     * @param <T> The type to coerce the mapped value to.
-     * @param key The key
+     * @param <T>          The type to coerce the mapped value to.
+     * @param key          The key
      * @param defaultValue The default value.
-     * @param valueType The type of the expected value.
-     * @return the value to which the specified key is mapped, or the specified default value if this map contains no mapping for the key. 
+     * @param valueType    The type of the expected value.
+     * @return the value to which the specified key is mapped,
+     *     or the specified default value if this map contains no mapping for the key.
      */
-    public <T> T get(String key, T defaultValue, Class<T> valueType)
-    {
-        try
-        {
+    public <T> T get(String key, T defaultValue, Class<T> valueType) {
+        try {
             Object value = get(key);
-            if(value == null) return defaultValue;
-            if(valueType != null) 
-            {
-                if(!valueType.isAssignableFrom(value.getClass()))
+            if (value == null) {
+                return defaultValue;
+            }
+            if (valueType != null) {
+                if (!valueType.isAssignableFrom(value.getClass())) {
                     return defaultValue;
+                }
             }
             return (T) value;
-        }
-        catch(ClassCastException | NBTException ex)
-        {
+        } catch (ClassCastException | NBTException ex) {
             return defaultValue;
         }
     }
-    
+
+    @Override
+    public Object get(Object key) {
+        return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.get(key));
+    }
+
     /**
      * Returns the Compound tag to which the specified key is mapped.
      * If the value mapped to the key is not a compound tag, a new empty tag
@@ -189,11 +180,10 @@ public class NBTCompound implements Map<String, Object>
      * @param key The key.
      * @return the Compound tag to which the specified key is mapped.
      */
-    public NBTCompound getCompound(String key)
-    {
+    public NBTCompound getCompound(String key) {
         return get(key, new NBTCompound(this, key));
     }
-    
+
     /**
      * Returns the List tag to which the specified key is mapped.
      * If the value mapped to the key is not a list tag, a new empty tag
@@ -203,83 +193,68 @@ public class NBTCompound implements Map<String, Object>
      * @param key The key.
      * @return the List tag to which the specified key is mapped.
      */
-    public NBTList getList(String key)
-    {
+    public NBTList getList(String key) {
         return get(key, new NBTList(this, key));
     }
-    
+
     @Override
-    public int size()
-    {
+    public int size() {
         return nmsNbtMap == null ? 0 : nmsNbtMap.size();
     }
 
     @Override
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return nmsNbtMap == null || nmsNbtMap.isEmpty();
     }
 
     @Override
-    public boolean containsKey(Object key)
-    {
+    public boolean containsKey(Object key) {
         return nmsNbtMap != null && nmsNbtMap.containsKey(key);
     }
 
     @Override
-    public boolean containsValue(Object value)
-    {
+    public boolean containsValue(Object value) {
         return nmsNbtMap != null && nmsNbtMap.containsValue(NBT.fromNativeValue(value));
     }
 
     @Override
-    public Object get(Object key)
-    {
-        return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.get(key));
-    }
-
-    @Override
-    public Object put(String key, Object value)
-    {
+    public Object put(String key, Object value) {
         return NBT.toNativeValue(getNbtMap().put(key, NBT.fromNativeValue(value)));
     }
 
     @Override
-    public Object remove(Object key)
-    {
+    public Object remove(Object key) {
         return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.remove(key));
     }
 
     @Override
-    public void putAll(Map<? extends String, ?> m)
-    {
-        for (Entry<? extends String, ?> entry : m.entrySet())
-        {
+    public void putAll(Map<? extends String, ?> m) {
+        for (Entry<? extends String, ?> entry : m.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
     }
 
     @Override
-    public void clear()
-    {
-        if(nmsNbtMap == null) return;
+    public void clear() {
+        if (nmsNbtMap == null) {
+            return;
+        }
         nmsNbtMap.clear();
     }
 
     @Override
-    public Set<String> keySet()
-    {
+    public Set<String> keySet() {
         return nmsNbtMap == null ? new HashSet<String>() : nmsNbtMap.keySet();
     }
 
     @Override
-    public Collection<Object> values()
-    {
+    public Collection<Object> values() {
         final ArrayList<Object> list = new ArrayList<>(size());
-        if (nmsNbtMap == null) return list;
-        
-        for (Object value : nmsNbtMap.values())
-        {
+        if (nmsNbtMap == null) {
+            return list;
+        }
+
+        for (Object value : nmsNbtMap.values()) {
             list.add(NBT.toNativeValue(value));
         }
         return list;
@@ -292,8 +267,7 @@ public class NBTCompound implements Map<String, Object>
      * @see NBT#toNBTJSONString(Object) The underlying export method used.
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         return NBT.toNBTJSONString(this);
     }
 
@@ -304,49 +278,43 @@ public class NBTCompound implements Map<String, Object>
      * @return A new HashMap containing the data stored inside this compound.
      * @see NBT#addToItemStack(ItemStack, Map, boolean) The method used to add these exported tags back inside an item.
      */
-    public Map<String, Object> toHashMap()
-    {
+    public Map<String, Object> toHashMap() {
         return new HashMap<>(this);
     }
 
     @Override
-    public Set<Entry<String, Object>> entrySet()
-    {
-        HashSet<Entry<String,Object>> set = new HashSet<>(size());
-        if (nmsNbtMap == null) return set;
-        
-        for (Entry<String, Object> entry : nmsNbtMap.entrySet())
-        {
-            set.add(new NBTCompoundEntry(entry.getKey()));
+    public @NotNull Set<Entry<String, Object>> entrySet() {
+        HashSet<Entry<String, Object>> set = new HashSet<>(size());
+        if (nmsNbtMap == null) {
+            return set;
         }
-        
+
+        for (Entry<String, Object> entry : nmsNbtMap.entrySet()) {
+            set.add(new NbtCompoundEntry(entry.getKey()));
+        }
+
         return set;
     }
 
-    private class NBTCompoundEntry implements Map.Entry<String, Object>
-    {
+    private class NbtCompoundEntry implements Map.Entry<String, Object> {
         private final String key;
-        
-        public NBTCompoundEntry(String key)
-        {
+
+        public NbtCompoundEntry(String key) {
             this.key = key;
         }
-        
+
         @Override
-        public String getKey()
-        {
+        public String getKey() {
             return key;
         }
 
         @Override
-        public Object getValue()
-        {
+        public Object getValue() {
             return get(key);
         }
 
         @Override
-        public Object setValue(Object value)
-        {
+        public Object setValue(Object value) {
             return put(key, value);
         }
     }

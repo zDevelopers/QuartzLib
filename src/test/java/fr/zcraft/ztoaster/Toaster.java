@@ -40,6 +40,9 @@ import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.ztoaster.commands.AddCommand;
 import fr.zcraft.ztoaster.commands.ListCommand;
 import fr.zcraft.ztoaster.commands.OpenCommand;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Locale;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -48,43 +51,63 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Locale;
 
-
-public class Toaster extends QuartzPlugin implements Listener
-{
+public class Toaster extends QuartzPlugin implements Listener {
     /**
      * A counter for all the toasts created (until toaster restart).
      */
-    static private int toastCounter = 0;
-    
+    private static int toastCounter = 0;
+
     /**
      * A list of all the toasts.
      */
-    static private ArrayList<Toast> toasts;
+    private static ArrayList<Toast> toasts;
 
     /**
      * The screen of the toaster.
      */
     private Sidebar toasterSidebar;
 
-    protected Toaster(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
-    {
+    protected Toaster(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
         super(loader, description, dataFolder, file);
     }
 
+    /**
+     * .
+     * @return The id for a new toast.
+     */
+    public static int newToastId() {
+        return toastCounter++;
+    }
+
+    /**
+     * .
+     * @return an array of all the toasts ever created (until toaster restart).
+     */
+    public static Toast[] getToasts() {
+        return toasts.toArray(new Toast[toasts.size()]);
+    }
+
+    /**
+     * Adds a new toast to the world.
+     *
+     * @return the newly created toast.
+     */
+    public static Toast newToast() {
+        Toast toast = new Toast();
+        toasts.add(toast);
+        return toast;
+    }
+
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         PluginLogger.info("Setting up toaster.");
-        
+
         toasts = new ArrayList<>();
         toastCounter = 0;
-        
+
         loadComponents(Gui.class, Commands.class, ToasterWorker.class, SidebarScoreboard.class, I18n.class);
-        
+
         Commands.register("toaster", AddCommand.class, OpenCommand.class, ListCommand.class);
 
         I18n.useDefaultPrimaryLocale();
@@ -95,50 +118,20 @@ public class Toaster extends QuartzPlugin implements Listener
 
         toasterSidebar = new ToasterSidebar();
 
-        for (Player player : getServer().getOnlinePlayers())
+        for (Player player : getServer().getOnlinePlayers()) {
             toasterSidebar.addRecipient(player);
+        }
 
         toasterSidebar.runAutoRefresh(true);
     }
-    
+
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         PluginLogger.info("Unplugging toaster.");
     }
 
-
-    /**
-     * @return The id for a new toast.
-     */
-    static public int newToastId()
-    {
-        return toastCounter++;
-    }
-    
-    /**
-     * @return an array of all the toasts ever created (until toaster restart).
-     */
-    static public Toast[] getToasts()
-    {
-        return toasts.toArray(new Toast[toasts.size()]);
-    }
-    
-    /**
-     * Adds a new toast to the world.
-     * @return the newly created toast.
-     */
-    static public Toast newToast()
-    {
-        Toast toast = new Toast();
-        toasts.add(toast);
-        return toast;
-    }
-
-
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent ev)
-    {
+    public void onPlayerJoin(PlayerJoinEvent ev) {
         toasterSidebar.addRecipient(ev.getPlayer());
     }
 }

@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzlib.tools;
 
 import org.bukkit.Material;
@@ -38,8 +39,7 @@ import org.bukkit.Material;
 /**
  * With some inspiration from Markus Lechner.
  */
-public enum MinecraftVersion
-{
+public enum MinecraftVersion {
     VERSION_1_12_2_OR_OLDER,
     VERSION_1_13_X,
     VERSION_1_14_X_OR_NEWER,
@@ -47,37 +47,30 @@ public enum MinecraftVersion
 
     private static MinecraftVersion version = null;
 
-    public static MinecraftVersion get()
-    {
-        if (version != null) return version;
+    public static MinecraftVersion get() {
+        if (version != null) {
+            return version;
+        }
 
-        for (Material reg : Material.values())
-        {
+        for (Material reg : Material.values()) {
             // I am looking at you Cauldron
-            if (reg == null || reg.toString() == null || reg.toString().isEmpty())
-            {
+            if (reg == null || reg.toString() == null || reg.toString().isEmpty()) {
                 continue;
             }
 
-            if (reg.toString().equalsIgnoreCase("SIGN_POST"))
-            {
+            if (reg.toString().equalsIgnoreCase("SIGN_POST")) {
                 version = MinecraftVersion.VERSION_1_12_2_OR_OLDER;
                 break;
-            }
-            else if (reg.toString().equalsIgnoreCase("SIGN"))
-            {
+            } else if (reg.toString().equalsIgnoreCase("SIGN")) {
                 version = MinecraftVersion.VERSION_1_13_X;
                 break;
-            }
-            else if (reg.toString().equalsIgnoreCase("JUNGLE_SIGN"))
-            {
+            } else if (reg.toString().equalsIgnoreCase("JUNGLE_SIGN")) {
                 version = MinecraftVersion.VERSION_1_14_X_OR_NEWER;
                 break;
             }
         }
 
-        if (version == null)
-        {
+        if (version == null) {
             version = MinecraftVersion.VERSION_ERROR;
         }
 

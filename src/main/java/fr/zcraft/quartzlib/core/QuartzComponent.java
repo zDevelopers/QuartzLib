@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.core;
 
 import org.bukkit.plugin.Plugin;
@@ -35,42 +36,21 @@ import org.bukkit.plugin.Plugin;
  * This abstract class represents a QuartzLib component that needs to be loaded
  * and/or unloaded.
  */
-public abstract class QuartzComponent
-{
+public abstract class QuartzComponent {
     private boolean enabled = false;
 
     /**
      * Called when this component is enabled, while the parent plugin is itself
      * enabled.
      */
-	protected void onEnable() {}
+    protected void onEnable() {
+    }
 
     /**
      * Called when this component is disabled, while the parent plugin is itself
      * disabled.
      */
-	protected void onDisable() {}
-
-    /**
-     * Enables (load) or disable (unload) this QuartzLib component.
-     *
-     * @param enabled {@code true} to enable the component.
-     */
-    public void setEnabled(boolean enabled)
-    {
-        if(enabled == this.enabled)
-            return; // The state is not changed.
-
-        this.enabled = enabled;
-
-        if (enabled)
-        {
-            onEnable();
-        }
-        else
-        {
-            onDisable();
-        }
+    protected void onDisable() {
     }
 
     /**
@@ -78,17 +58,34 @@ public abstract class QuartzComponent
      *
      * @return {@code true} if enabled.
      */
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return enabled;
     }
 
     /**
+     * Enables (load) or disable (unload) this QuartzLib component.
      *
+     * @param enabled {@code true} to enable the component.
+     */
+    public void setEnabled(boolean enabled) {
+        if (enabled == this.enabled) {
+            return; // The state is not changed.
+        }
+
+        this.enabled = enabled;
+
+        if (enabled) {
+            onEnable();
+        } else {
+            onDisable();
+        }
+    }
+
+    /**
+     * Gets the plugin owning this component.
      * @return The plugin owning this component.
      */
-    protected Plugin getPlugin()
-    {
+    protected Plugin getPlugin() {
         return QuartzLib.getPlugin();
     }
 }

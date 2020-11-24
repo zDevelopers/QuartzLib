@@ -27,9 +27,8 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.quartzlib.components.i18n.translators.properties;
 
-import org.apache.commons.lang.StringUtils;
+package fr.zcraft.quartzlib.components.i18n.translators.properties;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,21 +37,19 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import org.apache.commons.lang.StringUtils;
 
 
-public class ZLibResourceBundleControl extends ResourceBundle.Control
-{
+public class ZLibResourceBundleControl extends ResourceBundle.Control {
     private final File bundleFile;
     private final String resourceReference;
 
-    public ZLibResourceBundleControl(File bundleFile)
-    {
+    public ZLibResourceBundleControl(File bundleFile) {
         this.bundleFile = bundleFile;
         this.resourceReference = null;
     }
 
-    public ZLibResourceBundleControl(String resourceReference)
-    {
+    public ZLibResourceBundleControl(String resourceReference) {
         this.bundleFile = null;
         this.resourceReference = resourceReference;
     }
@@ -61,16 +58,13 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
      * <p>Uses the file name as the bundle name.</p>
      *
      * <hr>
-     *
-     * <p> {@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
-    public String toBundleName(String baseName, Locale locale)
-    {
+    public String toBundleName(String baseName, Locale locale) {
         final String[] nameParts = (bundleFile != null ? bundleFile.getName() : resourceReference).split("\\.");
 
-        if (nameParts.length >= 2)
-        {
+        if (nameParts.length >= 2) {
             nameParts[nameParts.length - 1] = "";
         }
 
@@ -82,17 +76,14 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
      * the end user, if a file was provided.</p>
      *
      * <hr>
-     *
-     * <p> {@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
-    public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException
-    {
-        if (format.equals("java.properties") && bundleFile != null)
-        {
+    public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+            throws IllegalAccessException, InstantiationException, IOException {
+        if (format.equals("java.properties") && bundleFile != null) {
             final ResourceBundle bundle;
-            try (InputStream stream = new FileInputStream(bundleFile))
-            {
+            try (InputStream stream = new FileInputStream(bundleFile)) {
                 bundle = new PropertyResourceBundle(stream);
             }
 
@@ -107,12 +98,11 @@ public class ZLibResourceBundleControl extends ResourceBundle.Control
      * Plus, the cache may cause problems if one reloads the plugin to update the translation.</p>
      *
      * <hr>
-     *
-     * <p> {@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
-    public boolean needsReload(String baseName, Locale locale, String format, ClassLoader loader, ResourceBundle bundle, long loadTime)
-    {
+    public boolean needsReload(String baseName, Locale locale, String format, ClassLoader loader, ResourceBundle bundle,
+                               long loadTime) {
         return true;
     }
 }

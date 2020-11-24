@@ -14,15 +14,13 @@ public abstract class MockedToasterTest {
     protected Toaster plugin;
 
     @BeforeEach
-    public void setUp()
-    {
+    public void setUp() {
         server = MockBukkit.mock();
         plugin = MockBukkit.load(Toaster.class);
     }
 
     @AfterEach
-    public void tearDown()
-    {
+    public void tearDown() {
         MockBukkit.unmock();
     }
 }

@@ -30,12 +30,16 @@
 
 package fr.zcraft.quartzlib.components.worker;
 
-public abstract class WorkerRunnable<T>
-{
+public abstract class WorkerRunnable<T> {
     private Worker worker;
-            
-    abstract public T run() throws Throwable;
-    
-    Worker getWorker() {return worker;}
-    void setWorker(Worker worker) {this.worker = worker;}
+
+    public abstract T run() throws Throwable;
+
+    Worker getWorker() {
+        return worker;
+    }
+
+    void setWorker(Worker worker) {
+        this.worker = worker;
+    }
 }

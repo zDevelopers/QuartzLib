@@ -36,27 +36,25 @@ import fr.zcraft.quartzlib.components.i18n.I;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class ToastExplorer extends ExplorerGui<Toast>
-{
+public class ToastExplorer extends ExplorerGui<Toast> {
     @Override
-    protected void onUpdate()
-    {
+    protected void onUpdate() {
         setTitle(I.t(getPlayerLocale(), "{black}Toaster contents"));
-        
+
         setData(Toaster.getToasts());
-        
+
         //DO NOT TOUCH THE TOASTS !
         setMode(ExplorerGui.Mode.READONLY);
     }
-    
+
     @Override
-    protected ItemStack getViewItem(Toast toast)
-    {
-        if(toast.getStatus().equals(Toast.CookingStatus.COOKED))
-            // Title of the cooked toast item in GUI
-            return GuiUtils.makeItem(Material.COOKED_PORKCHOP, I.t(getPlayerLocale(), "{white}Cooked toast #{0}", toast.getToastId()));
-        else
-            // Title of the raw toast item in GUI
-            return GuiUtils.makeItem(Material.PORKCHOP, I.t(getPlayerLocale(), "{white}Raw toast #{0}", toast.getToastId()));
+    protected ItemStack getViewItem(Toast toast) {
+        if (toast.getStatus().equals(Toast.CookingStatus.COOKED)) { // Title of the cooked toast item in GUI
+            return GuiUtils.makeItem(Material.COOKED_PORKCHOP,
+                    I.t(getPlayerLocale(), "{white}Cooked toast #{0}", toast.getToastId()));
+        } else { // Title of the raw toast item in GUI
+            return GuiUtils.makeItem(Material.PORKCHOP,
+                    I.t(getPlayerLocale(), "{white}Raw toast #{0}", toast.getToastId()));
+        }
     }
 }

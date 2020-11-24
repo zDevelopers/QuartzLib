@@ -31,113 +31,97 @@
 package fr.zcraft.quartzlib.tools;
 
 import fr.zcraft.quartzlib.core.QuartzLib;
-
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public final class PluginLogger
-{
-    static private Thread mainThread;
-    static private HashMap<Thread, PluginThreadLogger> loggers;
+public final class PluginLogger {
+    private static Thread mainThread;
+    private static HashMap<Thread, PluginThreadLogger> loggers;
 
-    private PluginLogger() {}
-    
-    static public void init()
-    {
+    private PluginLogger() {
+    }
+
+    public static void init() {
         mainThread = Thread.currentThread();
         loggers = new HashMap<>();
     }
-    
-    static public void log(Level level, String message, Throwable ex)
-    {
+
+    public static void log(Level level, String message, Throwable ex) {
         getLogger().log(level, message, ex);
     }
-    
-    static public void log(Level level, String message, Object...args)
-    {
+
+    public static void log(Level level, String message, Object... args) {
         getLogger().log(level, message, args);
     }
-        
-    static public void log(Level level, String message, Throwable ex, Object... args)
-    {
+
+    public static void log(Level level, String message, Throwable ex, Object... args) {
         log(level, message, args);
         log(level, "Exception : ", ex);
     }
-    
-    static public void info(String message, Object...args)
-    {
+
+    public static void info(String message, Object... args) {
         log(Level.INFO, message, args);
     }
-    
-    static public void warning(String message, Object... args)
-    {
+
+    public static void warning(String message, Object... args) {
         log(Level.WARNING, message, args);
     }
-    
-    static public void warning(String message, Throwable ex)
-    {
+
+    public static void warning(String message, Throwable ex) {
         log(Level.WARNING, message, ex);
     }
-    
-    static public void warning(String message, Throwable ex, Object... args)
-    {
+
+    public static void warning(String message, Throwable ex, Object... args) {
         log(Level.WARNING, message, ex, args);
     }
-    
-    static public void error(String message)
-    {
+
+    public static void error(String message) {
         log(Level.SEVERE, message);
     }
-    
-    static public void error(String message, Throwable ex)
-    {
+
+    public static void error(String message, Throwable ex) {
         log(Level.SEVERE, message, ex);
     }
-    
-    static public void error(String message, Throwable ex, Object... args)
-    {
+
+    public static void error(String message, Throwable ex, Object... args) {
         log(Level.SEVERE, message, ex, args);
     }
 
-    static public void error(String message, Object... args)
-    {
+    public static void error(String message, Object... args) {
         log(Level.SEVERE, message, args);
     }
-    
-    static private Logger getLogger()
-    {
+
+    private static Logger getLogger() {
         Thread currentThread = Thread.currentThread();
-        if(currentThread.equals(mainThread)) return QuartzLib.getPlugin().getLogger();
+        if (currentThread.equals(mainThread)) {
+            return QuartzLib.getPlugin().getLogger();
+        }
         return getLogger(currentThread);
     }
-    
-    static private Logger getLogger(Thread thread)
-    {
+
+    private static Logger getLogger(Thread thread) {
         PluginThreadLogger logger = loggers.get(thread);
-        if(logger == null)
-        {
+        if (logger == null) {
             logger = new PluginThreadLogger(thread);
             loggers.put(thread, logger);
         }
         return logger;
     }
-    
-    static private class PluginThreadLogger extends Logger
-    {
+
+    private static class PluginThreadLogger extends Logger {
         private final String loggerName;
-        public PluginThreadLogger(Thread thread)
-        {
+
+        public PluginThreadLogger(Thread thread) {
             super(QuartzLib.getPlugin().getClass().getCanonicalName(), null);
             setParent(QuartzLib.getPlugin().getLogger());
             setLevel(Level.ALL);
             loggerName = "[" + thread.getName() + "] ";
         }
-        
+
         @Override
-        public void log(LogRecord logRecord) 
-        {
+        public void log(LogRecord logRecord) {
             logRecord.setMessage(loggerName + logRecord.getMessage());
             super.log(logRecord);
         }

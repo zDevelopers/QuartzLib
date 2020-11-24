@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.worker;
 
 import java.lang.annotation.ElementType;
@@ -41,18 +42,19 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface WorkerAttributes
-{
+public @interface WorkerAttributes {
     /**
      * Defines the name of the Worker.
      * The named is used in various places, such as thread name or logging.
+     *
      * @return The name of the worker.
      */
     String name() default "";
-    
+
     /**
      * Defines if the Worker needs to query the main thread or not.
      * See the {@link Worker} class documentation for more information.
+     *
      * @return If the Worker queries the main thread;
      */
     boolean queriesMainThread() default false;

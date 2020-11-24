@@ -27,27 +27,24 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.ztoaster;
 
 import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzlib.components.i18n.I18n;
 import fr.zcraft.quartzlib.components.scoreboard.Sidebar;
 import fr.zcraft.quartzlib.components.scoreboard.SidebarMode;
-import org.bukkit.entity.Player;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import org.bukkit.entity.Player;
 
 
-public class ToasterSidebar extends Sidebar
-{
+public class ToasterSidebar extends Sidebar {
     private int toastsCount = 0;
     private int insideTheToaster = 0;
 
-
-    public ToasterSidebar()
-    {
+    public ToasterSidebar() {
         setAsync(true);
         setContentMode(SidebarMode.PER_PLAYER);
         setAutoRefreshDelay(10);
@@ -55,23 +52,21 @@ public class ToasterSidebar extends Sidebar
 
 
     @Override
-    public void preRender()
-    {
+    public void preRender() {
         Toast[] toasts = Toaster.getToasts();
 
         toastsCount = toasts.length;
 
         insideTheToaster = 0;
-        for (Toast toast : toasts)
-        {
-            if (toast.getStatus() == Toast.CookingStatus.NOT_COOKED)
+        for (Toast toast : toasts) {
+            if (toast.getStatus() == Toast.CookingStatus.NOT_COOKED) {
                 insideTheToaster++;
+            }
         }
     }
-    
+
     @Override
-    public List<String> getContent(Player player)
-    {
+    public List<String> getContent(Player player) {
         Locale playerLocale = I18n.getPlayerLocale(player);
         return Arrays.asList(
                 I.t(playerLocale, "{darkgreen}{bold}Cook"),
@@ -86,12 +81,11 @@ public class ToasterSidebar extends Sidebar
     }
 
     @Override
-    public String getTitle(Player player)
-    {
-        if(insideTheToaster > 0)
-            return I.t(I18n.getPlayerLocale(player), "{red}{bold}\u2668 Toaster \u2668");
-
-        else
+    public String getTitle(Player player) {
+        if (insideTheToaster > 0) {
+            return I.t(I18n.getPlayerLocale(player), "{red}{bold}♨ Toaster ♨");
+        } else {
             return I.t(I18n.getPlayerLocale(player), "{blue}Toaster");
+        }
     }
 }

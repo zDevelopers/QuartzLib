@@ -27,13 +27,13 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.reflection;
 
 import fr.zcraft.quartzlib.exceptions.IncompatibleMinecraftVersionException;
-import org.bukkit.entity.Player;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.bukkit.entity.Player;
 
 
 /**
@@ -41,54 +41,48 @@ import java.lang.reflect.Method;
  *
  * @author Amaury Carrade
  */
-public final class NMSNetwork
-{
-    private final static Class<?> craftPlayerClass;
-    private final static Class<?> entityPlayerClass;
-    private final static Class<?> packetClass;
-    private final static Method sendPacketMethod;
+public final class NMSNetwork {
+    private static final Class<?> craftPlayerClass;
+    private static final Class<?> entityPlayerClass;
+    private static final Class<?> packetClass;
+    private static final Method sendPacketMethod;
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             craftPlayerClass = Reflection.getBukkitClassByName("entity.CraftPlayer");
             entityPlayerClass = Reflection.getMinecraftClassByName("EntityPlayer");
 
             packetClass = Reflection.getMinecraftClassByName("Packet");
-            sendPacketMethod = ((Class<?>) Reflection.getMinecraftClassByName("PlayerConnection")).getDeclaredMethod("sendPacket", packetClass);
-        }
-        catch (ClassNotFoundException | NoSuchMethodException e)
-        {
+            sendPacketMethod = ((Class<?>) Reflection.getMinecraftClassByName("PlayerConnection"))
+                    .getDeclaredMethod("sendPacket", packetClass);
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
             throw new IncompatibleMinecraftVersionException("Cannot load classes needed to send network packets", e);
         }
     }
 
-    private NMSNetwork() {}
+    private NMSNetwork() {
+    }
 
     /**
      * Returns the player's handle (i.e. the NMS EntityPlayer object).
      *
      * @param player The player.
-     *
      * @return The player's handle (reflection-retrieved object, instance of the
-     * net.minecraft.server.EntityPlayer class).
+     *     net.minecraft.server.EntityPlayer class).
      * @throws InvocationTargetException             if an exception is thrown while the connection
      *                                               is retrieved.
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
      *                                               methods and fields needed to get the player's
      *                                               connection.
      */
-    static public Object getPlayerHandle(Player player) throws InvocationTargetException
-    {
-        try
-        {
+    public static Object getPlayerHandle(Player player) throws InvocationTargetException {
+        try {
             Object craftPlayer = craftPlayerClass.cast(player);
             return Reflection.call(craftPlayer, "getHandle");
-        }
-        catch (NoSuchMethodException | IllegalAccessException e)
-        {
-            throw new IncompatibleMinecraftVersionException("Cannot retrieve standard Bukkit or NBS object while getting a player's handle, is the current Bukkit/Minecraft version supported by this API?", e);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new IncompatibleMinecraftVersionException(
+                    "Cannot retrieve standard Bukkit or NBS object while getting a player's handle, "
+                            + "is the current Bukkit/Minecraft version supported by this API?", e);
         }
     }
 
@@ -96,27 +90,26 @@ public final class NMSNetwork
      * Returns the player's connection, frequently used to send packets.
      *
      * @param playerHandle The player's handle, as returned by {@link #getPlayerHandle(Player)}.
-     *
      * @return The player's connection (reflection-retrieved object, instance of the
-     * net.minecraft.server.PlayerConnection class).
+     *     net.minecraft.server.PlayerConnection class).
      * @throws InvocationTargetException             if an exception is thrown while the connection
      *                                               is retrieved.
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
      *                                               methods and fields needed to get the player's
      *                                               connection.
      */
-    static public Object getPlayerConnection(Object playerHandle) throws InvocationTargetException
-    {
-        try
-        {
-            if (!entityPlayerClass.isAssignableFrom(playerHandle.getClass()))
-                throw new ClassCastException("Cannot retrieve a player connection from another class that net.minecraft.server.<version>.EntityPlayer (got " + playerHandle.getClass().getName() + ").");
+    public static Object getPlayerConnection(Object playerHandle) throws InvocationTargetException {
+        try {
+            if (!entityPlayerClass.isAssignableFrom(playerHandle.getClass())) {
+                throw new ClassCastException("Cannot retrieve a player connection from another class that "
+                    + "net.minecraft.server.<version>.EntityPlayer (got " + playerHandle.getClass().getName() + ").");
+            }
 
             return Reflection.getFieldValue(playerHandle, "playerConnection");
-        }
-        catch (NoSuchFieldException | IllegalAccessException e)
-        {
-            throw new IncompatibleMinecraftVersionException("Cannot retrieve standard Bukkit or NBS object while getting a player's connection, is the current Bukkit/Minecraft version supported by this API?", e);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IncompatibleMinecraftVersionException(
+                    "Cannot retrieve standard Bukkit or NBS object while getting a player's connection, "
+                            + "is the current Bukkit/Minecraft version supported by this API?", e);
         }
     }
 
@@ -124,17 +117,15 @@ public final class NMSNetwork
      * Returns the player's connection, frequently used to send packets.
      *
      * @param player The player.
-     *
      * @return The player's connection (reflection-retrieved object, instance of the
-     * net.minecraft.server.PlayerConnection class).
+     *     net.minecraft.server.PlayerConnection class).
      * @throws InvocationTargetException             if an exception is thrown while the connection
      *                                               is retrieved.
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
      *                                               methods and fields needed to get the player's
      *                                               connection.
      */
-    static public Object getPlayerConnection(Player player) throws InvocationTargetException
-    {
+    public static Object getPlayerConnection(Player player) throws InvocationTargetException {
         return getPlayerConnection(getPlayerHandle(player));
     }
 
@@ -145,7 +136,6 @@ public final class NMSNetwork
      *                         method.
      * @param packet           The packet to be sent, an instance of a subclass of the
      *                         net.minecraft.server.Packet class.
-     *
      * @throws InvocationTargetException             if an exception is thrown while the packet is
      *                                               sent.
      * @throws ClassCastException                    if the {@code packet} object is not an instance
@@ -154,32 +144,32 @@ public final class NMSNetwork
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
      *                                               methods and fields needed to send the packet.
      */
-    static public void sendPacket(Object playerConnection, Object packet) throws InvocationTargetException
-    {
-        try
-        {
-            if (!packetClass.isAssignableFrom(packet.getClass()))
-                throw new ClassCastException("Cannot send a packet object if the object is not a subclass of net.minecraft.server.<version>.Packet (got " + packet.getClass().getName() + ").");
+    public static void sendPacket(Object playerConnection, Object packet) throws InvocationTargetException {
+        try {
+            if (!packetClass.isAssignableFrom(packet.getClass())) {
+                throw new ClassCastException(
+                        "Cannot send a packet object if the object is not a subclass of "
+                                + "net.minecraft.server.<version>.Packet (got "
+                                + packet.getClass().getName() + ").");
+            }
 
             sendPacketMethod.invoke(playerConnection, packet);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new IncompatibleMinecraftVersionException("Cannot retrieve standard Bukkit or NBS object while sending a packet to a player, is the current Bukkit/Minecraft version supported by this API?", e);
+        } catch (IllegalAccessException e) {
+            throw new IncompatibleMinecraftVersionException(
+                    "Cannot retrieve standard Bukkit or NBS object while sending a packet to a player, "
+                            + "is the current Bukkit/Minecraft version supported by this API?", e);
         }
     }
 
     /**
      * Sends a packet.
-     *
-     * If you use this method, the player connection is not cached. If you have multiple packets to
+     * <p>If you use this method, the player connection is not cached. If you have multiple packets to
      * send, store the player's connection returned by {@link #getPlayerConnection(Player)} and then
-     * use the {@link #sendPacket(Object, Object)} method.
+     * use the {@link #sendPacket(Object, Object)} method.</p>
      *
      * @param player The player this packet will be sent to.
      * @param packet The packet to be sent, an instance of a subclass of the
      *               net.minecraft.server.Packet class.
-     *
      * @throws InvocationTargetException             if an exception is thrown while the packet is
      *                                               sent.
      * @throws ClassCastException                    if the {@code packet} object is not an instance
@@ -188,8 +178,7 @@ public final class NMSNetwork
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
      *                                               methods and fields needed to send the packet.
      */
-    static public void sendPacket(Player player, Object packet) throws InvocationTargetException
-    {
+    public static void sendPacket(Player player, Object packet) throws InvocationTargetException {
         sendPacket(getPlayerConnection(player), packet);
     }
 }

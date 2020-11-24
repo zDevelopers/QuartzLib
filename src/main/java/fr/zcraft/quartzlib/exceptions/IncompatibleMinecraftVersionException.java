@@ -27,27 +27,24 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.exceptions;
 
 
 /**
  * This runtime exception is thrown when an error is encountered due to an incompatible
  * Minecraft server version, as example while sending some packets.
- *
- * The underlying exception is available through {@link #getCause()}.
+ * <p>The underlying exception is available through {@link #getCause()}.</p>
  */
-public class IncompatibleMinecraftVersionException extends RuntimeException
-{
+public class IncompatibleMinecraftVersionException extends RuntimeException {
 
-	private static final long serialVersionUID = -8022385806817755567L;
+    private static final long serialVersionUID = -8022385806817755567L;
 
-	public IncompatibleMinecraftVersionException(String message, Throwable cause)
-    {
+    public IncompatibleMinecraftVersionException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public IncompatibleMinecraftVersionException(Throwable cause)
-    {
+    public IncompatibleMinecraftVersionException(Throwable cause) {
         super(cause);
     }
 }

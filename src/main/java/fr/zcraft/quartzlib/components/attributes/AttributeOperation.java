@@ -33,58 +33,57 @@ package fr.zcraft.quartzlib.components.attributes;
 /**
  * This enum represents the possible values for an item attribute operation.
  */
-public enum AttributeOperation 
-{
+public enum AttributeOperation {
     /**
      * Operation 0: Additive. Adds all of the modifiers' amounts to the current value of the attribute.
      */
     ADDITIVE(0),
     /**
-     * Operation 1: Multiplicative. Multiplies the current value of the attribute by (1 + x), where x is the sum of the modifiers' amounts.
+     * Operation 1: Multiplicative. Multiplies the current value of the attribute by (1 + x),
+     * where x is the sum of the modifiers' amounts.
      */
     MULTIPLY(1),
     /**
-     * Operation 2: Multiplicative. For every modifier, multiplies the current value of the attribute by (1 + x), where x is the amount of the particular modifier. 
-     * Functions the same as Operation 1 if there is only a single modifier with operation 1 or 2. 
+     * Operation 2: Multiplicative. For every modifier, multiplies the current value of the attribute by (1 + x),
+     * where x is the amount of the particular modifier.
+     * Functions the same as Operation 1 if there is only a single modifier with operation 1 or 2.
      * However, for multiple modifiers it will multiply the modifiers rather than adding them.
      */
     MULTIPLY_ALL(2);
-    
+
     private final int code;
-    private AttributeOperation(int code)
-    {
+
+    AttributeOperation(int code) {
         this.code = code;
     }
-    
-    /**
-     * 
-     * @return the operation's code.
-     */
-    public int getCode()
-    {
-        return code;
-    }
-    
-    @Override
-    public String toString()
-    {
-        return String.valueOf(code);
-    }
-    
+
     /**
      * Gets an AttributeOperation from its code.
+     *
      * @param code The attribute code.
      * @return the corresponding attribute operation.
      * @throws IllegalArgumentException if the code is invalid.
      */
-    static public AttributeOperation fromCode(int code) throws IllegalArgumentException
-    {
-        for(AttributeOperation operation : values())
-        {
-            if(operation.code == code)
+    public static AttributeOperation fromCode(int code) throws IllegalArgumentException {
+        for (AttributeOperation operation : values()) {
+            if (operation.code == code) {
                 return operation;
+            }
         }
-        
+
         throw new IllegalArgumentException("Illegal Attribute operation code : " + code);
+    }
+
+    /**
+     * Gets the operation's code.
+     * @return the operation's code.
+     */
+    public int getCode() {
+        return code;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(code);
     }
 }

@@ -1,20 +1,20 @@
 /*
  * Copyright or © or Copr. AmauryCarrade (2015)
- * 
+ *
  * http://amaury.carrade.eu
- * 
+ *
  * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
+ * abiding by the rules of distribution of free software.  You can  use,
  * modify and/ or redistribute the software under the terms of the CeCILL-B
  * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
- * 
+ * "http://www.cecill.info".
+ *
  * As a counterpart to the access to the source code and  rights to copy,
  * modify and redistribute granted by the license, users are provided only
  * with a limited warranty  and the software's author,  the holder of the
  * economic rights,  and the successive licensors  have only  limited
- * liability. 
- * 
+ * liability.
+ *
  * In this respect, the user's attention is drawn to the risks associated
  * with loading,  using,  modifying and/or developing or reproducing the
  * software by the user in light of its specific status of free software,
@@ -22,18 +22,15 @@
  * therefore means  that it is reserved for developers  and  experienced
  * professionals having in-depth computer knowledge. Users are therefore
  * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
- * 
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.quartzlib.components.commands;
 
-import junit.framework.Assert;
-import org.apache.commons.lang.StringUtils;
-import org.junit.jupiter.api.Test;
+package fr.zcraft.quartzlib.components.commands;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,33 +40,31 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import junit.framework.Assert;
+import org.apache.commons.lang.StringUtils;
+import org.junit.jupiter.api.Test;
 
-
-public class CommandFlagsTest
-{
+public class CommandFlagsTest {
     private final Method parseArgsMethod;
 
-    public CommandFlagsTest() throws ReflectiveOperationException
-    {
-        parseArgsMethod = Command.class.getDeclaredMethod("parseArgs", String[].class, Set.class, List.class, Set.class);
+    public CommandFlagsTest() throws ReflectiveOperationException {
+        parseArgsMethod =
+                Command.class.getDeclaredMethod("parseArgs", String[].class, Set.class, List.class, Set.class);
         parseArgsMethod.setAccessible(true);
     }
 
-    private void parseArgs(final String[] args, final Set<String> acceptedFlags, List<String> realArgs, Set<String> flags)
-    {
-        try
-        {
+    private void parseArgs(final String[] args, final Set<String> acceptedFlags, List<String> realArgs,
+                           Set<String> flags) {
+        try {
             parseArgsMethod.invoke(null, args, acceptedFlags, realArgs, flags);
-        }
-        catch (IllegalAccessException | InvocationTargetException e)
-        {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             Assert.fail("Cannot invoke parseArgs method");
         }
     }
 
-    private void assertArgs(final String[] args, final String[] acceptedFlags, final String[] expectedArgs, final String[] expectedFlags)
-    {
+    private void assertArgs(final String[] args, final String[] acceptedFlags, final String[] expectedArgs,
+                            final String[] expectedFlags) {
         final Set<String> acceptedFlagsSet = acceptedFlags != null ? new HashSet<>(Arrays.asList(acceptedFlags)) : null;
 
         final List<String> actualArgs = new ArrayList<>(args.length);
@@ -80,13 +75,14 @@ public class CommandFlagsTest
         final TreeSet<String> expectedFlagsSorted = new TreeSet<>(Arrays.asList(expectedFlags));
         final TreeSet<String> actualFlagsSorted = new TreeSet<>(actualFlags);
 
-        Assert.assertEquals("Expected and actual arguments differs", StringUtils.join(expectedArgs, ","), StringUtils.join(actualArgs, ","));
-        Assert.assertEquals("Expected and actual flags differs", StringUtils.join(expectedFlagsSorted, ","), StringUtils.join(actualFlagsSorted, ","));
+        Assert.assertEquals("Expected and actual arguments differs", StringUtils.join(expectedArgs, ","),
+                StringUtils.join(actualArgs, ","));
+        Assert.assertEquals("Expected and actual flags differs", StringUtils.join(expectedFlagsSorted, ","),
+                StringUtils.join(actualFlagsSorted, ","));
     }
 
     @Test
-    public void flagsDisabledTest()
-    {
+    public void flagsDisabledTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "arg2"},
                 null,
@@ -96,8 +92,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void flagsDisabledWithFlagLikeTest()
-    {
+    public void flagsDisabledWithFlagLikeTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "-flag", "arg2", "--flag2"},
                 null,
@@ -107,8 +102,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void simpleFlagsTest()
-    {
+    public void simpleFlagsTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "-f"},
                 new String[] {},
@@ -125,8 +119,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void simpleMultipleFlagsTest()
-    {
+    public void simpleMultipleFlagsTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "-fl"},
                 new String[] {},
@@ -143,8 +136,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void longFlagTest()
-    {
+    public void longFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--flop"},
                 new String[] {},
@@ -161,8 +153,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void longFlagWithDashTest()
-    {
+    public void longFlagWithDashTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--flop-pomf"},
                 new String[] {},
@@ -179,8 +170,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void mixedFlagTest()
-    {
+    public void mixedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--flop", "-fl", "--pomf"},
                 new String[] {},
@@ -197,8 +187,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void mixedCaseFlagTest()
-    {
+    public void mixedCaseFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--FLOP", "-fL", "--poMf"},
                 new String[] {},
@@ -215,8 +204,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void middleFlagTest()
-    {
+    public void middleFlagTest() {
         assertArgs(
                 new String[] {"arg0", "--flop", "-fl", "arg1", "--pomf"},
                 new String[] {},
@@ -233,8 +221,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void duplicatedFlagTest()
-    {
+    public void duplicatedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--pomf", "--pomf"},
                 new String[] {},
@@ -258,8 +245,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void duplicatedMixedCaseFlagTest()
-    {
+    public void duplicatedMixedCaseFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--pomf", "--POMF"},
                 new String[] {},
@@ -286,10 +272,8 @@ public class CommandFlagsTest
     // Constrained
 
 
-
     @Test
-    public void simpleConstrainedFlagsTest()
-    {
+    public void simpleConstrainedFlagsTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "-f"},
                 new String[] {"f"},
@@ -306,8 +290,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void simpleMultipleConstrainedFlagsTest()
-    {
+    public void simpleMultipleConstrainedFlagsTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "-fl"},
                 new String[] {"f"},
@@ -331,8 +314,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void longConstrainedFlagTest()
-    {
+    public void longConstrainedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--flop"},
                 new String[] {"flop"},
@@ -349,8 +331,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void mixedConstrainedFlagTest()
-    {
+    public void mixedConstrainedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--flop", "-fl", "--pomf"},
                 new String[] {"flop", "f"},
@@ -367,8 +348,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void mixedCaseConstrainedFlagTest()
-    {
+    public void mixedCaseConstrainedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--FLOP", "-fL", "--poMf"},
                 new String[] {"flop", "l"},
@@ -385,8 +365,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void middleConstrainedFlagTest()
-    {
+    public void middleConstrainedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "--flop", "-fl", "arg1", "--pomf"},
                 new String[] {"pomf", "l"},
@@ -403,8 +382,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void duplicatedConstrainedFlagTest()
-    {
+    public void duplicatedConstrainedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--pomf", "--pomf"},
                 new String[] {"pomf"},
@@ -449,8 +427,7 @@ public class CommandFlagsTest
     }
 
     @Test
-    public void duplicatedMixedCaseConstrainedFlagTest()
-    {
+    public void duplicatedMixedCaseConstrainedFlagTest() {
         assertArgs(
                 new String[] {"arg0", "arg1", "--pomf", "--POMF"},
                 new String[] {"pomf"},

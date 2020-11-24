@@ -27,21 +27,19 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.events;
 
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
-
 /**
- * A class used to wrap an event for {@link FutureEventHandler}s
+ * A class used to wrap an event for {@link FutureEventHandler}s.
  */
-public class WrappedEvent
-{
-    private Event wrappedEvent;
+public class WrappedEvent {
+    private final Event wrappedEvent;
 
-    public WrappedEvent(Event event)
-    {
+    public WrappedEvent(Event event) {
         this.wrappedEvent = event;
     }
 
@@ -55,8 +53,7 @@ public class WrappedEvent
      * @return The wrapped event.
      * @see fr.zcraft.quartzlib.tools.reflection.Reflection
      */
-    public Event getEvent()
-    {
+    public Event getEvent() {
         return wrappedEvent;
     }
 
@@ -65,8 +62,7 @@ public class WrappedEvent
      *
      * @return {@code true} if cancellable.
      */
-    public boolean isCancellable()
-    {
+    public boolean isCancellable() {
         return wrappedEvent instanceof Cancellable;
     }
 
@@ -77,27 +73,27 @@ public class WrappedEvent
      * @throws UnsupportedOperationException if the wrapped event is not
      *                                       cancellable.
      */
-    public boolean isCancelled() throws UnsupportedOperationException
-    {
-        if (wrappedEvent instanceof Cancellable)
+    public boolean isCancelled() throws UnsupportedOperationException {
+        if (wrappedEvent instanceof Cancellable) {
             return ((Cancellable) wrappedEvent).isCancelled();
-        else
-            throw new UnsupportedOperationException("Cannot retrieve the cancellation state of a non-cancellable event");
+        } else {
+            throw new UnsupportedOperationException(
+                    "Cannot retrieve the cancellation state of a non-cancellable event");
+        }
     }
 
     /**
      * Marks the wrapped event as cancelled or not.
      *
      * @param cancelled {@code true} to cancel it.
-     *
      * @throws UnsupportedOperationException if the wrapped event is not
      *                                       cancellable.
      */
-    public void setCancelled(boolean cancelled) throws UnsupportedOperationException
-    {
-        if (wrappedEvent instanceof Cancellable)
+    public void setCancelled(boolean cancelled) throws UnsupportedOperationException {
+        if (wrappedEvent instanceof Cancellable) {
             ((Cancellable) wrappedEvent).setCancelled(cancelled);
-        else
+        } else {
             throw new UnsupportedOperationException("Cannot set the cancellation state of a non-cancellable event");
+        }
     }
 }

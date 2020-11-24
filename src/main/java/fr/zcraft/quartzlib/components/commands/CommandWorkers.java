@@ -7,20 +7,22 @@ import fr.zcraft.quartzlib.components.worker.WorkerCallback;
 import fr.zcraft.quartzlib.components.worker.WorkerRunnable;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.mojang.UUIDFetcher;
-
 import java.util.UUID;
 import java.util.function.Consumer;
 
 @WorkerAttributes(name = "Command's worker", queriesMainThread = true)
-public class CommandWorkers extends Worker{
+public class CommandWorkers extends Worker {
 
-    public void OfflineNameFetch(final String playerName, final Consumer<UUID> callback) {
-
+    /**
+     * Fetches an offline player's UUID by name.
+     */
+    public void offlineNameFetch(final String playerName, final Consumer<UUID> callback) {
         final WorkerCallback wCallback = new WorkerCallback<UUID>() {
             @Override
             public void finished(UUID result) {
                 callback.accept(result);  // Si tout va bien on passe l'UUID au callback
             }
+
             @Override
             public void errored(Throwable exception) {
                 PluginLogger.warning(I.t("Error while getting player UUID"));

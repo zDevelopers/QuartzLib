@@ -27,89 +27,115 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.core.QuartzComponent;
 import fr.zcraft.quartzlib.core.QuartzLib;
-import org.bukkit.command.CommandSender;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.command.CommandSender;
 
-public class Commands extends QuartzComponent
-{
-    public static final String CHAT_PREFIX = "\u2503";
+public class Commands extends QuartzComponent {
+    public static final String CHAT_PREFIX = "┃";
 
-    static private final List<CommandGroup> commandGroups =  new ArrayList<>();
-    static private String globalPermission;
+    private static final List<CommandGroup> commandGroups = new ArrayList<>();
+    private static String globalPermission;
 
-    static public void registerShortcut(String commandGroupName, Class<? extends Command> commandClass, String ... shortcutNames)
-    {
+    /**
+     * Registers a shortcut command.
+     */
+    public static void registerShortcut(String commandGroupName, Class<? extends Command> commandClass,
+                                        String... shortcutNames) {
         CommandGroup group = getMatchingCommandGroup(commandGroupName);
-        if(group == null) throw new IllegalArgumentException("Invalid command group name: " + commandGroupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Invalid command group name: " + commandGroupName);
+        }
         CommandGroup newCommandGroup = new CommandGroup(group, commandClass, shortcutNames);
-        
+
         newCommandGroup.register(QuartzLib.getPlugin());
         commandGroups.add(newCommandGroup);
     }
-    
-    static public void register(String[] names, Class<? extends Command> ... commandsClasses)
-    {
+
+    /**
+     * Registers many new commands.
+     * @param names The names of the commands
+     * @param commandsClasses The matching classes for the commands
+     */
+    public static void register(String[] names, Class<? extends Command>... commandsClasses) {
         final CommandGroup commandGroup = new CommandGroup(names, commandsClasses);
         commandGroup.register(QuartzLib.getPlugin());
 
         commandGroups.add(commandGroup);
     }
-    
-    static public void register(String name, Class<? extends Command> ... commandsClasses)
-    {
+
+    public static void register(String name, Class<? extends Command>... commandsClasses) {
         register(new String[] {name}, commandsClasses);
     }
-    
-    static public boolean execute(CommandSender sender, String commandName, String[] args)
-    {
+
+    /**
+     * Executes a registered command.
+     * @param sender The command sender.
+     * @param commandName The name of the command.
+     * @param args The command's arguments.
+     * @return Whether the command was found.
+     */
+    public static boolean execute(CommandSender sender, String commandName, String[] args) {
         CommandGroup commandGroup = getMatchingCommandGroup(commandName);
-        if(commandGroup == null) return false;
+        if (commandGroup == null) {
+            return false;
+        }
         commandGroup.executeMatchingCommand(sender, args);
         return true;
     }
-    
-    static public List<String> tabComplete(CommandSender sender, String commandName, String[] args)
-    {
+
+
+    /**
+     * Computes a list of possible autocomplete suggestions for the given command.
+     * @param sender The sender of the command.
+     * @param commandName The name of the command.
+     * @param args The partial arguments for the command.
+     * @return A list of suggestions.
+     */
+    public static List<String> tabComplete(CommandSender sender, String commandName, String[] args) {
         CommandGroup commandGroup = getMatchingCommandGroup(commandName);
-        if(commandGroup == null) return new ArrayList<String>();
+        if (commandGroup == null) {
+            return new ArrayList<>();
+        }
         return commandGroup.tabComplete(sender, args);
     }
-    
-    static public Command getCommandInfo(Class<? extends Command> commandClass)
-    {
+
+    /**
+     * Gets the command matching the given class.
+     * @param commandClass The command class.
+     * @return The matching gommand, or null if none were found.
+     */
+    public static Command getCommandInfo(Class<? extends Command> commandClass) {
         Command command = null;
-        for(CommandGroup commandGroup : commandGroups)
-        {
+        for (CommandGroup commandGroup : commandGroups) {
             command = commandGroup.getCommandInfo(commandClass);
-            if(command != null) break;
+            if (command != null) {
+                break;
+            }
         }
         return command;
     }
-    
-    static private CommandGroup getMatchingCommandGroup(String commandName)
-    {
-        for(CommandGroup commandGroup : commandGroups)
-        {
-            if(commandGroup.matches(commandName))
+
+    private static CommandGroup getMatchingCommandGroup(String commandName) {
+        for (CommandGroup commandGroup : commandGroups) {
+            if (commandGroup.matches(commandName)) {
                 return commandGroup;
+            }
         }
         return null;
     }
-    
-    
-    static public String getGlobalPermission()
-    {
+
+
+    public static String getGlobalPermission() {
         return globalPermission;
     }
-    
-    static public void setGlobalPermission(String permission)
-    {
+
+    public static void setGlobalPermission(String permission) {
         globalPermission = permission;
     }
 }

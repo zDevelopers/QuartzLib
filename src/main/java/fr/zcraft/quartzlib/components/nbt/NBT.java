@@ -33,11 +33,6 @@ package fr.zcraft.quartzlib.components.nbt;
 import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzlib.tools.reflection.NMSException;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,33 +40,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * This class provides various utilities to manipulate NBT data.
  */
-public abstract class NBT 
-{
-    private NBT() {}
-
-    /**
-     * Returns the NBT JSON representation of the given object.
-     * This method returns a non-strict JSON representation of the object, 
-     * because minecraft (both client and server) can't deal with strict JSON
-     * for some item nbt tags.
-     *
-     * @param value The value to JSONify.
-     * @return the NBT JSON representation of the given object. 
-     */
-    static public String toNBTJSONString(Object value)
-    {
-        StringBuilder sb = new StringBuilder();
-        toNBTJSONString(sb, value);
-        return sb.toString();
-    }
+public abstract class NBT {
+    static Class<?> MC_ITEM_STACK = null;
+    static Class<?> MC_NBT_TAG_COMPOUND = null;
 
 
     /* ========== Item utilities ========== */
-    
+    static Class<?> CB_CRAFT_ITEM_META = null;
+
+    private NBT() {
+    }
+
     /**
      * Returns the NBT tag for the specified item.
      * The tag is read-write, and any modification applied to it will also be
@@ -79,21 +66,17 @@ public abstract class NBT
      *
      * @param item The item to get the tag from.
      * @return the NBT tag for the specified item.
-     * @throws NMSException 
+     * @throws NMSException If there was any issue while assigning NBT data.
      */
-    static public NBTCompound fromItemStack(ItemStack item) throws NMSException
-    {
+    public static NBTCompound fromItemStack(ItemStack item) throws NMSException {
         init();
-        try
-        {
+        try {
             return new NBTCompound(getMcNBTCompound(item));
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             throw new NMSException("Unable to retrieve NBT data", ex);
         }
     }
-    
+
     /**
      * Returns an NBT-like representation of the specified item meta.
      * It is useful as a fallback if you need item data as an NBT format, but
@@ -102,19 +85,20 @@ public abstract class NBT
      * @param meta The item meta to get the data from.
      * @return an NBT-like representation of the specified item meta.
      */
-    static public Map<String, Object> fromItemMeta(ItemMeta meta)
-    {
+    public static Map<String, Object> fromItemMeta(ItemMeta meta) {
         Map<String, Object> itemData = new HashMap<>();
 
-        if (meta.hasDisplayName())
+        if (meta.hasDisplayName()) {
             itemData.put("Name", meta.getDisplayName());
+        }
 
-        if (meta.hasLore())
+        if (meta.hasLore()) {
             itemData.put("Lore", meta.getLore());
-        
+        }
+
         return itemData;
     }
-    
+
     /**
      * Returns an NBT-like representation of the specified enchantments.
      * It is useful as a fallback if you need item data as an NBT format, but
@@ -123,25 +107,26 @@ public abstract class NBT
      * @param enchants the enchantment list to get the data from.
      * @return an NBT-like representation of the specified enchantments.
      */
-    static public List<Map<String, Object>> fromEnchantments(Map<Enchantment, Integer> enchants)
-    {
+    public static List<Map<String, Object>> fromEnchantments(Map<Enchantment, Integer> enchants) {
         List<Map<String, Object>> enchantList = new ArrayList<>();
-        
-        for (Map.Entry<Enchantment, Integer> enchantment : enchants.entrySet())
-        {
+
+        for (Map.Entry<Enchantment, Integer> enchantment : enchants.entrySet()) {
             final Map<String, Object> enchantmentData = new HashMap<>();
 
-           
+
             enchantmentData.put("key", enchantment.getKey());
-            
+
 
             enchantmentData.put("lvl", enchantment.getValue());
             enchantList.add(enchantmentData);
         }
-        
+
         return enchantList;
     }
-    
+
+
+    /* ========== Internal utilities ========== */
+
     /**
      * Returns an NBT-like representation of the item flags (HideFlags).
      * It is useful as a fallback if you need item data as an NBT format, but
@@ -150,101 +135,97 @@ public abstract class NBT
      * @param itemFlags item flag set to get the data from.
      * @return an NBT-like representation of the item flags (HideFlags).
      */
-    static public byte fromItemFlags(Set<ItemFlag> itemFlags)
-    {
+    public static byte fromItemFlags(Set<ItemFlag> itemFlags) {
         byte flags = 0;
 
-        for (ItemFlag flag : itemFlags)
-        {
-            switch (flag)
-            {
+        for (ItemFlag flag : itemFlags) {
+            switch (flag) {
                 case HIDE_ENCHANTS:
-                    flags += 1; break;
-                case HIDE_ATTRIBUTES: 
-                    flags += 1 << 1; break;
+                    flags += 1;
+                    break;
+                case HIDE_ATTRIBUTES:
+                    flags += 1 << 1;
+                    break;
                 case HIDE_UNBREAKABLE:
-                    flags += 1 << 2; break;
+                    flags += 1 << 2;
+                    break;
                 case HIDE_DESTROYS:
-                    flags += 1 << 3; break;
+                    flags += 1 << 3;
+                    break;
                 case HIDE_PLACED_ON:
-                    flags += 1 << 4; break;
+                    flags += 1 << 4;
+                    break;
                 case HIDE_POTION_EFFECTS:
-                    flags += 1 << 5; break;
+                    flags += 1 << 5;
+                    break;
+                default:
+                    break;
             }
         }
-        
+
         return flags;
     }
 
     /**
      * Replaces the tags in the given ItemStack by the given tags.
-     *
-     * This operation is only possible on a CraftItemStack. As a consequence,
+     * <p>This operation is only possible on a CraftItemStack. As a consequence,
      * this method <strong>returns</strong> an {@link ItemStack}. If the given
      * ItemStack was a CraftItemStack, the same instance will be returned, but
-     * in the other cases, it will be a new one (a copy).
+     * in the other cases, it will be a new one (a copy).</p>
      *
      * @param item The ItemStack to change.
      * @param tags The tags to place inside the stack.
-     *
      * @return An item stack with the modification applied. It may (if you given
-     * a CraftItemStack) or may not (else) be the same instance as the given
-     * one.
+     *     a CraftItemStack) or may not (else) be the same instance as the given one.
      * @throws NMSException if the operation cannot be executed.
      * @see #addToItemStack(ItemStack, Map, boolean) This method is equivalent
-     * to this one with replace = true.
+     *     to this one with replace = true.
      */
-    static public ItemStack addToItemStack(ItemStack item, Map<String, Object> tags) throws NMSException
-    {
+    public static ItemStack addToItemStack(ItemStack item, Map<String, Object> tags) throws NMSException {
         return addToItemStack(item, tags, true);
     }
 
     /**
      * Adds or replaces the tags in the given ItemStack by the given tags.
-     *
-     * This operation is only possible on a CraftItemStack. As a consequence,
+     * <p>This operation is only possible on a CraftItemStack. As a consequence,
      * this method <strong>returns</strong> an {@link ItemStack}. If the given
      * ItemStack was a CraftItemStack, the same instance will be returned, but
-     * in the other cases, it will be a new one (a copy).
+     * in the other cases, it will be a new one (a copy).</p>
      *
      * @param item    The ItemStack to change.
      * @param tags    The tags to place inside the stack.
      * @param replace {@code true} to replace the whole set of tags. If {@code
      *                false}, tags will be added.
-     *
      * @return An item stack with the modification applied. It may (if you given
-     * a CraftItemStack) or may not (else) be the same instance as the given
-     * one.
+     *     a CraftItemStack) or may not (else) be the same instance as the given one.
      * @throws NMSException if the operation cannot be executed.
      */
-    static public ItemStack addToItemStack(final ItemStack item, final Map<String, Object> tags, final boolean replace) throws NMSException
-    {
+    public static ItemStack addToItemStack(final ItemStack item, final Map<String, Object> tags, final boolean replace)
+            throws NMSException {
         init();
 
-        try
-        {
+        try {
             final ItemStack craftItemStack = (ItemStack) ItemUtils.getCraftItemStack(item);
             final Object mcItemStack = ItemUtils.getNMSItemStack(item);
             final NBTCompound compound = fromItemStack(craftItemStack);
 
-            if (replace) compound.clear();
+            if (replace) {
+                compound.clear();
+            }
             compound.putAll(tags);
-            Object tag = compound.getNBTTagCompound();
+            Object tag = compound.getNbtTagCompound();
 
-            if (tag != null)
-            {
-                final ItemMeta craftItemMeta = (ItemMeta) Reflection.call(craftItemStack.getClass(), null, "getItemMeta", new Object[] {mcItemStack});
+            if (tag != null) {
+                final ItemMeta craftItemMeta = (ItemMeta) Reflection
+                        .call(craftItemStack.getClass(), null, "getItemMeta", new Object[] {mcItemStack});
 
                 // There's an "applyToItem" method in CraftItemMeta but is doesn't handle well new NBT tags.
                 // We try to re-create a whole new instance from the same CraftItemMeta base class instead,
                 // using the constructor accepting a NBTTagCompound.
                 ItemMeta newCraftItemMeta;
-                try
-                {
+                try {
                     newCraftItemMeta = Reflection.instantiate(craftItemMeta.getClass(), tag);
-                }
-                catch (NoSuchMethodException e)
-                {
+                } catch (NoSuchMethodException e) {
                     // The CraftMetaBlockState constructor is different (like some Portal's turrets):
                     // he takes the Material as his second argument.
                     newCraftItemMeta = Reflection.instantiate(craftItemMeta.getClass(), tag, craftItemStack.getType());
@@ -254,48 +235,32 @@ public abstract class NBT
             }
 
             return craftItemStack;
-        }
-        catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException | NMSException e)
-        {
+        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException
+                | IllegalAccessException | NMSException e) {
             throw new NMSException("Cannot set item stack tags", e);
         }
     }
 
-
-    /* ========== Internal utilities ========== */
-    
-    static Class<?> MC_ITEM_STACK = null;
-    static Class<?> MC_NBT_TAG_COMPOUND = null;
-    static Class<?> CB_CRAFT_ITEM_META = null;
-
-
-    static Class getMinecraftClass(String className) throws NMSException
-    {
-        try
-        {
+    static Class<?> getMinecraftClass(String className) throws NMSException {
+        try {
             return Reflection.getMinecraftClassByName(className);
-        }
-        catch (ClassNotFoundException ex)
-        {
+        } catch (ClassNotFoundException ex) {
             throw new NMSException("Unable to find class: " + className, ex);
         }
     }
 
-    static Class getCraftBukkitClass(String className) throws NMSException
-    {
-        try
-        {
+    static Class<?> getCraftBukkitClass(String className) throws NMSException {
+        try {
             return Reflection.getBukkitClassByName(className);
-        }
-        catch (ClassNotFoundException ex)
-        {
+        } catch (ClassNotFoundException ex) {
             throw new NMSException("Unable to find class: " + className, ex);
         }
     }
 
-    static private void init() throws NMSException
-    {
-        if (MC_ITEM_STACK != null) return; // Already initialized
+    private static void init() throws NMSException {
+        if (MC_ITEM_STACK != null) {
+            return; // Already initialized
+        }
 
         MC_ITEM_STACK = getMinecraftClass("ItemStack");
         MC_NBT_TAG_COMPOUND = getMinecraftClass("NBTTagCompound");
@@ -313,33 +278,29 @@ public abstract class NBT
      * @return The NMS NBT tag.
      * @throws NMSException If something goes wrong while extracting the tag.
      */
-    static private Object getMcNBTCompound(ItemStack item) throws NMSException
-    {
+    private static Object getMcNBTCompound(ItemStack item) throws NMSException {
         Object mcItemStack = ItemUtils.getNMSItemStack(item);
-        if (mcItemStack == null) return null;
+        if (mcItemStack == null) {
+            return null;
+        }
 
-        try
-        {
+        try {
             Object tag = Reflection.getFieldValue(MC_ITEM_STACK, mcItemStack, "tag");
 
-            if (tag == null)
-            {
+            if (tag == null) {
                 tag = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
 
-                try
-                {
+                try {
                     Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tag);
-                }
-                catch (NoSuchMethodException e) // If the set method change—more resilient, as the setTag will only update the field without any kind of callback.
-                {
+                } catch (NoSuchMethodException e) {
+                    // If the set method change—more resilient,
+                    // as the setTag will only update the field without any kind of callback.
                     Reflection.setFieldValue(MC_ITEM_STACK, mcItemStack, "tag", tag);
                 }
             }
 
             return tag;
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             throw new NMSException("Unable to retrieve NBT tag from item", ex);
         }
     }
@@ -351,31 +312,31 @@ public abstract class NBT
      * @param value The native Java value to convert.
      * @return The NMS NBT tag instance converted from the native value.
      */
-    static Object fromNativeValue(Object value)
-    {
-        if (value == null) return null;
+    static Object fromNativeValue(Object value) {
+        if (value == null) {
+            return null;
+        }
 
-        NBTType type = NBTType.fromClass(value.getClass());
+        NbtType type = NbtType.fromClass(value.getClass());
         return type.newTag(value);
     }
 
     /**
      * Converts a NMS NBT tag instance to a native value, effectively
      * unwrapping the value inside to something Java alone can understand.
-     *
-     * Nested values are also converted, if any, to objects implementing
-     * the {@link Map} or {@link List} interface..
+     * <p>Nested values are also converted, if any, to objects implementing
+     * the {@link Map} or {@link List} interface..</p>
      *
      * @param nbtTag The NMS NBT tag instance.
      * @return The corresponding native value.
      */
-    static Object toNativeValue(Object nbtTag)
-    {
-        if (nbtTag == null) return null;
-        NBTType type = NBTType.fromNmsNbtTag(nbtTag);
-        
-        switch(type)
-        {
+    static Object toNativeValue(Object nbtTag) {
+        if (nbtTag == null) {
+            return null;
+        }
+        NbtType type = NbtType.fromNmsNbtTag(nbtTag);
+
+        switch (type) {
             case TAG_COMPOUND:
                 return new NBTCompound(nbtTag);
             case TAG_LIST:
@@ -387,57 +348,71 @@ public abstract class NBT
 
 
     /* ========== NBT String Utilities ========== */
-    
-    static private void toNBTJSONString(StringBuilder builder, Object value)
-    {
-        if (value == null) return;
-        
-        if (value instanceof List)
-            toNBTJSONString(builder, (List) value);
-        else if (value instanceof Map)
-            toNBTJSONString(builder, (Map) value);
-        else if (value instanceof String)
-            toNBTJSONString(builder, (String) value);
-        else
-            builder.append(value.toString());
+
+    /**
+     * Returns the NBT JSON representation of the given object.
+     * This method returns a non-strict JSON representation of the object,
+     * because minecraft (both client and server) can't deal with strict JSON
+     * for some item nbt tags.
+     *
+     * @param value The value to JSONify.
+     * @return the NBT JSON representation of the given object.
+     */
+    public static String toNBTJSONString(Object value) {
+        StringBuilder sb = new StringBuilder();
+        toNBTJSONString(sb, value);
+        return sb.toString();
     }
-    
-    static private void toNBTJSONString(StringBuilder builder, List list)
-    {
+
+    private static void toNBTJSONString(StringBuilder builder, Object value) {
+        if (value == null) {
+            return;
+        }
+
+        if (value instanceof List) {
+            toNBTJSONString(builder, (List) value);
+        } else if (value instanceof Map) {
+            toNBTJSONString(builder, (Map) value);
+        } else if (value instanceof String) {
+            toNBTJSONString(builder, (String) value);
+        } else {
+            builder.append(value.toString());
+        }
+    }
+
+    private static void toNBTJSONString(StringBuilder builder, List list) {
         builder.append("[");
-        
+
         boolean isFirst = true;
-        for(Object value : list)
-        {
-            if(!isFirst)
+        for (Object value : list) {
+            if (!isFirst) {
                 builder.append(",");
+            }
             toNBTJSONString(builder, value);
             isFirst = false;
         }
-        
+
         builder.append("]");
     }
-    
-    static private void toNBTJSONString(StringBuilder builder, Map<Object, Object> map)
-    {
+
+    private static void toNBTJSONString(StringBuilder builder, Map<Object, Object> map) {
         builder.append("{");
 
         boolean isFirst = true;
-        for (Entry<Object, Object> entry : map.entrySet())
-        {
-            if (!isFirst)
+        for (Entry<Object, Object> entry : map.entrySet()) {
+            if (!isFirst) {
                 builder.append(",");
+            }
             builder.append(entry.getKey().toString());
             builder.append(':');
             toNBTJSONString(builder, entry.getValue());
             isFirst = false;
         }
-        
+
         builder.append("}");
     }
-    
-    static private void toNBTJSONString(StringBuilder builder, String value)
-    {
+
+    private static void toNBTJSONString(StringBuilder builder, String value) {
         builder.append('"');
         builder.append(value.replace("\"", "\\\""));
         builder.append('"');

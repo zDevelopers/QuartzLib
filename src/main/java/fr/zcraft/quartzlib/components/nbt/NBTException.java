@@ -32,17 +32,13 @@ package fr.zcraft.quartzlib.components.nbt;
 
 /**
  * Represents an exception thrown while accessing Minecraft NBT data.
- * 
  */
-public class NBTException extends RuntimeException
-{
-    public NBTException(String text, Throwable cause)
-    {
+public class NBTException extends RuntimeException {
+    public NBTException(String text, Throwable cause) {
         super(text, cause);
     }
-    
-    public NBTException(String text)
-    {
+
+    public NBTException(String text) {
         super(text);
     }
 }

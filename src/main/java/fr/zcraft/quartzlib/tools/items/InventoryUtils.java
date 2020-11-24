@@ -32,20 +32,19 @@ package fr.zcraft.quartzlib.tools.items;
 
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
+import java.lang.reflect.InvocationTargetException;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * This class provides various utilities for inventory management.
  */
-abstract public class InventoryUtils 
-{
-    private InventoryUtils() {}
-    
+public abstract class InventoryUtils {
+    private InventoryUtils() {
+    }
+
     /**
      * Checks if these inventories are equal.
      *
@@ -53,14 +52,10 @@ abstract public class InventoryUtils
      * @param inventory2 The other inventory.
      * @return {@code true} if the two inventories are the same one.
      */
-    static public boolean sameInventories(Inventory inventory1, Inventory inventory2)
-    {
-        if (inventory1 == inventory2)
-        {
+    public static boolean sameInventories(Inventory inventory1, Inventory inventory2) {
+        if (inventory1 == inventory2) {
             return true;
-        }
-        else if (inventory1 == null || inventory2 == null)
-        {
+        } else if (inventory1 == null || inventory2 == null) {
             return false;
         }
 
@@ -73,56 +68,51 @@ abstract public class InventoryUtils
         boolean sameName = true;
         boolean sameTitle = true;
 
-        try
-        {
+        try {
             sameName = Reflection.call(inventory1, "getName").equals(Reflection.call(inventory2, "getName"));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
         }
-        catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {}
 
-        try
-        {
+        try {
             sameTitle = Reflection.call(inventory1, "getTitle").equals(Reflection.call(inventory2, "getTitle"));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
         }
-        catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {}
 
-        if (!sameName || !sameTitle || inventory1.getSize() != inventory2.getSize() || inventory1.getType() != inventory2.getType())
+        if (!sameName || !sameTitle || inventory1.getSize() != inventory2.getSize()
+                || inventory1.getType() != inventory2.getType()) {
             return false;
+        }
 
-        for (int slot = 0; slot < inventory1.getSize(); slot++)
-        {
+        for (int slot = 0; slot < inventory1.getSize(); slot++) {
             ItemStack item1 = inventory1.getItem(slot);
             ItemStack item2 = inventory2.getItem(slot);
 
-            if (item1 == null || item2 == null)
-            {
-                if (item1 == item2)
-                {
+            if (item1 == null || item2 == null) {
+                if (item1 == item2) {
                     continue;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
 
-            if (!item1.equals(item2))
-            {
+            if (!item1.equals(item2)) {
                 return false;
             }
         }
 
         return true;
-        
+
     }
-    
-    static public void updateInventoryLater(final Inventory inventory)
-    {
+
+    /**
+     * Updates an inventory for the next tick.
+     * @param inventory The inventory to update later.
+     */
+    public static void updateInventoryLater(final Inventory inventory) {
         RunTask.nextTick(() -> {
-            for(HumanEntity entity : inventory.getViewers())
-            {
-                if(entity instanceof Player)
-                {
-                    ((Player)entity).updateInventory();
+            for (HumanEntity entity : inventory.getViewers()) {
+                if (entity instanceof Player) {
+                    ((Player) entity).updateInventory();
                 }
             }
         });

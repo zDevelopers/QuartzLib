@@ -27,6 +27,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzlib.tools.players;
 
 
@@ -34,49 +35,38 @@ import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.NMSNetwork;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 
 /**
  * Enables or disables reduced debug infos for a player.
  */
-public final class ReducedDebugInfo
-{
+public final class ReducedDebugInfo {
     private static final byte ENABLE_REDUCED_DEBUG_INFO = 22;
     private static final byte DISABLE_REDUCED_DEBUG_INFO = 23;
-
-
+    private static final Set<UUID> reducedPlayers = new HashSet<>();
     private static boolean enabled;
-
     private static Class<?> entityClass;
     private static Class<?> packetPlayOutEntityStatusClass;
-
     private static Listener listener = null;
     private static boolean listenerRegistered = false;
-    private static final Set<UUID> reducedPlayers = new HashSet<>();
 
-
-    static
-    {
-        try
-        {
+    static {
+        try {
             entityClass = Reflection.getMinecraftClassByName("Entity");
             packetPlayOutEntityStatusClass = Reflection.getMinecraftClassByName("PacketPlayOutEntityStatus");
 
             enabled = true;
-        }
-        catch (ClassNotFoundException e)
-        {
+        } catch (ClassNotFoundException e) {
             enabled = false;
         }
     }
@@ -91,11 +81,9 @@ public final class ReducedDebugInfo
      * @param player The player.
      * @param reduce {@code true} to reduce debugs infos; {@code false} to
      *               expand them.
-     *
      * @return {@code true} if the packet was successfully sent.
      */
-    public static boolean setForPlayer(final Player player, final boolean reduce)
-    {
+    public static boolean setForPlayer(final Player player, final boolean reduce) {
         return setForPlayer(player, reduce, false);
     }
 
@@ -113,32 +101,36 @@ public final class ReducedDebugInfo
      *                    #setForPlayer(Player, boolean) setForPlayer(Player,
      *                    false)}. Only kept while the server is running, not
      *                    after a reboot.
-     *
      * @return {@code true} if the packet was successfully sent.
      */
-    public static boolean setForPlayer(final Player player, final boolean reduce, final boolean keepReduced)
-    {
-        if (!enabled) return false;
+    public static boolean setForPlayer(final Player player, final boolean reduce, final boolean keepReduced) {
+        if (!enabled) {
+            return false;
+        }
 
-        if (reduce && keepReduced) reducedPlayers.add(player.getUniqueId());
-        else if (!reduce) reducedPlayers.remove(player.getUniqueId());
+        if (reduce && keepReduced) {
+            reducedPlayers.add(player.getUniqueId());
+        } else if (!reduce) {
+            reducedPlayers.remove(player.getUniqueId());
+        }
 
         checkListener();
 
-        try
-        {
+        try {
             final Object handle = NMSNetwork.getPlayerHandle(player);
 
-            final Constructor<?> packetConstructor = packetPlayOutEntityStatusClass.getConstructor(entityClass, byte.class);
-            final Object packet = packetConstructor.newInstance(handle, reduce ? ENABLE_REDUCED_DEBUG_INFO : DISABLE_REDUCED_DEBUG_INFO);
+            final Constructor<?> packetConstructor =
+                    packetPlayOutEntityStatusClass.getConstructor(entityClass, byte.class);
+            final Object packet = packetConstructor
+                    .newInstance(handle, reduce ? ENABLE_REDUCED_DEBUG_INFO : DISABLE_REDUCED_DEBUG_INFO);
 
             NMSNetwork.sendPacket(NMSNetwork.getPlayerConnection(handle), packet);
 
             return true;
-        }
-        catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException e)
-        {
-            PluginLogger.error("Cannot " + (reduce ? "enable" : "disable") + " reduced debug infos for player {0}", e, player.getName());
+        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException
+                | IllegalAccessException | IllegalArgumentException e) {
+            PluginLogger.error("Cannot " + (reduce ? "enable" : "disable") + " reduced debug infos for player {0}", e,
+                    player.getName());
             return false;
         }
     }
@@ -147,31 +139,27 @@ public final class ReducedDebugInfo
      * Enables or disables the internal listener to keep the reduced debug
      * enabled, if needed.
      */
-    private static void checkListener()
-    {
-        if (reducedPlayers.size() > 0)
-        {
-            if (listener == null) listener = new ReducedDebugListener();
-            if (!listenerRegistered)
-            {
+    private static void checkListener() {
+        if (reducedPlayers.size() > 0) {
+            if (listener == null) {
+                listener = new ReducedDebugListener();
+            }
+            if (!listenerRegistered) {
                 QuartzLib.registerEvents(listener);
                 listenerRegistered = true;
             }
-        }
-        else if (listenerRegistered)
-        {
+        } else if (listenerRegistered) {
             QuartzLib.unregisterEvents(listener);
             listenerRegistered = false;
         }
     }
 
-    protected static class ReducedDebugListener implements Listener
-    {
-        @EventHandler (priority = EventPriority.MONITOR, ignoreCancelled = true)
-        public void onPlayerJoin(PlayerJoinEvent ev)
-        {
-            if (reducedPlayers.contains(ev.getPlayer().getUniqueId()))
+    protected static class ReducedDebugListener implements Listener {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+        public void onPlayerJoin(PlayerJoinEvent ev) {
+            if (reducedPlayers.contains(ev.getPlayer().getUniqueId())) {
                 setForPlayer(ev.getPlayer(), true);
+            }
         }
     }
 }

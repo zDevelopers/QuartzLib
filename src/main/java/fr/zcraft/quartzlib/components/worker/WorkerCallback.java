@@ -30,8 +30,8 @@
 
 package fr.zcraft.quartzlib.components.worker;
 
-public interface WorkerCallback<T>
-{
-    public void finished(T result);
-    public void errored(Throwable exception);
+public interface WorkerCallback<T> {
+    void finished(T result);
+
+    void errored(Throwable exception);
 }

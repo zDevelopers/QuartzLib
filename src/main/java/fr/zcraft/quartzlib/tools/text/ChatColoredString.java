@@ -36,44 +36,40 @@ import java.util.EnumSet;
 import java.util.Set;
 import org.bukkit.ChatColor;
 
-public class ChatColoredString 
-{
+public class ChatColoredString {
     private final Set<ChatColor> modifiers;
     private final String string;
-    
-    public ChatColoredString(Collection<ChatColor> modifiers, String string)
-    {
+
+    public ChatColoredString(Collection<ChatColor> modifiers, String string) {
         this.modifiers = Collections.unmodifiableSet(EnumSet.copyOf(modifiers));
         this.string = string;
     }
-    
-    public String getString()
-    {
+
+    public String getString() {
         return string;
     }
-    
-    public Set<ChatColor> getModifiers()
-    {
+
+    public Set<ChatColor> getModifiers() {
         return modifiers;
     }
-    
-    public String toString(char delimiter)
-    {
+
+    /**
+     * Builds a string of the chat color using the given delimiter.
+     */
+    public String toString(char delimiter) {
         StringBuilder builder = new StringBuilder();
-        
-        for(ChatColor modifier : modifiers)
-        {
+
+        for (ChatColor modifier : modifiers) {
             builder.append(delimiter);
             builder.append(modifier.getChar());
         }
-        
+
         builder.append(string);
         return builder.toString();
     }
-    
+
     @Override
-    public String toString()
-    {
+    public String toString() {
         return toString('§');
     }
 }

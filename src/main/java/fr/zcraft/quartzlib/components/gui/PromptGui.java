@@ -35,6 +35,8 @@ import fr.zcraft.quartzlib.tools.MinecraftVersion;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,108 +48,180 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
+public class PromptGui extends GuiBase {
+    private static final int SIGN_LINES_COUNT = 4;
+    private static final int SIGN_COLUMNS_COUNT = 15;
 
-public class PromptGui extends GuiBase
-{
-    static private final int SIGN_LINES_COUNT = 4;
-    static private final int SIGN_COLUMNS_COUNT = 15;
-
-    static private boolean isInitialized = false;
+    private static boolean isInitialized = false;
 
     /* ===== Reflection to Sign API ===== */
-    static private Field fieldTileEntitySign = null; // 1.11.2-: CraftSign.sign; 1.12+: CraftBlockEntityState.tileEntity
-    static private Field fieldTileEntitySignEditable = null; // 1.12+ only: CraftBlockEntityState.isEditable
-    static private Method methodGetHandle = null; // CraftPlayer.getHandle()
-    static private Method methodOpenSign = null; // EntityHuman.openSign()
+    private static Field fieldTileEntitySign = null; // 1.11.2-: CraftSign.sign; 1.12+: CraftBlockEntityState.tileEntity
+    private static Field fieldTileEntitySignEditable = null; // 1.12+ only: CraftBlockEntityState.isEditable
+    private static Method methodGetHandle = null; // CraftPlayer.getHandle()
+    private static Method methodOpenSign = null; // EntityHuman.openSign()
+    private final Callback<String> callback;
+    private Location signLocation;
+    private String contents;
 
-    static public boolean isAvailable()
-    {
-        if (!isInitialized) init();
+    public PromptGui(Callback<String> callback, String contents) {
+        this(callback);
+        this.contents = contents;
+    }
+
+    /**
+     * Creates a new prompt GUI, using the given callback.
+     * @param callback The callback to be given the input text to.
+     */
+    public PromptGui(Callback<String> callback) {
+        super();
+        if (!isAvailable()) {
+            throw new IllegalStateException("Sign-based prompt GUI are not available");
+        }
+
+        this.callback = callback;
+    }
+
+    /**
+     * Checks if Prompt GUIs can be correctly used on this Minecraft versions.
+     */
+    public static boolean isAvailable() {
+        if (!isInitialized) {
+            init();
+        }
         return fieldTileEntitySign != null;
     }
 
-    static public void prompt(Player owner, Callback<String> callback)
-    {
+    public static void prompt(Player owner, Callback<String> callback) {
         prompt(owner, callback, "", null);
     }
 
-    static public void prompt(Player owner, Callback<String> callback, String contents, GuiBase parent)
-    {
+    public static void prompt(Player owner, Callback<String> callback, String contents, GuiBase parent) {
         Gui.open(owner, new PromptGui(callback, contents), parent);
     }
 
-    static private void init()
-    {
+    private static void init() {
         isInitialized = true;
 
-        try
-        {
+        try {
             final Class<?> CraftBlockEntityState = Reflection.getBukkitClassByName("block.CraftBlockEntityState");
             final Class<?> CraftSign = Reflection.getBukkitClassByName("block.CraftSign");
             final Class<?> classTileEntitySign = Reflection.getMinecraftClassByName("TileEntitySign");
             final Class<?> CraftPlayer = Reflection.getBukkitClassByName("entity.CraftPlayer");
             final Class<?> EntityHuman = Reflection.getMinecraftClassByName("EntityHuman");
 
-            try
-            {
+            try {
                 fieldTileEntitySign = Reflection.getField(CraftSign, "sign");
-            }
-            catch (NoSuchFieldException e) // 1.12+
-            {
+            } catch (NoSuchFieldException e) { // 1.12+
                 fieldTileEntitySign = Reflection.getField(CraftBlockEntityState, "tileEntity");
             }
 
-            try
-            {
+            try {
                 fieldTileEntitySignEditable = Reflection.getField(classTileEntitySign, "isEditable");
-            }
-            catch (NoSuchFieldException e) // 1.11.2 or below
-            {
+            } catch (NoSuchFieldException e) { // 1.11.2 or below
                 fieldTileEntitySignEditable = null;
             }
 
             methodGetHandle = CraftPlayer.getDeclaredMethod("getHandle");
             methodOpenSign = EntityHuman.getDeclaredMethod("openSign", classTileEntitySign);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             PluginLogger.error("Unable to initialize Sign Prompt API", e);
             fieldTileEntitySign = null;
         }
     }
 
-    private final Callback<String> callback;
-    private Location signLocation;
-    private String contents;
+    private static String getSignContents(String[] lines) {
+        StringBuilder content = new StringBuilder(lines[0].trim());
 
-    public PromptGui(Callback<String> callback, String contents)
-    {
-        this(callback);
-        this.contents = contents;
+        for (int i = 1; i < lines.length; i++) {
+            if (lines[i] == null || lines[i].isEmpty()) {
+                continue;
+            }
+            content.append(" ").append(lines[i].trim());
+        }
+
+        return content.toString().trim();
     }
 
-    public PromptGui(Callback<String> callback)
-    {
-        super();
-        if (!isAvailable())
-            throw new IllegalStateException("Sign-based prompt GUI are not available");
+    private static void setSignContents(Sign sign, String content) {
+        String[] lines = new String[SIGN_LINES_COUNT + 1];
+        String curLine;
+        int curLineIndex = 0;
+        int spacePos;
 
-        this.callback = callback;
+        if (content != null) {
+            lines[0] = content;
+            while (curLineIndex < SIGN_LINES_COUNT) {
+                curLine = lines[curLineIndex];
+                if (curLine.length() <= SIGN_COLUMNS_COUNT) {
+                    break;
+                }
+
+                spacePos = curLine.lastIndexOf(' ', SIGN_COLUMNS_COUNT);
+                if (spacePos < 0) {
+                    break;
+                }
+                lines[curLineIndex + 1] = curLine.substring(spacePos + 1);
+                lines[curLineIndex] = curLine.substring(0, spacePos);
+                curLineIndex++;
+            }
+        }
+
+        for (int i = SIGN_LINES_COUNT; i-- > 0; ) {
+            sign.setLine(i, lines[i]);
+        }
+    }
+
+    private static Location findAvailableLocation(Player player) {
+        World world = player.getWorld();
+        Chunk playerChunk = player.getLocation().getChunk();
+        Chunk firstChunk = world.getChunkAt(playerChunk.getX() - 1, playerChunk.getZ() - 1);
+        Location firstLoc = firstChunk.getBlock(0, 255, 0).getLocation();
+        Location loc;
+
+        for (int i = 48; i-- > 0; ) {
+            for (int j = 0; j-- > -10; ) {
+                for (int k = 48; k-- > 0; ) {
+                    loc = firstLoc.add(i, j, k);
+                    if (hasSpace(world, loc)) {
+                        return loc;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static boolean hasSpace(World world, Location loc) {
+        if (!Material.AIR.equals(world.getBlockAt(loc).getType())) {
+            return false;
+        }
+
+        for (int i = 1; i-- > -1; ) {
+            for (int j = 1; j-- > -2; ) {
+                for (int k = 1; k-- > -1; ) {
+                    if (!Material.AIR.equals(world.getBlockAt(
+                            loc.getBlockX() + i, loc.getBlockY() + j, loc.getBlockZ() + k)
+                            .getType())) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     @Override
-    protected void open(final Player player)
-    {
+    protected void open(final Player player) {
         super.open(player);
 
         signLocation = findAvailableLocation(player);
 
-        if (signLocation == null)
-        {
-            throw new RuntimeException("Too many players are using a PromptGui at the same time. (…wait, the limit is about 7 500, how did you do that??)");
+        if (signLocation == null) {
+            throw new RuntimeException("Too many players are using a PromptGui at the same time."
+                    + " (…wait, the limit is about 7500, how did you do that??)");
         }
 
         // Ugly workaround for spigot still applying physics in spigot 1.9.2+
@@ -156,8 +230,7 @@ public class PromptGui extends GuiBase
         final Block block = signLocation.getWorld().getBlockAt(signLocation);
         final Material signMaterial;
 
-        switch (MinecraftVersion.get())
-        {
+        switch (MinecraftVersion.get()) {
             case VERSION_1_12_2_OR_OLDER:
                 signMaterial = Material.valueOf("SIGN_POST");
                 break;
@@ -176,28 +249,25 @@ public class PromptGui extends GuiBase
         sign.update();
 
         RunTask.later(() -> {
-            try
-            {
+            try {
                 final Object signTileEntity = fieldTileEntitySign.get(sign);
                 final Object playerEntity = methodGetHandle.invoke(player);
 
                 // In Minecraft 1.12+, there's a lock on the signs to avoid them
                 // to be edited after they are loaded into the game.
-                if (fieldTileEntitySignEditable != null)
+                if (fieldTileEntitySignEditable != null) {
                     fieldTileEntitySignEditable.set(signTileEntity, true);
+                }
 
                 methodOpenSign.invoke(playerEntity, signTileEntity);
-            }
-            catch (final Throwable e)
-            {
+            } catch (final Throwable e) {
                 PluginLogger.error("Error while opening Sign prompt", e);
             }
         }, 3);
     }
 
     @Override
-    protected void onClose()
-    {
+    protected void onClose() {
         final Block block = signLocation.getWorld().getBlockAt(signLocation);
         block.setType(Material.AIR);
 
@@ -206,111 +276,24 @@ public class PromptGui extends GuiBase
         super.onClose();
     }
 
-    private void validate(String[] lines)
-    {
+    private void validate(String[] lines) {
         callback.call(getSignContents(lines));
 
         // Bukkit sends extra InventoryCloseEvents when closing a sign GUI...
         this.close(true);
     }
 
-    static private String getSignContents(String[] lines)
-    {
-        StringBuilder content = new StringBuilder(lines[0].trim());
-
-        for (int i = 1; i < lines.length; i++)
-        {
-            if (lines[i] == null || lines[i].isEmpty()) continue;
-            content.append(" ").append(lines[i].trim());
-        }
-
-        return content.toString().trim();
-    }
-
-    static private void setSignContents(Sign sign, String content)
-    {
-        String[] lines = new String[SIGN_LINES_COUNT + 1];
-        String curLine;
-        int curLineIndex = 0, spacePos;
-
-        if (content != null)
-        {
-            lines[0] = content;
-            while (curLineIndex < SIGN_LINES_COUNT)
-            {
-                curLine = lines[curLineIndex];
-                if (curLine.length() <= SIGN_COLUMNS_COUNT)
-                    break;
-
-                spacePos = curLine.lastIndexOf(' ', SIGN_COLUMNS_COUNT);
-                if (spacePos < 0) break;
-                lines[curLineIndex + 1] = curLine.substring(spacePos + 1);
-                lines[curLineIndex] = curLine.substring(0, spacePos);
-                curLineIndex++;
-            }
-        }
-
-        for (int i = SIGN_LINES_COUNT; i-- > 0; )
-        {
-            sign.setLine(i, lines[i]);
-        }
-    }
-
-    static private Location findAvailableLocation(Player player)
-    {
-        World world = player.getWorld();
-        Chunk playerChunk = player.getLocation().getChunk();
-        Chunk firstChunk = world.getChunkAt(playerChunk.getX() - 1, playerChunk.getZ() - 1);
-        Location firstLoc = firstChunk.getBlock(0, 255, 0).getLocation();
-        Location loc;
-
-        for (int i = 48; i-- > 0; )
-        {
-            for (int j = 0; j-- > -10; )
-            {
-                for (int k = 48; k-- > 0; )
-                {
-                    loc = firstLoc.add(i, j, k);
-                    if (hasSpace(world, loc))
-                        return loc;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    static private boolean hasSpace(World world, Location loc)
-    {
-        if (!Material.AIR.equals(world.getBlockAt(loc).getType()))
-            return false;
-
-        for (int i = 1; i-- > -1; )
-        {
-            for (int j = 1; j-- > -2; )
-            {
-                for (int k = 1; k-- > -1; )
-                {
-                    if (!Material.AIR.equals(world.getBlockAt(
-                            loc.getBlockX() + i, loc.getBlockY() + j, loc.getBlockZ() + k)
-                            .getType()))
-                        return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     @Override
-    protected Listener getEventListener() { return new PromptGuiListener(); }
+    protected Listener getEventListener() {
+        return new PromptGuiListener();
+    }
 
-    private final class PromptGuiListener implements Listener
-    {
+    private final class PromptGuiListener implements Listener {
         @EventHandler
-        public void onSignChange(SignChangeEvent event)
-        {
-            if (event.getPlayer() != getPlayer()) return;
+        public void onSignChange(SignChangeEvent event) {
+            if (event.getPlayer() != getPlayer()) {
+                return;
+            }
             validate(event.getLines());
         }
     }

@@ -36,159 +36,135 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class ConfigurationList<T> extends ConfigurationItem<List<T>> implements List<T>
-{
+public class ConfigurationList<T> extends ConfigurationItem<List<T>> implements List<T> {
     private final Class<T> itemType;
-    
-    public ConfigurationList(String fieldName, List<T> defaultValue, Class<T> itemType, String... deprecatedNames)
-    {
+
+    public ConfigurationList(String fieldName, List<T> defaultValue, Class<T> itemType, String... deprecatedNames) {
         super(fieldName, defaultValue, deprecatedNames);
         this.itemType = itemType;
     }
-    
+
     @Override
-    protected List<T> getValue(Object value) throws ConfigurationParseException
-    {
-        if(value == null) return null;
-        
+    protected List<T> getValue(Object value) throws ConfigurationParseException {
+        if (value == null) {
+            return null;
+        }
+
         return ConfigurationValueHandlers.handleListValue(value, itemType);
     }
-    
+
     @Override
-    public int size()
-    {
+    public int size() {
         return get().size();
     }
 
     @Override
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return get().isEmpty();
     }
 
     @Override
-    public boolean contains(Object o)
-    {
+    public boolean contains(Object o) {
         return get().contains(o);
     }
 
     @Override
-    public Iterator<T> iterator()
-    {
+    public Iterator<T> iterator() {
         return get().iterator();
     }
 
     @Override
-    public T[] toArray()
-    {
+    public T[] toArray() {
         return (T[]) get().toArray();
     }
 
     @Override
-    public <T> T[] toArray(T[] a)
-    {
+    public <T> T[] toArray(T[] a) {
         return get().toArray(a);
     }
 
     @Override
-    public boolean add(T e)
-    {
+    public boolean add(T e) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean remove(Object o)
-    {
+    public void add(int index, T element) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean containsAll(Collection<?> c)
-    {
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public T remove(int index) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
         return get().containsAll(c);
     }
 
     @Override
-    public boolean addAll(Collection<? extends T> c)
-    {
+    public boolean addAll(Collection<? extends T> c) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean addAll(int index, Collection<? extends T> c)
-    {
+    public boolean addAll(int index, Collection<? extends T> c) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeAll(Collection<?> c)
-    {
+    public boolean removeAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean retainAll(Collection<?> c)
-    {
+    public boolean retainAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void clear()
-    {
+    public void clear() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public T get(int index)
-    {
+    public T get(int index) {
         return get().get(index);
     }
 
     @Override
-    public T set(int index, T element)
-    {
+    public T set(int index, T element) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void add(int index, T element)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public T remove(int index)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int indexOf(Object o)
-    {
+    public int indexOf(Object o) {
         return get().indexOf(o);
     }
 
     @Override
-    public int lastIndexOf(Object o)
-    {
+    public int lastIndexOf(Object o) {
         return get().lastIndexOf(o);
     }
 
     @Override
-    public ListIterator<T> listIterator()
-    {
+    public ListIterator<T> listIterator() {
         return Collections.unmodifiableList(get()).listIterator();
     }
 
     @Override
-    public ListIterator<T> listIterator(int index)
-    {
+    public ListIterator<T> listIterator(int index) {
         return Collections.unmodifiableList(get()).listIterator(index);
     }
 
     @Override
-    public List<T> subList(int fromIndex, int toIndex)
-    {
+    public List<T> subList(int fromIndex, int toIndex) {
         return get().subList(fromIndex, toIndex);
     }
 
