@@ -1,5 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
+import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,7 @@ class CommandEndpoint extends CommandNode {
     }
 
     @Override
-    void run(Object instance, String[] args) {
+    void run(Object instance, String[] args) throws CommandException {
         this.methods.get(0).run(instance, args);
     }
 

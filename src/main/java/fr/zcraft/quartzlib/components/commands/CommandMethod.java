@@ -1,5 +1,8 @@
 package fr.zcraft.quartzlib.components.commands;
 
+import fr.zcraft.quartzlib.components.commands.exceptions.ArgumentParseException;
+import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -22,7 +25,7 @@ class CommandMethod {
         return name;
     }
 
-    public void run(Object target, String[] args) {
+    public void run(Object target, String[] args) throws CommandException {
         Object[] parsedArgs = parseArguments(args);
         try {
             this.method.invoke(target, parsedArgs);
@@ -31,7 +34,7 @@ class CommandMethod {
         }
     }
 
-    private Object[] parseArguments(String[] args) {
+    private Object[] parseArguments(String[] args) throws ArgumentParseException {
         Object[] parsed = new Object[args.length];
 
         for (int i = 0; i < args.length; i++) {

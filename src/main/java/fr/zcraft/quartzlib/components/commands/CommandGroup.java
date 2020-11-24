@@ -1,5 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
+import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,13 +39,13 @@ class CommandGroup extends CommandNode {
         endpoint.addMethod(method);
     }
 
-    void run(String... args) {
+    void run(String... args) throws CommandException {
         Object commandObject = classInstanceSupplier.get();
         run(commandObject, args);
     }
 
     @Override
-    void run(Object instance, String[] args) {
+    void run(Object instance, String[] args) throws CommandException {
         String commandName = args[0];
         CommandNode subCommand = subCommands.get(commandName);
         subCommand.run(instance, Arrays.copyOfRange(args, 1, args.length));

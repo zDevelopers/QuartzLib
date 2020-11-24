@@ -1,8 +1,6 @@
 package fr.zcraft.quartzlib.components.commands;
 
-import fr.zcraft.quartzlib.components.commands.ArgumentType;
-
-public class ArgumentTypeHandler<T> {
+class ArgumentTypeHandler<T> {
     private final Class<T> resultType;
     private final ArgumentType<T> typeHandler;
 

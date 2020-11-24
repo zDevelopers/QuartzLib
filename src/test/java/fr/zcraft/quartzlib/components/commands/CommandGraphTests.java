@@ -1,5 +1,6 @@
 package fr.zcraft.quartzlib.components.commands;
 
+import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ public class CommandGraphTests {
         Assertions.assertArrayEquals(new String[] {"add", "delete"}, commandNames);
     }
 
-    @Test public void canRunBasicSubcommands() {
+    @Test public void canRunBasicSubcommands() throws CommandException {
         final boolean[] ran = {false, false, false};
 
         class FooCommand {
@@ -56,7 +57,7 @@ public class CommandGraphTests {
         Assertions.assertArrayEquals(new boolean[] { false, true, false }, ran);
     }
 
-    @Test public void canReceiveStringArguments() {
+    @Test public void canReceiveStringArguments() throws CommandException {
         final String[] argValue = {""};
 
         class FooCommand {
@@ -68,7 +69,7 @@ public class CommandGraphTests {
         Assertions.assertArrayEquals(new String[] { "pomf" }, argValue);
     }
 
-    @Test public void canReceiveParsedArguments() {
+    @Test public void canReceiveParsedArguments() throws CommandException {
         final int[] argValue = {0};
 
         class FooCommand {
@@ -78,5 +79,20 @@ public class CommandGraphTests {
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run("foo", "add", "42");
         Assertions.assertArrayEquals(new int[] { 42 }, argValue);
+    }
+
+    enum FooEnum { FOO, BAR }
+    @Test public void canReceiveEnumArguments() throws CommandException {
+        final FooEnum[] argValue = {null};
+
+        class FooCommand {
+            public void add (FooEnum arg) { argValue[0] = arg; }
+        }
+
+        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.run("foo", "add", "foo");
+        Assertions.assertArrayEquals(new FooEnum[] { FooEnum.FOO }, argValue);
+        commands.run("foo", "add", "bar");
+        Assertions.assertArrayEquals(new FooEnum[] { FooEnum.BAR }, argValue);
     }
 }

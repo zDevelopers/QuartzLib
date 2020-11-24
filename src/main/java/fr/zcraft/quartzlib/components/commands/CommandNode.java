@@ -1,5 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
+import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+
 abstract class CommandNode {
     private final String name;
     private final CommandGroup parent;
@@ -17,5 +19,5 @@ abstract class CommandNode {
         return parent;
     }
 
-    abstract void run(Object instance, String[] args);
+    abstract void run(Object instance, String[] args) throws CommandException;
 }
