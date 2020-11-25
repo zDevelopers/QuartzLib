@@ -7,28 +7,28 @@ import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 class MojangHeadTest extends MockedBukkitTest {
     @Test
-    void canCreateHeadItems() {
-        Assertions.assertEquals("MHF_Cake", MojangHead.CAKE.getHeadName());
+    public void canCreateHeadItems() {
+        Assert.assertEquals("MHF_Cake", MojangHead.CAKE.getHeadName());
         ItemStack item = MojangHead.CAKE.asItem();
 
-        Assertions.assertEquals(Material.PLAYER_HEAD, item.getType());
-        Assertions.assertEquals(1, item.getAmount());
-        Assertions.assertEquals("MHF_Cake", ((SkullMeta) Objects.requireNonNull(item.getItemMeta())).getOwner());
+        Assert.assertEquals(Material.PLAYER_HEAD, item.getType());
+        Assert.assertEquals(1, item.getAmount());
+        Assert.assertEquals("MHF_Cake", ((SkullMeta) Objects.requireNonNull(item.getItemMeta())).getOwner());
 
         ItemStack isbItem = MojangHead.CAKE.asItemBuilder().item();
 
-        Assertions.assertEquals(Material.PLAYER_HEAD, isbItem.getType());
-        Assertions.assertEquals(1, item.getAmount());
-        Assertions.assertEquals("MHF_Cake", ((SkullMeta) Objects.requireNonNull(isbItem.getItemMeta())).getOwner());
+        Assert.assertEquals(Material.PLAYER_HEAD, isbItem.getType());
+        Assert.assertEquals(1, item.getAmount());
+        Assert.assertEquals("MHF_Cake", ((SkullMeta) Objects.requireNonNull(isbItem.getItemMeta())).getOwner());
     }
 
     @Test
-    void headNamesMatch() {
+    public void headNamesMatch() {
         HashMap<MojangHead, String> headNames = new HashMap<>();
 
         headNames.put(MojangHead.ALEX, "MHF_Alex");
@@ -76,9 +76,9 @@ class MojangHeadTest extends MockedBukkitTest {
         headNames.put(MojangHead.EXCLAMATION, "MHF_Exclamation");
         headNames.put(MojangHead.QUESTION, "MHF_Question");
 
-        Assertions.assertEquals(headNames.size(), MojangHead.values().length);
-        Assertions.assertTrue(headNames.keySet().containsAll(Arrays.asList(MojangHead.values().clone())));
+        Assert.assertEquals(headNames.size(), MojangHead.values().length);
+        Assert.assertTrue(headNames.keySet().containsAll(Arrays.asList(MojangHead.values().clone())));
 
-        headNames.forEach((head, name) -> Assertions.assertEquals(name, head.getHeadName()));
+        headNames.forEach((head, name) -> Assert.assertEquals(name, head.getHeadName()));
     }
 }
