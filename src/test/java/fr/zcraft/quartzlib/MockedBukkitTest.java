@@ -11,7 +11,12 @@ import org.junit.jupiter.api.BeforeEach;
  * be instantiated.</p>
  */
 public abstract class MockedBukkitTest {
-    protected final ServerMock server = MockBukkit.mock();
+    protected ServerMock server;
+
+    @BeforeEach
+    public void setup() {
+        server = MockBukkit.mock();
+    }
 
     @AfterEach
     public void tearDown() {

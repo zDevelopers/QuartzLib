@@ -18,8 +18,10 @@ import org.junit.jupiter.api.Test;
 public class ItemStackBuilderTest extends MockedBukkitTest {
     @Test
     public void throwsOnEmptyBuilder() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new ItemStackBuilder().item(),
-                "Material cannot be null");
+        IllegalStateException ex = Assertions.assertThrows(IllegalStateException.class,
+                () -> new ItemStackBuilder().item());
+
+        Assertions.assertEquals("Cannot build item without a specified material", ex.getMessage());
     }
 
     @Test
@@ -174,7 +176,6 @@ public class ItemStackBuilderTest extends MockedBukkitTest {
     }
 
     @Test
-    @Disabled
     public void canAddFlags() {
         ItemStack itemStack = new ItemStackBuilder(Material.QUARTZ).withFlags(ItemFlag.HIDE_ATTRIBUTES).item();
         Set<ItemFlag> flags = Objects.requireNonNull(itemStack.getItemMeta()).getItemFlags();
