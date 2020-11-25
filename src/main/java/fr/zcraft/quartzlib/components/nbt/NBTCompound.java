@@ -67,7 +67,7 @@ public class NBTCompound implements Map<String, Object> {
         if (nativeNbtTag == null) {
             this.nmsNbtMap = new HashMap<>();
         } else {
-            this.nmsNbtMap = (Map<String, Object>) NbtType.TAG_COMPOUND.getData(nmsNbtTag);
+            this.nmsNbtMap = (Map<String, Object>) NBTType.TAG_COMPOUND.getData(nmsNbtTag);
         }
 
         this.parent = null;
@@ -92,10 +92,10 @@ public class NBTCompound implements Map<String, Object> {
         if (nmsNbtMap == null) {
             nmsNbtMap = new HashMap<>();
             if (nmsNbtTag != null) {
-                NbtType.TAG_COMPOUND.setData(nmsNbtTag, nmsNbtMap);
+                NBTType.TAG_COMPOUND.setData(nmsNbtTag, nmsNbtMap);
             } else {
-                nmsNbtTag = NbtType.TAG_COMPOUND.newTag(nmsNbtMap);
-                NbtType.TAG_LIST.setData(nmsNbtTag, nmsNbtTag);
+                nmsNbtTag = NBTType.TAG_COMPOUND.newTag(nmsNbtMap);
+                NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtTag);
 
                 if (parent != null && parentKey != null) {
                     if (parent instanceof NBTCompound) {

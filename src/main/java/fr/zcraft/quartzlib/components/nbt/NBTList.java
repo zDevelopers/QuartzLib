@@ -50,7 +50,7 @@ public class NBTList implements List<Object> {
     private final Object parentKey;
     List<Object> nmsNbtList;
     private Object nmsNbtTag;
-    private NbtType type = NbtType.TAG_END;
+    private NBTType type = NBTType.TAG_END;
 
     /**
      * Created a new empty NBT list.
@@ -63,7 +63,7 @@ public class NBTList implements List<Object> {
 
     @SuppressWarnings("unchecked")
     NBTList(Object nmsListTag) {
-        this(null, nmsListTag == null ? new ArrayList<>() : (List<Object>) NbtType.TAG_LIST.getData(nmsListTag));
+        this(null, nmsListTag == null ? new ArrayList<>() : (List<Object>) NBTType.TAG_LIST.getData(nmsListTag));
     }
 
     private NBTList(Object nmsListTag, List<Object> nmsNbtList) {
@@ -91,8 +91,8 @@ public class NBTList implements List<Object> {
 
     static void guessAndWriteTypeToNbtTagList(Object nmsNbtTag) {
         try {
-            final NbtType currentType = NbtType.fromId((byte) Reflection.getFieldValue(nmsNbtTag, "type"));
-            if (currentType.equals(NbtType.TAG_END)) {
+            final NBTType currentType = NBTType.fromId((byte) Reflection.getFieldValue(nmsNbtTag, "type"));
+            if (currentType.equals(NBTType.TAG_END)) {
                 // We retrieve the first element of the internal list and use it as
                 // the list type, if the list is not empty.
                 @SuppressWarnings("unchecked") final List<Object> internalNbtList =
@@ -100,7 +100,7 @@ public class NBTList implements List<Object> {
 
                 if (!internalNbtList.isEmpty()) {
                     Reflection.setFieldValue(nmsNbtTag, "type",
-                            (byte) NbtType.fromNmsNbtTag(internalNbtList.get(0)).getId());
+                            (byte) NBTType.fromNmsNbtTag(internalNbtList.get(0)).getId());
                 }
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -114,11 +114,11 @@ public class NBTList implements List<Object> {
         if (nmsNbtList == null) {
             nmsNbtList = new ArrayList<>();
             if (nmsNbtTag != null) {
-                NbtType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
+                NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
                 setTypeFromNbtTag();
             } else {
-                nmsNbtTag = NbtType.TAG_LIST.newTag(nmsNbtList);
-                NbtType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
+                nmsNbtTag = NBTType.TAG_LIST.newTag(nmsNbtList);
+                NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtList);
 
                 setTypeFromNbtList();
                 writeTypeToNbtTag();
@@ -139,7 +139,7 @@ public class NBTList implements List<Object> {
     private void setTypeFromNbtTag() {
         if (nmsNbtTag != null) {
             try {
-                this.type = NbtType.fromId((byte) Reflection.getFieldValue(nmsNbtTag, "type"));
+                this.type = NBTType.fromId((byte) Reflection.getFieldValue(nmsNbtTag, "type"));
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 PluginLogger.error("Unable to retrieve NBTTagList's type."
                                 + " The type will be guessed next time an element is inserted into the list…", e);
@@ -149,7 +149,7 @@ public class NBTList implements List<Object> {
 
     private void setTypeFromNbtList() {
         if (nmsNbtList != null && !nmsNbtList.isEmpty()) {
-            setType(NbtType.fromNmsNbtTag(nmsNbtList.get(0)));
+            setType(NBTType.fromNmsNbtTag(nmsNbtList.get(0)));
         }
     }
 
@@ -165,19 +165,19 @@ public class NBTList implements List<Object> {
         }
     }
 
-    public NbtType getType() {
+    public NBTType getType() {
         return type;
     }
 
-    private void setType(NbtType type) {
+    private void setType(NBTType type) {
         this.type = type;
         writeTypeToNbtTag();
     }
 
     private void checkType(Object o) {
-        if (type == null || type.equals(NbtType.TAG_END)) {
+        if (type == null || type.equals(NBTType.TAG_END)) {
             try {
-                setType(NbtType.fromClass(o.getClass()));
+                setType(NBTType.fromClass(o.getClass()));
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Illegal type class in a NBT list: " + o.getClass(), e);
             }
