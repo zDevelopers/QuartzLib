@@ -68,7 +68,7 @@ _Published one day_
 - :warning: We removed the `ItemStackBuilder.data(short)` method, and all abilities to process Data Values
   since they are now removed from Minecraft and strongly deprecated from Bukkit.
   Damage for tools are now properly handled by bukkit using the [`Damageable`](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/inventory/meta/Damageable.html)
-  `ItemMeta` API and can be used in `ItemStackBuilder` with the new [`withMeta()`](https://zdevelopers.github.io/QuartzLib/fr/zcraft/quartzlib/tools/items/ItemStackBuilder.html#withMeta-java.util.function.Consumer-)
+  `ItemMeta` API and can be used in `ItemStackBuilder` with the new [`withMeta()`](https://dev.zcraft.fr/docs/quartzlib/fr/zcraft/quartzlib/tools/items/ItemStackBuilder.html#withMeta-java.util.function.Consumer-)
   API.
 
 #### `ItemUtils`
@@ -147,4 +147,3 @@ Just rename these references—the interfaces have remained the same.
 #### `RawText`
 
 - :warning: Removed `Achievement`-related methods from the raw text component, as these are no longer supported in Minecraft 1.15+.
-
