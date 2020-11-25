@@ -38,6 +38,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -103,7 +105,7 @@ public abstract class ItemUtils {
      * @param player The player to give the item to.
      * @param item   The item to give to the player
      * @return true if the player received the item in its inventory, false if
-     *     it had to be totally or partially dropped on the ground.
+     *              it had to be totally or partially dropped on the ground.
      */
     public static boolean give(final Player player, final ItemStack item) {
         final Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
@@ -152,8 +154,7 @@ public abstract class ItemUtils {
                 && first.getData().equals(other.getData())
                 && ((!first.hasItemMeta() && !other.hasItemMeta())
                 || (!first.getItemMeta().hasDisplayName() && !other.getItemMeta().hasDisplayName())
-                || (first.getItemMeta().getDisplayName().equals(other.getItemMeta().getDisplayName()))
-            );
+                || (first.getItemMeta().getDisplayName().equals(other.getItemMeta().getDisplayName())));
     }
 
     /**
@@ -326,7 +327,7 @@ public abstract class ItemUtils {
      *
      * @param item An item.
      * @return The Minecraft name of this item, or null if the item's material
-     *      is invalid.
+     *         is invalid.
      * @throws NMSException if the operation cannot be executed.
      */
     public static String getMinecraftId(ItemStack item) throws NMSException {
@@ -407,8 +408,8 @@ public abstract class ItemUtils {
      *
      * @param item An item.
      * @return A NMS ItemStack for this item. If the item was a CraftItemStack,
-     *      this will be the item's handle directly; in the other cases, a copy in a
-     *      NMS ItemStack object.
+     *         this will be the item's handle directly; in the other cases, a copy in a
+     *         NMS ItemStack object.
      * @throws NMSException if the operation cannot be executed.
      */
     public static Object getNMSItemStack(ItemStack item) throws NMSException {
@@ -427,8 +428,8 @@ public abstract class ItemUtils {
      *
      * @param item An item.
      * @return A CraftItemStack for this item. If the item was initially a
-     *      CraftItemStack, it is returned directly. In the other cases, a copy in a
-     *      new CraftItemStack will be returned.
+     *         CraftItemStack, it is returned directly. In the other cases,
+     *         a copy in a new CraftItemStack will be returned.
      * @throws NMSException if the operation cannot be executed.
      */
     public static Object getCraftItemStack(ItemStack item) throws NMSException {
@@ -517,4 +518,87 @@ public abstract class ItemUtils {
         RunTask.nextTick(() -> drop(location, item));
     }
 
+    /**
+     * Converts a chat color to its dye equivalent.
+     *
+     * <p>The transformation is not perfect as there is no 1:1
+     * correspondence between dyes and chat colors.</p>
+     *
+     * @param color The chat color.
+     * @return The corresponding dye.
+     */
+    public static DyeColor asDye(final ChatColor color) {
+        switch (color) {
+            case BLACK:
+                return DyeColor.BLACK;
+
+            case BLUE:
+            case DARK_BLUE:
+                return DyeColor.BLUE;
+
+            case DARK_GREEN:
+                return DyeColor.GREEN;
+
+            case DARK_AQUA:
+                return DyeColor.CYAN;
+
+            case DARK_RED:
+                return DyeColor.RED;
+
+            case DARK_PURPLE:
+                return DyeColor.PURPLE;
+
+            case GOLD:
+            case YELLOW:
+                return DyeColor.YELLOW;
+
+            case GRAY:
+                return DyeColor.LIGHT_GRAY;
+
+            case DARK_GRAY:
+                return DyeColor.GRAY;
+
+            case GREEN:
+                return DyeColor.LIME;
+
+            case AQUA:
+                return DyeColor.LIGHT_BLUE;
+
+            case RED:
+                return DyeColor.ORANGE;
+
+            case LIGHT_PURPLE:
+                return DyeColor.PINK;
+
+            // White, reset & formatting
+            default:
+                return DyeColor.WHITE;
+        }
+    }
+
+    /**
+     * Converts a dye color to a dyeable material.
+     *
+     * @param material The base name of the material: its name without the
+     *                 color part. E.g. {@code "STAINED_GLASS"} or {@code "BED"}.
+     * @param color    The dye color.
+     * @return The corresponding material.
+     * @throws IllegalArgumentException If the given block is not dyeable.
+     */
+    public static Material colorize(final ColorableMaterial material, final DyeColor color) {
+        return Material.valueOf(color.name() + "_" + material.name());
+    }
+
+    /**
+     * Converts a chat color to a dyeable material.
+     *
+     * @param material The base name of the material: its name without the
+     *                 color part. E.g. {@code "STAINED_GLASS"} or {@code "BED"}.
+     * @param color    The chat color.
+     * @return The corresponding material.
+     * @throws IllegalArgumentException If the given block is not dyeable.
+     */
+    public static Material colorize(final ColorableMaterial material, final ChatColor color) {
+        return colorize(material, asDye(color));
+    }
 }
