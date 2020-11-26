@@ -129,7 +129,6 @@ public class ItemStackBuilder {
     @Nullable
     private Material material;
     private int amount = 1;
-    private short data = 0;
     @Nullable
     private RawTextPart<?> title = null;
     private boolean resetLore = false;
@@ -182,7 +181,6 @@ public class ItemStackBuilder {
 
         if (itemStack != null) {
             this.amount = itemStack.getAmount();
-            this.data = itemStack.getDurability();
 
             ItemMeta meta = itemStack.getItemMeta();
 
@@ -218,8 +216,6 @@ public class ItemStackBuilder {
 
             newItemStack.setAmount(amount);
         }
-
-        newItemStack.setDurability(data);
 
         // Looking at the Bukkit impl I have no idea in which case getItemMeta() could return null
         final ItemMeta meta = Objects.requireNonNull(newItemStack.getItemMeta());
@@ -598,17 +594,6 @@ public class ItemStackBuilder {
         }
         Collections.addAll(this.itemFlags, itemFlags);
 
-        return this;
-    }
-
-    /**
-     * Sets the data (= damage) value of the ItemStack.
-     *
-     * @param data The data value.
-     * @return The current ItemStackBuilder instance, for methods chaining.
-     */
-    public ItemStackBuilder data(short data) {
-        this.data = data;
         return this;
     }
 

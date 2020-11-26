@@ -62,11 +62,19 @@ _Published one day_
 
 #### `ItemStackBuilder`
 
-- :warning: We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods. The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material. For the second one, use the new `ItemStackBuilder.withMeta()` method.
+- :warning: We removed the `ItemStackBuilder.dye(DyeColor)` and `ItemStackBuilder.head(String)` methods.
+  The first one can be replaced by the right material, as in 1.13+ each dyed version has its own material.
+  For the second one, use the new `ItemStackBuilder.withMeta()` method.
+- :warning: We removed the `ItemStackBuilder.data(short)` method, and all abilities to process Data Values
+  since they are now removed from Minecraft and strongly deprecated from Bukkit.
+  Damage for tools are now properly handled by bukkit using the [`Damageable`](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/inventory/meta/Damageable.html)
+  `ItemMeta` API and can be used in `ItemStackBuilder` with the new [`withMeta()`](https://dev.zcraft.fr/docs/quartzlib/fr/zcraft/quartzlib/tools/items/ItemStackBuilder.html#withMeta-java.util.function.Consumer-)
+  API.
 
 #### `ItemUtils`
 
-- :warning: We removed the following methods from `ItemUtils`, as they were duplicates of `ItemStackBuilder` ones, or using deprecated APIs. Use their equivalent in `ItemStackBuilder` instead.
+- :warning: We removed the following methods from `ItemUtils`, as they are now directly present in all supported Bukkit versions.
+  You can also use their equivalent in `ItemStackBuilder` instead.
   - `hasItemFlag(ItemMeta, String)`
   - `removeItemFlags(ItemMeta, String...)`
   - `hideItemAttributes(ItemMeta)`
@@ -139,4 +147,3 @@ Just rename these references—the interfaces have remained the same.
 #### `RawText`
 
 - :warning: Removed `Achievement`-related methods from the raw text component, as these are no longer supported in Minecraft 1.15+.
-

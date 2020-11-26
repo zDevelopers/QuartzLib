@@ -473,11 +473,6 @@ public abstract class ConfigurationValueHandlers {
             item = new ItemStackBuilder(material, amount);
         }
 
-        if (map.containsKey("data")) {
-            item.data(handleShortValue(map.get("data")));
-            PluginLogger.warning("In configuration, ItemStack `data` field is deprecated. Use `nbt` instead.");
-        }
-
         if (map.containsKey("title")) {
             item.title(map.get("title").toString());
         }
