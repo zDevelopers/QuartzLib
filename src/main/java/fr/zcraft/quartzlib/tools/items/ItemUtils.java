@@ -582,8 +582,7 @@ public abstract class ItemUtils {
     /**
      * Converts a dye color to a dyeable material.
      *
-     * @param material The base name of the material: its name without the
-     *                 color part. E.g. {@code "STAINED_GLASS"} or {@code "BED"}.
+     * @param material The colorable material to colorize.
      * @param color    The dye color.
      * @return The corresponding material.
      * @throws IllegalArgumentException If the given block is not dyeable.
@@ -596,8 +595,7 @@ public abstract class ItemUtils {
     /**
      * Converts a chat color to a dyeable material.
      *
-     * @param material The base name of the material: its name without the
-     *                 color part. E.g. {@code "STAINED_GLASS"} or {@code "BED"}.
+     * @param material The colorable material to colorize.
      * @param color    The chat color.
      * @return The corresponding material.
      * @throws IllegalArgumentException If the given block is not dyeable.
