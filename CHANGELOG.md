@@ -36,6 +36,18 @@ _Published one day_
   ```
 
   To hide _all_ attributes from the item, use `hideAllAttributes()`.
+  
+#### [`ItemUtils`](https://zdevelopers.github.io/QuartzLib/fr/zcraft/quartzlib/tools/items/ItemUtils.html)
+
+- We added a [`asDye`](https://zdevelopers.github.io/QuartzLib/fr/zcraft/quartzlib/tools/items/ItemUtils.html#asDye-org.bukkit.ChatColor-) method to convert a `ChatColor` to its closest `DyeColor` equivalent.
+
+- We added two `colorize` methods to `ItemUtils` to convert either [a dye](https://zdevelopers.github.io/QuartzLib/fr/zcraft/quartzlib/tools/items/ItemUtils.html#colorize-fr.zcraft.quartzlib.tools.items.ColorableMaterial-org.bukkit.DyeColor-) or [a chat color](https://zdevelopers.github.io/QuartzLib/fr/zcraft/quartzlib/tools/items/ItemUtils.html#colorize-fr.zcraft.quartzlib.tools.items.ColorableMaterial-org.bukkit.ChatColor-) to a colored block dynamically. As example,
+  
+  ```java
+  ItemUtils.colorize(ColorableMaterial.GLAZED_TERRACOTTA, DyeColor.LIME)
+  ```
+  
+  will return `Material.LIME_GLAZED_TERRACOTTA`.
 
 #### Tests
 

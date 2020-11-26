@@ -48,6 +48,7 @@
   </module>
 
   <module name="TreeWalker">
+    <module name="SuppressWarningsHolder"/>
     <module name="SuppressWarnings">
       <property name="id" value="checkstyle:suppresswarnings"/>
     </module>
