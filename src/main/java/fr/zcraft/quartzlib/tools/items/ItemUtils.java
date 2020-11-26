@@ -49,6 +49,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 //import org.bukkit.Sound;
 
@@ -527,7 +529,8 @@ public abstract class ItemUtils {
      * @param color The chat color.
      * @return The corresponding dye.
      */
-    public static DyeColor asDye(final ChatColor color) {
+    @Contract(pure = true)
+    public static DyeColor asDye(@NotNull final ChatColor color) {
         switch (color) {
             case BLACK:
                 return DyeColor.BLACK;
@@ -585,7 +588,8 @@ public abstract class ItemUtils {
      * @return The corresponding material.
      * @throws IllegalArgumentException If the given block is not dyeable.
      */
-    public static Material colorize(final ColorableMaterial material, final DyeColor color) {
+    @Contract(pure = true)
+    public static Material colorize(@NotNull final ColorableMaterial material, @NotNull final DyeColor color) {
         return Material.valueOf(color.name() + "_" + material.name());
     }
 
@@ -598,7 +602,8 @@ public abstract class ItemUtils {
      * @return The corresponding material.
      * @throws IllegalArgumentException If the given block is not dyeable.
      */
-    public static Material colorize(final ColorableMaterial material, final ChatColor color) {
+    @Contract(pure = true)
+    public static Material colorize(@NotNull final ColorableMaterial material, @NotNull final ChatColor color) {
         return colorize(material, asDye(color));
     }
 }
