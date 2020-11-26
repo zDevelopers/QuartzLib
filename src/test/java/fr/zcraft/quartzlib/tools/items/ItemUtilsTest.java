@@ -32,8 +32,10 @@ package fr.zcraft.quartzlib.tools.items;
 
 import com.google.common.collect.ImmutableMap;
 import fr.zcraft.quartzlib.MockedBukkitTest;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
@@ -66,17 +68,7 @@ public class ItemUtilsTest extends MockedBukkitTest {
                 .put(ChatColor.LIGHT_PURPLE, DyeColor.PINK)
                 .put(ChatColor.WHITE, DyeColor.WHITE)
 
-                // Formatting codes are converted to white
-                .put(ChatColor.BOLD, DyeColor.WHITE)
-                .put(ChatColor.ITALIC, DyeColor.WHITE)
-                .put(ChatColor.UNDERLINE, DyeColor.WHITE)
-                .put(ChatColor.STRIKETHROUGH, DyeColor.WHITE)
-                .put(ChatColor.MAGIC, DyeColor.WHITE)
-                .put(ChatColor.RESET, DyeColor.WHITE)
-
                 .build();
-
-        Assert.assertEquals("All chat colors are covered", expectedConversion.size(), ChatColor.values().length);
 
         final Set<DyeColor> dyes = new HashSet<>(expectedConversion.values());
         Assert.assertEquals(
@@ -84,7 +76,14 @@ public class ItemUtilsTest extends MockedBukkitTest {
                 dyes.size(), DyeColor.values().length - 2
         );
 
-        expectedConversion.forEach((chatColor, dye) -> Assert.assertEquals(chatColor + " is correctly converted to" + dye, ItemUtils.asDye(chatColor), dye));
+        Arrays.stream(ChatColor.values()).forEach(chatColor -> {
+            final DyeColor dye = expectedConversion.get(chatColor);
+            Assert.assertEquals(
+                    chatColor + " is correctly converted to" + (dye != null ? dye : "Optional.EMPTY"),
+                    ItemUtils.asDye(chatColor),
+                    dye != null ? Optional.of(dye) : Optional.empty()
+            );
+        });
     }
 
     @Test

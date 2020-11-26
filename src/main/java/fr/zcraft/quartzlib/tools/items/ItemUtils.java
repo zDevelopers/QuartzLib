@@ -37,6 +37,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
@@ -51,6 +52,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 //import org.bukkit.Sound;
 
@@ -527,55 +529,62 @@ public abstract class ItemUtils {
      * correspondence between dyes and chat colors.</p>
      *
      * @param color The chat color.
-     * @return The corresponding dye.
+     * @return The corresponding dye, or an empty value if none match (e.g. for formatting codes, of for {@code null}).
      */
     @Contract(pure = true)
-    public static DyeColor asDye(@NotNull final ChatColor color) {
+    public static Optional<DyeColor> asDye(@Nullable final ChatColor color) {
+        if (color == null) {
+            return Optional.empty();
+        }
+
         switch (color) {
             case BLACK:
-                return DyeColor.BLACK;
+                return Optional.of(DyeColor.BLACK);
 
             case BLUE:
             case DARK_BLUE:
-                return DyeColor.BLUE;
+                return Optional.of(DyeColor.BLUE);
 
             case DARK_GREEN:
-                return DyeColor.GREEN;
+                return Optional.of(DyeColor.GREEN);
 
             case DARK_AQUA:
-                return DyeColor.CYAN;
+                return Optional.of(DyeColor.CYAN);
 
             case DARK_RED:
-                return DyeColor.RED;
+                return Optional.of(DyeColor.RED);
 
             case DARK_PURPLE:
-                return DyeColor.PURPLE;
+                return Optional.of(DyeColor.PURPLE);
 
             case GOLD:
             case YELLOW:
-                return DyeColor.YELLOW;
+                return Optional.of(DyeColor.YELLOW);
 
             case GRAY:
-                return DyeColor.LIGHT_GRAY;
+                return Optional.of(DyeColor.LIGHT_GRAY);
 
             case DARK_GRAY:
-                return DyeColor.GRAY;
+                return Optional.of(DyeColor.GRAY);
 
             case GREEN:
-                return DyeColor.LIME;
+                return Optional.of(DyeColor.LIME);
 
             case AQUA:
-                return DyeColor.LIGHT_BLUE;
+                return Optional.of(DyeColor.LIGHT_BLUE);
 
             case RED:
-                return DyeColor.ORANGE;
+                return Optional.of(DyeColor.ORANGE);
 
             case LIGHT_PURPLE:
-                return DyeColor.PINK;
+                return Optional.of(DyeColor.PINK);
+
+            case WHITE:
+                return Optional.of(DyeColor.WHITE);
 
             // White, reset & formatting
             default:
-                return DyeColor.WHITE;
+                return Optional.empty();
         }
     }
 
@@ -585,7 +594,6 @@ public abstract class ItemUtils {
      * @param material The colorable material to colorize.
      * @param color    The dye color.
      * @return The corresponding material.
-     * @throws IllegalArgumentException If the given block is not dyeable.
      */
     @Contract(pure = true)
     public static Material colorize(@NotNull final ColorableMaterial material, @NotNull final DyeColor color) {
@@ -597,11 +605,11 @@ public abstract class ItemUtils {
      *
      * @param material The colorable material to colorize.
      * @param color    The chat color.
-     * @return The corresponding material.
-     * @throws IllegalArgumentException If the given block is not dyeable.
+     * @return The corresponding material. If the chat color was not convertible to a dye, {@code ChatColor#WHITE} is
+     *         used.
      */
     @Contract(pure = true)
     public static Material colorize(@NotNull final ColorableMaterial material, @NotNull final ChatColor color) {
-        return colorize(material, asDye(color));
+        return colorize(material, asDye(color).orElse(DyeColor.WHITE));
     }
 }
