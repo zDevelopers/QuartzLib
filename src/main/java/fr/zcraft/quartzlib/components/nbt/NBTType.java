@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 
-enum NbtType {
+enum NBTType {
     TAG_END((byte) 0, null, Void.class),
     TAG_BYTE((byte) 1, "NBTTagByte", byte.class, Byte.class),
     TAG_SHORT((byte) 2, "NBTTagShort", short.class, Short.class),
@@ -56,14 +56,14 @@ enum NbtType {
     private final String nmsClassName;
     private Class nmsClass;
 
-    NbtType(byte id, String nmsClassName, Class... types) {
+    NBTType(byte id, String nmsClassName, Class... types) {
         this.id = id;
         this.types = types;
         this.nmsClassName = nmsClassName;
     }
 
-    public static NbtType fromId(byte id) {
-        for (NbtType type : NbtType.values()) {
+    public static NBTType fromId(byte id) {
+        for (NBTType type : NBTType.values()) {
             if (id == type.id) {
                 return type;
             }
@@ -72,7 +72,7 @@ enum NbtType {
         throw new IllegalArgumentException("Illegal type id: " + id);
     }
 
-    public static NbtType fromNmsNbtTag(Object nmsNbtTag) {
+    public static NBTType fromNmsNbtTag(Object nmsNbtTag) {
         try {
             return fromId((byte) Reflection.call(nmsNbtTag, "getTypeId"));
         } catch (Exception ex) {
@@ -80,8 +80,8 @@ enum NbtType {
         }
     }
 
-    public static NbtType fromClass(Class klass) {
-        for (NbtType type : NbtType.values()) {
+    public static NBTType fromClass(Class klass) {
+        for (NBTType type : NBTType.values()) {
             if (type.isAssignableFrom(klass)) {
                 return type;
             }

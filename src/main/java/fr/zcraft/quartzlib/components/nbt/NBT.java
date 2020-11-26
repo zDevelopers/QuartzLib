@@ -317,7 +317,7 @@ public abstract class NBT {
             return null;
         }
 
-        NbtType type = NbtType.fromClass(value.getClass());
+        NBTType type = NBTType.fromClass(value.getClass());
         return type.newTag(value);
     }
 
@@ -334,7 +334,7 @@ public abstract class NBT {
         if (nbtTag == null) {
             return null;
         }
-        NbtType type = NbtType.fromNmsNbtTag(nbtTag);
+        NBTType type = NBTType.fromNmsNbtTag(nbtTag);
 
         switch (type) {
             case TAG_COMPOUND:
