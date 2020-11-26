@@ -8,9 +8,9 @@ Changes marked with :warning: are **breaking changes**.
 
 
 
-## QuartzLib 0.1
+## QuartzLib 0.0.2
 
-_Published one day_
+_Published on November 26th, 2020_
 
 ### Added
 
@@ -94,7 +94,7 @@ _Published one day_
 
 ## QuartzLib 0.0.1
 
-_Published 12 November, 2020_
+_Published on November 12th, 2020_
 
 ### Changed
 
