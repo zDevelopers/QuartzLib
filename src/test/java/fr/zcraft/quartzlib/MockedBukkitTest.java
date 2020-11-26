@@ -2,8 +2,8 @@ package fr.zcraft.quartzlib;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.After;
+import org.junit.Before;
 
 /**
  * A simple base class for tests that just set up a Mock Bukkit server, without any plugin associated.
@@ -13,12 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 public abstract class MockedBukkitTest {
     protected ServerMock server;
 
-    @BeforeEach
+    @Before
     public void setup() {
         server = MockBukkit.mock();
     }
 
-    @AfterEach
+    @After
     public void tearDown() {
         MockBukkit.unmock();
     }
