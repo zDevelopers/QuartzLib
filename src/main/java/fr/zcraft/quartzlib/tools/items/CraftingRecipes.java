@@ -35,10 +35,12 @@ import fr.zcraft.quartzlib.core.QuartzLib;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This class provides various utilities for Crafting Recipes management.
@@ -115,30 +117,32 @@ public class CraftingRecipes extends QuartzComponent {
      * @param str The recipe string
      * @return The recipe string array
      */
-    public static String[] getRecipeShape(String str) {
+    public static @NotNull String[] getRecipeShape(@NotNull String str) {
         if (str.length() > 9) {
             throw new IllegalArgumentException("Invalid recipe shape string");
         }
 
-        while (str.length() < 9) {
-            str += " ";
+        StringBuilder strBuilder = new StringBuilder(str);
+        while (strBuilder.length() < 9) {
+            strBuilder.append(" ");
         }
+        str = strBuilder.toString();
 
         return new String[] {
-                str.substring(0, 2),
-                str.substring(3, 5),
-                str.substring(6, 8)
+                str.substring(0, 3),
+                str.substring(3, 6),
+                str.substring(6, 9)
         };
     }
 
-    private static String[] generateRecipeShape(int count) {
-        String shape = "";
+    private static @NotNull String[] generateRecipeShape(int count) {
+        StringBuilder shape = new StringBuilder();
         char key = 'A';
-        for (; count-- > 0; ) {
-            shape += key;
+        while (count-- > 0) {
+            shape.append(key);
             key = (char) (key + 1);
         }
-        return getRecipeShape(shape);
+        return getRecipeShape(shape.toString());
     }
 
     /**
@@ -146,21 +150,23 @@ public class CraftingRecipes extends QuartzComponent {
      * Ingredients are automatically indexed, using uppercase letters
      * (A = first ingredient, B = second ingredient, etc.)
      *
+     * @param recipeName The name of the new recipe.
      * @param result    The resulting item of the recipe.
      * @param materials The ingredients for the recipe
      * @return The dummy recipe.
      */
-    public static ShapedRecipe shaped(ItemStack result, Material... materials) {
-        ShapedRecipe recipe = new ShapedRecipe(result)
-                .shape(generateRecipeShape(materials.length));
-
+    public static @NotNull ShapedRecipe shaped(String recipeName, ItemStack result, Material... materials) {
         if (materials.length > 9) {
-            throw new IllegalArgumentException("Too many materials for a recipe.");
+            throw new IllegalArgumentException("Too many materials for a recipe (a maximum of 9 is expected).");
         }
 
+        NamespacedKey namespacedKey = new NamespacedKey(QuartzLib.getPlugin(), recipeName);
+        ShapedRecipe recipe = new ShapedRecipe(namespacedKey, result)
+                .shape(generateRecipeShape(materials.length));
+
         char key = 'A';
-        for (int i = 0; i < materials.length; ++i) {
-            recipe.setIngredient(key, materials[i]);
+        for (Material material : materials) {
+            recipe.setIngredient(key, material);
             key = (char) (key + 1);
         }
 
@@ -172,21 +178,23 @@ public class CraftingRecipes extends QuartzComponent {
      * Ingredients are automatically indexed, using uppercase letters
      * (A = first ingredient, B = second ingredient, etc.)
      *
+     * @param recipeName The name of the new recipe.
      * @param result    The resulting item of the recipe.
      * @param materials The ingredients for the recipe
      * @return The dummy recipe.
      */
-    public static ShapedRecipe shaped(ItemStack result, MaterialData... materials) {
-        ShapedRecipe recipe = new ShapedRecipe(result)
-                .shape(generateRecipeShape(materials.length));
-
+    public static @NotNull ShapedRecipe shaped(String recipeName, ItemStack result, RecipeChoice... materials) {
         if (materials.length > 9) {
-            throw new IllegalArgumentException("Too many materials for a recipe.");
+            throw new IllegalArgumentException("Too many materials for a recipe (a maximum of 9 is expected).");
         }
 
+        NamespacedKey namespacedKey = new NamespacedKey(QuartzLib.getPlugin(), recipeName);
+        ShapedRecipe recipe = new ShapedRecipe(namespacedKey, result)
+                .shape(generateRecipeShape(materials.length));
+
         char key = 'A';
-        for (int i = 0; i < materials.length; ++i) {
-            recipe.setIngredient(key, materials[i]);
+        for (RecipeChoice material : materials) {
+            recipe.setIngredient(key, material);
             key = (char) (key + 1);
         }
 
@@ -198,6 +206,7 @@ public class CraftingRecipes extends QuartzComponent {
      * Ingredients are automatically indexed, using uppercase letters
      * (A = first ingredient, B = second ingredient, etc.)
      *
+     * @param recipeName The name of the new recipe.
      * @param result    The resulting item of the recipe.
      * @param line1     The first line of the recipe
      * @param line2     The second line of the recipe
@@ -205,9 +214,9 @@ public class CraftingRecipes extends QuartzComponent {
      * @param materials The ingredients for the recipe
      * @return The shaped recipe
      */
-    public static ShapedRecipe shaped(ItemStack result, String line1, String line2, String line3,
+    public static ShapedRecipe shaped(String recipeName, ItemStack result, String line1, String line2, String line3,
                                       Material... materials) {
-        ShapedRecipe recipe = shaped(result, materials);
+        ShapedRecipe recipe = shaped(recipeName, result, materials);
         recipe.shape(line1, line2, line3);
         return recipe;
     }
@@ -217,14 +226,15 @@ public class CraftingRecipes extends QuartzComponent {
      * Ingredients are automatically indexed, using uppercase letters
      * (A = first ingredient, B = second ingredient, etc.)
      *
+     * @param recipeName The name of the new recipe.
      * @param result The resulting item of the recipe.
      * @param line1  The first line of the recipe
      * @param line2  The second line of the recipe
      * @param line3  The third line of the recipe
      * @return The shaped recipe
      */
-    public static ShapedRecipe shaped(ItemStack result, String line1, String line2, String line3) {
-        return shaped(result, line1, line2, line3, new Material[] {});
+    public static ShapedRecipe shaped(String recipeName, ItemStack result, String line1, String line2, String line3) {
+        return shaped(recipeName, result, line1, line2, line3, new Material[] {});
     }
 
     /**
@@ -232,6 +242,7 @@ public class CraftingRecipes extends QuartzComponent {
      * Ingredients are automatically indexed, using uppercase letters
      * (A = first ingredient, B = second ingredient, etc.)
      *
+     * @param recipeName The name of the new recipe.
      * @param result    The resulting item of the recipe.
      * @param line1     The first line of the recipe
      * @param line2     The second line of the recipe
@@ -239,9 +250,9 @@ public class CraftingRecipes extends QuartzComponent {
      * @param materials The ingredients for the recipe
      * @return The shaped recipe
      */
-    public static ShapedRecipe shaped(ItemStack result, String line1, String line2, String line3,
-                                      MaterialData... materials) {
-        ShapedRecipe recipe = shaped(result, materials);
+    public static ShapedRecipe shaped(String recipeName, ItemStack result, String line1, String line2, String line3,
+                                      RecipeChoice... materials) {
+        ShapedRecipe recipe = shaped(recipeName, result, materials);
         recipe.shape(line1, line2, line3);
         return recipe;
     }
@@ -252,21 +263,16 @@ public class CraftingRecipes extends QuartzComponent {
      * Ingredients are automatically indexed, using uppercase letters
      * (A = first ingredient, B = second ingredient, etc.)
      *
-     * @param other The recipe to retreive the ingredients and result from.
+     * @param recipeName The name of the new recipe.
+     * @param other The recipe to retrieve the ingredients and result from.
      * @param line1 The first line of the recipe
      * @param line2 The second line of the recipe
      * @param line3 The third line of the recipe
      * @return The shaped recipe
      */
-    public static ShapedRecipe shaped(ShapedRecipe other, String line1, String line2, String line3) {
-        ShapedRecipe newRecipe = shaped(other.getResult(), line1, line2, line3);
-
-        for (char key : other.getIngredientMap().keySet()) {
-            ItemStack ingredient = other.getIngredientMap().get(key);
-            if (ingredient != null && ingredient.getType() != Material.AIR) {
-                newRecipe.setIngredient(key, ingredient.getData());
-            }
-        }
+    public static ShapedRecipe shaped(String recipeName, ShapedRecipe other, String line1, String line2, String line3) {
+        ShapedRecipe newRecipe = shaped(recipeName, other.getResult(), line1, line2, line3);
+        other.getChoiceMap().forEach(newRecipe::setIngredient);
 
         return newRecipe;
     }
@@ -279,13 +285,19 @@ public class CraftingRecipes extends QuartzComponent {
      * B A -
      * - - -
      *
+     * @param baseRecipeName The base name of the new recipe.
+     *                       Individual IDs will be appended to this name for each recipe.
      * @param a      The first material of the recipe.
      * @param b      The second material of the recipe.
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(Material a, Material b, ItemStack result) {
-        return get2x2DiagonalRecipes(new MaterialData(a), new MaterialData(b), result);
+    public static List<Recipe> get2x2DiagonalRecipes(String baseRecipeName, Material a, Material b, ItemStack result) {
+        return get2x2DiagonalRecipes(
+                baseRecipeName,
+                new RecipeChoice.MaterialChoice(a),
+                new RecipeChoice.MaterialChoice(b),
+                result);
     }
 
     /**
@@ -296,22 +308,28 @@ public class CraftingRecipes extends QuartzComponent {
      * B A -
      * - - -
      *
+     * @param baseRecipeName The base name of the new recipe.
+     *                       Individual IDs will be appended to this name for each recipe.
      * @param a      The first material of the recipe.
      * @param b      The second material of the recipe.
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(MaterialData a, MaterialData b, ItemStack result) {
+    public static List<Recipe> get2x2DiagonalRecipes(
+            String baseRecipeName,
+            RecipeChoice a,
+            RecipeChoice b,
+            ItemStack result) {
         ArrayList<Recipe> recipes = new ArrayList<>();
 
-        recipes.add(shaped(result, "AB ", "BA ", "   ", a, b));
-        recipes.add(shaped(result, "BA ", "AB ", "   ", a, b));
-        recipes.add(shaped(result, " AB", " BA", "   ", a, b));
-        recipes.add(shaped(result, " BA", " AB", "   ", a, b));
-        recipes.add(shaped(result, "   ", "AB ", "BA ", a, b));
-        recipes.add(shaped(result, "   ", "BA ", "AB ", a, b));
-        recipes.add(shaped(result, "   ", " AB", " BA", a, b));
-        recipes.add(shaped(result, "   ", " BA", " AB", a, b));
+        recipes.add(shaped(baseRecipeName + '1', result, "AB ", "BA ", "   ", a, b));
+        recipes.add(shaped(baseRecipeName + '2', result, "BA ", "AB ", "   ", a, b));
+        recipes.add(shaped(baseRecipeName + '3', result, " AB", " BA", "   ", a, b));
+        recipes.add(shaped(baseRecipeName + '4', result, " BA", " AB", "   ", a, b));
+        recipes.add(shaped(baseRecipeName + '5', result, "   ", "AB ", "BA ", a, b));
+        recipes.add(shaped(baseRecipeName + '6', result, "   ", "BA ", "AB ", a, b));
+        recipes.add(shaped(baseRecipeName + '7', result, "   ", " AB", " BA", a, b));
+        recipes.add(shaped(baseRecipeName + '8', result, "   ", " BA", " AB", a, b));
 
         return recipes;
     }
@@ -324,12 +342,14 @@ public class CraftingRecipes extends QuartzComponent {
      * - A -
      * - - -
      *
+     * @param baseRecipeName The base name of the new recipe.
+     *                       Individual IDs will be appended to this name for each recipe.
      * @param a      The material of the recipe.
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(Material a, ItemStack result) {
-        return get2x2DiagonalRecipes(new MaterialData(a), result);
+    public static List<Recipe> get2x2DiagonalRecipes(String baseRecipeName, Material a, ItemStack result) {
+        return get2x2DiagonalRecipes(baseRecipeName, new RecipeChoice.MaterialChoice(a), result);
     }
 
     /**
@@ -340,23 +360,43 @@ public class CraftingRecipes extends QuartzComponent {
      * - A -
      * - - -
      *
+     * @param baseRecipeName The base name of the new recipe.
+     *                       Individual IDs will be appended to this name for each recipe.
      * @param a      The material of the recipe.
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(MaterialData a, ItemStack result) {
+    public static List<Recipe> get2x2DiagonalRecipes(String baseRecipeName, RecipeChoice a, ItemStack result) {
         ArrayList<Recipe> recipes = new ArrayList<>();
 
-        recipes.add(shaped(result, "A  ", " A ", "   ", a));
-        recipes.add(shaped(result, " A ", "A  ", "   ", a));
-        recipes.add(shaped(result, " A ", "  A", "   ", a));
-        recipes.add(shaped(result, "  A", " A ", "   ", a));
-        recipes.add(shaped(result, "   ", "A  ", " A ", a));
-        recipes.add(shaped(result, "   ", " A ", "A  ", a));
-        recipes.add(shaped(result, "   ", " A ", "  A", a));
-        recipes.add(shaped(result, "   ", "  A", " A ", a));
+        recipes.add(shaped(baseRecipeName + '1',  result, "A  ", " A ", "   ", a));
+        recipes.add(shaped(baseRecipeName + '2', result, " A ", "A  ", "   ", a));
+        recipes.add(shaped(baseRecipeName + '3', result, " A ", "  A", "   ", a));
+        recipes.add(shaped(baseRecipeName + '4', result, "  A", " A ", "   ", a));
+        recipes.add(shaped(baseRecipeName + '5', result, "   ", "A  ", " A ", a));
+        recipes.add(shaped(baseRecipeName + '6', result, "   ", " A ", "A  ", a));
+        recipes.add(shaped(baseRecipeName + '7', result, "   ", " A ", "  A", a));
+        recipes.add(shaped(baseRecipeName + '8', result, "   ", "  A", " A ", a));
 
         return recipes;
+    }
+
+    /**
+     * Returns a list of all the possible recipes for one ingredient in a
+     * 2x2 shape.
+     * Example :
+     * A A -
+     * A A -
+     * - - -
+     *
+     * @param baseRecipeName The base name of the new recipe.
+     *                       Individual IDs will be appended to this name for each recipe.
+     * @param a      The material of the recipe.
+     * @param result The resulting item of the recipe.
+     * @return All the possible recipes.
+     */
+    public static List<Recipe> get2x2Recipes(String baseRecipeName, Material a, ItemStack result) {
+        return get2x2Recipes(baseRecipeName, new RecipeChoice.MaterialChoice(a), result);
     }
 
     /**
@@ -371,29 +411,13 @@ public class CraftingRecipes extends QuartzComponent {
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2Recipes(Material a, ItemStack result) {
-        return get2x2Recipes(new MaterialData(a), result);
-    }
-
-    /**
-     * Returns a list of all the possible recipes for one ingredient in a
-     * 2x2 shape.
-     * Example :
-     * A A -
-     * A A -
-     * - - -
-     *
-     * @param a      The material of the recipe.
-     * @param result The resulting item of the recipe.
-     * @return All the possible recipes.
-     */
-    public static List<Recipe> get2x2Recipes(MaterialData a, ItemStack result) {
+    public static List<Recipe> get2x2Recipes(String baseRecipeName, RecipeChoice a, ItemStack result) {
         ArrayList<Recipe> recipes = new ArrayList<>();
 
-        recipes.add(shaped(result, "AA ", "AA ", "   ", a));
-        recipes.add(shaped(result, " AA", " AA", "   ", a));
-        recipes.add(shaped(result, "   ", "AA ", "AA ", a));
-        recipes.add(shaped(result, "   ", " AA", " AA", a));
+        recipes.add(shaped(baseRecipeName + '1', result, "AA ", "AA ", "   ", a));
+        recipes.add(shaped(baseRecipeName + '2', result, " AA", " AA", "   ", a));
+        recipes.add(shaped(baseRecipeName + '3', result, "   ", "AA ", "AA ", a));
+        recipes.add(shaped(baseRecipeName + '4', result, "   ", " AA", " AA", a));
 
         return recipes;
     }
