@@ -1,6 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +14,8 @@ class CommandEndpoint extends CommandNode {
     }
 
     @Override
-    void run(Object instance, String[] args) throws CommandException {
-        this.methods.get(0).run(instance, args);
+    void run(Object instance, CommandSender sender, String[] args) throws CommandException {
+        this.methods.get(0).run(instance, sender, args);
     }
 
     void addMethod(CommandMethod method) {

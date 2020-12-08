@@ -1,6 +1,10 @@
 package fr.zcraft.quartzlib.components.commands;
 
+import fr.zcraft.quartzlib.MockedBukkitTest;
+import fr.zcraft.quartzlib.components.commands.attributes.Sender;
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +21,7 @@ class CommandWithStatics {
     static public void staticMethod () {}
 }
 
-public class CommandGraphTests {
+public class CommandGraphTests extends MockedBukkitTest {
     private CommandManager commands;
 
     @BeforeEach
@@ -32,13 +36,13 @@ public class CommandGraphTests {
             public void list () {}
         }
 
-        CommandGroup commandGroup = new CommandGroup(FooCommand.class, () -> new FooCommand(), "foo", new ArgumentTypeHandlerCollection());
+        CommandGroup commandGroup = new CommandGroup(FooCommand.class, () -> new FooCommand(), "foo", new TypeCollection());
         String[] commandNames = StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName).toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] {"add", "get", "list"}, commandNames);
     }
 
     @Test public void onlyDiscoversPublicMethods() {
-        CommandGroup commandGroup = new CommandGroup(CommandWithStatics.class, () -> new CommandWithStatics(), "foo", new ArgumentTypeHandlerCollection());
+        CommandGroup commandGroup = new CommandGroup(CommandWithStatics.class, () -> new CommandWithStatics(), "foo", new TypeCollection());
         String[] commandNames = StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName).toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] {"add", "delete"}, commandNames);
     }
@@ -53,7 +57,7 @@ public class CommandGraphTests {
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
-        commands.run("foo", "get");
+        commands.run(server.addPlayer(), "foo", "get");
         Assertions.assertArrayEquals(new boolean[] { false, true, false }, ran);
     }
 
@@ -65,7 +69,7 @@ public class CommandGraphTests {
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
-        commands.run("foo", "add", "pomf");
+        commands.run(server.addPlayer(), "foo", "add", "pomf");
         Assertions.assertArrayEquals(new String[] { "pomf" }, argValue);
     }
 
@@ -77,7 +81,7 @@ public class CommandGraphTests {
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
-        commands.run("foo", "add", "42");
+        commands.run(server.addPlayer(), "foo", "add", "42");
         Assertions.assertArrayEquals(new int[] { 42 }, argValue);
     }
 
@@ -90,9 +94,24 @@ public class CommandGraphTests {
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
-        commands.run("foo", "add", "foo");
+        commands.run(server.addPlayer(), "foo", "add", "foo");
         Assertions.assertArrayEquals(new FooEnum[] { FooEnum.FOO }, argValue);
-        commands.run("foo", "add", "bar");
+        commands.run(server.addPlayer(), "foo", "add", "bar");
         Assertions.assertArrayEquals(new FooEnum[] { FooEnum.BAR }, argValue);
+    }
+
+    @Test public void canReceiveCommandSender() throws CommandException {
+        final CommandSender[] senders = {null};
+        Player player = server.addPlayer();
+
+        class FooCommand {
+            public void add(@Sender CommandSender sender) {
+                senders[0] = sender;
+            }
+        }
+
+        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.run(player,"foo", "add");
+        Assertions.assertArrayEquals(new CommandSender[] { player }, senders);
     }
 }

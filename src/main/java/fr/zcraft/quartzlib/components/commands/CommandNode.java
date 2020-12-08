@@ -1,6 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import org.bukkit.command.CommandSender;
 
 abstract class CommandNode {
     private final String name;
@@ -19,5 +20,5 @@ abstract class CommandNode {
         return parent;
     }
 
-    abstract void run(Object instance, String[] args) throws CommandException;
+    abstract void run(Object instance, CommandSender sender, String[] args) throws CommandException;
 }

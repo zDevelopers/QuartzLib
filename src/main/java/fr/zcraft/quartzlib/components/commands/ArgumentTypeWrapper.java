@@ -1,10 +1,10 @@
 package fr.zcraft.quartzlib.components.commands;
 
-class ArgumentTypeHandler<T> {
+class ArgumentTypeWrapper<T> {
     private final Class<T> resultType;
     private final ArgumentType<T> typeHandler;
 
-    public ArgumentTypeHandler(Class<T> resultType, ArgumentType<T> typeHandler) {
+    public ArgumentTypeWrapper(Class<T> resultType, ArgumentType<T> typeHandler) {
         this.resultType = resultType;
         this.typeHandler = typeHandler;
     }

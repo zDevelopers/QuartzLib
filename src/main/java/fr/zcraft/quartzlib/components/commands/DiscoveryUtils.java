@@ -9,10 +9,10 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 abstract class DiscoveryUtils {
-    public static Stream<CommandMethod> getCommandMethods(Class<?> commandGroupClass, ArgumentTypeHandlerCollection typeHandlerCollection) {
+    public static Stream<CommandMethod> getCommandMethods(Class<?> commandGroupClass, TypeCollection typeCollection) {
         return Arrays.stream(commandGroupClass.getDeclaredMethods())
                 .filter(m -> Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers()))
-                .map((Method method) -> new CommandMethod(method, typeHandlerCollection));
+                .map((Method method) -> new CommandMethod(method, typeCollection));
     }
 
     public static Supplier<?> getClassConstructorSupplier (Class<?> commandGroupClass) {

@@ -1,6 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,15 +14,15 @@ class CommandGroup extends CommandNode {
 
     private final Map<String, CommandNode> subCommands = new HashMap<>();
 
-    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, ArgumentTypeHandlerCollection typeHandlerCollection) {
-        this(commandGroupClass, classInstanceSupplier, name, typeHandlerCollection, null);
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, TypeCollection typeCollection) {
+        this(commandGroupClass, classInstanceSupplier, name, typeCollection, null);
     }
 
-    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, ArgumentTypeHandlerCollection typeHandlerCollection, CommandGroup parent) {
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, TypeCollection typeCollection, CommandGroup parent) {
         super(name, parent);
         this.commandGroupClass = commandGroupClass;
         this.classInstanceSupplier = classInstanceSupplier;
-        DiscoveryUtils.getCommandMethods(commandGroupClass, typeHandlerCollection).forEach(this::addMethod);
+        DiscoveryUtils.getCommandMethods(commandGroupClass, typeCollection).forEach(this::addMethod);
     }
 
     public Iterable<CommandNode> getSubCommands () {
@@ -39,15 +40,15 @@ class CommandGroup extends CommandNode {
         endpoint.addMethod(method);
     }
 
-    void run(String... args) throws CommandException {
+    void run(CommandSender sender, String... args) throws CommandException {
         Object commandObject = classInstanceSupplier.get();
-        run(commandObject, args);
+        run(commandObject, sender, args);
     }
 
     @Override
-    void run(Object instance, String[] args) throws CommandException {
+    void run(Object instance, CommandSender sender, String[] args) throws CommandException {
         String commandName = args[0];
         CommandNode subCommand = subCommands.get(commandName);
-        subCommand.run(instance, Arrays.copyOfRange(args, 1, args.length));
+        subCommand.run(instance, sender, Arrays.copyOfRange(args, 1, args.length));
     }
 }

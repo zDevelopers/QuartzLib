@@ -6,14 +6,20 @@ import java.lang.reflect.Parameter;
 
 public class CommandMethodArgument {
     private final Parameter parameter;
-    private final ArgumentTypeHandler<?> typeHandler;
+    private final int position;
+    private final ArgumentTypeWrapper<?> typeHandler;
 
-    public CommandMethodArgument(Parameter parameter, ArgumentTypeHandlerCollection typeHandlerCollection) {
+    public CommandMethodArgument(Parameter parameter, int position, TypeCollection typeCollection) {
         this.parameter = parameter;
-        this.typeHandler = typeHandlerCollection.findTypeHandler(parameter.getType()).get(); // FIXME: handle unknown types
+        this.position = position;
+        this.typeHandler = typeCollection.findArgumentType(parameter.getType()).get(); // FIXME: handle unknown types
     }
 
     public Object parse(String raw) throws ArgumentParseException {
         return this.typeHandler.getTypeHandler().parse(raw);
+    }
+
+    public int getPosition() {
+        return position;
     }
 }
