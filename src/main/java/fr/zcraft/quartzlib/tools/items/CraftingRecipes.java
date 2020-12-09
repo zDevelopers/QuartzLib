@@ -411,6 +411,8 @@ public class CraftingRecipes extends QuartzComponent {
      * A A -
      * - - -
      *
+     * @param baseRecipeName The base name of the new recipe.
+     *                       Individual IDs will be appended to this name for each recipe.
      * @param a      The material of the recipe.
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
