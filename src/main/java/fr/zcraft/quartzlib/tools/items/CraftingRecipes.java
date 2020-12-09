@@ -292,7 +292,11 @@ public class CraftingRecipes extends QuartzComponent {
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(String baseRecipeName, Material a, Material b, ItemStack result) {
+    public static List<ShapedRecipe> get2x2DiagonalRecipes(
+            String baseRecipeName,
+            Material a,
+            Material b,
+            ItemStack result) {
         return get2x2DiagonalRecipes(
                 baseRecipeName,
                 new RecipeChoice.MaterialChoice(a),
@@ -315,12 +319,12 @@ public class CraftingRecipes extends QuartzComponent {
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(
+    public static List<ShapedRecipe> get2x2DiagonalRecipes(
             String baseRecipeName,
             RecipeChoice a,
             RecipeChoice b,
             ItemStack result) {
-        ArrayList<Recipe> recipes = new ArrayList<>();
+        ArrayList<ShapedRecipe> recipes = new ArrayList<>();
 
         recipes.add(shaped(baseRecipeName + '1', result, "AB ", "BA ", "   ", a, b));
         recipes.add(shaped(baseRecipeName + '2', result, "BA ", "AB ", "   ", a, b));
@@ -348,7 +352,7 @@ public class CraftingRecipes extends QuartzComponent {
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(String baseRecipeName, Material a, ItemStack result) {
+    public static List<ShapedRecipe> get2x2DiagonalRecipes(String baseRecipeName, Material a, ItemStack result) {
         return get2x2DiagonalRecipes(baseRecipeName, new RecipeChoice.MaterialChoice(a), result);
     }
 
@@ -366,8 +370,8 @@ public class CraftingRecipes extends QuartzComponent {
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2DiagonalRecipes(String baseRecipeName, RecipeChoice a, ItemStack result) {
-        ArrayList<Recipe> recipes = new ArrayList<>();
+    public static List<ShapedRecipe> get2x2DiagonalRecipes(String baseRecipeName, RecipeChoice a, ItemStack result) {
+        ArrayList<ShapedRecipe> recipes = new ArrayList<>();
 
         recipes.add(shaped(baseRecipeName + '1',  result, "A  ", " A ", "   ", a));
         recipes.add(shaped(baseRecipeName + '2', result, " A ", "A  ", "   ", a));
@@ -395,7 +399,7 @@ public class CraftingRecipes extends QuartzComponent {
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2Recipes(String baseRecipeName, Material a, ItemStack result) {
+    public static List<ShapedRecipe> get2x2Recipes(String baseRecipeName, Material a, ItemStack result) {
         return get2x2Recipes(baseRecipeName, new RecipeChoice.MaterialChoice(a), result);
     }
 
@@ -411,8 +415,8 @@ public class CraftingRecipes extends QuartzComponent {
      * @param result The resulting item of the recipe.
      * @return All the possible recipes.
      */
-    public static List<Recipe> get2x2Recipes(String baseRecipeName, RecipeChoice a, ItemStack result) {
-        ArrayList<Recipe> recipes = new ArrayList<>();
+    public static List<ShapedRecipe> get2x2Recipes(String baseRecipeName, RecipeChoice a, ItemStack result) {
+        ArrayList<ShapedRecipe> recipes = new ArrayList<>();
 
         recipes.add(shaped(baseRecipeName + '1', result, "AA ", "AA ", "   ", a));
         recipes.add(shaped(baseRecipeName + '2', result, " AA", " AA", "   ", a));
