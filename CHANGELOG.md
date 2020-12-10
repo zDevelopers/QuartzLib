@@ -6,7 +6,18 @@ We follow semantic versioning: you can tell if a version contains breaking chang
 
 Changes marked with :warning: are **breaking changes**.
 
+## QuartzLib 0.0.3
 
+_Published one day_
+
+### Changed
+
+#### `CraftingRecipes`
+- :warning: All recipes are now required to provide names, therefore all helper methods to generate recipes take a
+  mandatory name argument. The name is automatically namespaced with the plugin's name.
+- :warning: All helpers that were consuming the now-deprecated `MaterialData` now consume the more flexible `RecipeChoice` instead.
+- All helpers that generate shaped recipes (2x2, 2x2 diagonal, etc.) now return `ShapedRecipe`s explicitely, since there
+  is no way those recipes can be anything other than shaped, and hiding this detail is not useful at all.
 
 ## QuartzLib 0.0.2
 
