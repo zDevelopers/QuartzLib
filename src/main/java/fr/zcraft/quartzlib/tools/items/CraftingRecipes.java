@@ -33,6 +33,7 @@ package fr.zcraft.quartzlib.tools.items;
 import fr.zcraft.quartzlib.core.QuartzComponent;
 import fr.zcraft.quartzlib.core.QuartzLib;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -156,21 +157,11 @@ public class CraftingRecipes extends QuartzComponent {
      * @return The dummy recipe.
      */
     public static @NotNull ShapedRecipe shaped(String recipeName, ItemStack result, Material... materials) {
-        if (materials.length > 9) {
-            throw new IllegalArgumentException("Too many materials for a recipe (a maximum of 9 is expected).");
-        }
+        RecipeChoice[] choices = Arrays.stream(materials)
+                .map(RecipeChoice.MaterialChoice::new)
+                .toArray(RecipeChoice[]::new);
 
-        NamespacedKey namespacedKey = new NamespacedKey(QuartzLib.getPlugin(), recipeName);
-        ShapedRecipe recipe = new ShapedRecipe(namespacedKey, result)
-                .shape(generateRecipeShape(materials.length));
-
-        char key = 'A';
-        for (Material material : materials) {
-            recipe.setIngredient(key, material);
-            key = (char) (key + 1);
-        }
-
-        return recipe;
+        return shaped(recipeName, result, choices);
     }
 
     /**
