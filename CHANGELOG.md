@@ -15,6 +15,7 @@ _Published one day_
 #### `CraftingRecipes`
 - :warning: All recipes are now required to provide names, therefore all helper methods to generate recipes take a
   mandatory name argument. The name is automatically namespaced with the plugin's name.
+- :warning: All helpers that were consuming the now-deprecated `MaterialData` now consume the more flexible `RecipeChoice` instead.
 - All helpers that generate shaped recipes (2x2, 2x2 diagonal, etc.) now return `ShapedRecipe`s explicitely, since there
   is no way those recipes can be anything other than shaped, and hiding this detail is not useful at all.
 
