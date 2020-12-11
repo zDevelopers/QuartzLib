@@ -1,6 +1,7 @@
 name: zToaster
-main: fr.zcraft.quartzlib.Toaster
-version: 0.99
+main: fr.zcraft.ztoaster.Toaster
+version: 0.0.1
+api-version: 1.15
 
 commands:
    toaster:

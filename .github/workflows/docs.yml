@@ -19,7 +19,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build JavaDoc
-        run: mvn -B javadoc:javadoc --file pom.xml
+        run: mvn -B javadoc:javadoc -pl quartzlib --file pom.xml
       - name: Checkout website repository
         uses: actions/checkout@v2
         with:

@@ -1,7 +1,8 @@
-package fr.zcraft.quartzlib;
+package fr.zcraft.ztoaster;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
+import fr.zcraft.ztoaster.Toaster;
 import org.junit.After;
 import org.junit.Before;
 
