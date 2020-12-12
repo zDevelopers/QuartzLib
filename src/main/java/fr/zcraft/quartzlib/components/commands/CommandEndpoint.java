@@ -13,8 +13,8 @@ class CommandEndpoint extends CommandNode {
     }
 
     @Override
-    void run(Object instance, CommandSender sender, String[] args) throws CommandException {
-        this.methods.get(0).run(instance, sender, args);
+    void run(Object parentInstance, CommandSender sender, String[] args) throws CommandException {
+        this.methods.get(0).run(parentInstance, sender, args);
     }
 
     void addMethod(CommandMethod method) {

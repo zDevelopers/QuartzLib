@@ -2,6 +2,7 @@ package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.MockedBukkitTest;
 import fr.zcraft.quartzlib.components.commands.attributes.Sender;
+import fr.zcraft.quartzlib.components.commands.attributes.SubCommand;
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import java.util.stream.StreamSupport;
 import org.bukkit.command.CommandSender;
@@ -133,6 +134,31 @@ public class CommandGraphTests extends MockedBukkitTest {
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(player, "foo", "add");
         Assert.assertArrayEquals(new CommandSender[] {player}, senders);
+    }
+
+    @Test
+    public void canCallSubcommand() throws CommandException {
+        final boolean[] ran = {false};
+
+        class SubFooCommand {
+            public void add() {
+                ran[0] = true;
+            }
+        }
+
+        class FooCommand {
+            @SubCommand
+            public final SubFooCommand sub = new SubFooCommand();
+
+            public void add() {
+                throw new RuntimeException("This shouldn't run!");
+            }
+        }
+
+        Player player = server.addPlayer();
+        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.run(player, "foo", "sub", "add");
+        Assert.assertArrayEquals(new boolean[] {true}, ran);
     }
 
     enum FooEnum {

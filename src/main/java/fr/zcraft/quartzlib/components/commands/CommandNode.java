@@ -2,12 +2,13 @@ package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Nullable;
 
 abstract class CommandNode {
     private final String name;
-    private final CommandGroup parent;
+    @Nullable private final CommandGroup parent;
 
-    protected CommandNode(String name, CommandGroup parent) {
+    protected CommandNode(String name, @Nullable CommandGroup parent) {
         this.name = name;
         this.parent = parent;
     }
@@ -16,9 +17,9 @@ abstract class CommandNode {
         return name;
     }
 
-    public CommandGroup getParent() {
+    @Nullable public CommandGroup getParent() {
         return parent;
     }
 
-    abstract void run(Object instance, CommandSender sender, String[] args) throws CommandException;
+    abstract void run(Object parentInstance, CommandSender sender, String[] args) throws CommandException;
 }
