@@ -1,10 +1,8 @@
 package fr.zcraft.quartzlib.components.commands;
 
-import fr.zcraft.quartzlib.components.commands.exceptions.ArgumentParseException;
 import fr.zcraft.quartzlib.components.commands.exceptions.InvalidSenderException;
-import org.bukkit.command.CommandSender;
-
 import java.lang.reflect.Parameter;
+import org.bukkit.command.CommandSender;
 
 public class CommandMethodSenderArgument {
     private final Parameter parameter;

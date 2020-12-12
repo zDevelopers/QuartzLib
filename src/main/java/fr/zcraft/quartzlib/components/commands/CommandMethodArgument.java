@@ -1,7 +1,6 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.ArgumentParseException;
-
 import java.lang.reflect.Parameter;
 
 public class CommandMethodArgument {

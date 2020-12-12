@@ -1,12 +1,11 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
-import org.bukkit.command.CommandSender;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.bukkit.command.CommandSender;
 
 class CommandGroup extends CommandNode {
     private final Class<?> commandGroupClass;
@@ -14,18 +13,20 @@ class CommandGroup extends CommandNode {
 
     private final Map<String, CommandNode> subCommands = new HashMap<>();
 
-    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, TypeCollection typeCollection) {
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name,
+                        TypeCollection typeCollection) {
         this(commandGroupClass, classInstanceSupplier, name, typeCollection, null);
     }
 
-    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name, TypeCollection typeCollection, CommandGroup parent) {
+    public CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name,
+                        TypeCollection typeCollection, CommandGroup parent) {
         super(name, parent);
         this.commandGroupClass = commandGroupClass;
         this.classInstanceSupplier = classInstanceSupplier;
         DiscoveryUtils.getCommandMethods(commandGroupClass, typeCollection).forEach(this::addMethod);
     }
 
-    public Iterable<CommandNode> getSubCommands () {
+    public Iterable<CommandNode> getSubCommands() {
         return this.subCommands.values();
     }
 

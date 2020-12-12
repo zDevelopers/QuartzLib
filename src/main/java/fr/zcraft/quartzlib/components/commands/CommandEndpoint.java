@@ -1,10 +1,9 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
-import org.bukkit.command.CommandSender;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.command.CommandSender;
 
 class CommandEndpoint extends CommandNode {
     private final List<CommandMethod> methods = new ArrayList<>();

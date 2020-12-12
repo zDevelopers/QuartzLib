@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 public class EnumArgumentTypeTests {
     private final EnumArgumentType enumArgumentType = new EnumArgumentType();
 
-    private enum SimpleEnum { FOO, BAR }
+    private enum SimpleEnum {
+        FOO, BAR
+    }
 
     @Test
     public void worksOnSimpleEnum() throws ArgumentParseException {

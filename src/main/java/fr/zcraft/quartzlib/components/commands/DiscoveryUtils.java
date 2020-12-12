@@ -15,7 +15,7 @@ abstract class DiscoveryUtils {
                 .map((Method method) -> new CommandMethod(method, typeCollection));
     }
 
-    public static Supplier<?> getClassConstructorSupplier (Class<?> commandGroupClass) {
+    public static Supplier<?> getClassConstructorSupplier(Class<?> commandGroupClass) {
         Constructor<?> constructor = commandGroupClass.getDeclaredConstructors()[0];
         return () -> {
             try {

@@ -3,8 +3,11 @@ package fr.zcraft.quartzlib.components.commands;
 import fr.zcraft.quartzlib.components.commands.arguments.generic.EnumArgumentType;
 import fr.zcraft.quartzlib.components.commands.arguments.primitive.IntegerArgumentType;
 import fr.zcraft.quartzlib.components.commands.senders.GenericCommandSender;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 class TypeCollection {
     private final Map<Class<?>, ArgumentTypeWrapper<?>> argumentTypeMap = new HashMap<>();
@@ -17,8 +20,7 @@ class TypeCollection {
         this.registerNativeTypes();
     }
 
-    public <T> void register(ArgumentTypeWrapper<T> typeHandler)
-    {
+    public <T> void register(ArgumentTypeWrapper<T> typeHandler) {
         argumentTypeMap.put(typeHandler.getResultType(), typeHandler);
     }
 
@@ -26,8 +28,7 @@ class TypeCollection {
         genericArgumentTypes.add(genericArgumentType);
     }
 
-    public <T> void register(SenderTypeWrapper<T> typeHandler)
-    {
+    public <T> void register(SenderTypeWrapper<T> typeHandler) {
         senderTypeMap.put(typeHandler.getResultType(), typeHandler);
     }
 
@@ -37,7 +38,9 @@ class TypeCollection {
 
     public Optional<ArgumentTypeWrapper<?>> findArgumentType(Class<?> resultType) {
         ArgumentTypeWrapper<?> typeHandler = argumentTypeMap.get(resultType);
-        if (typeHandler != null) return Optional.of(typeHandler);
+        if (typeHandler != null) {
+            return Optional.of(typeHandler);
+        }
         return this.findGenericArgumentType(resultType);
     }
 
@@ -46,14 +49,15 @@ class TypeCollection {
             Optional<? extends ArgumentType<?>> matchingArgumentType = t.getMatchingArgumentType(resultType);
 
             if (matchingArgumentType.isPresent()) {
-                ArgumentTypeWrapper<?> typeHandler = new ArgumentTypeWrapper<>(resultType, (ArgumentType<T>) matchingArgumentType.get());
+                ArgumentTypeWrapper<?> typeHandler =
+                        new ArgumentTypeWrapper<>(resultType, (ArgumentType<T>) matchingArgumentType.get());
                 return Optional.of(typeHandler);
             }
         }
         return Optional.empty();
     }
 
-    private void registerNativeTypes () {
+    private void registerNativeTypes() {
         // Primitive types
         register(new ArgumentTypeWrapper<>(Integer.class, new IntegerArgumentType()));
         register(new ArgumentTypeWrapper<>(String.class, s -> s));
@@ -68,7 +72,9 @@ class TypeCollection {
 
     public Optional<SenderTypeWrapper<?>> findSenderType(Class<?> resultType) {
         SenderTypeWrapper<?> typeHandler = senderTypeMap.get(resultType);
-        if (typeHandler != null) return Optional.of(typeHandler);
+        if (typeHandler != null) {
+            return Optional.of(typeHandler);
+        }
         return this.findGenericSenderType(resultType);
     }
 
@@ -77,7 +83,8 @@ class TypeCollection {
             Optional<? extends SenderType<?>> matchingSenderType = t.getMatchingSenderType(resultType);
 
             if (matchingSenderType.isPresent()) {
-                SenderTypeWrapper<?> typeHandler = new SenderTypeWrapper<>(resultType, (SenderType<T>) matchingSenderType.get());
+                SenderTypeWrapper<?> typeHandler =
+                        new SenderTypeWrapper<>(resultType, (SenderType<T>) matchingSenderType.get());
                 return Optional.of(typeHandler);
             }
         }

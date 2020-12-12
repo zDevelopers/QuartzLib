@@ -4,13 +4,12 @@ import fr.zcraft.quartzlib.components.commands.attributes.Sender;
 import fr.zcraft.quartzlib.components.commands.exceptions.ArgumentParseException;
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import fr.zcraft.quartzlib.components.commands.exceptions.InvalidSenderException;
-import org.bukkit.command.CommandSender;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.command.CommandSender;
 
 class CommandMethod {
     private final Method method;
@@ -34,7 +33,7 @@ class CommandMethod {
             }
         }
 
-        this.arguments = arguments.toArray(new CommandMethodArgument[]{});
+        this.arguments = arguments.toArray(new CommandMethodArgument[] {});
         this.parameterCount = parameters.length;
     }
 
@@ -51,7 +50,8 @@ class CommandMethod {
         }
     }
 
-    private Object[] parseArguments(CommandSender sender, String[] args) throws ArgumentParseException, InvalidSenderException {
+    private Object[] parseArguments(CommandSender sender, String[] args)
+            throws ArgumentParseException, InvalidSenderException {
         Object[] parsed = new Object[parameterCount];
 
         for (int i = 0; i < arguments.length; i++) {

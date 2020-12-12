@@ -3,104 +3,124 @@ package fr.zcraft.quartzlib.components.commands;
 import fr.zcraft.quartzlib.MockedBukkitTest;
 import fr.zcraft.quartzlib.components.commands.attributes.Sender;
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import java.util.stream.StreamSupport;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.StreamSupport;
-
-// This is outside because inner classes cannot have statics
-class CommandWithStatics {
-    public void add () {}
-    private void get () {}
-    protected void list () {}
-    public void delete () {}
-    void update () {}
-    static public void staticMethod () {}
-}
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class CommandGraphTests extends MockedBukkitTest {
     private CommandManager commands;
 
-    @BeforeEach
-    public void beforeEach () {
+    @Before
+    public void beforeEach() {
         commands = new CommandManager();
     }
 
-    @Test public void canDiscoverBasicSubcommands() {
+    @Test
+    public void canDiscoverBasicSubcommands() {
         class FooCommand {
-            public void add () {}
-            public void get () {}
-            public void list () {}
+            public void add() {
+            }
+
+            public void get() {
+            }
+
+            public void list() {
+            }
         }
 
-        CommandGroup commandGroup = new CommandGroup(FooCommand.class, () -> new FooCommand(), "foo", new TypeCollection());
-        String[] commandNames = StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName).toArray(String[]::new);
-        Assertions.assertArrayEquals(new String[] {"add", "get", "list"}, commandNames);
+        CommandGroup commandGroup =
+                new CommandGroup(FooCommand.class, () -> new FooCommand(), "foo", new TypeCollection());
+        String[] commandNames =
+                StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName)
+                        .toArray(String[]::new);
+        Assert.assertArrayEquals(new String[] {"add", "get", "list"}, commandNames);
     }
 
-    @Test public void onlyDiscoversPublicMethods() {
-        CommandGroup commandGroup = new CommandGroup(CommandWithStatics.class, () -> new CommandWithStatics(), "foo", new TypeCollection());
-        String[] commandNames = StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName).toArray(String[]::new);
-        Assertions.assertArrayEquals(new String[] {"add", "delete"}, commandNames);
+    @Test
+    public void onlyDiscoversPublicMethods() {
+        CommandGroup commandGroup =
+                new CommandGroup(CommandWithStatics.class, () -> new CommandWithStatics(), "foo", new TypeCollection());
+        String[] commandNames =
+                StreamSupport.stream(commandGroup.getSubCommands().spliterator(), false).map(CommandNode::getName)
+                        .toArray(String[]::new);
+        Assert.assertArrayEquals(new String[] {"add", "delete"}, commandNames);
     }
 
-    @Test public void canRunBasicSubcommands() throws CommandException {
+    @Test
+    public void canRunBasicSubcommands() throws CommandException {
         final boolean[] ran = {false, false, false};
 
         class FooCommand {
-            public void add () { ran[0] = true; }
-            public void get () { ran[1] = true; }
-            public void list () { ran[2] = true; }
+            public void add() {
+                ran[0] = true;
+            }
+
+            public void get() {
+                ran[1] = true;
+            }
+
+            public void list() {
+                ran[2] = true;
+            }
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "get");
-        Assertions.assertArrayEquals(new boolean[] { false, true, false }, ran);
+        Assert.assertArrayEquals(new boolean[] {false, true, false}, ran);
     }
 
-    @Test public void canReceiveStringArguments() throws CommandException {
+    @Test
+    public void canReceiveStringArguments() throws CommandException {
         final String[] argValue = {""};
 
         class FooCommand {
-            public void add (String arg) { argValue[0] = arg; }
+            public void add(String arg) {
+                argValue[0] = arg;
+            }
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "add", "pomf");
-        Assertions.assertArrayEquals(new String[] { "pomf" }, argValue);
+        Assert.assertArrayEquals(new String[] {"pomf"}, argValue);
     }
 
-    @Test public void canReceiveParsedArguments() throws CommandException {
+    @Test
+    public void canReceiveParsedArguments() throws CommandException {
         final int[] argValue = {0};
 
         class FooCommand {
-            public void add (Integer arg) { argValue[0] = arg; }
+            public void add(Integer arg) {
+                argValue[0] = arg;
+            }
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "add", "42");
-        Assertions.assertArrayEquals(new int[] { 42 }, argValue);
+        Assert.assertArrayEquals(new int[] {42}, argValue);
     }
 
-    enum FooEnum { FOO, BAR }
-    @Test public void canReceiveEnumArguments() throws CommandException {
+    @Test
+    public void canReceiveEnumArguments() throws CommandException {
         final FooEnum[] argValue = {null};
 
         class FooCommand {
-            public void add (FooEnum arg) { argValue[0] = arg; }
+            public void add(FooEnum arg) {
+                argValue[0] = arg;
+            }
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "add", "foo");
-        Assertions.assertArrayEquals(new FooEnum[] { FooEnum.FOO }, argValue);
+        Assert.assertArrayEquals(new FooEnum[] {FooEnum.FOO}, argValue);
         commands.run(server.addPlayer(), "foo", "add", "bar");
-        Assertions.assertArrayEquals(new FooEnum[] { FooEnum.BAR }, argValue);
+        Assert.assertArrayEquals(new FooEnum[] {FooEnum.BAR}, argValue);
     }
 
-    @Test public void canReceiveCommandSender() throws CommandException {
+    @Test
+    public void canReceiveCommandSender() throws CommandException {
         final CommandSender[] senders = {null};
         Player player = server.addPlayer();
 
@@ -111,7 +131,11 @@ public class CommandGraphTests extends MockedBukkitTest {
         }
 
         commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
-        commands.run(player,"foo", "add");
-        Assertions.assertArrayEquals(new CommandSender[] { player }, senders);
+        commands.run(player, "foo", "add");
+        Assert.assertArrayEquals(new CommandSender[] {player}, senders);
+    }
+
+    enum FooEnum {
+        FOO, BAR
     }
 }

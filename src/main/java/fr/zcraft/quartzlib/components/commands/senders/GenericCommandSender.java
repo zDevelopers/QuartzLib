@@ -2,11 +2,9 @@ package fr.zcraft.quartzlib.components.commands.senders;
 
 import fr.zcraft.quartzlib.components.commands.GenericSenderType;
 import fr.zcraft.quartzlib.components.commands.SenderType;
-import fr.zcraft.quartzlib.components.commands.exceptions.ArgumentParseException;
 import fr.zcraft.quartzlib.components.commands.exceptions.InvalidSenderException;
-import org.bukkit.command.CommandSender;
-
 import java.util.Optional;
+import org.bukkit.command.CommandSender;
 
 public class GenericCommandSender implements GenericSenderType<CommandSender> {
     @Override
@@ -17,11 +15,11 @@ public class GenericCommandSender implements GenericSenderType<CommandSender> {
         return Optional.empty();
     }
 
-    static private class InvalidSenderTypeException extends InvalidSenderException {
+    private static class InvalidSenderTypeException extends InvalidSenderException {
 
     }
 
-    static private class CommandSenderSubType implements SenderType<CommandSender> {
+    private static class CommandSenderSubType implements SenderType<CommandSender> {
         private final Class<?> subtype;
 
         private CommandSenderSubType(Class<?> subtype) {
