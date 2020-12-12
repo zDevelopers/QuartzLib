@@ -93,6 +93,7 @@ class CommandGroup extends CommandNode {
     private void runSelf(Object instance, CommandSender sender, String[] args) throws CommandException {
         String commandName = args[0];
         CommandNode subCommand = subCommands.get(commandName);
+        // TODO: handle null
         subCommand.run(instance, sender, Arrays.copyOfRange(args, 1, args.length));
     }
 

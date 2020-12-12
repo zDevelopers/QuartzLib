@@ -68,7 +68,7 @@ public class CommandGraphTests extends MockedBukkitTest {
             }
         }
 
-        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "get");
         Assert.assertArrayEquals(new boolean[] {false, true, false}, ran);
     }
@@ -83,7 +83,7 @@ public class CommandGraphTests extends MockedBukkitTest {
             }
         }
 
-        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "add", "pomf");
         Assert.assertArrayEquals(new String[] {"pomf"}, argValue);
     }
@@ -98,7 +98,7 @@ public class CommandGraphTests extends MockedBukkitTest {
             }
         }
 
-        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "add", "42");
         Assert.assertArrayEquals(new int[] {42}, argValue);
     }
@@ -113,7 +113,7 @@ public class CommandGraphTests extends MockedBukkitTest {
             }
         }
 
-        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(server.addPlayer(), "foo", "add", "foo");
         Assert.assertArrayEquals(new FooEnum[] {FooEnum.FOO}, argValue);
         commands.run(server.addPlayer(), "foo", "add", "bar");
@@ -131,7 +131,7 @@ public class CommandGraphTests extends MockedBukkitTest {
             }
         }
 
-        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
         commands.run(player, "foo", "add");
         Assert.assertArrayEquals(new CommandSender[] {player}, senders);
     }
@@ -155,9 +155,8 @@ public class CommandGraphTests extends MockedBukkitTest {
             }
         }
 
-        Player player = server.addPlayer();
-        commands.registerCommand("foo", FooCommand.class, () -> new FooCommand());
-        commands.run(player, "foo", "sub", "add");
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
+        commands.run(server.addPlayer(), "foo", "sub", "add");
         Assert.assertArrayEquals(new boolean[] {true}, ran);
     }
 
