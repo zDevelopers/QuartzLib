@@ -47,6 +47,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
@@ -67,16 +68,30 @@ public abstract class ItemUtils {
     }
 
     /**
-     * Simulates the player consuming the itemstack in its hand, depending on
-     * his game mode. This decreases the ItemStack's size by one, and replaces
+     * Simulates the player consuming the ItemStack in their main hand, depending on
+     * their game mode. This decreases the ItemStack's size by one, and replaces
      * it with air if nothing is left.
      *
      * @param player The player that will consume the stack.
-     * @return The updated stack.
+     * @return The updated ItemStack.
      */
-    public static ItemStack consumeItem(Player player) {
-        ItemStack newStack = consumeItem(player, player.getItemInHand());
-        player.setItemInHand(newStack);
+    public static ItemStack consumeItemInMainHand(Player player) {
+        ItemStack newStack = consumeItem(player, player.getInventory().getItemInMainHand());
+        player.getInventory().setItemInMainHand(newStack);
+        return newStack;
+    }
+
+    /**
+     * Simulates the player consuming the ItemStack in their main hand, depending on
+     * their game mode. This decreases the ItemStack's size by one, and replaces
+     * it with air if nothing is left.
+     *
+     * @param player The player that will consume the stack.
+     * @return The updated ItemStack.
+     */
+    public static ItemStack consumeItemInOffHand(Player player) {
+        ItemStack newStack = consumeItem(player, player.getInventory().getItemInOffHand());
+        player.getInventory().setItemInOffHand(newStack);
         return newStack;
     }
 
@@ -182,48 +197,32 @@ public abstract class ItemUtils {
      * @param player The player that is using the item.
      * @param item   The item in the player's hand.
      * @param factor The amount of damage taken.
+     * @return `true` if the damaged item was broken, `false` otherwise.
      */
-    public static void damageItemInHand(Player player, ItemStack item, int factor) {
-        if (player == null) {
-            throw new IllegalArgumentException("Player can't be null.");
-        }
+    public static boolean damageItem(@NotNull Player player, @NotNull ItemStack item, int factor) {
         if (player.getGameMode() == GameMode.CREATIVE) {
-            return;
+            return false;
         }
 
-        short newDurability = item.getDurability();
+        ItemMeta meta = item.getItemMeta();
+
+        if (!(meta instanceof Damageable)) {
+            return false;
+        }
+
+        int newDurability = ((Damageable) meta).getDamage();
         newDurability += newDurability(item.getEnchantmentLevel(Enchantment.DURABILITY)) * factor;
 
         if (newDurability >= item.getType().getMaxDurability()) {
-            breakItemInHand(player, item);
+            InventoryUtils.breakItemInHand(player, item);
+            player.updateInventory();
+            return true;
         } else {
-            item.setDurability(newDurability);
-            //player.getInventory().setItemInHand(item);
+            ((Damageable) meta).setDamage(newDurability);
+            item.setItemMeta(meta);
+            player.updateInventory();
+            return false;
         }
-
-        player.updateInventory();
-    }
-
-    /**
-     * Breaks the item currently in the hand of the player.
-     *
-     * @param player The player.
-     * @param hand   The hand to retrieve the item from. This will always be the main hand if
-     *               the Bukkit build don't support dual-wielding.
-     */
-    public static void breakItemInHand(Player player, DualWielding hand) {
-        DualWielding.setItemInHand(player, hand, new ItemStack(Material.AIR));
-        //player.playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 1);
-    }
-
-    /**
-     * Breaks the given item if it is found in one of the player's hands.
-     *
-     * @param player The player.
-     * @param item   The item to break.
-     */
-    public static void breakItemInHand(Player player, ItemStack item) {
-        breakItemInHand(player, DualWielding.getHoldingHand(player, item));
     }
 
     /**
