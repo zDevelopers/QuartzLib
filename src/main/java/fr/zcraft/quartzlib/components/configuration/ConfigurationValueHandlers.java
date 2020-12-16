@@ -30,7 +30,6 @@
 
 package fr.zcraft.quartzlib.components.configuration;
 
-import fr.zcraft.quartzlib.tools.MinecraftVersion;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
@@ -621,15 +620,7 @@ public abstract class ConfigurationValueHandlers {
      */
     @ConfigurationValueHandler
     public static BannerMeta handleBannerValue(final Map map) throws ConfigurationParseException {
-        final Material bannerMaterial;
-
-        if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER) {
-            bannerMaterial = Material.valueOf("BANNER");
-        } else {
-            bannerMaterial = Material.valueOf("WHITE_BANNER");
-        }
-
-        final BannerMeta banner = (BannerMeta) new ItemStack(bannerMaterial).getItemMeta();
+        final BannerMeta banner = (BannerMeta) new ItemStack(Material.WHITE_BANNER).getItemMeta();
         final DyeColor baseColor = getValue(map, "color", DyeColor.BLACK);
         final List<?> patterns = getListValue(map, "patterns", new ArrayList<>(), Object.class);
 
