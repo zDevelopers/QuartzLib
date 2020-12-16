@@ -30,15 +30,28 @@
 
 package fr.zcraft.quartzlib.tools.items;
 
+import fr.zcraft.quartzlib.core.QuartzComponent;
+import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import java.lang.reflect.Field;
+import java.util.Map;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A fake enchantment to add a glowing effect on any item.
@@ -47,13 +60,14 @@ import org.bukkit.inventory.meta.ItemMeta;
  *
  * @author Amaury Carrade
  */
-public class GlowEffect extends EnchantmentWrapper {
-    private static final int ENCHANTMENT_ID = 254;
-    private static final String ENCHANTMENT_NAME = "GlowEffect";
-    private static Enchantment glow;
+public class GlowEffect extends QuartzComponent {
+    private static final String ENCHANTMENT_NAME = "____gloweffect____";
+    @Nullable
+    private static Enchantment glowEnchantment = null;
 
-    protected GlowEffect(String id) {
-        super(id);
+    @Override
+    protected void onEnable() {
+        QuartzLib.registerEvents(new GlowEnchantEventListener());
     }
 
     /**
@@ -61,9 +75,15 @@ public class GlowEffect extends EnchantmentWrapper {
      *
      * @return an instance of the fake enchantment.
      */
-    private static Enchantment getGlow() {
-        if (glow != null) {
-            return glow;
+    private static @NotNull Enchantment getGlow() {
+        if (glowEnchantment != null) {
+            return glowEnchantment;
+        }
+
+        glowEnchantment = Enchantment.getByKey(getEnchantmentKey());
+
+        if (glowEnchantment != null) {
+            return glowEnchantment;
         }
 
         try {
@@ -76,24 +96,14 @@ public class GlowEffect extends EnchantmentWrapper {
             PluginLogger.error("Unable to re-enable enchantments registrations", e);
         }
 
-        try {
-            try {
-                glow = new GlowEffect("LURE");
-                Enchantment.registerEnchantment(glow);
-            } catch (NoSuchMethodError e) {
-                // 1.13+
+        glowEnchantment = new GlowEffectEnchantment();
+        Enchantment.registerEnchantment(glowEnchantment);
 
-            }
+        return glowEnchantment;
+    }
 
-        } catch (IllegalArgumentException e) {
-            // If the enchantment is already registered - happens on server
-            // reload
-            glow = Enchantment.getByName("LURE"); // getByID required - by
-            // name it doesn't work
-            // (returns null).
-        }
-
-        return glow;
+    private static NamespacedKey getEnchantmentKey() {
+        return new NamespacedKey(QuartzLib.getPlugin(), ENCHANTMENT_NAME);
     }
 
     /**
@@ -156,40 +166,108 @@ public class GlowEffect extends EnchantmentWrapper {
 
         Enchantment glow = getGlow();
         if (glow != null) {
-            return item.getEnchantmentLevel(glow) > 0;
+            // For some reason, item.containsEnchantment() doesn't work, but meta.hasEnchant() does
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                return meta.hasEnchant(glow);
+            }
+            return false;
         }
         return false;
     }
 
-    /* ** Enchantment properties overwritten ** */
+    private static class GlowEnchantEventListener implements Listener {
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        public void onInventoryClick(InventoryClickEvent event) {
+            if (event.getInventory().getType() != InventoryType.GRINDSTONE) {
+                return;
+            }
 
-    @Override
-    public boolean canEnchantItem(ItemStack item) {
-        return true;
+            if (event.getClick().isShiftClick() && hasGlow(event.getCurrentItem())) {
+                event.setResult(Event.Result.DENY);
+                return;
+            }
+
+            Inventory clickedInventory = event.getClickedInventory();
+            if (clickedInventory == null || clickedInventory.getType() != InventoryType.GRINDSTONE) {
+                return;
+            }
+
+            if (hasGlow(event.getCursor())) {
+                event.setResult(Event.Result.DENY);
+                return;
+            }
+
+            for (ItemStack item : clickedInventory) {
+                if (hasGlow(item)) {
+                    event.setResult(Event.Result.DENY);
+                    return;
+                }
+            }
+        }
+
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        public void onInventoryDrag(InventoryDragEvent event) {
+            if (event.getInventory().getType() != InventoryType.GRINDSTONE) {
+                return;
+            }
+
+            for (Map.Entry<Integer, ItemStack> entry : event.getNewItems().entrySet()) {
+                Inventory dragResult = event.getView().getInventory(entry.getKey());
+                if (dragResult != null && dragResult.getType() == InventoryType.GRINDSTONE) {
+                    if (hasGlow(entry.getValue())) {
+                        event.setResult(Event.Result.DENY);
+                        return;
+                    }
+                }
+            }
+        }
     }
 
-    @Override
-    public boolean conflictsWith(Enchantment other) {
-        return false;
-    }
+    private static class GlowEffectEnchantment extends Enchantment {
+        protected GlowEffectEnchantment() {
+            super(getEnchantmentKey());
+        }
 
-    @Override
-    public EnchantmentTarget getItemTarget() {
-        return null;
-    }
+        @Override
+        public boolean canEnchantItem(@NotNull ItemStack item) {
+            return true;
+        }
 
-    @Override
-    public int getMaxLevel() {
-        return 5;
-    }
+        @Override
+        public boolean conflictsWith(@NotNull Enchantment other) {
+            return false;
+        }
 
-    @Override
-    public String getName() {
-        return ENCHANTMENT_NAME;
-    }
+        @Override
+        public @NotNull EnchantmentTarget getItemTarget() {
+            return EnchantmentTarget.ALL;
+        }
 
-    @Override
-    public int getStartLevel() {
-        return 1;
+        @Override
+        public boolean isTreasure() {
+            return false;
+        }
+
+        @Override
+        public boolean isCursed() {
+            return false;
+        }
+
+        @Override
+        public int getMaxLevel() {
+            return 1;
+        }
+
+        @Override
+        public @NotNull String getName() {
+            return ENCHANTMENT_NAME;
+        }
+
+        @Override
+        public int getStartLevel() {
+            return 1;
+        }
+
     }
 }

@@ -37,6 +37,7 @@ import fr.zcraft.quartzlib.components.scoreboard.Sidebar;
 import fr.zcraft.quartzlib.components.scoreboard.SidebarScoreboard;
 import fr.zcraft.quartzlib.core.QuartzPlugin;
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import fr.zcraft.quartzlib.tools.items.GlowEffect;
 import fr.zcraft.ztoaster.commands.AddCommand;
 import fr.zcraft.ztoaster.commands.ListCommand;
 import fr.zcraft.ztoaster.commands.OpenCommand;
@@ -108,7 +109,7 @@ public class Toaster extends QuartzPlugin implements Listener {
         toasts = new ArrayList<>();
         toastCounter = 0;
 
-        loadComponents(Gui.class, Commands.class, ToasterWorker.class, SidebarScoreboard.class, I18n.class);
+        loadComponents(Gui.class, Commands.class, ToasterWorker.class, SidebarScoreboard.class, I18n.class, GlowEffect.class);
 
         Commands.register("toaster", AddCommand.class, OpenCommand.class, ListCommand.class);
 
