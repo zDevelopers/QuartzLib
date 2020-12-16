@@ -158,6 +158,7 @@ public abstract class InventoryUtils {
             case OFF_HAND:
                 player.getInventory().setItemInOffHand(item);
                 break;
+            default: break;
         }
         //player.playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 1);
     }
