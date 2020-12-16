@@ -54,9 +54,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A fake enchantment to add a glowing effect on any item.
+ * Utilities creating a fake enchantment to add a glowing effect on any item.
  *
- * <strong>Only work with 1.12 and before.</strong>
+ * <p><b>NOTE:</b> this component needs to be loaded at startup, otherwise it will still works but items using
+ * created using this effect may be used in a grindstone to cheat out experience to players.</p>
  *
  * @author Amaury Carrade
  */
@@ -75,7 +76,7 @@ public class GlowEffect extends QuartzComponent {
      *
      * @return an instance of the fake enchantment.
      */
-    private static @NotNull Enchantment getGlow() {
+    private static Enchantment getGlow() {
         if (glowEnchantment != null) {
             return glowEnchantment;
         }
@@ -108,8 +109,6 @@ public class GlowEffect extends QuartzComponent {
 
     /**
      * Adds a glowing effect to the given item stack.
-     * <p>Warning: this effect is a bit unstable: it will be thrown away if the
-     * item's meta is updated. So add it at the end.</p>
      *
      * @param item The item.
      */
