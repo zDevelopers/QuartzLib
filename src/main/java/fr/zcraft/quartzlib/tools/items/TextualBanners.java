@@ -30,7 +30,6 @@
 
 package fr.zcraft.quartzlib.tools.items;
 
-import fr.zcraft.quartzlib.tools.MinecraftVersion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -281,14 +280,6 @@ public final class TextualBanners {
         return patterns;
     }
 
-    private static Material getBannerMaterial() {
-        if (MinecraftVersion.get() == MinecraftVersion.VERSION_1_12_2_OR_OLDER) {
-            return Material.valueOf("BANNER");
-        }
-
-        return Material.valueOf("WHITE_BANNER");
-    }
-
     /**
      * Returns a banner containing the patterns with the background color.
      *
@@ -297,7 +288,7 @@ public final class TextualBanners {
      * @return An {@link ItemStack} containing these parameters
      */
     public static ItemStack getBanner(DyeColor color, List<Pattern> patterns) {
-        ItemStack banner = new ItemStack(getBannerMaterial());
+        ItemStack banner = new ItemStack(Material.WHITE_BANNER);
         banner.setItemMeta(getBannerMeta(color, patterns));
         return banner;
     }
@@ -310,7 +301,7 @@ public final class TextualBanners {
      * @return An ItemMeta containing these parameters
      */
     public static BannerMeta getBannerMeta(DyeColor color, List<Pattern> patterns) {
-        BannerMeta meta = (BannerMeta) new ItemStack(getBannerMaterial()).getItemMeta();
+        BannerMeta meta = (BannerMeta) new ItemStack(Material.WHITE_BANNER).getItemMeta();
         meta.setBaseColor(color);
         meta.setPatterns(patterns);
         return meta;

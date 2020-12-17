@@ -31,7 +31,6 @@
 package fr.zcraft.quartzlib.components.gui;
 
 import fr.zcraft.quartzlib.tools.Callback;
-import fr.zcraft.quartzlib.tools.MinecraftVersion;
 import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
@@ -228,21 +227,8 @@ public class PromptGui extends GuiBase {
         signLocation.getWorld().getBlockAt(signLocation.clone().add(0, -1, 0)).setType(Material.GLASS);
 
         final Block block = signLocation.getWorld().getBlockAt(signLocation);
-        final Material signMaterial;
 
-        switch (MinecraftVersion.get()) {
-            case VERSION_1_12_2_OR_OLDER:
-                signMaterial = Material.valueOf("SIGN_POST");
-                break;
-            case VERSION_1_13_X:
-                signMaterial = Material.valueOf("SIGN");
-                break;
-            default:
-                signMaterial = Material.valueOf("OAK_SIGN");
-                break;
-        }
-
-        block.setType(signMaterial, false);
+        block.setType(Material.OAK_SIGN, false);
 
         final Sign sign = (Sign) block.getState();
         setSignContents(sign, contents);
