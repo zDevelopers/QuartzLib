@@ -33,6 +33,7 @@ package fr.zcraft.quartzlib.tools.items;
 import fr.zcraft.quartzlib.core.QuartzComponent;
 import fr.zcraft.quartzlib.core.QuartzLib;
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import java.lang.reflect.Field;
 import java.util.Map;
 import org.bukkit.Material;
@@ -69,6 +70,7 @@ public class GlowEffect extends QuartzComponent {
     @Override
     protected void onEnable() {
         QuartzLib.registerEvents(new GlowEnchantEventListener());
+        getGlow();
     }
 
     /**
@@ -90,9 +92,7 @@ public class GlowEffect extends QuartzComponent {
         try {
             // We change this to force Bukkit to accept a new enchantment.
             // Thanks to Cybermaxke on BukkitDev.
-            Field acceptingNewField = Enchantment.class.getDeclaredField("acceptingNew");
-            acceptingNewField.setAccessible(true);
-            acceptingNewField.set(null, true);
+            Reflection.setFieldValue(Enchantment.class, null, "acceptingNew", true);
         } catch (Exception e) {
             PluginLogger.error("Unable to re-enable enchantments registrations", e);
         }
@@ -121,18 +121,6 @@ public class GlowEffect extends QuartzComponent {
 
         if (glow != null) {
             item.addEnchantment(glow, 1);
-        } else {
-            //from https://github.com/zDevelopers/QuartzLib/pull/21/files#diff-cd248f55f1484c684edc6fa27c585899L167-R44
-            if (item.getItemMeta().hasEnchants()) {
-                return;
-            }
-
-            final Enchantment fakeGlow =
-                    item.getType() != Material.FISHING_ROD ? Enchantment.LURE : Enchantment.ARROW_DAMAGE;
-            final ItemMeta im = item.getItemMeta();
-            im.addEnchant(fakeGlow, 1, true);
-            im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            item.setItemMeta(im);
         }
     }
 
