@@ -1,0 +1,87 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid   ""
+msgstr  "Project-Id-Version: PACKAGE VERSION\n"
+        "Report-Msgid-Bugs-To: AmauryCarrade\n"
+        "POT-Creation-Date: 2016-01-15 23:46+0100\n"
+        "PO-Revision-Date: 2016-01-16 04:04+0100\n"
+        "Last-Translator: Amaury Carrade\n"
+        "Language-Team: Amaury Carrade\n"
+        "Language: fr_FR\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=2; plural=n>1;\n"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:75
+msgid   "{darkgreen}{bold}Cook"
+msgstr  "{darkgreen}{bold}Cook"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:78
+msgid   "{yellow}{bold}Inside the toaster"
+msgstr  "{yellow}{bold}Inside da toasterr"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:81
+msgid   "{gold}{bold}Cooked"
+msgstr  "{gold}{bold}Cooked"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:90
+msgid   "{red}{bold}♨ Toaster ♨"
+msgstr  "{red}{bold}♨ Toaster ♨"
+
+#: fr/zcraft/ztoaster/ToasterSidebar.java:93
+msgid   "{blue}Toaster"
+msgstr  "{blue}Toaster"
+
+#: fr/zcraft/ztoaster/ToastExplorer.java:44
+msgid   "{black}Toaster contents"
+msgstr   "{black}Toaster contents"
+
+#. Title of the cooked toast item in GUI
+#: fr/zcraft/ztoaster/ToastExplorer.java:57
+msgid   "{white}Cooked toast #{0}"
+msgstr   "{white}Cooked toast #{0}"
+
+#. Title of the raw toast item in GUI
+#: fr/zcraft/ztoaster/ToastExplorer.java:60
+msgid   "{white}Raw toast #{0}"
+msgstr   "{white}Raw toast #{0}"
+
+#: fr/zcraft/ztoaster/commands/AddCommand.java:56
+#, possible-java-format
+msgid   "DING! Toast {0} is ready !"
+msgstr  "DING! Toast {0} is ready !"
+
+#: fr/zcraft/ztoaster/commands/AddCommand.java:64
+msgid   "{ce}Oh no! A toasted exception !"
+msgstr  "{ce}Oh no! A toasted exception !"
+
+#: fr/zcraft/ztoaster/commands/AddCommand.java:65
+msgid   "{ce}See toaster logs for details."
+msgstr  "{ce}See toaster logs for details."
+
+#: fr/zcraft/ztoaster/commands/AddCommand.java:69
+#, possible-java-format
+msgid   "Toast {0} added."
+msgstr  "Toast {0} added."
+
+#: fr/zcraft/ztoaster/commands/AddCommand.java:63
+#, java-format
+msgid   "One toast added."
+msgid_plural "{0} toasts added."
+msgstr[0]  "One toast added."
+msgstr[1]  "{0} toasts added."
+
+#. Output of the command /toaster list, without toasts.
+#: fr/zcraft/ztoaster/commands/ListCommand.java:74
+msgid   "There are no toasts here ..."
+msgstr  "There are no toasts here ..."
+
+#: fr/zcraft/ztoaster/commands/ListCommand.java:79
+#, java-format
+msgid   "  Toast #{0}"
+msgstr  "  Toast #{0}"

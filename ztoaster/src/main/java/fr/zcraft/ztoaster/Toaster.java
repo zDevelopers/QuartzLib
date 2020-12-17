@@ -68,6 +68,8 @@ public class Toaster extends QuartzPlugin implements Listener {
      */
     private Sidebar toasterSidebar;
 
+    public Toaster () {}
+
     protected Toaster(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
         super(loader, description, dataFolder, file);
     }
