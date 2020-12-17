@@ -2,6 +2,7 @@ package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import fr.zcraft.quartzlib.components.commands.exceptions.MissingSubcommandException;
+import fr.zcraft.quartzlib.components.commands.exceptions.UnknownSubcommandException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,9 +98,11 @@ public class CommandGroup extends CommandNode {
             throw new MissingSubcommandException(this);
         }
 
-        String commandName = args[0];
-        CommandNode subCommand = subCommands.get(commandName);
-        // TODO: handle null
+        CommandNode subCommand = subCommands.get(args[0]);
+        if (subCommand == null) {
+            throw new UnknownSubcommandException(this, args[0]);
+        }
+
         subCommand.run(instance, sender, Arrays.copyOfRange(args, 1, args.length));
     }
 
