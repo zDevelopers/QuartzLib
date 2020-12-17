@@ -463,23 +463,15 @@ public abstract class ItemUtils {
     }
 
     private static String getI18nPotionKey(ItemStack item) {
-        switch (item.getType().name()) {
-            case "SPLASH_POTION":
+        switch (item.getType()) {
+            case SPLASH_POTION:
                 return "splash_potion.effect.";
-            case "LINGERING_POTION":
+            case LINGERING_POTION:
                 return "lingering_potion.effect.";
-            case "POTION":
-                break;
+            case POTION:
             default:
                 return "potion.effect";
         }
-
-        Potion potion = Potion.fromItemStack(item);
-
-        if (potion.isSplash()) {
-            return "splash_potion.effect.";
-        }
-        return "potion.effect.";
     }
 
     /**
