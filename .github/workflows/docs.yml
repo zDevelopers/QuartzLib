@@ -37,7 +37,7 @@ jobs:
           # Create dir if needed, cleanup old doc and copy new one
           mkdir -p web/static/docs/
           rm -rf web/static/docs/$PROJECT_NAME_LOWER
-          cp -r target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
+          cp -r quartzlib/target/site/apidocs web/static/docs/$PROJECT_NAME_LOWER
 
           # Go to website repository
           cd web
