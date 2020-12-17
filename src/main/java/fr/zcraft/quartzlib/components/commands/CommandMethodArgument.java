@@ -1,6 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.ArgumentParseException;
+import fr.zcraft.quartzlib.components.commands.exceptions.UnknownArgumentTypeException;
 import java.lang.reflect.Parameter;
 
 public class CommandMethodArgument {
@@ -8,10 +9,16 @@ public class CommandMethodArgument {
     private final int position;
     private final ArgumentTypeWrapper<?> typeHandler;
 
-    public CommandMethodArgument(Parameter parameter, int position, TypeCollection typeCollection) {
+    public CommandMethodArgument(
+            CommandMethod parent,
+            Parameter parameter,
+            int position,
+            TypeCollection typeCollection
+    ) {
         this.parameter = parameter;
         this.position = position;
-        this.typeHandler = typeCollection.findArgumentType(parameter.getType()).get(); // FIXME: handle unknown types
+        this.typeHandler = typeCollection.findArgumentType(parameter.getType())
+            .orElseThrow(() -> new UnknownArgumentTypeException(parent.getMethod(), parameter.getType()));
     }
 
     public Object parse(String raw) throws ArgumentParseException {

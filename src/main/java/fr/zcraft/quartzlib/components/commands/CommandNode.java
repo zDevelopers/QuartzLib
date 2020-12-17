@@ -4,7 +4,7 @@ import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 
-abstract class CommandNode {
+public abstract class CommandNode {
     private final String name;
     @Nullable private final CommandGroup parent;
 

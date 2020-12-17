@@ -30,6 +30,7 @@
 
 package fr.zcraft.ztoaster;
 
+import fr.zcraft.quartzlib.components.commands.CommandManager;
 import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzlib.components.i18n.I18n;
 import fr.zcraft.quartzlib.components.scoreboard.Sidebar;
@@ -64,7 +65,8 @@ public class Toaster extends QuartzPlugin implements Listener {
      */
     private Sidebar toasterSidebar;
 
-    public Toaster () {}
+    public Toaster() {
+    }
 
     protected Toaster(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
         super(loader, description, dataFolder, file);
@@ -72,6 +74,7 @@ public class Toaster extends QuartzPlugin implements Listener {
 
     /**
      * .
+     *
      * @return The id for a new toast.
      */
     public static int newToastId() {
@@ -80,6 +83,7 @@ public class Toaster extends QuartzPlugin implements Listener {
 
     /**
      * .
+     *
      * @return an array of all the toasts ever created (until toaster restart).
      */
     public static Toast[] getToasts() {
@@ -106,7 +110,8 @@ public class Toaster extends QuartzPlugin implements Listener {
 
         loadComponents(Gui.class, ToasterWorker.class, SidebarScoreboard.class, I18n.class);
 
-        // Commands.register("toaster", AddCommand.class, OpenCommand.class, ListCommand.class);
+        new CommandManager()
+                .registerCommand("toaster", ToastCommands.class, ToastCommands::new);
 
         I18n.useDefaultPrimaryLocale();
         I18n.setFallbackLocale(Locale.US);

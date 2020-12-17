@@ -29,7 +29,7 @@ class CommandMethod {
             if (parameter.isAnnotationPresent(Sender.class)) { // TODO: check for multiple sender arguments
                 senderArgument = new CommandMethodSenderArgument(parameter, i, typeCollection);
             } else {
-                arguments.add(new CommandMethodArgument(parameter, i, typeCollection));
+                arguments.add(new CommandMethodArgument(this, parameter, i, typeCollection));
             }
         }
 
@@ -68,5 +68,9 @@ class CommandMethod {
 
     public CommandMethodArgument[] getArguments() {
         return arguments;
+    }
+
+    public Method getMethod() {
+        return method;
     }
 }

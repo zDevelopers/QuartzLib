@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CommandRegistrationTests extends MockedToasterTest {
+public class CommandExecutionTests extends MockedToasterTest {
     private CommandManager commands;
 
     @Before

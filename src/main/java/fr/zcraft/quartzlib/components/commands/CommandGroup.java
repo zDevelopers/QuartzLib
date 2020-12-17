@@ -1,15 +1,17 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import fr.zcraft.quartzlib.components.commands.exceptions.MissingSubcommandException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 
-class CommandGroup extends CommandNode {
+public class CommandGroup extends CommandNode {
     private final Class<?> commandGroupClass;
 
     @Nullable
@@ -52,7 +54,7 @@ class CommandGroup extends CommandNode {
         DiscoveryUtils.getSubCommands(this, typeCollection).forEach(this::addSubCommand);
     }
 
-    public Iterable<CommandNode> getSubCommands() {
+    public Collection<CommandNode> getSubCommands() {
         return this.subCommands.values();
     }
 
@@ -91,6 +93,10 @@ class CommandGroup extends CommandNode {
     }
 
     private void runSelf(Object instance, CommandSender sender, String[] args) throws CommandException {
+        if (args.length == 0) {
+            throw new MissingSubcommandException(this);
+        }
+
         String commandName = args[0];
         CommandNode subCommand = subCommands.get(commandName);
         // TODO: handle null

@@ -41,7 +41,7 @@ import org.bukkit.entity.Player;
  * Utility to send JSON messages.
  *
  * <p>This tool uses the /tellraw command to send the messages. If the JSON is not correctly
- * formatted, the message will not be sent and a Runtime exception containing the exception throw by
+ * formatted, the message will not be sent and a Runtime exception containing the exception thrown by
  * the vanilla /tellraw command will be thrown.</p>
  */
 public final class RawMessage {

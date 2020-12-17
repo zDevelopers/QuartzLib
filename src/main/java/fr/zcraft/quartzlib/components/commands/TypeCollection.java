@@ -62,6 +62,8 @@ class TypeCollection {
         register(new ArgumentTypeWrapper<>(Integer.class, new IntegerArgumentType()));
         register(new ArgumentTypeWrapper<>(String.class, s -> s));
 
+        register(new ArgumentTypeWrapper<>(int.class, new IntegerArgumentType()));
+
         // Generic types
         register(new EnumArgumentType());
 

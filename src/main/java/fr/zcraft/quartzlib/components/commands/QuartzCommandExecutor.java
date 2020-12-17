@@ -1,6 +1,7 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import fr.zcraft.quartzlib.tools.text.RawMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,7 +20,7 @@ public class QuartzCommandExecutor implements CommandExecutor {
         try {
             group.run(sender, args);
         } catch (CommandException e) {
-            throw new RuntimeException(e); // TODO
+            RawMessage.send(sender, e.display(sender).build());
         }
         return true;
     }
