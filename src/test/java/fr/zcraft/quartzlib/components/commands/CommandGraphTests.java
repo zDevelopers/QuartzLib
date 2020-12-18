@@ -160,6 +160,29 @@ public class CommandGraphTests extends MockedBukkitTest {
         Assert.assertArrayEquals(new boolean[] {true}, ran);
     }
 
+    @Test
+    public void canHandleOverrides() throws CommandException {
+        final String[] argValue = {""};
+
+        class FooCommand {
+            public void add(String arg) {
+                argValue[0] = arg;
+            }
+
+            public void add() {
+                argValue[0] = "bar";
+            }
+        }
+
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
+
+        commands.run(server.addPlayer(), "foo", "add", "pomf");
+        Assert.assertArrayEquals(new String[] {"pomf"}, argValue);
+
+        commands.run(server.addPlayer(), "foo", "add");
+        Assert.assertArrayEquals(new String[] {"bar"}, argValue);
+    }
+
     enum FooEnum {
         FOO, BAR
     }

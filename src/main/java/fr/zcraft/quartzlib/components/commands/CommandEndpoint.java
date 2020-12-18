@@ -4,6 +4,7 @@ import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Nullable;
 
 class CommandEndpoint extends CommandNode {
     private final List<CommandMethod> methods = new ArrayList<>();
@@ -14,7 +15,12 @@ class CommandEndpoint extends CommandNode {
 
     @Override
     void run(Object parentInstance, CommandSender sender, String[] args) throws CommandException {
-        this.methods.get(0).run(parentInstance, sender, args);
+        CommandMethod method = findMatchingMethod(args);
+        method.run(parentInstance, sender, args);
+    }
+
+    @Nullable CommandMethod findMatchingMethod(String[] args) {
+        return this.methods.stream().filter(m -> m.getArguments().length == args.length).findFirst().orElse(null);
     }
 
     void addMethod(CommandMethod method) {

@@ -10,13 +10,15 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 class CommandMethod {
-    private final Method method;
-    private final String name;
-    private final CommandMethodArgument[] arguments;
+    @NotNull private final Method method;
+    @NotNull private final String name;
+    @NotNull private final CommandMethodArgument[] arguments;
     private final int parameterCount;
-    private CommandMethodSenderArgument senderArgument = null;
+    @Nullable private CommandMethodSenderArgument senderArgument = null;
 
     CommandMethod(Method method, TypeCollection typeCollection) {
         this.method = method;
@@ -37,7 +39,7 @@ class CommandMethod {
         this.parameterCount = parameters.length;
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
@@ -66,11 +68,11 @@ class CommandMethod {
         return parsed;
     }
 
-    public CommandMethodArgument[] getArguments() {
+    public @NotNull CommandMethodArgument[] getArguments() {
         return arguments;
     }
 
-    public Method getMethod() {
+    public @NotNull Method getMethod() {
         return method;
     }
 }
