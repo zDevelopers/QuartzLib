@@ -1,10 +1,39 @@
 package fr.zcraft.quartzlib.tools.text;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Various string-related utilities.
  */
 public final class StringUtils {
     private StringUtils() {
+    }
+
+    /**
+     * Find the nearest from a given string among the given list of candidates,
+     *   computed based on a Levenshtein Distance.
+     * <p>The string must be from at most a given maximum distance of all candidates, else null is returned.</p>
+     * @param toTest The string to test.
+     * @param candidates The list of candidates.
+     * @param maxDistance The maximum distance.
+     * @param <T> The type of CharSequence to test (usually String)
+     * @return The nearest candidate to the string to test, if found within maxDistance.
+     */
+    @Nullable
+    public static <T extends CharSequence> T levenshteinNearest(T toTest, Iterable<T> candidates, int maxDistance) {
+        T nearest = null;
+        int nearestDistance = maxDistance;
+
+        for (T subCommand : candidates) {
+            int distance = StringUtils.levenshteinDistance(toTest, subCommand);
+
+            if (distance < nearestDistance) {
+                nearest = subCommand;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
     }
 
     /**

@@ -6,6 +6,8 @@ import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzlib.components.rawtext.RawText;
 import fr.zcraft.quartzlib.components.rawtext.RawTextPart;
 import fr.zcraft.quartzlib.tools.text.StringUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
@@ -33,10 +35,14 @@ public class UnknownSubcommandException extends CommandException {
 
         if (nearest != null) {
             text = text.then("\n" + CHAT_PREFIX).color(ChatColor.AQUA)
-                    .then("  " + I.t("Did you mean") + ": ").color(ChatColor.GRAY)
+                    .then("  " + I.t("Did you mean: ")).color(ChatColor.GRAY)
                     .then("/").color(ChatColor.WHITE)
-                    .then(getParents() + " ").color(ChatColor.AQUA)
-                    .then(nearest).color(ChatColor.DARK_AQUA);
+                    .then(getParents() + " ").style(ChatColor.AQUA, ChatColor.UNDERLINE)
+                        .hover(I.t("Click to insert this command"))
+                        .suggest("/" + getParents() + " " + nearest)
+                    .then(nearest).style(ChatColor.DARK_AQUA, ChatColor.UNDERLINE)
+                        .hover(I.t("Click to insert this command"))
+                        .suggest("/" + getParents() + " " + nearest);
         }
 
         return text.build();
@@ -46,20 +52,12 @@ public class UnknownSubcommandException extends CommandException {
 
     @Nullable
     private String getNearestCommand() {
-        String nearest = null;
-        int nearestDistance = MAX_DISTANCE;
+        List<String> names = commandGroup.getSubCommands()
+                .stream()
+                .map(CommandNode::getName)
+                .collect(Collectors.toList());
 
-        for (CommandNode subCommand : commandGroup.getSubCommands()) {
-            String name = subCommand.getName();
-            int distance = StringUtils.levenshteinDistance(attemptedSubcommand, name);
-
-            if (distance < nearestDistance) {
-                nearest = name;
-                nearestDistance = distance;
-            }
-        }
-
-        return nearest;
+        return StringUtils.levenshteinNearest(attemptedSubcommand, names, MAX_DISTANCE);
     }
 
     private String getParents() {
