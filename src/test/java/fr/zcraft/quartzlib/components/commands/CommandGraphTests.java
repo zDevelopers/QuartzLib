@@ -2,9 +2,11 @@ package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.MockedBukkitTest;
 import fr.zcraft.quartzlib.components.commands.annotations.CommandMethod;
+import fr.zcraft.quartzlib.components.commands.annotations.Param;
 import fr.zcraft.quartzlib.components.commands.annotations.Sender;
 import fr.zcraft.quartzlib.components.commands.annotations.SubCommand;
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import java.util.Objects;
 import java.util.stream.StreamSupport;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -251,5 +253,25 @@ public class CommandGraphTests extends MockedBukkitTest {
 
     enum FooEnum {
         FOO, BAR
+    }
+
+    @Test
+    public void canSpecifyParam() throws CommandException {
+        class FooCommand {
+            public void add(String arg) {
+            }
+
+            public void list(@Param("myInt") Integer arg) {
+            }
+        }
+
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
+        CommandGroup fooCommand = Objects.requireNonNull(commands.getCommand("foo"));
+
+        CommandEndpoint addCommand = (CommandEndpoint) Objects.requireNonNull(fooCommand.getSubCommand("add"));
+        Assert.assertEquals("string", addCommand.getMethods().iterator().next().getParameters()[0].getName());
+
+        CommandEndpoint listCommand = (CommandEndpoint) Objects.requireNonNull(fooCommand.getSubCommand("list"));
+        Assert.assertEquals("myInt", listCommand.getMethods().iterator().next().getParameters()[0].getName());
     }
 }

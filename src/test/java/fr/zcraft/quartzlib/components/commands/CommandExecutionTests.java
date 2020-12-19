@@ -15,8 +15,7 @@ public class CommandExecutionTests extends MockedToasterTest {
     }
 
     @Test
-    public void canRegisterAndRunCommand() throws CommandException {
-
+    public void canRegisterAndRunCommand() {
         final boolean[] ran = {false};
 
         class FooCommand {

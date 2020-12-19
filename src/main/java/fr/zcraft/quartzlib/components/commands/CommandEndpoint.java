@@ -4,6 +4,7 @@ import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 class CommandEndpoint extends CommandNode {
     private final SortedSet<CommandMethod> methods = new TreeSet<>();
@@ -15,7 +16,7 @@ class CommandEndpoint extends CommandNode {
     @Override
     void run(Object parentInstance, CommandSender sender, String[] args) throws CommandException {
         for (CommandMethod method : this.methods) {
-            if (method.getArguments().length != args.length) {
+            if (method.getParameters().length != args.length) {
                 continue; // TODO
             }
 
@@ -34,5 +35,9 @@ class CommandEndpoint extends CommandNode {
 
     void addMethod(CommandMethod method) {
         methods.add(method);
+    }
+
+    @NotNull public Iterable<CommandMethod> getMethods() {
+        return methods;
     }
 }

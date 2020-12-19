@@ -59,6 +59,10 @@ public class CommandGroup extends CommandNode {
         return this.subCommands.values();
     }
 
+    @Nullable public CommandNode getSubCommand(String subCommandName) {
+        return this.subCommands.get(subCommandName);
+    }
+
 
     private void addMethod(CommandMethod method) {
         // TODO: handle adding to non-endpoints

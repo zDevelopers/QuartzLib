@@ -13,12 +13,12 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class CommandMethod implements Comparable<CommandMethod> {
+public class CommandMethod implements Comparable<CommandMethod> {
     @NotNull private final Method method;
     @NotNull private final String name;
-    @NotNull private final CommandMethodArgument[] arguments;
+    @NotNull private final CommandMethodParameter[] parameters;
     private final int parameterCount;
-    @Nullable private CommandMethodSenderArgument senderArgument = null;
+    @Nullable private CommandMethodSenderArgument senderParameter = null;
 
     private final int declarationIndex;
     private final int priority;
@@ -28,19 +28,19 @@ class CommandMethod implements Comparable<CommandMethod> {
         this.name = method.getName();
         this.declarationIndex = declarationIndex;
 
-        Parameter[] parameters = method.getParameters();
-        List<CommandMethodArgument> arguments = new ArrayList<>();
-        for (int i = 0; i < parameters.length; i++) {
-            Parameter parameter = parameters[i];
-            if (parameter.isAnnotationPresent(Sender.class)) { // TODO: check for multiple sender arguments
-                senderArgument = new CommandMethodSenderArgument(parameter, i, typeCollection);
+        Parameter[] javaParameters = method.getParameters();
+        List<CommandMethodParameter> parameters = new ArrayList<>();
+        for (int i = 0; i < javaParameters.length; i++) {
+            Parameter parameter = javaParameters[i];
+            if (parameter.isAnnotationPresent(Sender.class)) { // TODO: check for multiple sender parameters
+                senderParameter = new CommandMethodSenderArgument(parameter, i, typeCollection);
             } else {
-                arguments.add(new CommandMethodArgument(this, parameter, i, typeCollection));
+                parameters.add(new CommandMethodParameter(this, parameter, i, typeCollection));
             }
         }
 
-        this.arguments = arguments.toArray(new CommandMethodArgument[] {});
-        this.parameterCount = parameters.length;
+        this.parameters = parameters.toArray(new CommandMethodParameter[] {});
+        this.parameterCount = javaParameters.length;
 
         fr.zcraft.quartzlib.components.commands.annotations.CommandMethod annotation =
                 method.getAnnotation(fr.zcraft.quartzlib.components.commands.annotations.CommandMethod.class);
@@ -68,20 +68,20 @@ class CommandMethod implements Comparable<CommandMethod> {
             throws ArgumentParseException, InvalidSenderException {
         Object[] parsed = new Object[parameterCount];
 
-        for (int i = 0; i < arguments.length; i++) {
-            CommandMethodArgument argument = arguments[i];
+        for (int i = 0; i < parameters.length; i++) {
+            CommandMethodParameter argument = parameters[i];
             parsed[argument.getPosition()] = argument.parse(args[i]);
         }
 
-        if (this.senderArgument != null) {
-            parsed[this.senderArgument.getPosition()] = this.senderArgument.parse(sender);
+        if (this.senderParameter != null) {
+            parsed[this.senderParameter.getPosition()] = this.senderParameter.parse(sender);
         }
 
         return parsed;
     }
 
-    public @NotNull CommandMethodArgument[] getArguments() {
-        return arguments;
+    public @NotNull CommandMethodParameter[] getParameters() {
+        return parameters;
     }
 
     public @NotNull Method getMethod() {

@@ -6,15 +6,17 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 abstract class DiscoveryUtils {
     public static Stream<CommandMethod> getCommandMethods(Class<?> commandGroupClass, TypeCollection typeCollection) {
         // Yay java "lambdas"
-        AtomicInteger declarationIndex = new AtomicInteger();
+        AtomicInteger declarationIndex = new AtomicInteger(0);
 
         return Arrays.stream(commandGroupClass.getDeclaredMethods())
                 .filter(m -> hasRunnableModifiers(m.getModifiers()))
@@ -45,5 +47,31 @@ abstract class DiscoveryUtils {
 
     private static boolean hasRunnableModifiers(int modifiers) {
         return Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers);
+    }
+
+    public static String generateArgumentName(Method declaringMethod, Parameter parameter) {
+        String parameterTypeName = generateArgumentName(parameter.getType());
+        Parameter[] parametersWithSameTypeName = Arrays.stream(declaringMethod.getParameters())
+                .filter(p -> parameterTypeName.equals(generateArgumentName(p.getType())))
+                .toArray(Parameter[]::new);
+
+        if (parametersWithSameTypeName.length <= 1) {
+            return parameterTypeName;
+        }
+
+        int index = IntStream.range(0, parametersWithSameTypeName.length)
+                .filter(i -> parameter == parametersWithSameTypeName[i])
+                .findFirst() // first occurrence
+                .orElse(-1) + 1;
+
+        return parameterTypeName + index;
+    }
+
+    private static String generateArgumentName(Class<?> type) {
+        String parameterTypeName = type.getSimpleName();
+        if ("".equals(parameterTypeName)) {
+            return "arg";
+        }
+        return Character.toLowerCase(parameterTypeName.charAt(0)) + parameterTypeName.substring(1);
     }
 }

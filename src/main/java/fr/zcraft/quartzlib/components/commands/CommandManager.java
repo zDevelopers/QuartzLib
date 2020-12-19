@@ -8,9 +8,10 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.jetbrains.annotations.Nullable;
 
 public class CommandManager {
-    private final Map<String, CommandNode> rootCommands = new HashMap<>();
+    private final Map<String, CommandGroup> rootCommands = new HashMap<>();
     private final TypeCollection typeCollection = new TypeCollection();
 
     public <T> void addCommand(String name, Class<T> commandType, Supplier<T> commandClassSupplier) {
@@ -31,6 +32,10 @@ public class CommandManager {
     }
 
     public void run(CommandSender sender, String commandName, String... args) throws CommandException {
-        ((CommandGroup) rootCommands.get(commandName)).run(sender, args); // TODO
+        rootCommands.get(commandName).run(sender, args); // TODO
+    }
+
+    @Nullable public CommandGroup getCommand(String commandName) {
+        return rootCommands.get(commandName);
     }
 }
