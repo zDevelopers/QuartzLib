@@ -1,346 +1,116 @@
-/*
- * Copyright or © or Copr. QuartzLib contributors (2015 - 2020)
- *
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use,
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info".
- *
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability.
- *
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or
- * data to be ensured and,  more generally, to use and operate it in the
- * same conditions as regards security.
- *
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
- */
-
 package fr.zcraft.quartzlib.components.commands;
 
-import fr.zcraft.quartzlib.tools.PluginLogger;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
+import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
+import fr.zcraft.quartzlib.components.commands.exceptions.MissingSubcommandException;
+import fr.zcraft.quartzlib.components.commands.exceptions.UnknownSubcommandException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.command.CommandExecutor;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
+public class CommandGroup extends CommandNode {
+    private final Class<?> commandGroupClass;
 
-public class CommandGroup implements TabCompleter, CommandExecutor {
-    private final CommandGroup shortcutCommandGroup;
-    private final String[] names;
-    private final Class<? extends Command>[] commandsClasses;
-    private final ArrayList<Command> commands = new ArrayList<>();
-    private final HashMap<String, String> commandsDescriptions = new HashMap<>();
-    private String description = "";
+    @Nullable
+    private final Supplier<?> classInstanceSupplier;
+    @Nullable
+    private final GroupClassInstanceSupplier groupClassInstanceSupplier;
 
-    CommandGroup(CommandGroup shortcutCommandGroup, Class<? extends Command> commandClass, String... names) {
-        this.names = names;
-        this.commandsClasses = new Class[] {commandClass};
-        this.shortcutCommandGroup = shortcutCommandGroup;
-        initCommands();
+    private final Map<String, CommandNode> subCommands = new HashMap<>();
+
+    CommandGroup(Class<?> commandGroupClass, Supplier<?> classInstanceSupplier, String name,
+                 TypeCollection typeCollection) {
+        this(commandGroupClass, classInstanceSupplier, null, name, typeCollection, null);
     }
 
-    CommandGroup(String[] names, Class<? extends Command>... commandsClasses) {
-        this.names = names;
-        this.commandsClasses = commandsClasses;
-        this.shortcutCommandGroup = null;
-        initDescriptions();
-        initCommands();
+    CommandGroup(Class<?> commandGroupClass, GroupClassInstanceSupplier classInstanceSupplier, String name,
+                 CommandGroup parent, TypeCollection typeCollection) {
+        this(commandGroupClass, null, classInstanceSupplier, name, typeCollection, parent);
     }
 
-    /**
-     * Gets the command args from the given group args.
-     * @param args The group args.
-     * @return The command args.
-     */
-    public static String[] getCommandArgsFromGroupArgs(String[] args) {
-        String[] commandArgs = new String[args.length - 1];
-
-        for (int i = 0; i < commandArgs.length; i++) {
-            commandArgs[i] = args[i + 1];
-        }
-
-        return commandArgs;
+    CommandGroup(CommandGroup parent, Field backingField, TypeCollection typeCollection) {
+        this(
+                backingField.getType(),
+                GroupClassInstanceSupplier.backingField(backingField),
+                backingField.getName(),
+                parent,
+                typeCollection
+        );
     }
 
-    private void initDescriptions() {
-        String fileName = "help/" + getUsualName() + ".txt";
-        InputStream stream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (stream == null) {
-            PluginLogger.warning("Could not load description file for the " + getUsualName() + " command");
-            return;
-        }
-
-        Scanner scanner = new Scanner(stream);
-        StringBuilder builder = new StringBuilder();
-
-        //Getting the group's description
-        //And then each command's description
-        int colonIndex;
-        int firstSpaceIndex;
-        boolean isGroupDescription = true;
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            colonIndex = line.indexOf(':');
-            if (isGroupDescription) {
-                firstSpaceIndex = line.indexOf(' ');
-                if (colonIndex > 0 && firstSpaceIndex > colonIndex) {
-                    isGroupDescription = false;
-                }
-            }
-
-            if (isGroupDescription) {
-                builder.append(line).append('\n');
-            } else {
-                commandsDescriptions.put(line.substring(0, colonIndex).trim(),
-                        line.substring(colonIndex + 1).trim());
-            }
-        }
-
-        scanner.close();
-        description = builder.toString().trim();
-
+    private CommandGroup(
+            Class<?> commandGroupClass,
+            @Nullable Supplier<?> classInstanceSupplier,
+            @Nullable GroupClassInstanceSupplier groupClassInstanceSupplier, String name,
+            TypeCollection typeCollection, CommandGroup parent) {
+        super(name, parent);
+        this.commandGroupClass = commandGroupClass;
+        this.classInstanceSupplier = classInstanceSupplier;
+        this.groupClassInstanceSupplier = groupClassInstanceSupplier;
+        DiscoveryUtils.getCommandMethods(commandGroupClass, typeCollection).forEach(this::addMethod);
+        DiscoveryUtils.getSubCommands(this, typeCollection).forEach(this::addSubCommand);
     }
 
-    private void initCommands() {
-        for (Class<? extends Command> commandClass : commandsClasses) {
-            addCommand(commandClass);
-        }
-
-        if (!isShortcutCommand()) {
-            addCommand(HelpCommand.class);
-        }
+    public Collection<CommandNode> getSubCommands() {
+        return this.subCommands.values();
     }
 
-    private void addCommand(Class<? extends Command> commandClass) {
-        Constructor<? extends Command> constructor;
-        Command newCommand;
-        try {
-            constructor = commandClass.getConstructor();
-            newCommand = constructor.newInstance();
-            newCommand.init(isShortcutCommand() ? shortcutCommandGroup : this);
-            commands.add(newCommand);
-        } catch (Exception ex) {
-            PluginLogger.warning("Exception while initializing command", ex);
-        }
+    @Nullable public CommandNode getSubCommand(String subCommandName) {
+        return this.subCommands.get(subCommandName);
     }
 
-    /**
-     * Execute the command matching the args.
-     * @param sender The command's sender.
-     * @param args The command args.
-     * @return true if command ran successfuly.
-     */
-    public boolean executeMatchingCommand(CommandSender sender, String[] args) {
-        if (isShortcutCommand()) {
-            commands.get(0).execute(sender, args);
-            return true;
+
+    private void addMethod(CommandMethod method) {
+        // TODO: handle adding to non-endpoints
+        CommandEndpoint endpoint = (CommandEndpoint) subCommands.get(method.getName());
+        if (endpoint == null) {
+            endpoint = new CommandEndpoint(method.getName());
+            subCommands.put(endpoint.getName(), endpoint);
         }
-
-        if (args.length <= 0) {
-            sender.sendMessage(getUsage());
-            return false;
-        }
-
-        String commandName = args[0];
-        String[] commandArgs = getCommandArgsFromGroupArgs(args);
-
-        return executeMatchingCommand(sender, commandName, commandArgs);
+        endpoint.addMethod(method);
     }
 
-    private boolean executeMatchingCommand(CommandSender sender, String commandName, String[] args) {
-        Command command = getMatchingCommand(commandName);
-        if (command != null) {
-            command.execute(sender, args);
-        } else {
-            sender.sendMessage(getUsage());
+    private void addSubCommand(CommandGroup commandGroup) {
+        subCommands.put(commandGroup.getName(), commandGroup);
+    }
+
+    void run(CommandSender sender, String... args) throws CommandException {
+        if (classInstanceSupplier == null) {
+            throw new IllegalStateException("This command group comes from a parent and cannot instanciate itself.");
         }
-        return command != null;
+
+        Object commandObject = classInstanceSupplier.get();
+        runSelf(commandObject, sender, args);
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command cmd, String label,
-                                      String[] args) {
-        return tabComplete(sender, args);
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
-        return executeMatchingCommand(sender, args);
-    }
-
-    /**
-     * Computes a list of possible autocomplete suggestions for the given partial arguments.
-     * @param sender The sender of the command.
-     * @param args The partial arguments.
-     * @return A list of suggestions.
-     */
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        if (isShortcutCommand()) {
-            return commands.get(0).tabComplete(sender, args);
-        }
-        if (args.length <= 1) {
-            return tabComplete(sender, args.length == 1 ? args[0] : null);
-        }
-        String commandName = args[0];
-        String[] commandArgs = getCommandArgsFromGroupArgs(args);
-        return tabCompleteMatching(sender, commandName, commandArgs);
-    }
-
-    /**
-     * Computes a list of possible autocomplete suggestions for the given command.
-     * @param sender The sender of the command.
-     * @param commandName The name of the command
-     * @return A list of suggestions.
-     */
-    public List<String> tabComplete(CommandSender sender, String commandName) {
-        ArrayList<String> matchingCommands = new ArrayList<String>();
-        for (Command command : commands) {
-            if (!command.canExecute(sender)) {
-                continue;
-            }
-            if (commandName == null || command.getName().startsWith(commandName.toLowerCase())) {
-                matchingCommands.add(command.getName());
-            }
-        }
-        return matchingCommands;
-    }
-
-    private List<String> tabCompleteMatching(CommandSender sender, String commandName, String[] args) {
-        Command command = getMatchingCommand(commandName);
-        if (command != null) {
-            return command.tabComplete(sender, args);
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * Gets the command matching the given name.
-     * @param commandName The command name.
-     * @return The matching command, or null if none were found.
-     */
-    public Command getMatchingCommand(String commandName) {
-        for (Command command : commands) {
-            if (command.matches(commandName)) {
-                return command;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets the command matching the given class.
-     * @param commandClass The command class.
-     * @return The matching gommand, or null if none were found.
-     */
-    public Command getCommandInfo(Class<? extends Command> commandClass) {
-        for (Command command : commands) {
-            if (command.getClass().equals(commandClass)) {
-                return command;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Return if this command matches the given name.
-     * @param name The name of the command to test for.
-     * @return if this command matches the given name.
-     */
-    public boolean matches(String name) {
-        name = name.toLowerCase();
-        for (String commandName : names) {
-            if (commandName.equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns an array of all subcommands.
-     * @return an array of all subcommands.
-     */
-    public String[] getCommandsNames() {
-        String[] commandsNames = new String[commands.size()];
-
-        for (int i = 0; i < commands.size(); i++) {
-            commandsNames[i] = commands.get(i).getName();
+    void run(Object parentInstance, CommandSender sender, String[] args) throws CommandException {
+        if (this.groupClassInstanceSupplier == null) {
+            throw new IllegalStateException("This command group cannot be ran from a parent");
         }
 
-        return commandsNames;
+        Object instance = this.groupClassInstanceSupplier.supply(parentInstance);
+        runSelf(instance, sender, args);
     }
 
-    void register(JavaPlugin plugin) {
-        PluginCommand bukkitCommand = plugin.getCommand(getUsualName());
-        if (bukkitCommand == null) {
-            throw new IllegalStateException("Command " + getUsualName() + " is not correctly registered in plugin.yml");
+    private void runSelf(Object instance, CommandSender sender, String[] args) throws CommandException {
+        if (args.length == 0) {
+            throw new MissingSubcommandException(this);
         }
-        bukkitCommand.setAliases(getAliases());
-        bukkitCommand.setExecutor(this);
-        bukkitCommand.setTabCompleter(this);
-    }
 
-    protected String getUsage() {
-        if (isShortcutCommand()) {
-            return "§cUsage: " + commands.get(0).getUsageString();
+        CommandNode subCommand = subCommands.get(args[0]);
+        if (subCommand == null) {
+            throw new UnknownSubcommandException(this, args[0]);
         }
-        return "§cUsage: /" + getUsualName()
-                + " <" + StringUtils.join(getCommandsNames(), "|") + ">";
+
+        subCommand.run(instance, sender, Arrays.copyOfRange(args, 1, args.length));
     }
 
-    public String getUsualName() {
-        return names[0];
+    public Class<?> getCommandGroupClass() {
+        return commandGroupClass;
     }
-
-    public String[] getNames() {
-        return names.clone();
-    }
-
-    public List<String> getAliases() {
-        return Arrays.asList(names).subList(1, names.length);
-    }
-
-    public Command[] getCommands() {
-        return commands.toArray(new Command[commands.size()]);
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getDescription(String commandName) {
-        return commandsDescriptions.get(commandName);
-    }
-
-    public boolean isShortcutCommand() {
-        return shortcutCommandGroup != null;
-    }
-
-    public CommandGroup getShortcutCommandGroup() {
-        return shortcutCommandGroup;
-    }
-
 }
