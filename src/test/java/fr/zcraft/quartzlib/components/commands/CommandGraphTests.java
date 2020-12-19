@@ -183,6 +183,29 @@ public class CommandGraphTests extends MockedBukkitTest {
         Assert.assertArrayEquals(new String[] {"bar"}, argValue);
     }
 
+    @Test
+    public void canHandleOverridesWithSameArgumentCount() throws CommandException {
+        final Object[] argValue = {null};
+
+        class FooCommand {
+            public void add(Integer arg) {
+                argValue[0] = arg;
+            }
+
+            public void add(String arg) {
+                argValue[0] = arg;
+            }
+        }
+
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
+
+        commands.run(server.addPlayer(), "foo", "add", "pomf");
+        Assert.assertArrayEquals(new Object[] {"pomf"}, argValue);
+
+        commands.run(server.addPlayer(), "foo", "add", "42");
+        Assert.assertArrayEquals(new Object[] {42}, argValue);
+    }
+
     enum FooEnum {
         FOO, BAR
     }

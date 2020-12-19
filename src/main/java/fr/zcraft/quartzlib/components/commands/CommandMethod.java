@@ -43,16 +43,15 @@ class CommandMethod {
         return name;
     }
 
-    public void run(Object target, CommandSender sender, String[] args) throws CommandException {
-        Object[] parsedArgs = parseArguments(sender, args);
+    public void run(Object target, Object[] parsedArgs) throws CommandException {
         try {
             this.method.invoke(target, parsedArgs);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace(); // TODO
+            throw new RuntimeException(e); // TODO
         }
     }
 
-    private Object[] parseArguments(CommandSender sender, String[] args)
+    public Object[] parseArguments(CommandSender sender, String[] args)
             throws ArgumentParseException, InvalidSenderException {
         Object[] parsed = new Object[parameterCount];
 

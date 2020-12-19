@@ -15,12 +15,22 @@ class CommandEndpoint extends CommandNode {
 
     @Override
     void run(Object parentInstance, CommandSender sender, String[] args) throws CommandException {
-        CommandMethod method = findMatchingMethod(args);
-        method.run(parentInstance, sender, args);
-    }
+        for (CommandMethod method : this.methods) {
+            if (method.getArguments().length != args.length) {
+                continue; // TODO
+            }
 
-    @Nullable CommandMethod findMatchingMethod(String[] args) {
-        return this.methods.stream().filter(m -> m.getArguments().length == args.length).findFirst().orElse(null);
+            try {
+                Object[] parsedArgs;
+                parsedArgs = method.parseArguments(sender, args);
+                method.run(parentInstance, parsedArgs);
+                return;
+            } catch (CommandException ignored) { // TODO
+
+            }
+        }
+
+        throw new RuntimeException("No matching command found"); // TODO
     }
 
     void addMethod(CommandMethod method) {
