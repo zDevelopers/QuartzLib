@@ -1,20 +1,24 @@
 package fr.zcraft.quartzlib.components.commands;
 
-import fr.zcraft.quartzlib.components.commands.attributes.SubCommand;
+import fr.zcraft.quartzlib.components.commands.annotations.SubCommand;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 abstract class DiscoveryUtils {
     public static Stream<CommandMethod> getCommandMethods(Class<?> commandGroupClass, TypeCollection typeCollection) {
+        // Yay java "lambdas"
+        AtomicInteger declarationIndex = new AtomicInteger();
+
         return Arrays.stream(commandGroupClass.getDeclaredMethods())
                 .filter(m -> hasRunnableModifiers(m.getModifiers()))
-                .map((Method method) -> new CommandMethod(method, typeCollection));
+                .map((Method method) -> new CommandMethod(method, typeCollection, declarationIndex.getAndIncrement()));
     }
 
     public static Stream<CommandGroup> getSubCommands(CommandGroup commandGroup, TypeCollection typeCollection) {

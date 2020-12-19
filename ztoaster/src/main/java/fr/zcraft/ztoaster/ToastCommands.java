@@ -1,6 +1,6 @@
 package fr.zcraft.ztoaster;
 
-import fr.zcraft.quartzlib.components.commands.attributes.Sender;
+import fr.zcraft.quartzlib.components.commands.annotations.Sender;
 import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzlib.components.i18n.I;
 import java.util.ArrayList;

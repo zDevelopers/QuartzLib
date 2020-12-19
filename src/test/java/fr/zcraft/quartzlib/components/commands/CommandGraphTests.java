@@ -1,8 +1,9 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.MockedBukkitTest;
-import fr.zcraft.quartzlib.components.commands.attributes.Sender;
-import fr.zcraft.quartzlib.components.commands.attributes.SubCommand;
+import fr.zcraft.quartzlib.components.commands.annotations.CommandMethod;
+import fr.zcraft.quartzlib.components.commands.annotations.Sender;
+import fr.zcraft.quartzlib.components.commands.annotations.SubCommand;
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import java.util.stream.StreamSupport;
 import org.bukkit.command.CommandSender;
@@ -198,6 +199,48 @@ public class CommandGraphTests extends MockedBukkitTest {
         }
 
         commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
+
+        commands.run(server.addPlayer(), "foo", "add", "pomf");
+        Assert.assertArrayEquals(new Object[] {"pomf"}, argValue);
+
+        commands.run(server.addPlayer(), "foo", "add", "42");
+        Assert.assertArrayEquals(new Object[] {42}, argValue);
+    }
+
+    @Test
+    public void canHandleOverridesWithPriorities() throws CommandException {
+        final Object[] argValue = {null};
+
+        class FooCommand {
+            public void add(String arg) {
+                argValue[0] = arg;
+            }
+
+            public void add(Integer arg) {
+                argValue[0] = arg;
+            }
+        }
+
+        commands.addCommand("foo", FooCommand.class, () -> new FooCommand());
+
+        commands.run(server.addPlayer(), "foo", "add", "pomf");
+        Assert.assertArrayEquals(new Object[] {"pomf"}, argValue);
+
+        commands.run(server.addPlayer(), "foo", "add", "42");
+        Assert.assertArrayEquals(new Object[] {"42"}, argValue);
+
+        class FooCommand2 {
+            public void add(String arg) {
+                argValue[0] = arg;
+            }
+
+            @CommandMethod(priority = 2)
+            public void add(Integer arg) {
+                argValue[0] = arg;
+            }
+        }
+
+        commands.addCommand("foo", FooCommand2.class, () -> new FooCommand2());
 
         commands.run(server.addPlayer(), "foo", "add", "pomf");
         Assert.assertArrayEquals(new Object[] {"pomf"}, argValue);

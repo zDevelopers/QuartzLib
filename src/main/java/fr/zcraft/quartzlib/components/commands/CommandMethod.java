@@ -1,6 +1,6 @@
 package fr.zcraft.quartzlib.components.commands;
 
-import fr.zcraft.quartzlib.components.commands.attributes.Sender;
+import fr.zcraft.quartzlib.components.commands.annotations.Sender;
 import fr.zcraft.quartzlib.components.commands.exceptions.ArgumentParseException;
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
 import fr.zcraft.quartzlib.components.commands.exceptions.InvalidSenderException;
@@ -13,16 +13,20 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class CommandMethod {
+class CommandMethod implements Comparable<CommandMethod> {
     @NotNull private final Method method;
     @NotNull private final String name;
     @NotNull private final CommandMethodArgument[] arguments;
     private final int parameterCount;
     @Nullable private CommandMethodSenderArgument senderArgument = null;
 
-    CommandMethod(Method method, TypeCollection typeCollection) {
+    private final int declarationIndex;
+    private final int priority;
+
+    CommandMethod(Method method, TypeCollection typeCollection, int declarationIndex) {
         this.method = method;
         this.name = method.getName();
+        this.declarationIndex = declarationIndex;
 
         Parameter[] parameters = method.getParameters();
         List<CommandMethodArgument> arguments = new ArrayList<>();
@@ -37,6 +41,15 @@ class CommandMethod {
 
         this.arguments = arguments.toArray(new CommandMethodArgument[] {});
         this.parameterCount = parameters.length;
+
+        fr.zcraft.quartzlib.components.commands.annotations.CommandMethod annotation =
+                method.getAnnotation(fr.zcraft.quartzlib.components.commands.annotations.CommandMethod.class);
+
+        if (annotation != null) {
+            priority = annotation.priority();
+        } else {
+            priority = 0;
+        }
     }
 
     public @NotNull String getName() {
@@ -73,5 +86,20 @@ class CommandMethod {
 
     public @NotNull Method getMethod() {
         return method;
+    }
+
+    @Override
+    public int compareTo(@NotNull CommandMethod other) {
+        if (priority == other.priority) {
+            if (declarationIndex == other.declarationIndex) {
+                // This is needed to differentiate between methods with the same declaration index and priority
+                return method.toString().compareTo(other.method.toString());
+            }
+
+            return Integer.compare(declarationIndex, other.declarationIndex);
+        }
+
+        // Higher priority = first in natural order
+        return Integer.compare(priority, other.priority) * -1;
     }
 }

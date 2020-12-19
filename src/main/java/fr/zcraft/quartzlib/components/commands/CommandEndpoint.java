@@ -1,13 +1,12 @@
 package fr.zcraft.quartzlib.components.commands;
 
 import fr.zcraft.quartzlib.components.commands.exceptions.CommandException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
 
 class CommandEndpoint extends CommandNode {
-    private final List<CommandMethod> methods = new ArrayList<>();
+    private final SortedSet<CommandMethod> methods = new TreeSet<>();
 
     CommandEndpoint(String name) {
         super(name, null);
