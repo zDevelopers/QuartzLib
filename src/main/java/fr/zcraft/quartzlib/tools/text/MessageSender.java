@@ -520,9 +520,17 @@ public final class MessageSender {
                     final Enum<?> nmsMessageType = type.getMessagePositionEnumValue();
 
                     if (nmsMessageType != null) {
-                        chatPacket = packetPlayOutChatClass
-                                .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum)
-                                .newInstance(componentText, nmsMessageType);
+                        try {
+                            chatPacket = packetPlayOutChatClass
+                                    .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum)
+                                    .newInstance(componentText, nmsMessageType);
+                        } catch (NoSuchMethodException ex) {
+                            //Packet changed in 1.16+ an UUID is needed
+                            chatPacket = packetPlayOutChatClass
+                                    .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum, UUID.class)
+                                    .newInstance(componentText, nmsMessageType, new UUID(0, 0));
+
+                        }
                     } else {
                         chatPacket = packetPlayOutChatClass
                                 .getConstructor(iChatBaseComponentClass, byte.class)
