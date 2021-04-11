@@ -94,6 +94,7 @@
             <artifactId>bukkit</artifactId>
             <version>1.15-R0.1-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -115,6 +116,7 @@
             <artifactId>js</artifactId>
             <version>20.3.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js-scriptengine</artifactId>
