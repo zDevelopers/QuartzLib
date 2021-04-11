@@ -76,8 +76,7 @@ public abstract class InventoryGui extends GuiBase {
      * Returns if the given event affects the GUI's inventory.
      *
      * @param event The event to test
-     * @return true if any of the event's slots is in the GUI's inventory,
-     *     false otherwise.
+     * @return true if any of the event's slots is in the GUI's inventory, false otherwise.
      */
     protected static boolean affectsGui(final InventoryDragEvent event) {
         for (int slot : event.getRawSlots()) {
@@ -194,8 +193,12 @@ public abstract class InventoryGui extends GuiBase {
             // Reopening the inventory
             // FIXME This probably resets the player' mouse cursor position to the center of the GUI in 1.13.
             if (isOpen()) {
-                player.closeInventory();
-                player.openInventory(inventory);
+                RunTask.nextTick(() -> {
+                    player.closeInventory();
+                    RunTask.nextTick(() -> {
+                        player.openInventory(inventory);
+                    });
+                });
             }
         }
     }
@@ -204,6 +207,7 @@ public abstract class InventoryGui extends GuiBase {
 
     /**
      * Gets the size of the inventory.
+     *
      * @return The size of the inventory.
      */
     protected final int getSize() {
@@ -238,6 +242,7 @@ public abstract class InventoryGui extends GuiBase {
 
     /**
      * Returns the title of the inventory.
+     *
      * @return The title of the inventory.
      */
     protected String getTitle() {
@@ -259,6 +264,7 @@ public abstract class InventoryGui extends GuiBase {
 
     /**
      * Gets the underlying inventory, or null if the Gui has not been opened yet.
+     *
      * @return The underlying inventory, or null if the Gui has not been opened yet.
      */
     public Inventory getInventory() {
