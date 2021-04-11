@@ -13,11 +13,36 @@ _Published one day_
 ### Changed
 
 #### `CraftingRecipes`
+
 - :warning: All recipes are now required to provide names, therefore all helper methods to generate recipes take a
   mandatory name argument. The name is automatically namespaced with the plugin's name.
 - :warning: All helpers that were consuming the now-deprecated `MaterialData` now consume the more flexible `RecipeChoice` instead.
 - All helpers that generate shaped recipes (2x2, 2x2 diagonal, etc.) now return `ShapedRecipe`s explicitely, since there
   is no way those recipes can be anything other than shaped, and hiding this detail is not useful at all.
+  
+#### Glow effect
+
+This tool was rewritten to register a namespaced enchantment, avoiding future incompatibilities with other plugins
+registering new enchants.
+
+- :warning: The glow effect is now a QuartzLib component. You still use glow effect as usual (either using `GlowEffect`
+  or through the `ItemStackBuilder`), but you have to load the effect using `loadComponents(GlowEffect.class)` in your
+  plugin's `onEnable`.
+
+#### `DualWielding`
+
+This API was added when Bukkit had no support for dual wielding. As there is support now, we cleaned up all of this
+and removed some things. We kept some useful methods and moved things to other classes for coherence.
+
+- Added `ItemUtils.consumeItemInOffHand`.
+- :warning: Moved `ItemUtils.consumeItem` to `ItemUtils.consumeItemInMainHand`.
+- :warning: Moved `ItemUtils.damageItemInHand` to `ItemUtils.damageItem`.
+- `ItemUtils.damageItem` now returns `true` if the damaged item was broken.
+- :warning: Moved `ItemUtils.breakItemInHand` methods to `InventoryUtils.breakItemInHand`.
+- :warning: Moved `DualWielding` to `InventoryUtils.DualWielding`.
+- :warning: Moved `DualWieldling` methods to `InventoryUtils`.
+- :warning: Removed `DualWieldling.setItemInHand` and `DualWieldling.getItemInHand` (use Bukkit API instead).
+
 
 #### `GlowEffect`
 - :warning: This class is not an enchantment anymore and has been re-implemented. It is now a `QuartzComponent` that
