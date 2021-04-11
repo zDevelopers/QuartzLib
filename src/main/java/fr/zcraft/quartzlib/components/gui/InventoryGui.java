@@ -92,7 +92,7 @@ public abstract class InventoryGui extends GuiBase {
      *
      * @param event The event to test
      * @return {@code true} if the event's slot is in the GUI's inventory,
-     * {@code false} otherwise.
+     *     {@code false} otherwise.
      */
     protected static boolean affectsGui(final InventoryClickEvent event) {
         return event.getRawSlot() < event.getInventory().getSize();
@@ -195,10 +195,10 @@ public abstract class InventoryGui extends GuiBase {
             if (isOpen()) {
                 RunTask.nextTick(() -> {
                     player.closeInventory();
+                    RunTask.nextTick(() -> {
+                        player.openInventory(inventory);
+                    });
                 });
-
-                player.openInventory(inventory);
-
             }
         }
     }
