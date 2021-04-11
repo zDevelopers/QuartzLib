@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-@CommandInfo(name = "list", usageParameters = "[cooked|not_cooked]")
+@CommandInfo(name = "list", usageParameters = "[cooked|in_oven|not_cooked]")
 public class ListCommand extends Command {
     @Override
     protected void run() throws CommandException {
@@ -63,7 +63,7 @@ public class ListCommand extends Command {
     private void showToasts(Collection<Toast> toasts) {
         if (toasts.isEmpty()) {
             // Output of the command /toaster list, without toasts.
-            info(I.t("There are no toasts here ..."));
+            info(I.t("There are no toasts here..."));
         }
 
         for (Toast toast : toasts) {
