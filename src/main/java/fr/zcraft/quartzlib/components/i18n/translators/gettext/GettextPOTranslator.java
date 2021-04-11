@@ -45,18 +45,7 @@ import javax.script.ScriptException;
  * Loads Gettext .po files (uncompiled).
  */
 public class GettextPOTranslator extends Translator {
-    /**
-     * A script engine used to compute plural rules.
-     *
-     * <p>The official documentation mentions that the plural determination script is in C format, but
-     * the JavaScript format is the same for these scripts (containing only basic mathematics and
-     * ternary operators), excepted for the booleans, but this case is handled manually.</p>
-     *
-     * @see #getPluralIndex(Integer)
-     */
-    private final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
     private POFile source = null;
-
 
     public GettextPOTranslator(Locale locale, File file) {
         super(locale, file);
@@ -93,26 +82,7 @@ public class GettextPOTranslator extends Translator {
             return count != 1 ? 1 : 0;
         }
 
-        try {
-            scriptEngine.put("n", count);
-            Object rawPluralIndex = scriptEngine.eval(source.getPluralFormScript());
-
-            // If the index is a boolean, as some po files use the C handling of booleans, we convert them
-            // into the appropriate numbers.
-            // Else, we try to convert the output to an integer.
-            Integer pluralIndex = rawPluralIndex instanceof Boolean ? (((Boolean) rawPluralIndex) ? 1 : 0) :
-                    (rawPluralIndex instanceof Number ? ((Number) rawPluralIndex).intValue() :
-                            Integer.valueOf(rawPluralIndex.toString()));
-            if (pluralIndex <= source.getPluralCount()) {
-                return pluralIndex;
-            } else {
-                return 0;
-            }
-        } catch (ScriptException | NumberFormatException e) {
-            PluginLogger.error("Invalid plural script for language {0}: “{1}”", e, getLocale(),
-                    source.getPluralFormScript());
-            return 0;
-        }
+        return source.computePluralForm(count);
     }
 
     @Override

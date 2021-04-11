@@ -19,6 +19,10 @@ _Published one day_
 - All helpers that generate shaped recipes (2x2, 2x2 diagonal, etc.) now return `ShapedRecipe`s explicitely, since there
   is no way those recipes can be anything other than shaped, and hiding this detail is not useful at all.
 
+#### `GlowEffect`
+- :warning: This class is not an enchantment anymore and has been re-implemented. It is now a `QuartzComponent` that
+  needs to be enabled at startup in order to prevent items with a Glow effect to be used in a Grindstone.
+
 ## QuartzLib 0.0.2
 
 _Published on November 26th, 2020_
