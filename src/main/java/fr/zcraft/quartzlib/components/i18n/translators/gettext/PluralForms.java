@@ -94,7 +94,7 @@ public class PluralForms {
     }
 
     private Function<Long, Integer> computeFormsFunction() {
-        if (formsScript == null) {
+        if (formsScript == null || formsScript.isEmpty()) {
             return formsFunctionFallback();
         }
 
