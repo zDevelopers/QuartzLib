@@ -522,7 +522,8 @@ public final class MessageSender {
                     if (nmsMessageType != null) {
                         try {
                             //Packet changed in 1.16+ an UUID is needed
-                            //An UUID with both longs set to 0 will always display (even if the player has turn the option disableChat on)
+                            //An UUID with both longs set to 0 will always display 
+                            //(even if the player has turn the option disableChat on)
                             chatPacket = packetPlayOutChatClass
                                     .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum, UUID.class)
                                     .newInstance(componentText, nmsMessageType, new UUID(0, 0));
