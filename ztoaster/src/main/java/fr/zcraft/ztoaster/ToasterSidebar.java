@@ -42,7 +42,7 @@ import org.bukkit.entity.Player;
 
 public class ToasterSidebar extends Sidebar {
     private int toastsCount = 0;
-    private int insideTheToaster = 0;
+    private long insideTheToaster = 0;
 
     public ToasterSidebar() {
         setAsync(true);
@@ -57,25 +57,22 @@ public class ToasterSidebar extends Sidebar {
 
         toastsCount = toasts.length;
 
-        insideTheToaster = 0;
-        for (Toast toast : toasts) {
-            if (toast.getStatus() == Toast.CookingStatus.NOT_COOKED) {
-                insideTheToaster++;
-            }
-        }
+        insideTheToaster = Arrays.stream(toasts)
+                .filter(toast -> toast.getStatus() != Toast.CookingStatus.COOKED)
+                .count();
     }
 
     @Override
     public List<String> getContent(Player player) {
         Locale playerLocale = I18n.getPlayerLocale(player);
         return Arrays.asList(
-                I.t(playerLocale, "{darkgreen}{bold}Cook"),
+                I.tl(playerLocale, "{darkgreen}{bold}Cook"),
                 player.getDisplayName(),
                 "",
-                I.t(playerLocale, "{yellow}{bold}Inside the toaster"),
+                I.tl(playerLocale, "{yellow}{bold}Inside the toaster"),
                 insideTheToaster + "",
                 "",
-                I.t(playerLocale, "{gold}{bold}Cooked"),
+                I.tl(playerLocale, "{gold}{bold}Cooked"),
                 (toastsCount - insideTheToaster) + ""
         );
     }
@@ -83,9 +80,9 @@ public class ToasterSidebar extends Sidebar {
     @Override
     public String getTitle(Player player) {
         if (insideTheToaster > 0) {
-            return I.t(I18n.getPlayerLocale(player), "{red}{bold}♨ Toaster ♨");
+            return I.tl(I18n.getPlayerLocale(player), "{red}{bold}♨ Toaster ♨");
         } else {
-            return I.t(I18n.getPlayerLocale(player), "{blue}Toaster");
+            return I.tl(I18n.getPlayerLocale(player), "{blue}Toaster");
         }
     }
 }

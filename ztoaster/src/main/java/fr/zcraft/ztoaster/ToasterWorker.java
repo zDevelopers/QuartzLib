@@ -77,6 +77,7 @@ public class ToasterWorker extends Worker {
             public Object run() throws Throwable {
                 PluginLogger.info("Cooking toast #{0} ...", toastId);
 
+                newToast.setStatus(Toast.CookingStatus.IN_OVEN);
                 Thread.sleep(TOAST_COOKING_TIME);
 
                 PluginLogger.info("Toast #{0} cooked !", toastId);

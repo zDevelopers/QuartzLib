@@ -33,6 +33,7 @@ package fr.zcraft.ztoaster;
 import fr.zcraft.quartzlib.components.gui.ExplorerGui;
 import fr.zcraft.quartzlib.components.gui.GuiUtils;
 import fr.zcraft.quartzlib.components.i18n.I;
+import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -43,7 +44,7 @@ public class ToastExplorer extends ExplorerGui<Toast> {
 
         setData(Toaster.getToasts());
 
-        //DO NOT TOUCH THE TOASTS !
+        // DO NOT TOUCH THE TOASTS !
         setMode(ExplorerGui.Mode.READONLY);
     }
 
@@ -53,8 +54,10 @@ public class ToastExplorer extends ExplorerGui<Toast> {
             return GuiUtils.makeItem(Material.COOKED_PORKCHOP,
                     I.t(getPlayerLocale(), "{white}Cooked toast #{0}", toast.getToastId()));
         } else { // Title of the raw toast item in GUI
-            return GuiUtils.makeItem(Material.PORKCHOP,
-                    I.t(getPlayerLocale(), "{white}Raw toast #{0}", toast.getToastId()));
+            return new ItemStackBuilder(Material.PORKCHOP)
+                    .title(I.tl(getPlayerLocale(), "{white}Raw toast #{0}", toast.getToastId()))
+                    .glow(toast.getStatus() == Toast.CookingStatus.IN_OVEN)
+                    .item();
         }
     }
 }
