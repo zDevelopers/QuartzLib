@@ -51,6 +51,6 @@ public class Toast {
     }
 
     public enum CookingStatus {
-        COOKED, NOT_COOKED
+        COOKED, IN_OVEN, NOT_COOKED
     }
 }

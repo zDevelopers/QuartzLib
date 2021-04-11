@@ -47,14 +47,14 @@ public class AddCommand extends Command {
 
         if (args.length == 0) {
             Toast toast = ToasterWorker.addToast(cook);
-            cook.sendMessage(I.t("Toast {0} added.", toast.getToastId()));
+            cook.sendMessage(I.tl(cook, "Toast {0} added.", toast.getToastId()));
         } else {
             int toastCount = getIntegerParameter(0);
             for (int i = toastCount; i-- > 0; ) {
                 ToasterWorker.addToast(cook);
             }
 
-            cook.sendMessage(I.tn("One toast added.", "{0} toasts added.", toastCount, toastCount));
+            cook.sendMessage(I.tln(cook, "One toast added.", "{0} toasts added.", toastCount, toastCount));
         }
     }
 }

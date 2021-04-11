@@ -64,6 +64,7 @@ public class POFile {
 
     private Integer pluralCount = 2;
     private String pluralFormScript = "";
+    private PluralForms pluralForms = null;
 
 
     /**
@@ -303,6 +304,7 @@ public class POFile {
                             if (pluralFormScript.contains("=")) {
                                 pluralFormScript = pluralFormScript.split("=")[1];
                             }
+
                         } catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
                             // Well, invalid.
                         }
@@ -312,6 +314,8 @@ public class POFile {
                 }
             }
         }
+
+        pluralForms = new PluralForms(pluralCount, pluralFormScript);
     }
 
     /**
@@ -360,6 +364,29 @@ public class POFile {
      */
     public String getPluralFormScript() {
         return pluralFormScript;
+    }
+
+    /**
+     * For a given number, compute the plural index to use for the locale of this file.
+     *
+     * <p>Some plural scripts are very commons. For them, we hardcode native functions.
+     * We then do not depend on a JavaScript engine, and it's order of magnitude faster.
+     * If you can use them, it's always better.
+     *
+     * <p>This method can only work correctly with Plural-Forms listed at:
+     * http://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html#Plural-forms
+     *
+     * @param count The count to compute plural for.
+     * @return The plural index.
+     * @throws IllegalStateException if the method is called before {@link #parse()}.
+     */
+    public int computePluralForm(long count) {
+        // File not parsed yet
+        if (pluralForms == null) {
+            throw new IllegalStateException("Cannot compute plural form: the file is not parsed. Call parse() first.");
+        }
+
+        return pluralForms.computePluralForm(count);
     }
 
 
