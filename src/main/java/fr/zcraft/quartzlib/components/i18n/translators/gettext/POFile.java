@@ -378,8 +378,14 @@ public class POFile {
      *
      * @param count The count to compute plural for.
      * @return The plural index.
+     * @throws IllegalStateException if the method is called before {@link #parse()}.
      */
     public int computePluralForm(long count) {
+        // File not parsed yet
+        if (pluralForms == null) {
+            throw new IllegalStateException("Cannot compute plural form: the file is not parsed. Call parse() first.");
+        }
+
         return pluralForms.computePluralForm(count);
     }
 
