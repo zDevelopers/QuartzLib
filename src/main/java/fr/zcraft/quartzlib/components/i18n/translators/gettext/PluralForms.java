@@ -266,7 +266,7 @@ public class PluralForms {
     private Function<Long, Integer> formsFunctionFallback() {
         PluginLogger.warning(
                   "Unknown plural rule “{0}”; without JavaScript engine available, we'll fallback to English "
-                + "pluralization rules. If you want your language's plural rule supported without JavaScript "
+                + "pluralization rules. If you want your language's plural rules supported without JavaScript "
                 + "engine, please open an issue with your language and its plural rules at "
                 + "https://github.com/zDevelopers/QuartzLib/issues.",
                 formsScript
