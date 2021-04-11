@@ -8,7 +8,7 @@ Changes marked with :warning: are **breaking changes**.
 
 ## QuartzLib 0.0.3
 
-_Published one day_
+_Published on April 11th, 2021_
 
 ### Changed
 
