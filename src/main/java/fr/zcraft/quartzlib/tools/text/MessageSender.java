@@ -521,9 +521,10 @@ public final class MessageSender {
 
                     if (nmsMessageType != null) {
                         try {
-                            //Packet changed in 1.16+ an UUID is needed
-                            //An UUID with both longs set to 0 will always display 
-                            //(even if the player has turn the option disableChat on)
+                            // 1.16.1+ chat packets constructor require an UUID. To send
+                            // system messages, we need to give a null UUID (else the message
+                            // will be filtered if the player disabled chat messages on their
+                            // client).
                             chatPacket = packetPlayOutChatClass
                                     .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum, UUID.class)
                                     .newInstance(componentText, nmsMessageType, new UUID(0, 0));
