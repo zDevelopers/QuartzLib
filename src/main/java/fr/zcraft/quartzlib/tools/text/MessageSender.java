@@ -521,15 +521,15 @@ public final class MessageSender {
 
                     if (nmsMessageType != null) {
                         try {
-                            chatPacket = packetPlayOutChatClass
-                                    .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum)
-                                    .newInstance(componentText, nmsMessageType);
-                        } catch (NoSuchMethodException ex) {
                             //Packet changed in 1.16+ an UUID is needed
                             chatPacket = packetPlayOutChatClass
                                     .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum, UUID.class)
                                     .newInstance(componentText, nmsMessageType, new UUID(0, 0));
 
+                        } catch (NoSuchMethodException ex) {
+                            chatPacket = packetPlayOutChatClass
+                                    .getConstructor(iChatBaseComponentClass, chatMessageTypeEnum)
+                                    .newInstance(componentText, nmsMessageType);
                         }
                     } else {
                         chatPacket = packetPlayOutChatClass
