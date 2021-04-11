@@ -34,6 +34,7 @@ import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
 import java.lang.reflect.InvocationTargetException;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -150,7 +151,8 @@ public abstract class InventoryUtils {
      *               the Bukkit build don't support dual-wielding.
      */
     public static void breakItemInHand(Player player, @NotNull InventoryUtils.DualWielding hand) {
-        ItemStack item = new ItemStack(Material.AIR);
+        final ItemStack item = new ItemStack(Material.AIR);
+
         switch (hand) {
             case MAIN_HAND:
                 player.getInventory().setItemInMainHand(item);
@@ -160,7 +162,8 @@ public abstract class InventoryUtils {
                 break;
             default: break;
         }
-        //player.playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 1);
+
+        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.8f, 1);
     }
 
     /**
