@@ -182,16 +182,18 @@ public class PluralForms {
                 return n -> 0;
 
             // Two forms, singular used for one only
-            // English, German, Dutch, Swedish, Danish, Norwegian, Faroese, Spanish, Portuguese, Italian,
-            // Greek, Bulgarian, Finnish, Estonian, Hebrew, ahasa Indonesian, Esperanto, Hungarian, Turkish
+            // Bahasa Indonesian, Bulgarian, Danish, Dutch, English, Esperanto, Estonian, Faroese, Finnish, German,
+            // Greek, Hebrew, Hungarian, Italian, Norwegian, Portuguese, Spanish, Swedish, Turkish
             case "n!=1":
             case "n<1||n>1": // Yup. POEdit can generate this.
+            case "n>1||n<1":
                 return n -> n != 1 ? 1 : 0;
 
             case "n!=0":
                 return n -> n != 0 ? 1 : 0;
 
             case "n==0||n==1":
+            case "n==1||n==0":
                 return n -> n == 0 || n == 1 ? 1 : 0;
 
             case "n>0":
@@ -234,13 +236,13 @@ public class PluralForms {
                 return n -> n % 10 == 1 && n % 100 != 11 ? 0 : (n % 10 >= 2 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2);
 
             // Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
-            // Russian, Ukrainian, Serbian, Croatian, Belarusian, Bosnian
+            // Belarusian, Bosnian, Croatian, Russian, Serbian, Ukrainian
             case "n%10==1&&n%100!=11?0:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?1:2":
                 return n -> n % 10 == 1 && n % 100 != 11 ? 0 :
                         (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2);
 
             // Alternative for the above, sometime encountered
-            // Russian, Ukrainian, Serbian, Croatian, Belarusian, Bosnian
+            // Belarusian, Bosnian, Croatian, Russian, Serbian, Ukrainian
             case "n%10==1&&n%100!=11?0:n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?1:2":
                 return n -> n % 10 == 1 && n % 100 != 11 ? 0 :
                         (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 >= 14) ? 1 : 2);
