@@ -118,7 +118,7 @@ public class POFile {
             return;
         }
 
-        try {
+        try (final BufferedReader reader = rawReader) {
             String line;
             Integer lineNumber = 0;
 
@@ -129,7 +129,7 @@ public class POFile {
             Map<String, String> tokens = new HashMap<>();
             String lastToken = null;
 
-            while ((line = rawReader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 lineNumber++;
 
                 // We don't care about trailing whitespaces
@@ -179,15 +179,9 @@ public class POFile {
             pluralForms = new PluralForms(pluralCount, pluralFormScript);
         } catch (IOException e) {
             throw new CannotParsePOException("An IO exception occurred while parsing the file", e);
-        } finally {
-            try {
-                if (rawReader != null) {
-                    rawReader.close();
-                    rawReader = null;
-                }
-            } catch (IOException ignored) {
-            }
         }
+
+        rawReader = null;
     }
 
     /**
