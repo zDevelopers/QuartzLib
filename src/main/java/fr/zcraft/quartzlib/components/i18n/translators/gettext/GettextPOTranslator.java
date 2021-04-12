@@ -1,5 +1,12 @@
 /*
- * Copyright or © or Copr. QuartzLib contributors (2015 - 2020)
+ * This file is part of QuartzLib.
+ *
+ * Copyright or © or Copr. ProkopyL <prokopylmc@gmail.com> (2015 - 2021)
+ * Copyright or © or Copr. Amaury Carrade <amaury@carrade.eu> (2015 – 2021)
+ * Copyright or © or Copr. Vlammar <valentin.jabre@gmail.com> (2019 – 2021)
+ *
+ * This software is a computer program whose purpose is to create Minecraft mods
+ * with the Bukkit API easily.
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
