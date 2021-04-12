@@ -101,15 +101,17 @@ public class PluralForms {
         // We first try if this script is known
         Function<Long, Integer> function = formsFunctionFromKnownScripts();
 
-        // Else we try two JS engines, and fallback to English rules.
+        // Else we try two JS engines, and fallback to English rules if none of them work.
         if (function == null) {
             function = formsFunctionFromNashorn();
-        }
-        if (function == null) {
-            function = formsFunctionFromGraalVM();
-        }
-        if (function == null) {
-            function = formsFunctionFallback();
+
+            if (function == null) {
+                function = formsFunctionFromGraalVM();
+
+                if (function == null) {
+                    function = formsFunctionFallback();
+                }
+            }
         }
 
         return function;
