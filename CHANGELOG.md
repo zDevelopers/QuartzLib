@@ -6,6 +6,18 @@ We follow semantic versioning: you can tell if a version contains breaking chang
 
 Changes marked with :warning: are **breaking changes**.
 
+## QuartzLib 0.0.4
+
+_Published on April 12th, 2021_
+
+### Changed
+
+#### Internationalization (i18n)
+
+- Fixed a bug where plural scripts were loaded once per translation instead of once per file.
+- Optimised the plural script manager by adding many known scripts. This reduces the likelihood of
+  having to start a JavaScript engine, improving performance by several orders of magnitude.
+
 ## QuartzLib 0.0.3
 
 _Published on April 11th, 2021_

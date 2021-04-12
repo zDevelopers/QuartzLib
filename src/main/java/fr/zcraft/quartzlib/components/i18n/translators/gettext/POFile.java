@@ -1,5 +1,12 @@
 /*
- * Copyright or © or Copr. QuartzLib contributors (2015 - 2020)
+ * This file is part of QuartzLib.
+ *
+ * Copyright or © or Copr. ProkopyL <prokopylmc@gmail.com> (2015 - 2021)
+ * Copyright or © or Copr. Amaury Carrade <amaury@carrade.eu> (2015 – 2021)
+ * Copyright or © or Copr. Vlammar <valentin.jabre@gmail.com> (2019 – 2021)
+ *
+ * This software is a computer program whose purpose is to create Minecraft mods
+ * with the Bukkit API easily.
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use,
@@ -118,7 +125,7 @@ public class POFile {
             return;
         }
 
-        try {
+        try (final BufferedReader reader = rawReader) {
             String line;
             Integer lineNumber = 0;
 
@@ -129,7 +136,7 @@ public class POFile {
             Map<String, String> tokens = new HashMap<>();
             String lastToken = null;
 
-            while ((line = rawReader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 lineNumber++;
 
                 // We don't care about trailing whitespaces
@@ -174,17 +181,14 @@ public class POFile {
             if (!tokens.isEmpty()) {
                 analyseEntry(tokens);
             }
+
+            // At the end we compute plural rules
+            pluralForms = new PluralForms(pluralCount, pluralFormScript);
         } catch (IOException e) {
             throw new CannotParsePOException("An IO exception occurred while parsing the file", e);
-        } finally {
-            try {
-                if (rawReader != null) {
-                    rawReader.close();
-                    rawReader = null;
-                }
-            } catch (IOException ignored) {
-            }
         }
+
+        rawReader = null;
     }
 
     /**
@@ -314,8 +318,6 @@ public class POFile {
                 }
             }
         }
-
-        pluralForms = new PluralForms(pluralCount, pluralFormScript);
     }
 
     /**
@@ -374,7 +376,8 @@ public class POFile {
      * If you can use them, it's always better.
      *
      * <p>This method can only work correctly with Plural-Forms listed at:
-     * http://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html#Plural-forms
+     * http://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html#Plural-forms,
+     * as well as POEdit-generated plural forms.
      *
      * @param count The count to compute plural for.
      * @return The plural index.
