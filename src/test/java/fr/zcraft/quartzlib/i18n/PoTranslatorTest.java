@@ -112,6 +112,12 @@ public class PoTranslatorTest {
                 translator.translate(null, "One toast added.", "{0} toasts added.", 1));
         Assert.assertEquals("Bad translation with plural (plural)", "{0} pains ajoutés.",
                 translator.translate(null, "One toast added.", "{0} toasts added.", 2));
+
+
+        SecurityManager manager = System.getSecurityManager();
+        System.setSecurityManager(new SecurityManager());//new BuildSecurityManager());
+    //https://stackoverflow.com/questions/32584997/setting-a-custom-security-manager-when-running-junit-with-gradle
+        System.setSecurityManager(manager);
     }
 
     @Test

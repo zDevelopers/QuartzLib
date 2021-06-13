@@ -70,6 +70,12 @@ public class PluralForms {
     private final Function<Long, Integer> formsFunction;
 
     /**
+     * A boolean to avoid spamming waring message for SecurityException
+     */
+    private boolean securityExceptionWarningSent = false;
+
+
+    /**
      * Constructs a new Gettext plural form.
      *
      * <p>The script will be matched against a database of known script. If one match, it will be implemented in
@@ -378,8 +384,14 @@ public class PluralForms {
      * @return a Function to compute the plural index from the given count.
      */
     private Function<Long, Integer> formsFunctionFromJSEngine(final String engine) {
-        final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(engine);
-        if (scriptEngine == null) {
+        final ScriptEngine scriptEngine;
+        try {
+            scriptEngine = new ScriptEngineManager().getEngineByName(engine);
+            if (scriptEngine == null) {
+                return null;
+            }
+        } catch (SecurityException exception) {
+            PluginLogger.warning("ScriptEngine returned a security exception");
             return null;
         }
 
@@ -397,6 +409,12 @@ public class PluralForms {
             } catch (ScriptException | NumberFormatException e) {
                 PluginLogger.error("Invalid plural forms script “{1}”", e, formsScript);
                 return 0;
+            } catch (SecurityException exception) {
+                if(!securityExceptionWarningSent){
+                    securityExceptionWarningSent=true;
+                    PluginLogger.warning("ScriptEngine returned a security exception Fallback to english plural rules");
+                }
+                return FORMS_FUNCTION_FALLBACK.apply(n);
             }
         };
     }
