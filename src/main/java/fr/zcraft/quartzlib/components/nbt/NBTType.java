@@ -30,8 +30,11 @@
 
 package fr.zcraft.quartzlib.components.nbt;
 
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -123,6 +126,24 @@ enum NBTType {
         return nmsClassName;
     }
 
+    public Class get1_17NmsClass() {
+        if (nmsClassName == null) {
+            return null;
+        }
+
+        try {
+            if (nmsClass == null) {
+                PluginLogger.info(nmsClassName);
+                nmsClass = Reflection.getMinecraft1_17ClassByName("nbt." + nmsClassName);
+            }
+        } catch (Exception ex) {
+            throw new NBTException("Unable to retrieve NBT tag class", ex);
+        }
+
+        return nmsClass;
+    }
+
+
     public Class getNmsClass() {
         if (nmsClassName == null) {
             return null;
@@ -152,7 +173,7 @@ enum NBTType {
             final Object tag;
             switch (this) {
                 case TAG_COMPOUND:
-                    tag = Reflection.instantiate(getNmsClass());
+                    tag = Reflection.instantiate(get1_17NmsClass());
                     if (value instanceof NBTCompound) {
                         setData(tag, ((NBTCompound) value).nmsNbtMap);
                     } else {
@@ -161,7 +182,7 @@ enum NBTType {
                     break;
 
                 case TAG_LIST:
-                    tag = Reflection.instantiate(getNmsClass());
+                    tag = Reflection.instantiate(get1_17NmsClass());
                     if (value instanceof NBTList) {
                         setData(tag, ((NBTList) value).nmsNbtList);
                     } else {
@@ -174,14 +195,47 @@ enum NBTType {
                     break;
 
                 default:
-                    Constructor cons = Reflection.findConstructor(getNmsClass(), 1);
+                    Constructor cons = Reflection.findConstructor(get1_17NmsClass(), 1);
                     cons.setAccessible(true);
                     tag = cons.newInstance(value);
             }
-
             return tag;
-        } catch (Exception ex) {
-            throw new NBTException("Unable to create NBT tag", ex);
+        } catch (Exception e) {
+            try {
+                final Object tag;
+                switch (this) {
+                    case TAG_COMPOUND:
+                        tag = Reflection.instantiate(getNmsClass());
+                        if (value instanceof NBTCompound) {
+                            setData(tag, ((NBTCompound) value).nmsNbtMap);
+                        } else {
+                            new NBTCompound(tag).putAll((Map) value);
+                        }
+                        break;
+
+                    case TAG_LIST:
+                        tag = Reflection.instantiate(getNmsClass());
+                        if (value instanceof NBTList) {
+                            setData(tag, ((NBTList) value).nmsNbtList);
+                        } else {
+                            new NBTList(tag).addAll((List) value);
+                        }
+
+                        // If a NBTTagList is built from scratch, the NMS object is created lately
+                        // and may not have the list's type registered at this point.
+                        NBTList.guessAndWriteTypeToNbtTagList(tag);
+                        break;
+
+                    default:
+                        Constructor cons = Reflection.findConstructor(getNmsClass(), 1);
+                        cons.setAccessible(true);
+                        tag = cons.newInstance(value);
+                }
+
+                return tag;
+            } catch (Exception ex) {
+                throw new NBTException("Unable to create NBT tag", ex);
+            }
         }
     }
 
@@ -190,17 +244,78 @@ enum NBTType {
             return null;
         }
         try {
+            switch (getNmsTagFieldName()) {
+                case "map":
+                    //Since 1.17 "map" became "tags"
+                    //h() return an unmodifiable map
+                    return Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "h");
+
+                case "list":
+                    //We recreate the list because there are no getter for the list.
+                    //TODO check if in 1.18 a getter is added for this one.
+                    List list = new ArrayList();
+
+                    for (int i = 0; i < (int) Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "size"); i++) {
+                        //Strange thing of java a call cast int into integer resulting in the impossibility
+                        // to call the method
+                        Method method;
+
+
+                        method = nmsNbtTag.getClass().getMethod("get", int.class);
+
+
+                        list.add(method.invoke(nmsNbtTag, i));
+                        //list.add(Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "get", i));
+                        // Doesn't work see above
+                    }
+                    return list;
+                case "data":
+                    //TODO I don't know what to do here
+                default:
+                    break;
+            }
+            //Fallback used for data right now don't know if this works
             return Reflection.getFieldValue(nmsNbtTag, getNmsTagFieldName());
-        } catch (Exception ex) {
-            throw new NBTException("Unable to retrieve NBT tag data", ex);
+        } catch (Exception exc) {
+            PluginLogger.info("can't get list?" + exc.toString());
+            //Older versions than 1.17 (fields are no longer accessible in java 17)
+            try {
+                return Reflection.getFieldValue(nmsNbtTag, getNmsTagFieldName());
+            } catch (Exception e) {
+                try {
+                    return Reflection.getFieldValue(nmsNbtTag, getNmsTagFieldName());
+                } catch (Exception ex) {
+                    throw new NBTException("Unable to retrieve NBT tag data", ex);
+                }
+            }
         }
+
+
     }
 
     public void setData(Object nmsNbtTag, Object value) {
         try {
-            Reflection.setFieldValue(nmsNbtTag, getNmsTagFieldName(), value);
-        } catch (Exception ex) {
-            throw new NBTException("Unable to set NBT tag data", ex);
+            switch (getNmsTagFieldName()) {
+                case "map":
+                    Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", getNmsTagFieldName(), value);
+                    break;
+                //TODO check if this works with every type,
+                // if not has to do by hand all calls for set+type and a (UUID),b,c...
+                case "list":
+                    Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", getNmsTagFieldName(), value);
+                    break;
+                case "data":
+                    //TODO I don't know what to do here
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            try {
+                Reflection.setFieldValue(nmsNbtTag, getNmsTagFieldName(), value);
+            } catch (Exception ex) {
+                throw new NBTException("Unable to set NBT tag data", ex);
+            }
         }
+
     }
 }

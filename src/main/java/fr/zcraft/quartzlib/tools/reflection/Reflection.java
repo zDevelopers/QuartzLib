@@ -95,6 +95,18 @@ public final class Reflection {
     }
 
     /**
+     * Returns the {@link Class} of a NMS class from it's name (without the main NMS package) 1.17+.
+     * <p>For example, with "Server", this method returns the {@code net.minecraft.v1_X_RX} class.</p>
+     *
+     * @param name The NMS' class name (without the main Bukkit package).
+     * @return The class.
+     * @throws ClassNotFoundException if no class exists with this name in the NMS package.
+     */
+    public static Class getMinecraft1_17ClassByName(String name) throws ClassNotFoundException {
+        return Class.forName("net.minecraft" + "." + name);
+    }
+
+    /**
      * Returns the {@link Class} of a NMS class from it's name (without the main NMS package).
      * <p>For example, with "Server", this method returns the {@code net.minecraft.server.v1_X_RX.Server} class.</p>
      *

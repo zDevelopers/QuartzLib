@@ -30,6 +30,9 @@
 
 package fr.zcraft.quartzlib.components.nbt;
 
+import fr.zcraft.quartzlib.tools.PluginLogger;
+import fr.zcraft.quartzlib.tools.reflection.Reflection;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -112,6 +115,7 @@ public class NBTCompound implements Map<String, Object> {
 
     /**
      * Returns the NMS NBTTagCompound instance.
+     *
      * @return The NMS NBTTagCompound instance.
      */
     Object getNbtTagCompound() {
@@ -120,15 +124,15 @@ public class NBTCompound implements Map<String, Object> {
 
     /**
      * Returns the value to which the specified key is mapped,
-     *     or the specified default value if this map contains no mapping for the key.
+     * or the specified default value if this map contains no mapping for the key.
      * If a value is present, but could not be coerced to the given type,
-     *     it is ignored and the default value is returned instead.
+     * it is ignored and the default value is returned instead.
      *
      * @param <T>          The type to coerce the mapped value to.
      * @param key          The key
      * @param defaultValue The default value.
      * @return the value to which the specified key is mapped,
-     *     or the specified default value if this map contains no mapping for the key.
+     *         or the specified default value if this map contains no mapping for the key.
      */
     public <T> T get(String key, T defaultValue) {
         return get(key, defaultValue, defaultValue == null ? null : (Class<T>) defaultValue.getClass());
@@ -136,18 +140,18 @@ public class NBTCompound implements Map<String, Object> {
 
     /**
      * Returns the value to which the specified key is mapped,
-     *     or the specified default value if this map contains no mapping for the key.
+     * or the specified default value if this map contains no mapping for the key.
      * If a value is present, but could not be coerced to the given type,
-     *     it is ignored and the default value is returned instead.
+     * it is ignored and the default value is returned instead.
      * This version of the method is recommended if the defaultValue parameter is null,
-     *     so it can have enough type information to protect against wrong NBT types.
+     * so it can have enough type information to protect against wrong NBT types.
      *
      * @param <T>          The type to coerce the mapped value to.
      * @param key          The key
      * @param defaultValue The default value.
      * @param valueType    The type of the expected value.
      * @return the value to which the specified key is mapped,
-     *     or the specified default value if this map contains no mapping for the key.
+     *         or the specified default value if this map contains no mapping for the key.
      */
     public <T> T get(String key, T defaultValue, Class<T> valueType) {
         try {
@@ -219,7 +223,40 @@ public class NBTCompound implements Map<String, Object> {
 
     @Override
     public Object put(String key, Object value) {
-        return NBT.toNativeValue(getNbtMap().put(key, NBT.fromNativeValue(value)));
+        //getNbtMap().put(key, NBT.fromNativeValue(value));
+        PluginLogger.info("put " + key + " " + value.toString());
+        try {
+            return NBT.toNativeValue(getNbtMap().put(key, NBT.fromNativeValue(value)));
+        } catch (Exception e) {
+            try {
+                switch (key) {
+                    case "map":
+                        PluginLogger.info("adgshj " + key + "  " + value);
+                        Method method;
+                        method = nmsNbtTag.getClass().getMethod("setInt",String.class, int.class);
+
+
+                        return method.invoke(nmsNbtTag, key,value);
+                        //return Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, ,"setInt", key,  value);
+
+                    case "list":
+                        return Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", key, (int) value);
+
+                    case "data":
+                        PluginLogger.info("Issue not supported yet DATA " + key);
+                        return null;
+                    default:
+                        PluginLogger.info("Issue not supported yet to add tag " + key);
+                        return null;
+                }
+            } catch (Exception ex) {
+                PluginLogger.error("Issue while putting tag. " + ex.toString());
+                return null;
+            }
+
+
+        }
+
     }
 
     @Override

@@ -30,6 +30,7 @@
 
 package fr.zcraft.quartzlib.components.nbt;
 
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzlib.tools.reflection.NMSException;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
@@ -176,10 +177,10 @@ public abstract class NBT {
      * @param item The ItemStack to change.
      * @param tags The tags to place inside the stack.
      * @return An item stack with the modification applied. It may (if you given
-     *     a CraftItemStack) or may not (else) be the same instance as the given one.
+     *         a CraftItemStack) or may not (else) be the same instance as the given one.
      * @throws NMSException if the operation cannot be executed.
      * @see #addToItemStack(ItemStack, Map, boolean) This method is equivalent
-     *     to this one with replace = true.
+     *         to this one with replace = true.
      */
     public static ItemStack addToItemStack(ItemStack item, Map<String, Object> tags) throws NMSException {
         return addToItemStack(item, tags, true);
@@ -197,7 +198,7 @@ public abstract class NBT {
      * @param replace {@code true} to replace the whole set of tags. If {@code
      *                false}, tags will be added.
      * @return An item stack with the modification applied. It may (if you given
-     *     a CraftItemStack) or may not (else) be the same instance as the given one.
+     *         a CraftItemStack) or may not (else) be the same instance as the given one.
      * @throws NMSException if the operation cannot be executed.
      */
     public static ItemStack addToItemStack(final ItemStack item, final Map<String, Object> tags, final boolean replace)
@@ -208,6 +209,7 @@ public abstract class NBT {
             final ItemStack craftItemStack = (ItemStack) ItemUtils.getCraftItemStack(item);
             final Object mcItemStack = ItemUtils.getNMSItemStack(item);
             final NBTCompound compound = fromItemStack(craftItemStack);
+            PluginLogger.info(compound.toString());
 
             if (replace) {
                 compound.clear();
@@ -241,11 +243,24 @@ public abstract class NBT {
         }
     }
 
+    /**
+     * Older version, the new addition of prefixes has been made mandatory by 1.17
+     */
     static Class<?> getMinecraftClass(String className) throws NMSException {
+        return getMinecraftClass("", className);
+    }
+
+    static Class<?> getMinecraftClass(String prefix, String className) throws NMSException {
         try {
-            return Reflection.getMinecraftClassByName(className);
+            PluginLogger.info(className);
+            return Reflection
+                    .getMinecraft1_17ClassByName(prefix.equals("") ? className : prefix + "." + className); //1.17+
         } catch (ClassNotFoundException ex) {
-            throw new NMSException("Unable to find class: " + className, ex);
+            try {
+                return Reflection.getMinecraftClassByName(className);//Legacy for older version than 1.17
+            } catch (ClassNotFoundException e) {
+                throw new NMSException("Unable to find class: " + prefix + className, e);
+            }
         }
     }
 
@@ -262,8 +277,8 @@ public abstract class NBT {
             return; // Already initialized
         }
 
-        MC_ITEM_STACK = getMinecraftClass("ItemStack");
-        MC_NBT_TAG_COMPOUND = getMinecraftClass("NBTTagCompound");
+        MC_ITEM_STACK = getMinecraftClass("world.item", "ItemStack");
+        MC_NBT_TAG_COMPOUND = getMinecraftClass("nbt", "NBTTagCompound");
         CB_CRAFT_ITEM_META = getCraftBukkitClass("inventory.CraftMetaItem");
     }
 
@@ -285,23 +300,41 @@ public abstract class NBT {
         }
 
         try {
-            Object tag = Reflection.getFieldValue(MC_ITEM_STACK, mcItemStack, "tag");
+            //1.17+
+            Object tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getTag");
+            //Object tagCompound = Reflection.getFieldValue(MC_ITEM_STACK, mcItemStack, "tag");
+            //Reflection.getField(MC_ITEM_STACK, "tag").get(mcItemStack);
+            // public NBTTagCompound getTag() { ITEMSTACK
+            if (tagCompound == null) {
+                tagCompound = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
 
-            if (tag == null) {
-                tag = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
+                Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
 
-                try {
-                    Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tag);
-                } catch (NoSuchMethodException e) {
-                    // If the set method change—more resilient,
-                    // as the setTag will only update the field without any kind of callback.
-                    Reflection.setFieldValue(MC_ITEM_STACK, mcItemStack, "tag", tag);
-                }
             }
+            PluginLogger.info(tagCompound.toString());
+            return tagCompound;
 
-            return tag;
-        } catch (Exception ex) {
-            throw new NMSException("Unable to retrieve NBT tag from item", ex);
+        } catch (Exception exc) {
+            //Older method
+            try {
+                Object tag = Reflection.getFieldValue(MC_ITEM_STACK, mcItemStack, "tag");
+
+                if (tag == null) {
+                    tag = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
+
+                    try {
+                        Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tag);
+                    } catch (NoSuchMethodException e) {
+                        // If the set method change—more resilient,
+                        // as the setTag will only update the field without any kind of callback.
+                        Reflection.setFieldValue(MC_ITEM_STACK, mcItemStack, "tag", tag);
+                    }
+                }
+
+                return tag;
+            } catch (Exception ex) {
+                throw new NMSException("Unable to retrieve NBT tag from item", ex);
+            }
         }
     }
 
