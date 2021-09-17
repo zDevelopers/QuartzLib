@@ -30,7 +30,6 @@
 
 package fr.zcraft.quartzlib.components.nbt;
 
-import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -133,7 +132,6 @@ enum NBTType {
 
         try {
             if (nmsClass == null) {
-                PluginLogger.info(nmsClassName);
                 nmsClass = Reflection.getMinecraft1_17ClassByName("nbt." + nmsClassName);
             }
         } catch (Exception ex) {
@@ -277,7 +275,6 @@ enum NBTType {
             //Fallback used for data right now don't know if this works
             return Reflection.getFieldValue(nmsNbtTag, getNmsTagFieldName());
         } catch (Exception exc) {
-            PluginLogger.info("can't get list?" + exc.toString());
             //Older versions than 1.17 (fields are no longer accessible in java 17)
             try {
                 return Reflection.getFieldValue(nmsNbtTag, getNmsTagFieldName());

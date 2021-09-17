@@ -209,7 +209,6 @@ public abstract class NBT {
             final ItemStack craftItemStack = (ItemStack) ItemUtils.getCraftItemStack(item);
             final Object mcItemStack = ItemUtils.getNMSItemStack(item);
             final NBTCompound compound = fromItemStack(craftItemStack);
-            PluginLogger.info(compound.toString());
 
             if (replace) {
                 compound.clear();
@@ -252,7 +251,6 @@ public abstract class NBT {
 
     static Class<?> getMinecraftClass(String prefix, String className) throws NMSException {
         try {
-            PluginLogger.info(className);
             return Reflection
                     .getMinecraft1_17ClassByName(prefix.equals("") ? className : prefix + "." + className); //1.17+
         } catch (ClassNotFoundException ex) {
@@ -311,7 +309,6 @@ public abstract class NBT {
                 Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
 
             }
-            PluginLogger.info(tagCompound.toString());
             return tagCompound;
 
         } catch (Exception exc) {

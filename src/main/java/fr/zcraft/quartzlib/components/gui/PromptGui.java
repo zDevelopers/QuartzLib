@@ -56,12 +56,14 @@ public class PromptGui extends GuiBase {
 
     /* ===== Reflection to Sign API ===== */
     private static Field fieldTileEntitySign = null; // 1.11.2-: CraftSign.sign; 1.12+: CraftBlockEntityState.tileEntity
+    private static Object tileEntitySign = null; //1.17+
     private static Field fieldTileEntitySignEditable = null; // 1.12+ only: CraftBlockEntityState.isEditable
     private static Method methodGetHandle = null; // CraftPlayer.getHandle()
     private static Method methodOpenSign = null; // EntityHuman.openSign()
     private final Callback<String> callback;
     private Location signLocation;
     private String contents;
+
 
     public PromptGui(Callback<String> callback, String contents) {
         this(callback);
@@ -70,10 +72,12 @@ public class PromptGui extends GuiBase {
 
     /**
      * Creates a new prompt GUI, using the given callback.
+     *
      * @param callback The callback to be given the input text to.
      */
     public PromptGui(Callback<String> callback) {
         super();
+
         if (!isAvailable()) {
             throw new IllegalStateException("Sign-based prompt GUI are not available");
         }
@@ -81,14 +85,23 @@ public class PromptGui extends GuiBase {
         this.callback = callback;
     }
 
+
     /**
      * Checks if Prompt GUIs can be correctly used on this Minecraft versions.
      */
     public static boolean isAvailable() {
-        if (!isInitialized) {
-            init();
+        try {
+            if (!isInitialized) {
+                init();
+            }
+            return fieldTileEntitySign != null;
+        } catch (Exception e) {
+            //1.17+ can't use the fields because of java 17
+            if (!isInitialized) {
+                init();
+            }
+            return tileEntitySign != null;
         }
-        return fieldTileEntitySign != null;
     }
 
     public static void prompt(Player owner, Callback<String> callback) {
@@ -102,8 +115,10 @@ public class PromptGui extends GuiBase {
     private static void init() {
         isInitialized = true;
 
+
         try {
-            final Class<?> CraftBlockEntityState = Reflection.getBukkitClassByName("block.CraftBlockEntityState");
+            final Class<?> CraftBlockEntityState =
+                    Reflection.getBukkitClassByName("block.CraftBlockEntityState");
             final Class<?> CraftSign = Reflection.getBukkitClassByName("block.CraftSign");
             final Class<?> classTileEntitySign = Reflection.getMinecraftClassByName("TileEntitySign");
             final Class<?> CraftPlayer = Reflection.getBukkitClassByName("entity.CraftPlayer");
@@ -127,6 +142,7 @@ public class PromptGui extends GuiBase {
             PluginLogger.error("Unable to initialize Sign Prompt API", e);
             fieldTileEntitySign = null;
         }
+
     }
 
     private static String getSignContents(String[] lines) {
@@ -236,16 +252,29 @@ public class PromptGui extends GuiBase {
 
         RunTask.later(() -> {
             try {
-                final Object signTileEntity = fieldTileEntitySign.get(sign);
-                final Object playerEntity = methodGetHandle.invoke(player);
+                if (tileEntitySign == null) {
+                    final Object signTileEntity = fieldTileEntitySign.get(sign);
+                    final Object playerEntity = methodGetHandle.invoke(player);
 
-                // In Minecraft 1.12+, there's a lock on the signs to avoid them
-                // to be edited after they are loaded into the game.
-                if (fieldTileEntitySignEditable != null) {
-                    fieldTileEntitySignEditable.set(signTileEntity, true);
+                    // In Minecraft 1.12+, there's a lock on the signs to avoid them
+                    // to be edited after they are loaded into the game.
+                    if (fieldTileEntitySignEditable != null) {
+                        fieldTileEntitySignEditable.set(signTileEntity, true);
+                    }
+
+                    methodOpenSign.invoke(playerEntity, signTileEntity);
+                } else {
+                    //TODO utiliser tile entitysign methods here
+                    final Object playerEntity = methodGetHandle.invoke(player);
+
+                    // In Minecraft 1.12+, there's a lock on the signs to avoid them
+                    // to be edited after they are loaded into the game.
+                    //if (fieldTileEntitySignEditable != null) {
+                    //    fieldTileEntitySignEditable.set(signTileEntity, true);
+                    //}
+
+                    //methodOpenSign.invoke(playerEntity, signTileEntity);
                 }
-
-                methodOpenSign.invoke(playerEntity, signTileEntity);
             } catch (final Throwable e) {
                 PluginLogger.error("Error while opening Sign prompt", e);
             }

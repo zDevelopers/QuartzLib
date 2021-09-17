@@ -223,32 +223,37 @@ public class NBTCompound implements Map<String, Object> {
 
     @Override
     public Object put(String key, Object value) {
-        //getNbtMap().put(key, NBT.fromNativeValue(value));
-        PluginLogger.info("put " + key + " " + value.toString());
         try {
             return NBT.toNativeValue(getNbtMap().put(key, NBT.fromNativeValue(value)));
         } catch (Exception e) {
             try {
-                switch (key) {
+
+                Object nbtBase = Reflection
+                        .instantiate(getNbtTagCompound().getClass(), new HashMap<String, Object>().put(key, value));
+                Method method;
+
+                method = nmsNbtTag.getClass().getMethod("set", String.class, getNbtTagCompound().getClass());
+
+                return method.invoke(nmsNbtTag, key, nbtBase);
+                /*switch (key) {
                     case "map":
-                        PluginLogger.info("adgshj " + key + "  " + value);
                         Method method;
+
                         method = nmsNbtTag.getClass().getMethod("setInt",String.class, int.class);
 
-
                         return method.invoke(nmsNbtTag, key,value);
-                        //return Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, ,"setInt", key,  value);
 
                     case "list":
-                        return Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", key, (int) value);
-
+                        //return Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", key, (int) value);
+                        PluginLogger.info("Issue not supported yet LIST ");
+                        return null;
                     case "data":
-                        PluginLogger.info("Issue not supported yet DATA " + key);
+                        PluginLogger.info("Issue not supported yet DATA ");
                         return null;
                     default:
                         PluginLogger.info("Issue not supported yet to add tag " + key);
                         return null;
-                }
+                }*/
             } catch (Exception ex) {
                 PluginLogger.error("Issue while putting tag. " + ex.toString());
                 return null;
