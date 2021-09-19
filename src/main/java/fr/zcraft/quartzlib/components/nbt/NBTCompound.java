@@ -227,13 +227,23 @@ public class NBTCompound implements Map<String, Object> {
             return NBT.toNativeValue(getNbtMap().put(key, NBT.fromNativeValue(value)));
         } catch (Exception e) {
             try {
+                PluginLogger.info("test put");
 
-                Object nbtBase = Reflection
-                        .instantiate(getNbtTagCompound().getClass(), new HashMap<String, Object>().put(key, value));
                 Method method;
+                PluginLogger.info("test put2");
+                PluginLogger.info("nbttagcompound " + getNbtTagCompound());
+                Class nbtTagCompoundClass = Reflection.getMinecraft1_17ClassByName("nbt.NBTTagCompound");
+                Class nbtBaseClass = Reflection.getMinecraft1_17ClassByName("nbt.NBTBase");
 
-                method = nmsNbtTag.getClass().getMethod("set", String.class, getNbtTagCompound().getClass());
+                method = nmsNbtTag.getClass().getMethod("set", String.class, nbtBaseClass);
 
+                PluginLogger.info("test put3");
+                Object nbtBase = Reflection
+                        .instantiate(nbtTagCompoundClass, new HashMap<String, Object>().put(key, value));
+                if (nmsNbtTag == null) {
+                    nmsNbtTag = NBTType.TAG_COMPOUND.newTag(nmsNbtMap);
+                    NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtTag);
+                }
                 return method.invoke(nmsNbtTag, key, nbtBase);
                 /*switch (key) {
                     case "map":
@@ -273,6 +283,7 @@ public class NBTCompound implements Map<String, Object> {
     public void putAll(Map<? extends String, ?> m) {
         for (Entry<? extends String, ?> entry : m.entrySet()) {
             put(entry.getKey(), entry.getValue());
+            PluginLogger.info("test put4");
         }
     }
 

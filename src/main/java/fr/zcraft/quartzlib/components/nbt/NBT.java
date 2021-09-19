@@ -292,6 +292,7 @@ public abstract class NBT {
      * @throws NMSException If something goes wrong while extracting the tag.
      */
     private static Object getMcNBTCompound(ItemStack item) throws NMSException {
+
         Object mcItemStack = ItemUtils.getNMSItemStack(item);
         if (mcItemStack == null) {
             return null;
@@ -299,16 +300,16 @@ public abstract class NBT {
 
         try {
             //1.17+
-            Object tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getTag");
-            //Object tagCompound = Reflection.getFieldValue(MC_ITEM_STACK, mcItemStack, "tag");
-            //Reflection.getField(MC_ITEM_STACK, "tag").get(mcItemStack);
-            // public NBTTagCompound getTag() { ITEMSTACK
+            Object tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getOrCreateTag");
+
+
             if (tagCompound == null) {
                 tagCompound = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
 
                 Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
 
             }
+            PluginLogger.info(tagCompound.toString());
             return tagCompound;
 
         } catch (Exception exc) {
