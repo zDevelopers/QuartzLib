@@ -57,28 +57,26 @@ public final class MessageSender {
 
     static {
         try {
-            iChatBaseComponentClass = Reflection.getMinecraftClassByName("IChatBaseComponent");
-            packetPlayOutChatClass = Reflection.getMinecraftClassByName("PacketPlayOutChat");
+            //1.17+
+            iChatBaseComponentClass = Reflection.getMinecraft1_17ClassByName("network.chat.IChatBaseComponent");
+            packetPlayOutChatClass = Reflection.getMinecraft1_17ClassByName("network.protocol.game.PacketPlayOutChat");
 
-            // TODO centralize the chat serialization mechanisms
-            try {
-                chatSerializerClass = Reflection.getMinecraftClassByName("ChatSerializer");
-            } catch (ClassNotFoundException e) {
-                chatSerializerClass = Reflection.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
-            }
+            chatSerializerClass =
+                    Reflection.getMinecraft1_17ClassByName("network.chat.IChatBaseComponent$ChatSerializer");
 
-            // We only support 1.8+
+
             if (!nmsVersion.equalsIgnoreCase("v1_8_R1")) {
-                chatComponentTextClass = Reflection.getMinecraftClassByName("ChatComponentText");
+                chatComponentTextClass = Reflection.getMinecraft1_17ClassByName("network.chat.ChatComponentText");
 
                 // This enum was introduced in 1.12;  before, a byte was directly used.
                 try {
-                    chatMessageTypeEnum = Reflection.getMinecraftClassByName("ChatMessageType");
+                    chatMessageTypeEnum = Reflection.getMinecraft1_17ClassByName("network.chat.ChatMessageType");
                     chatMessageByteToTypeMethod = Reflection.findMethod(chatMessageTypeEnum, "a", byte.class);
 
                     if (chatMessageByteToTypeMethod == null) {
-                        PluginLogger.error("You are using a version of Minecraft ({0}) incompatible with QuartzLib.",
-                                nmsVersion);
+                        PluginLogger
+                                .error("You are using a version of Minecraft ({0}) incompatible with QuartzLib.",
+                                        nmsVersion);
                         PluginLogger.error("The MessageSender component will not work"
                                 + "due to a change in Minecraft code.");
                         PluginLogger.error("Please report this to the QuartzLib developers"
@@ -92,13 +90,13 @@ public final class MessageSender {
                 }
             }
 
-            // For 1.12+, we send action bars using the title packet, as sending them using the chat packet is broken
-            // (see MC-119145).
+
             try {
-                packetPlayOutTitleClass = Reflection.getMinecraftClassByName("PacketPlayOutTitle");
+                packetPlayOutTitleClass =
+                        Reflection.getMinecraft1_17ClassByName("PacketPlayOutTitle"); //n'existe plus rip
 
                 final Class<? extends Enum> titleActionEnum =
-                        Reflection.getMinecraftClassByName("PacketPlayOutTitle$EnumTitleAction");
+                        Reflection.getMinecraft1_17ClassByName("PacketPlayOutTitle$EnumTitleAction");
                 for (final Enum<?> actionEnumConstant : titleActionEnum.getEnumConstants()) {
                     if (actionEnumConstant.name().equals("ACTIONBAR")) {
                         actionBarTitleActionEnum = actionEnumConstant;
@@ -109,8 +107,65 @@ public final class MessageSender {
                 packetPlayOutTitleClass = null;
                 actionBarTitleActionEnum = null;
             }
-        } catch (final Exception e) {
-            enabled = false;
+        } catch (Exception ex) {
+            try {
+                iChatBaseComponentClass = Reflection.getMinecraftClassByName("IChatBaseComponent");
+                packetPlayOutChatClass = Reflection.getMinecraftClassByName("PacketPlayOutChat");
+
+                // TODO centralize the chat serialization mechanisms
+                try {
+                    chatSerializerClass = Reflection.getMinecraftClassByName("ChatSerializer");
+                } catch (ClassNotFoundException e) {
+                    chatSerializerClass = Reflection.getMinecraftClassByName("IChatBaseComponent$ChatSerializer");
+                }
+
+                // We only support 1.8+
+                if (!nmsVersion.equalsIgnoreCase("v1_8_R1")) {
+                    chatComponentTextClass = Reflection.getMinecraftClassByName("ChatComponentText");
+
+                    // This enum was introduced in 1.12;  before, a byte was directly used.
+                    try {
+                        chatMessageTypeEnum = Reflection.getMinecraftClassByName("ChatMessageType");
+                        chatMessageByteToTypeMethod = Reflection.findMethod(chatMessageTypeEnum, "a", byte.class);
+
+                        if (chatMessageByteToTypeMethod == null) {
+                            PluginLogger
+                                    .error("You are using a version of Minecraft ({0}) incompatible with QuartzLib.",
+                                            nmsVersion);
+                            PluginLogger.error("The MessageSender component will not work"
+                                    + "due to a change in Minecraft code.");
+                            PluginLogger.error("Please report this to the QuartzLib developers"
+                                    + "at https://github.com/zDevelopers/QuartzLib/issues, thanks!");
+
+                            chatMessageTypeEnum = null;
+                        }
+                    } catch (ClassNotFoundException e) {
+                        chatMessageTypeEnum = null;
+                        chatMessageByteToTypeMethod = null;
+                    }
+                }
+
+                // For 1.12+,
+                // we send action bars using the title packet, as sending them using the chat packet is broken
+                // (see MC-119145).
+                try {
+                    packetPlayOutTitleClass = Reflection.getMinecraftClassByName("PacketPlayOutTitle");
+
+                    final Class<? extends Enum> titleActionEnum =
+                            Reflection.getMinecraftClassByName("PacketPlayOutTitle$EnumTitleAction");
+                    for (final Enum<?> actionEnumConstant : titleActionEnum.getEnumConstants()) {
+                        if (actionEnumConstant.name().equals("ACTIONBAR")) {
+                            actionBarTitleActionEnum = actionEnumConstant;
+                            break;
+                        }
+                    }
+                } catch (final Exception e) {
+                    packetPlayOutTitleClass = null;
+                    actionBarTitleActionEnum = null;
+                }
+            } catch (final Exception e) {
+                enabled = false;
+            }
         }
     }
 
@@ -124,19 +179,19 @@ public final class MessageSender {
      * @param message  The message to be sent.
      * @param type     The message's type.
      * @return {@code false} if an error occurred while sending the message.<br>
-     *     If this happens:
-     * <ul>
-     *     <li>
-     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
-     *         MessageSender.MessageType#SYSTEM SYSTEM},
-     *         and the {@link org.bukkit.command.CommandSender#sendMessage(String)
-     *         sendMessage} method was used as a fallback;
-     *     </li>
-     *     <li>
-     *         or the message's type was {@link
-     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
-     *     </li>
-     * </ul>
+     *         If this happens:
+     *         <ul>
+     *             <li>
+     *                 either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *                 MessageSender.MessageType#SYSTEM SYSTEM},
+     *                 and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *                 sendMessage} method was used as a fallback;
+     *             </li>
+     *             <li>
+     *                 or the message's type was {@link
+     *                 MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *             </li>
+     *         </ul>
      */
     public static boolean sendMessage(Player receiver, String message, MessageType type) {
         return sendChatPacket(
@@ -151,19 +206,19 @@ public final class MessageSender {
      * @param message  The message to be sent.
      * @param type     The message's type.
      * @return {@code false} if an error occurred while sending the message.<br>
-     *     If this happens:
-     * <ul>
-     *     <li>
-     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
-     *         MessageSender.MessageType#SYSTEM SYSTEM},
-     *         and the {@link org.bukkit.command.CommandSender#sendMessage(String)
-     *         sendMessage} method was used as a fallback;
-     *     </li>
-     *     <li>
-     *         or the message's type was {@link
-     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
-     *     </li>
-     * </ul>
+     *         If this happens:
+     *         <ul>
+     *             <li>
+     *                 either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *                 MessageSender.MessageType#SYSTEM SYSTEM},
+     *                 and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *                 sendMessage} method was used as a fallback;
+     *             </li>
+     *             <li>
+     *                 or the message's type was {@link
+     *                 MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *             </li>
+     *         </ul>
      */
     public static boolean sendMessage(Player receiver, RawText message, MessageType type) {
         return sendChatPacket(receiver, type.isJSON() ? message.toJSONString() : message.toFormattedText(), type);
@@ -176,20 +231,20 @@ public final class MessageSender {
      * @param message  The message to be sent.
      * @param type     The message's type.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *      occurred while sending the message.<br>
-     *      If this happens:
-     * <ul>
-     *     <li>
-     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
-     *         MessageSender.MessageType#SYSTEM SYSTEM},
-     *         and the {@link org.bukkit.command.CommandSender#sendMessage(String)
-     *         sendMessage} method was used as a fallback;
-     *     </li>
-     *     <li>
-     *         or the message's type was {@link
-     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
-     *     </li>
-     * </ul>
+     *         occurred while sending the message.<br>
+     *         If this happens:
+     *         <ul>
+     *             <li>
+     *                 either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *                 MessageSender.MessageType#SYSTEM SYSTEM},
+     *                 and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *                 sendMessage} method was used as a fallback;
+     *             </li>
+     *             <li>
+     *                 or the message's type was {@link
+     *                 MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *             </li>
+     *         </ul>
      */
     public static boolean sendMessage(UUID receiver, String message, MessageType type) {
         Player player = Bukkit.getPlayer(receiver);
@@ -204,20 +259,20 @@ public final class MessageSender {
      * @param message  The message to be sent.
      * @param type     The message's type.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *     occurred while sending the message.<br>
-     *     If this happens:
-     * <ul>
-     *     <li>
-     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
-     *         MessageSender.MessageType#SYSTEM SYSTEM},
-     *         and the {@link org.bukkit.command.CommandSender#sendMessage(String)
-     *         sendMessage} method was used as a fallback;
-     *     </li>
-     *     <li>
-     *         or the message's type was {@link
-     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
-     *     </li>
-     * </ul>
+     *         occurred while sending the message.<br>
+     *         If this happens:
+     *         <ul>
+     *             <li>
+     *                 either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *                 MessageSender.MessageType#SYSTEM SYSTEM},
+     *                 and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *                 sendMessage} method was used as a fallback;
+     *             </li>
+     *             <li>
+     *                 or the message's type was {@link
+     *                 MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *             </li>
+     *         </ul>
      */
     public static boolean sendMessage(UUID receiver, RawText message, MessageType type) {
         Player player = Bukkit.getPlayer(receiver);
@@ -236,19 +291,19 @@ public final class MessageSender {
      * @param json     The JSON message to be sent.
      * @param type     The message's type.
      * @return {@code false} if an error occurred while sending the message.<br>
-     *     If this happens:
-     * <ul>
-     *     <li>
-     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
-     *         MessageSender.MessageType#SYSTEM SYSTEM},
-     *         and the {@link org.bukkit.command.CommandSender#sendMessage(String)
-     *         sendMessage} method was used as a fallback;
-     *     </li>
-     *     <li>
-     *         or the message's type was {@link
-     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
-     *     </li>
-     * </ul>
+     *         If this happens:
+     *         <ul>
+     *             <li>
+     *                 either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *                 MessageSender.MessageType#SYSTEM SYSTEM},
+     *                 and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *                 sendMessage} method was used as a fallback;
+     *             </li>
+     *             <li>
+     *                 or the message's type was {@link
+     *                 MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *             </li>
+     *         </ul>
      */
     public static boolean sendJSONMessage(Player receiver, String json, MessageType type) {
         return sendChatPacket(receiver, json, type);
@@ -264,20 +319,20 @@ public final class MessageSender {
      * @param json     The message to be sent.
      * @param type     The message's type.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *      occurred while sending the message.<br>
-     *     If this happens:
-     * <ul>
-     *     <li>
-     *         either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
-     *         MessageSender.MessageType#SYSTEM SYSTEM},
-     *         and the {@link org.bukkit.command.CommandSender#sendMessage(String)
-     *         sendMessage} method was used as a fallback;
-     *     </li>
-     *     <li>
-     *         or the message's type was {@link
-     *         MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
-     *     </li>
-     * </ul>
+     *         occurred while sending the message.<br>
+     *         If this happens:
+     *         <ul>
+     *             <li>
+     *                 either the message's type was {@link MessageSender.MessageType#CHAT CHAT} or {@link
+     *                 MessageSender.MessageType#SYSTEM SYSTEM},
+     *                 and the {@link org.bukkit.command.CommandSender#sendMessage(String)
+     *                 sendMessage} method was used as a fallback;
+     *             </li>
+     *             <li>
+     *                 or the message's type was {@link
+     *                 MessageSender.MessageType#ACTION_BAR ACTION_BAR}, and the message was not sent.
+     *             </li>
+     *         </ul>
      */
     public static boolean sendJSONMessage(UUID receiver, String json, MessageType type) {
         Player player = Bukkit.getPlayer(receiver);
@@ -292,8 +347,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if an error occurred while sending the message. If this happens, the
-     * {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
-     *      automatically called as a fallback.
+     *         {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
+     *         automatically called as a fallback.
      */
     public static boolean sendChatMessage(Player receiver, String message) {
         return sendMessage(receiver, message, MessageType.CHAT);
@@ -306,9 +361,9 @@ public final class MessageSender {
      * @param receiver The UUID of the receiver of the message.
      * @param message  The message.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *     occurred while sending the message. If this happens, the {@link
-     *     org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
-     *     called as a fallback.
+     *         occurred while sending the message. If this happens, the {@link
+     *         org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
+     *         called as a fallback.
      */
     public static boolean sendChatMessage(UUID receiver, String message) {
         return sendMessage(receiver, message, MessageType.CHAT);
@@ -321,8 +376,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if an error occurred while sending the message. If this happens, the
-     *      {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
-     *      automatically called as a fallback.
+     *         {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
+     *         automatically called as a fallback.
      */
     public static boolean sendChatMessage(Player receiver, RawText message) {
         return sendMessage(receiver, message, MessageType.CHAT);
@@ -335,9 +390,9 @@ public final class MessageSender {
      * @param receiver The UUID of the receiver of the message.
      * @param message  The message.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *      occurred while sending the message. If this happens, the {@link
-     *      org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
-     *      called as a fallback.
+     *         occurred while sending the message. If this happens, the {@link
+     *         org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
+     *         called as a fallback.
      */
     public static boolean sendChatMessage(UUID receiver, RawText message) {
         return sendMessage(receiver, message, MessageType.CHAT);
@@ -351,8 +406,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if an error occurred while sending the message. If this happens, the
-     *     {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
-     *     automatically called as a fallback.
+     *         {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
+     *         automatically called as a fallback.
      */
     public static boolean sendSystemMessage(Player receiver, String message) {
         return sendMessage(receiver, message, MessageType.SYSTEM);
@@ -367,9 +422,9 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *     occurred while sending the message. If this happens, the {@link
-     *     org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
-     *     called as a fallback.
+     *         occurred while sending the message. If this happens, the {@link
+     *         org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
+     *         called as a fallback.
      */
     public static boolean sendSystemMessage(UUID receiver, String message) {
         return sendMessage(receiver, message, MessageType.SYSTEM);
@@ -383,8 +438,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if an error occurred while sending the message. If this happens, the
-     *     {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
-     *     automatically called as a fallback.
+     *         {@link org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is
+     *         automatically called as a fallback.
      */
     public static boolean sendSystemMessage(Player receiver, RawText message) {
         return sendMessage(receiver, message, MessageType.SYSTEM);
@@ -399,9 +454,9 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *     occurred while sending the message. If this happens, the {@link
-     *     org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
-     *     called as a fallback.
+     *         occurred while sending the message. If this happens, the {@link
+     *         org.bukkit.command.CommandSender#sendMessage(String) sendMessage} method is automatically
+     *         called as a fallback.
      */
     public static boolean sendSystemMessage(UUID receiver, RawText message) {
         return sendMessage(receiver, message, MessageType.SYSTEM);
@@ -413,8 +468,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if an error occurred while sending the message. If this happens, the
-     *     message is not sent at all. Such an error is likely to be caused by an incompatible Bukkit
-     *     version.
+     *         message is not sent at all. Such an error is likely to be caused by an incompatible Bukkit
+     *         version.
      * @see ActionBar
      */
     public static boolean sendActionBarMessage(Player receiver, String message) {
@@ -427,8 +482,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *     occurred while sending the message. If this happens, the message is not sent at all. Such an
-     *     error is likely to be caused by an incompatible Bukkit version.
+     *         occurred while sending the message. If this happens, the message is not sent at all. Such an
+     *         error is likely to be caused by an incompatible Bukkit version.
      * @see ActionBar
      */
     public static boolean sendActionBarMessage(UUID receiver, String message) {
@@ -441,8 +496,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if an error occurred while sending the message. If this happens, the
-     *     message is not sent at all. Such an error is likely to be caused by an incompatible Bukkit
-     *     version.
+     *         message is not sent at all. Such an error is likely to be caused by an incompatible Bukkit
+     *         version.
      * @see ActionBar
      */
     public static boolean sendActionBarMessage(Player receiver, RawText message) {
@@ -455,8 +510,8 @@ public final class MessageSender {
      * @param receiver The receiver of the message.
      * @param message  The message.
      * @return {@code false} if no player with the given UUID is currently logged in, or if an error
-     *     occurred while sending the message. If this happens, the message is not sent at all. Such an
-     *     error is likely to be caused by an incompatible Bukkit version.
+     *         occurred while sending the message. If this happens, the message is not sent at all. Such an
+     *         error is likely to be caused by an incompatible Bukkit version.
      * @see ActionBar
      */
     public static boolean sendActionBarMessage(UUID receiver, RawText message) {
@@ -498,13 +553,15 @@ public final class MessageSender {
                 Object baseComponent = iChatBaseComponentClass
                         .cast(Reflection.call(chatSerializerClass, chatSerializerClass, "a", content));
                 chatPacket =
-                        Reflection.instantiate(packetPlayOutChatClass, baseComponent, type.getMessagePositionByte());
+                        Reflection
+                                .instantiate(packetPlayOutChatClass, baseComponent, type.getMessagePositionByte());
             } else {
                 Object componentText;
 
                 if (type.isJSON()) {
                     componentText =
-                            iChatBaseComponentClass.cast(Reflection.call(chatSerializerClass, "a", (Object) content));
+                            iChatBaseComponentClass
+                                    .cast(Reflection.call(chatSerializerClass, "a", (Object) content));
                 } else {
                     componentText = Reflection.instantiate(chatComponentTextClass, content);
                 }
@@ -518,7 +575,6 @@ public final class MessageSender {
                             .newInstance(actionBarTitleActionEnum, componentText);
                 } else {
                     final Enum<?> nmsMessageType = type.getMessagePositionEnumValue();
-
                     if (nmsMessageType != null) {
                         try {
                             // 1.16.1+ chat packets constructor require an UUID. To send
@@ -541,7 +597,6 @@ public final class MessageSender {
                     }
                 }
             }
-
             NMSNetwork.sendPacket(receiver, chatPacket);
             return true;
         } catch (Exception e) {
@@ -618,6 +673,7 @@ public final class MessageSender {
 
         /**
          * Returns if the chat packet wants a JSON-formatted message.
+         *
          * @return {@code true} if the chat packet wants a JSON-formatted message, {@code false} else.
          */
         public boolean isJSON() {

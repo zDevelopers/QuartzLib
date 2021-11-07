@@ -31,7 +31,6 @@
 package fr.zcraft.quartzlib.components.nbt;
 
 import fr.zcraft.quartzlib.tools.PluginLogger;
-import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,7 +108,6 @@ public class NBTCompound implements Map<String, Object> {
                 }
             }
         }
-
         return nmsNbtMap;
     }
 
@@ -224,46 +222,24 @@ public class NBTCompound implements Map<String, Object> {
     @Override
     public Object put(String key, Object value) {
         try {
-            return NBT.toNativeValue(getNbtMap().put(key, NBT.fromNativeValue(value)));
+            switch (NBT.fromNativeValue(value).getClass().getName()) {
+                case "net.minecraft.nbt.NBTTagInt":
+                    //Reflection.call(nmsNbtTag, "setInt", key, Integer.parseInt(value.toString()));
+                    //Can't use call here because int is casted as an integer
+                    Method method;
+                    method = nmsNbtTag.getClass().getMethod("setInt", String.class, int.class);
+                    method.invoke(nmsNbtTag, key, value);
+                    break;
+                default:
+                    PluginLogger.info("Not supported yet " + NBT.fromNativeValue(value).getClass().getName());
+            }
+
+
+            return getNbtMap();
         } catch (Exception e) {
             try {
-                PluginLogger.info("test put");
-
-                Method method;
-                PluginLogger.info("test put2");
-                PluginLogger.info("nbttagcompound " + getNbtTagCompound());
-                Class nbtTagCompoundClass = Reflection.getMinecraft1_17ClassByName("nbt.NBTTagCompound");
-                Class nbtBaseClass = Reflection.getMinecraft1_17ClassByName("nbt.NBTBase");
-
-                method = nmsNbtTag.getClass().getMethod("set", String.class, nbtBaseClass);
-
-                PluginLogger.info("test put3");
-                Object nbtBase = Reflection
-                        .instantiate(nbtTagCompoundClass, new HashMap<String, Object>().put(key, value));
-                if (nmsNbtTag == null) {
-                    nmsNbtTag = NBTType.TAG_COMPOUND.newTag(nmsNbtMap);
-                    NBTType.TAG_LIST.setData(nmsNbtTag, nmsNbtTag);
-                }
-                return method.invoke(nmsNbtTag, key, nbtBase);
-                /*switch (key) {
-                    case "map":
-                        Method method;
-
-                        method = nmsNbtTag.getClass().getMethod("setInt",String.class, int.class);
-
-                        return method.invoke(nmsNbtTag, key,value);
-
-                    case "list":
-                        //return Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", key, (int) value);
-                        PluginLogger.info("Issue not supported yet LIST ");
-                        return null;
-                    case "data":
-                        PluginLogger.info("Issue not supported yet DATA ");
-                        return null;
-                    default:
-                        PluginLogger.info("Issue not supported yet to add tag " + key);
-                        return null;
-                }*/
+                PluginLogger.info(e.toString());
+                return NBT.toNativeValue(getNbtMap());
             } catch (Exception ex) {
                 PluginLogger.error("Issue while putting tag. " + ex.toString());
                 return null;
@@ -283,7 +259,6 @@ public class NBTCompound implements Map<String, Object> {
     public void putAll(Map<? extends String, ?> m) {
         for (Entry<? extends String, ?> entry : m.entrySet()) {
             put(entry.getKey(), entry.getValue());
-            PluginLogger.info("test put4");
         }
     }
 

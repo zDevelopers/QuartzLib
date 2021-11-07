@@ -309,7 +309,6 @@ public abstract class NBT {
                 Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
 
             }
-            PluginLogger.info(tagCompound.toString());
             return tagCompound;
 
         } catch (Exception exc) {
@@ -347,7 +346,6 @@ public abstract class NBT {
         if (value == null) {
             return null;
         }
-
         NBTType type = NBTType.fromClass(value.getClass());
         return type.newTag(value);
     }
@@ -365,6 +363,7 @@ public abstract class NBT {
         if (nbtTag == null) {
             return null;
         }
+
         NBTType type = NBTType.fromNmsNbtTag(nbtTag);
 
         switch (type) {

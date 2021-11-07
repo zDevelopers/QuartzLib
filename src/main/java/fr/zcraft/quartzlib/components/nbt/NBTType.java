@@ -30,6 +30,7 @@
 
 package fr.zcraft.quartzlib.components.nbt;
 
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -268,7 +269,9 @@ enum NBTType {
                     }
                     return list;
                 case "data":
+                    PluginLogger.info("To be implemented");
                     //TODO I don't know what to do here
+                    break;
                 default:
                     break;
             }

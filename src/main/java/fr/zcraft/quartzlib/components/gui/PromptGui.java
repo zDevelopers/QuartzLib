@@ -119,28 +119,48 @@ public class PromptGui extends GuiBase {
         try {
             final Class<?> CraftBlockEntityState =
                     Reflection.getBukkitClassByName("block.CraftBlockEntityState");
-            final Class<?> CraftSign = Reflection.getBukkitClassByName("block.CraftSign");
-            final Class<?> classTileEntitySign = Reflection.getMinecraftClassByName("TileEntitySign");
+            final Class<?> classTileEntitySign
+                    = Reflection.getMinecraft1_17ClassByName("world.level.block.entity.TileEntitySign");
             final Class<?> CraftPlayer = Reflection.getBukkitClassByName("entity.CraftPlayer");
-            final Class<?> EntityHuman = Reflection.getMinecraftClassByName("EntityHuman");
+            final Class<?> EntityHuman = Reflection.getMinecraft1_17ClassByName("world.entity.player.EntityHuman");
 
-            try {
-                fieldTileEntitySign = Reflection.getField(CraftSign, "sign");
-            } catch (NoSuchFieldException e) { // 1.12+
-                fieldTileEntitySign = Reflection.getField(CraftBlockEntityState, "tileEntity");
+            for (Field f : classTileEntitySign.getFields()) {
+                PluginLogger.info("type" + f.getType() + " name " + f.getName());
             }
+            fieldTileEntitySign = Reflection.getField(CraftBlockEntityState, "tileEntity");
 
-            try {
-                fieldTileEntitySignEditable = Reflection.getField(classTileEntitySign, "isEditable");
-            } catch (NoSuchFieldException e) { // 1.11.2 or below
-                fieldTileEntitySignEditable = null;
-            }
+            fieldTileEntitySignEditable = Reflection.getField(classTileEntitySign, "f");//isEditable new name
 
             methodGetHandle = CraftPlayer.getDeclaredMethod("getHandle");
             methodOpenSign = EntityHuman.getDeclaredMethod("openSign", classTileEntitySign);
         } catch (Exception e) {
-            PluginLogger.error("Unable to initialize Sign Prompt API", e);
-            fieldTileEntitySign = null;
+            try {
+                PluginLogger.info(e.toString());
+                final Class<?> CraftBlockEntityState =
+                        Reflection.getBukkitClassByName("block.CraftBlockEntityState");
+                final Class<?> CraftSign = Reflection.getBukkitClassByName("block.CraftSign");
+                final Class<?> classTileEntitySign = Reflection.getMinecraftClassByName("TileEntitySign");
+                final Class<?> CraftPlayer = Reflection.getBukkitClassByName("entity.CraftPlayer");
+                final Class<?> EntityHuman = Reflection.getMinecraftClassByName("EntityHuman");
+
+                try {
+                    fieldTileEntitySign = Reflection.getField(CraftSign, "sign");
+                } catch (NoSuchFieldException ex) { // 1.12+
+                    fieldTileEntitySign = Reflection.getField(CraftBlockEntityState, "tileEntity");
+                }
+
+                try {
+                    fieldTileEntitySignEditable = Reflection.getField(classTileEntitySign, "isEditable");
+                } catch (NoSuchFieldException exc) { // 1.11.2 or below
+                    fieldTileEntitySignEditable = null;
+                }
+
+                methodGetHandle = CraftPlayer.getDeclaredMethod("getHandle");
+                methodOpenSign = EntityHuman.getDeclaredMethod("openSign", classTileEntitySign);
+            } catch (Exception ex) {
+                PluginLogger.error("Unable to initialize Sign Prompt API", e);
+                fieldTileEntitySign = null;
+            }
         }
 
     }

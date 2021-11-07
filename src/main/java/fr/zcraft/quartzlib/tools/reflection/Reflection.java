@@ -30,6 +30,7 @@
 
 package fr.zcraft.quartzlib.tools.reflection;
 
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
