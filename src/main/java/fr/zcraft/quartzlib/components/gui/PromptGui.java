@@ -124,9 +124,6 @@ public class PromptGui extends GuiBase {
             final Class<?> CraftPlayer = Reflection.getBukkitClassByName("entity.CraftPlayer");
             final Class<?> EntityHuman = Reflection.getMinecraft1_17ClassByName("world.entity.player.EntityHuman");
 
-            for (Field f : classTileEntitySign.getFields()) {
-                PluginLogger.info("type" + f.getType() + " name " + f.getName());
-            }
             fieldTileEntitySign = Reflection.getField(CraftBlockEntityState, "tileEntity");
 
             fieldTileEntitySignEditable = Reflection.getField(classTileEntitySign, "f");//isEditable new name
