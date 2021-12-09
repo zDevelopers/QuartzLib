@@ -36,6 +36,7 @@ import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -115,7 +116,6 @@ public class PromptGui extends GuiBase {
     private static void init() {
         isInitialized = true;
 
-
         try {
             final Class<?> CraftBlockEntityState =
                     Reflection.getBukkitClassByName("block.CraftBlockEntityState");
@@ -123,16 +123,20 @@ public class PromptGui extends GuiBase {
                     = Reflection.getMinecraft1_17ClassByName("world.level.block.entity.TileEntitySign");
             final Class<?> CraftPlayer = Reflection.getBukkitClassByName("entity.CraftPlayer");
             final Class<?> EntityHuman = Reflection.getMinecraft1_17ClassByName("world.entity.player.EntityHuman");
-
             fieldTileEntitySign = Reflection.getField(CraftBlockEntityState, "tileEntity");
-
             fieldTileEntitySignEditable = Reflection.getField(classTileEntitySign, "f");//isEditable new name
-
             methodGetHandle = CraftPlayer.getDeclaredMethod("getHandle");
-            methodOpenSign = EntityHuman.getDeclaredMethod("openSign", classTileEntitySign);
-        } catch (Exception e) {
             try {
-                PluginLogger.info(e.toString());
+                //1.18+
+                methodOpenSign = EntityHuman.getDeclaredMethod("a", classTileEntitySign);
+                //methodOpenSign = EntityHuman.getDeclaredMethod("openTextEdit", classTileEntitySign);
+                //doesn't work because despite the name found in the jar, this may be an issue from Mojang with a bad
+                //mapping. The correct name is a and not openTextEdit.
+            } catch (Exception e) {
+                methodOpenSign = EntityHuman.getDeclaredMethod("openSign", classTileEntitySign);
+            }
+        } catch (Exception ex) {
+            try {
                 final Class<?> CraftBlockEntityState =
                         Reflection.getBukkitClassByName("block.CraftBlockEntityState");
                 final Class<?> CraftSign = Reflection.getBukkitClassByName("block.CraftSign");
@@ -142,7 +146,7 @@ public class PromptGui extends GuiBase {
 
                 try {
                     fieldTileEntitySign = Reflection.getField(CraftSign, "sign");
-                } catch (NoSuchFieldException ex) { // 1.12+
+                } catch (NoSuchFieldException exc) { // 1.12+
                     fieldTileEntitySign = Reflection.getField(CraftBlockEntityState, "tileEntity");
                 }
 
@@ -154,13 +158,13 @@ public class PromptGui extends GuiBase {
 
                 methodGetHandle = CraftPlayer.getDeclaredMethod("getHandle");
                 methodOpenSign = EntityHuman.getDeclaredMethod("openSign", classTileEntitySign);
-            } catch (Exception ex) {
-                PluginLogger.error("Unable to initialize Sign Prompt API", e);
+            } catch (Exception exc) {
+                PluginLogger.error("Unable to initialize Sign Prompt API", exc);
                 fieldTileEntitySign = null;
             }
         }
-
     }
+
 
     private static String getSignContents(String[] lines) {
         StringBuilder content = new StringBuilder(lines[0].trim());

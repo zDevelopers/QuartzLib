@@ -299,15 +299,18 @@ public abstract class NBT {
         }
 
         try {
-            //1.17+
-            Object tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getOrCreateTag");
-
+            Object tagCompound;
+            try {
+                //1.18
+                tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "t");
+            } catch (Exception e) {
+                //1.17
+                tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "a");
+            }
 
             if (tagCompound == null) {
                 tagCompound = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
-
                 Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
-
             }
             return tagCompound;
 
@@ -363,7 +366,6 @@ public abstract class NBT {
         if (nbtTag == null) {
             return null;
         }
-
         NBTType type = NBTType.fromNmsNbtTag(nbtTag);
 
         switch (type) {

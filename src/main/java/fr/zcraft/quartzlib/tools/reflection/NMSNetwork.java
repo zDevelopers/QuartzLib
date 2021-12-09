@@ -32,9 +32,9 @@ package fr.zcraft.quartzlib.tools.reflection;
 
 import fr.zcraft.quartzlib.exceptions.IncompatibleMinecraftVersionException;
 import fr.zcraft.quartzlib.tools.PluginLogger;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import org.bukkit.entity.Player;
 
 
@@ -50,37 +50,44 @@ public final class NMSNetwork {
     private static final Method sendPacketMethod;
 
     static {
-        Class<?> craftPlayerClass1;
-        Class<?> entityPlayerClass1;
-        Class<?> packetClass1;
+        Class<?> craftPlayerClass1 = null;
+        Class<?> entityPlayerClass1 = null;
+        Class<?> packetClass1 = null;
         Method sendPacketMethod1;
 
         try {
+            //1.18+
             craftPlayerClass1 = Reflection.getBukkitClassByName("entity.CraftPlayer");
             entityPlayerClass1 = Reflection.getMinecraft1_17ClassByName("server.level.EntityPlayer");
-
             packetClass1 = Reflection.getMinecraft1_17ClassByName("network.protocol.Packet");
             sendPacketMethod1 = ((Class<?>) Reflection.getMinecraft1_17ClassByName("server.network.PlayerConnection"))
-                    .getDeclaredMethod("sendPacket", packetClass1);
-        } catch (Exception ex) {
+                    .getDeclaredMethod("a", packetClass1);
+            //Was renamed in 1.18 from sendPacket to send but was renamed lambda$15 in the jar...
+        } catch (Exception exc) {
             try {
-                craftPlayerClass1 = Reflection.getBukkitClassByName("entity.CraftPlayer");
-                entityPlayerClass1 = Reflection.getMinecraftClassByName("EntityPlayer");
+                sendPacketMethod1 =
+                        ((Class<?>) Reflection.getMinecraft1_17ClassByName("server.network.PlayerConnection"))
+                                .getDeclaredMethod("sendPacket", packetClass1);
 
-                packetClass1 = Reflection.getMinecraftClassByName("Packet");
-                sendPacketMethod1 = ((Class<?>) Reflection.getMinecraftClassByName("PlayerConnection"))
-                        .getDeclaredMethod("sendPacket", packetClass1);
-            } catch (ClassNotFoundException | NoSuchMethodException e) {
-                throw new IncompatibleMinecraftVersionException("Cannot load classes needed to send network packets",
-                        e);
+            } catch (Exception ex) {
+                try {
+                    craftPlayerClass1 = Reflection.getBukkitClassByName("entity.CraftPlayer");
+                    entityPlayerClass1 = Reflection.getMinecraftClassByName("EntityPlayer");
+
+                    packetClass1 = Reflection.getMinecraftClassByName("Packet");
+                    sendPacketMethod1 = ((Class<?>) Reflection.getMinecraftClassByName("PlayerConnection"))
+                            .getDeclaredMethod("sendPacket", packetClass1);
+                } catch (ClassNotFoundException | NoSuchMethodException e) {
+                    throw new IncompatibleMinecraftVersionException(
+                            "Cannot load classes needed to send network packets",
+                            e);
+                }
             }
         }
-
         craftPlayerClass = craftPlayerClass1;
         entityPlayerClass = entityPlayerClass1;
         packetClass = packetClass1;
         sendPacketMethod = sendPacketMethod1;
-
     }
 
     private NMSNetwork() {

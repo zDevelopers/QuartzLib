@@ -77,9 +77,14 @@ enum NBTType {
 
     public static NBTType fromNmsNbtTag(Object nmsNbtTag) {
         try {
-            return fromId((byte) Reflection.call(nmsNbtTag, "getTypeId"));
+            //1.18
+            return fromId((byte) Reflection.call(nmsNbtTag, "a"));
         } catch (Exception ex) {
-            throw new NBTException("Unable to retrieve type of nbt tag", ex);
+            try {
+                return fromId((byte) Reflection.call(nmsNbtTag, "getTypeId"));
+            } catch (Exception e) {
+                throw new NBTException("Unable to retrieve type of nbt tag", ex);
+            }
         }
     }
 

@@ -224,21 +224,24 @@ public class NBTCompound implements Map<String, Object> {
         try {
             switch (NBT.fromNativeValue(value).getClass().getName()) {
                 case "net.minecraft.nbt.NBTTagInt":
-                    //Reflection.call(nmsNbtTag, "setInt", key, Integer.parseInt(value.toString()));
-                    //Can't use call here because int is casted as an integer
                     Method method;
-                    method = nmsNbtTag.getClass().getMethod("setInt", String.class, int.class);
-                    method.invoke(nmsNbtTag, key, value);
+                    try {
+                        //Reflection.call(nmsNbtTag, "setInt", key, Integer.parseInt(value.toString()));
+                        //Can't use call here because int is casted as an integer
+                        method = nmsNbtTag.getClass().getMethod("a", String.class, int.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    } catch (Exception e) {
+                        method = nmsNbtTag.getClass().getMethod("setInt", String.class, int.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    }
+
                     break;
                 default:
                     PluginLogger.info("Not supported yet " + NBT.fromNativeValue(value).getClass().getName());
             }
-
-
             return getNbtMap();
         } catch (Exception e) {
             try {
-                PluginLogger.info(e.toString());
                 return NBT.toNativeValue(getNbtMap());
             } catch (Exception ex) {
                 PluginLogger.error("Issue while putting tag. " + ex.toString());
