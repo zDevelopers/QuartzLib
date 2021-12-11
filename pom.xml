@@ -50,6 +50,6 @@
 
 	<modules>
 		<module>quartzlib</module>
-		<module>ztoaster</module>
+
 	</modules>
 </project>
