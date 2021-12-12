@@ -50,7 +50,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -124,7 +123,7 @@ public abstract class ItemUtils {
      * @param player The player to give the item to.
      * @param item   The item to give to the player
      * @return true if the player received the item in its inventory, false if
-     *              it had to be totally or partially dropped on the ground.
+     *         it had to be totally or partially dropped on the ground.
      */
     public static boolean give(final Player player, final ItemStack item) {
         final Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
