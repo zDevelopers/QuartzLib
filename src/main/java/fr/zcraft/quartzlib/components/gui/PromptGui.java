@@ -288,13 +288,6 @@ public class PromptGui extends GuiBase {
                     //TODO utiliser tile entitysign methods here
                     final Object playerEntity = methodGetHandle.invoke(player);
 
-                    // In Minecraft 1.12+, there's a lock on the signs to avoid them
-                    // to be edited after they are loaded into the game.
-                    //if (fieldTileEntitySignEditable != null) {
-                    //    fieldTileEntitySignEditable.set(signTileEntity, true);
-                    //}
-
-                    //methodOpenSign.invoke(playerEntity, signTileEntity);
                 }
             } catch (final Throwable e) {
                 PluginLogger.error("Error while opening Sign prompt", e);
