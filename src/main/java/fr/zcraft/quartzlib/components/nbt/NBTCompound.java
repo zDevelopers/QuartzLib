@@ -226,8 +226,8 @@ public class NBTCompound implements Map<String, Object> {
                 case "net.minecraft.nbt.NBTTagInt":
                     Method method;
                     try {
-                        //Reflection.call(nmsNbtTag, "setInt", key, Integer.parseInt(value.toString()));
-                        //Can't use call here because int is casted as an integer
+                        // Cannot use Reflection.call here because int is casted as an integer and we need the method
+                        // with an int
                         method = nmsNbtTag.getClass().getMethod("a", String.class, int.class);
                         method.invoke(nmsNbtTag, key, value);
                     } catch (Exception e) {

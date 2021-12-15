@@ -262,15 +262,10 @@ enum NBTType {
                     for (int i = 0; i < (int) Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "size"); i++) {
                         //Strange thing of java a call cast int into integer resulting in the impossibility
                         // to call the method
-                        Method method;
+                        final Method method = nmsNbtTag.getClass().getMethod("get", int.class);
 
-
-                        method = nmsNbtTag.getClass().getMethod("get", int.class);
-
-
+                        // Cannot use Reflection.call for the same reason as above.
                         list.add(method.invoke(nmsNbtTag, i));
-                        //list.add(Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "get", i));
-                        // Doesn't work see above
                     }
                     return list;
                 case "data":
@@ -304,8 +299,6 @@ enum NBTType {
                 case "map":
                     Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", getNmsTagFieldName(), value);
                     break;
-                //TODO check if this works with every type,
-                // if not has to do by hand all calls for set+type and a (UUID),b,c...
                 case "list":
                     Reflection.call(nmsNbtTag.getClass(), nmsNbtTag, "set", getNmsTagFieldName(), value);
                     break;

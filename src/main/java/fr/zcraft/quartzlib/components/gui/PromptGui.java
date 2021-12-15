@@ -36,7 +36,6 @@ import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -91,18 +90,12 @@ public class PromptGui extends GuiBase {
      * Checks if Prompt GUIs can be correctly used on this Minecraft versions.
      */
     public static boolean isAvailable() {
-        try {
-            if (!isInitialized) {
-                init();
-            }
-            return fieldTileEntitySign != null;
-        } catch (Exception e) {
-            //1.17+ can't use the fields because of java 17
-            if (!isInitialized) {
-                init();
-            }
-            return tileEntitySign != null;
+
+        if (!isInitialized) {
+            init();
         }
+        return fieldTileEntitySign != null;
+
     }
 
     public static void prompt(Player owner, Callback<String> callback) {
@@ -129,7 +122,6 @@ public class PromptGui extends GuiBase {
             try {
                 //1.18+
                 methodOpenSign = EntityHuman.getDeclaredMethod("a", classTileEntitySign);
-                //methodOpenSign = EntityHuman.getDeclaredMethod("openTextEdit", classTileEntitySign);
                 //doesn't work because despite the name found in the jar, this may be an issue from Mojang with a bad
                 //mapping. The correct name is a and not openTextEdit.
             } catch (Exception e) {
@@ -284,17 +276,6 @@ public class PromptGui extends GuiBase {
                     }
 
                     methodOpenSign.invoke(playerEntity, signTileEntity);
-                } else {
-                    //TODO utiliser tile entitysign methods here
-                    final Object playerEntity = methodGetHandle.invoke(player);
-
-                    // In Minecraft 1.12+, there's a lock on the signs to avoid them
-                    // to be edited after they are loaded into the game.
-                    //if (fieldTileEntitySignEditable != null) {
-                    //    fieldTileEntitySignEditable.set(signTileEntity, true);
-                    //}
-
-                    //methodOpenSign.invoke(playerEntity, signTileEntity);
                 }
             } catch (final Throwable e) {
                 PluginLogger.error("Error while opening Sign prompt", e);
