@@ -31,8 +31,10 @@
 package fr.zcraft.quartzlib.tools.reflection;
 
 import fr.zcraft.quartzlib.exceptions.IncompatibleMinecraftVersionException;
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import org.bukkit.entity.Player;
 
 
@@ -48,16 +50,44 @@ public final class NMSNetwork {
     private static final Method sendPacketMethod;
 
     static {
-        try {
-            craftPlayerClass = Reflection.getBukkitClassByName("entity.CraftPlayer");
-            entityPlayerClass = Reflection.getMinecraftClassByName("EntityPlayer");
+        Class<?> craftPlayerClass1 = null;
+        Class<?> entityPlayerClass1 = null;
+        Class<?> packetClass1 = null;
+        Method sendPacketMethod1;
 
-            packetClass = Reflection.getMinecraftClassByName("Packet");
-            sendPacketMethod = ((Class<?>) Reflection.getMinecraftClassByName("PlayerConnection"))
-                    .getDeclaredMethod("sendPacket", packetClass);
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
-            throw new IncompatibleMinecraftVersionException("Cannot load classes needed to send network packets", e);
+        try {
+            //1.18+
+            craftPlayerClass1 = Reflection.getBukkitClassByName("entity.CraftPlayer");
+            entityPlayerClass1 = Reflection.getMinecraft1_17ClassByName("server.level.EntityPlayer");
+            packetClass1 = Reflection.getMinecraft1_17ClassByName("network.protocol.Packet");
+            sendPacketMethod1 = ((Class<?>) Reflection.getMinecraft1_17ClassByName("server.network.PlayerConnection"))
+                    .getDeclaredMethod("a", packetClass1);
+            //Was renamed in 1.18 from sendPacket to send but was renamed lambda$15 in the jar...
+        } catch (Exception exc) {
+            try {
+                sendPacketMethod1 =
+                        ((Class<?>) Reflection.getMinecraft1_17ClassByName("server.network.PlayerConnection"))
+                                .getDeclaredMethod("sendPacket", packetClass1);
+
+            } catch (Exception ex) {
+                try {
+                    craftPlayerClass1 = Reflection.getBukkitClassByName("entity.CraftPlayer");
+                    entityPlayerClass1 = Reflection.getMinecraftClassByName("EntityPlayer");
+
+                    packetClass1 = Reflection.getMinecraftClassByName("Packet");
+                    sendPacketMethod1 = ((Class<?>) Reflection.getMinecraftClassByName("PlayerConnection"))
+                            .getDeclaredMethod("sendPacket", packetClass1);
+                } catch (ClassNotFoundException | NoSuchMethodException e) {
+                    throw new IncompatibleMinecraftVersionException(
+                            "Cannot load classes needed to send network packets",
+                            e);
+                }
+            }
         }
+        craftPlayerClass = craftPlayerClass1;
+        entityPlayerClass = entityPlayerClass1;
+        packetClass = packetClass1;
+        sendPacketMethod = sendPacketMethod1;
     }
 
     private NMSNetwork() {
@@ -68,7 +98,7 @@ public final class NMSNetwork {
      *
      * @param player The player.
      * @return The player's handle (reflection-retrieved object, instance of the
-     *     net.minecraft.server.EntityPlayer class).
+     *         net.minecraft.server.EntityPlayer class).
      * @throws InvocationTargetException             if an exception is thrown while the connection
      *                                               is retrieved.
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
@@ -91,7 +121,7 @@ public final class NMSNetwork {
      *
      * @param playerHandle The player's handle, as returned by {@link #getPlayerHandle(Player)}.
      * @return The player's connection (reflection-retrieved object, instance of the
-     *     net.minecraft.server.PlayerConnection class).
+     *         net.minecraft.server.PlayerConnection class).
      * @throws InvocationTargetException             if an exception is thrown while the connection
      *                                               is retrieved.
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,
@@ -99,18 +129,35 @@ public final class NMSNetwork {
      *                                               connection.
      */
     public static Object getPlayerConnection(Object playerHandle) throws InvocationTargetException {
+
         try {
+
             if (!entityPlayerClass.isAssignableFrom(playerHandle.getClass())) {
                 throw new ClassCastException("Cannot retrieve a player connection from another class that "
-                    + "net.minecraft.server.<version>.EntityPlayer (got " + playerHandle.getClass().getName() + ").");
+                        + "net.minecraft.server.<version>.EntityPlayer (got " + playerHandle.getClass().getName()
+                        + ").");
             }
 
-            return Reflection.getFieldValue(playerHandle, "playerConnection");
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IncompatibleMinecraftVersionException(
-                    "Cannot retrieve standard Bukkit or NBS object while getting a player's connection, "
-                            + "is the current Bukkit/Minecraft version supported by this API?", e);
+            return Reflection.getFieldValue(playerHandle, "b");//YES they renamed connection as b, that's not what
+            // you will find when looking at the decompiled bytecode
+
+        } catch (Exception ex) {
+            try {
+                if (!entityPlayerClass.isAssignableFrom(playerHandle.getClass())) {
+                    throw new ClassCastException("Cannot retrieve a player connection from another class that "
+                            + "net.minecraft.server.<version>.EntityPlayer (got "
+                            + playerHandle.getClass().getName()
+                            + ").");
+                }
+
+                return Reflection.getFieldValue(playerHandle, "playerConnection");
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IncompatibleMinecraftVersionException(
+                        "Cannot retrieve standard Bukkit or NBS object while getting a player's connection, "
+                                + "is the current Bukkit/Minecraft version supported by this API?", e);
+            }
         }
+
     }
 
     /**
@@ -118,7 +165,7 @@ public final class NMSNetwork {
      *
      * @param player The player.
      * @return The player's connection (reflection-retrieved object, instance of the
-     *     net.minecraft.server.PlayerConnection class).
+     *         net.minecraft.server.PlayerConnection class).
      * @throws InvocationTargetException             if an exception is thrown while the connection
      *                                               is retrieved.
      * @throws IncompatibleMinecraftVersionException if an error occurs while loading the classes,

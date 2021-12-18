@@ -30,6 +30,7 @@
 
 package fr.zcraft.quartzlib.tools.reflection;
 
+import fr.zcraft.quartzlib.tools.PluginLogger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -92,6 +93,18 @@ public final class Reflection {
      */
     public static Class<?> getBukkitClassByName(String name) throws ClassNotFoundException {
         return Class.forName(getBukkitPackageName() + "." + name);
+    }
+
+    /**
+     * Returns the {@link Class} of a NMS class from it's name (without the main NMS package) 1.17+.
+     * <p>For example, with "Server", this method returns the {@code net.minecraft.v1_X_RX} class.</p>
+     *
+     * @param name The NMS' class name (without the main Bukkit package).
+     * @return The class.
+     * @throws ClassNotFoundException if no class exists with this name in the NMS package.
+     */
+    public static Class getMinecraft1_17ClassByName(String name) throws ClassNotFoundException {
+        return Class.forName("net.minecraft" + "." + name);
     }
 
     /**
