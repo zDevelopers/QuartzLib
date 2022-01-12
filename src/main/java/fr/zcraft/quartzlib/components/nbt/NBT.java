@@ -308,7 +308,6 @@ public abstract class NBT {
                 try {
                     tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getTag");
                 } catch (Exception e2) {
-                    //It may be useless
                     tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "a");
                 }
             }
