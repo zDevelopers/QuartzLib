@@ -127,7 +127,7 @@ public class HelpCommand extends Command {
             return "";
         }
 
-        Scanner scanner = new Scanner(stream);
+        Scanner scanner = new Scanner(stream, "UTF-8");
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
