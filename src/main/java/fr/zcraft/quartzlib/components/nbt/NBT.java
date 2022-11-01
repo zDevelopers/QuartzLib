@@ -301,20 +301,30 @@ public abstract class NBT {
         try {
             Object tagCompound;
             try {
-                //1.18
-                tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "t");
+                // 1.19
+                tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getTagClone");
             } catch (Exception e) {
-                //1.17
                 try {
-                    tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getTag");
-                } catch (Exception e2) {
-                    tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "a");
+                    // 1.18
+                    tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "t");
+                } catch (Exception e1) {
+                    // 1.17
+                    try {
+                        tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "getTag");
+                    } catch (Exception e2) {
+                        tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "a");
+                    }
                 }
             }
 
             if (tagCompound == null) {
                 tagCompound = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
-                Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
+                try {
+                    // 1.19
+                    Reflection.call(MC_ITEM_STACK, mcItemStack, "setTagClone", tagCompound);
+                } catch (Exception e) {
+                    Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
+                }
             }
             return tagCompound;
 
@@ -327,11 +337,16 @@ public abstract class NBT {
                     tag = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
 
                     try {
-                        Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tag);
-                    } catch (NoSuchMethodException e) {
-                        // If the set method change—more resilient,
-                        // as the setTag will only update the field without any kind of callback.
-                        Reflection.setFieldValue(MC_ITEM_STACK, mcItemStack, "tag", tag);
+                        // 1.19
+                        Reflection.call(MC_ITEM_STACK, mcItemStack, "setTagClone", tag);
+                    } catch (Exception e) {
+                        try {
+                            Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tag);
+                        } catch (NoSuchMethodException e2) {
+                            // If the set method change—more resilient,
+                            // as the setTag will only update the field without any kind of callback.
+                            Reflection.setFieldValue(MC_ITEM_STACK, mcItemStack, "tag", tag);
+                        }
                     }
                 }
 
