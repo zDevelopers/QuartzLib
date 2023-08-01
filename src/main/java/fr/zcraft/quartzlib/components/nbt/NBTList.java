@@ -99,14 +99,18 @@ public class NBTList implements List<Object> {
                         (List<Object>) Reflection.getFieldValue(nmsNbtTag, "list");
 
                 if (!internalNbtList.isEmpty()) {
-                    Reflection.setFieldValue(nmsNbtTag, "type",
-                            (byte) NBTType.fromNmsNbtTag(internalNbtList.get(0)).getId());
+                    try {
+                        Reflection.setFieldValue(nmsNbtTag, "type",
+                                (byte) NBTType.fromNmsNbtTag(internalNbtList.get(0)).getId());
+                    } catch (Exception e) {
+                        PluginLogger.info("\n\n\n\nahbjdhgjuqshgjcqsjg" + nmsNbtTag.getClass().toString());
+                    }
                 }
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             PluginLogger
                     .error("Unable to set NBTTagList's type."
-                                    + " Such malformed lists cannot be read by Minecraft most of the time.", e);
+                            + " Such malformed lists cannot be read by Minecraft most of the time.", e);
         }
     }
 
@@ -142,7 +146,7 @@ public class NBTList implements List<Object> {
                 this.type = NBTType.fromId((byte) Reflection.getFieldValue(nmsNbtTag, "type"));
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 PluginLogger.error("Unable to retrieve NBTTagList's type."
-                                + " The type will be guessed next time an element is inserted into the list…", e);
+                        + " The type will be guessed next time an element is inserted into the list…", e);
             }
         }
     }
@@ -160,7 +164,7 @@ public class NBTList implements List<Object> {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 PluginLogger
                         .error("Unable to set NBTTagList's type."
-                                        + " Such malformed lists cannot be read by Minecraft most of the time.", e);
+                                + " Such malformed lists cannot be read by Minecraft most of the time.", e);
             }
         }
     }
@@ -355,7 +359,7 @@ public class NBTList implements List<Object> {
     /**
      * Returns the value at the specified position in this list, or the specified default value if this value is null.
      * If a value is present, but could not be coerced to the given type,
-     *     it is ignored and the default value is returned instead.
+     * it is ignored and the default value is returned instead.
      *
      * @param <T>          The type to coerce the indexed value to.
      * @param index        The position

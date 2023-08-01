@@ -60,22 +60,22 @@ public class WorldUtils {
      * @return the orientation of the specified location, as a BlockFace.
      */
     public static BlockFace get4thOrientation(Location loc) {
-        float yaw = Math.abs(loc.getYaw()) - 180f;
+        float yaw = loc.getYaw();
 
-        if (yaw <= 45 && yaw > -45) {
+        if (yaw > 135 || yaw <= -135) {
             return BlockFace.NORTH;
         }
 
-        if (yaw <= -45 && yaw > -135) {
-            return BlockFace.WEST;
+        if (yaw >= -135 && yaw < -45) {
+            return BlockFace.EAST;
         }
 
-        if (yaw <= -135 || yaw > 135) {
+        if (yaw < 45) {
             return BlockFace.SOUTH;
         }
 
-        if (yaw <= 135 && yaw > 45) {
-            return BlockFace.EAST;
+        if (yaw <= 135) {
+            return BlockFace.WEST;
         }
 
         return BlockFace.SELF;

@@ -70,6 +70,7 @@ public abstract class NBT {
      * @throws NMSException If there was any issue while assigning NBT data.
      */
     public static NBTCompound fromItemStack(ItemStack item) throws NMSException {
+        PluginLogger.info("fromItemStack");
         init();
         try {
             return new NBTCompound(getMcNBTCompound(item));
@@ -297,12 +298,13 @@ public abstract class NBT {
         if (mcItemStack == null) {
             return null;
         }
-
+        PluginLogger.info("NMSitemstack");
         try {
             Object tagCompound;
             try {
                 //1.18
                 tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "t");
+                PluginLogger.info("tagcompound");
             } catch (Exception e) {
                 //1.17
                 try {
@@ -313,6 +315,7 @@ public abstract class NBT {
             }
 
             if (tagCompound == null) {
+                PluginLogger.info("tag null");
                 tagCompound = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
                 Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
             }
@@ -378,7 +381,9 @@ public abstract class NBT {
             case TAG_LIST:
                 return new NBTList(nbtTag);
             default:
-                return type.getData(nbtTag);
+                PluginLogger.info("nbt tag " + nbtTag.toString());
+                return nbtTag;
+                //return type.getData(nbtTag);
         }
     }
 

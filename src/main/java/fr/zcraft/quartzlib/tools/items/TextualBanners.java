@@ -231,6 +231,12 @@ public final class TextualBanners {
         chars.put('.', getBannerMeta(DyeColor.WHITE,
                 Collections.singletonList(new Pattern(DyeColor.BLACK, PatternType.SQUARE_BOTTOM_LEFT))));
         chars.put(' ', getBannerMeta(DyeColor.WHITE, new ArrayList<Pattern>()));
+        chars.put('+', getBannerMeta(DyeColor.WHITE,
+                Arrays.asList(new Pattern(DyeColor.BLACK, PatternType.STRIPE_CENTER),
+                        new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE),
+                        new Pattern(DyeColor.WHITE, PatternType.BORDER),
+                        new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM),
+                        new Pattern(DyeColor.WHITE, PatternType.STRIPE_TOP))));
         chars.put('-', getBannerMeta(DyeColor.WHITE,
                 Arrays.asList(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE),
                         new Pattern(DyeColor.WHITE, PatternType.BORDER))));

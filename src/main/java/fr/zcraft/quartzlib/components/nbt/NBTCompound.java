@@ -31,6 +31,7 @@
 package fr.zcraft.quartzlib.components.nbt;
 
 import fr.zcraft.quartzlib.tools.PluginLogger;
+import fr.zcraft.quartzlib.tools.reflection.Reflection;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -170,6 +171,7 @@ public class NBTCompound implements Map<String, Object> {
 
     @Override
     public Object get(Object key) {
+        PluginLogger.info("get");
         return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.get(key));
     }
 
@@ -222,9 +224,10 @@ public class NBTCompound implements Map<String, Object> {
     @Override
     public Object put(String key, Object value) {
         try {
+            Method method;
             switch (NBT.fromNativeValue(value).getClass().getName()) {
                 case "net.minecraft.nbt.NBTTagInt":
-                    Method method;
+
                     try {
                         // Cannot use Reflection.call here because int is casted as an integer and we need the method
                         // with an int
@@ -236,12 +239,75 @@ public class NBTCompound implements Map<String, Object> {
                     }
 
                     break;
+
+                case "net.minecraft.nbt.NBTTagByte":
+
+                    try {
+                        // Cannot use Reflection.call here because int is casted as an integer and we need the method
+                        // with an int
+                        method = nmsNbtTag.getClass().getMethod("a", String.class, byte.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    } catch (Exception e) {
+                        method = nmsNbtTag.getClass().getMethod("setByte", String.class, byte.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    }
+
+                    break;
+
+                case "net.minecraft.nbt.NBTTagString":
+                    try {
+                        // Cannot use Reflection.call here because int is casted as an integer and we need the method
+                        // with an int
+                        method = nmsNbtTag.getClass().getMethod("a", String.class, String.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    } catch (Exception e) {
+                        method = nmsNbtTag.getClass().getMethod("setString", String.class, String.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    }
+
+                    break;
+
+                case "net.minecraft.nbt.NBTTagShort":
+                    try {
+                        // Cannot use Reflection.call here because int is casted as an integer and we need the method
+                        // with an int
+                        method = nmsNbtTag.getClass().getMethod("a", String.class, short.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    } catch (Exception e) {
+                        method = nmsNbtTag.getClass().getMethod("setShort", String.class, short.class);
+                        method.invoke(nmsNbtTag, key, value);
+                    }
+
+                    break;
+                case "net.minecraft.nbt.NBTTagList":
+                    PluginLogger.info("\n\n\n\ntest\n\n\n\n");
+                    break;
+                case "net.minecraft.nbt.NBTTagCompound":
+                    PluginLogger.info("\n\n\n\ncompound\n\n\n\n");
+                    try {
+                        Class klass = Reflection.getMinecraft1_17ClassByName("nbt.NBTBase");
+                        // Cannot use Reflection.call here because int is casted as an integer and we need the method
+                        // with an int
+                        method = nmsNbtTag.getClass().getMethod("a", String.class, klass);
+                        method.invoke(nmsNbtTag, key, value);
+                    } catch (Exception e) {
+                        Class klass = Reflection.getMinecraft1_17ClassByName("nbt.NBTBase");
+                        method = nmsNbtTag.getClass().getMethod("setNbtBase", String.class, klass);
+                        method.invoke(nmsNbtTag, key, value);
+                    }
+
+                    break;
+
+
                 default:
                     PluginLogger.info("Not supported yet " + NBT.fromNativeValue(value).getClass().getName());
+
             }
             return getNbtMap();
         } catch (Exception e) {
+            PluginLogger.info(e.toString());
             try {
+                PluginLogger.info("put");
                 return NBT.toNativeValue(getNbtMap());
             } catch (Exception ex) {
                 PluginLogger.error("Issue while putting tag. " + ex.toString());
@@ -255,6 +321,7 @@ public class NBTCompound implements Map<String, Object> {
 
     @Override
     public Object remove(Object key) {
+        PluginLogger.info("remove");
         return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.remove(key));
     }
 
@@ -286,6 +353,7 @@ public class NBTCompound implements Map<String, Object> {
         }
 
         for (Object value : nmsNbtMap.values()) {
+            PluginLogger.info("values");
             list.add(NBT.toNativeValue(value));
         }
         return list;
