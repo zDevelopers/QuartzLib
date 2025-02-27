@@ -54,7 +54,6 @@ import org.bukkit.configuration.MemorySection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
@@ -442,83 +441,6 @@ public abstract class ConfigurationValueHandlers {
             throw new ConfigurationParseException("Invalid enchantment name", value);
         }
         return enchantment;
-    }
-
-    /**
-     * Tries to parse an item stack value. Internal.
-     */
-    @ConfigurationValueHandler
-    public static ItemStack handleItemStackValue(Map map) throws ConfigurationParseException {
-        if (!map.containsKey("type")) {
-            throw new ConfigurationParseException("Key 'type' required.", map);
-        }
-
-        final Material material = Material.matchMaterial(map.get("type").toString());
-
-        if (material == null) {
-            throw new ConfigurationParseException("This material does not exist: '" + map.get("type").toString() + "'.",
-                    map);
-        }
-
-        int amount = map.containsKey("amount") ? handleIntValue(map.get("amount")) : 1;
-
-        ItemStackBuilder item;
-        boolean requiresCraftItem = false;
-
-        if (material.equals(Material.POTION)) {
-            Potion potion = handlePotionValue(map);
-            item = new ItemStackBuilder(potion.toItemStack(amount));
-        } else {
-            item = new ItemStackBuilder(material, amount);
-        }
-
-        if (map.containsKey("title")) {
-            item.title(map.get("title").toString());
-        }
-
-        if (map.containsKey("lore")) {
-            item.lore(handleListValue(map.get("lore"), String.class));
-        }
-
-        if (map.containsKey("glow")) {
-            item.glow(handleBoolValue(map.get("glow")));
-        }
-
-        if (map.containsKey("hideAttributes") && handleBoolValue(map.get("hideAttributes"))) {
-            item.hideAllAttributes();
-        }
-
-        if (map.containsKey("enchantments")) {
-            item.enchant(handleMapValue(map.get("enchantments"), Enchantment.class, Integer.class));
-        }
-
-        if (map.containsKey("nbt")) {
-            Object nbt = map.get("nbt");
-            if (nbt instanceof Map) {
-                item.nbt((Map<String, Object>) nbt);
-                requiresCraftItem = true;
-            }
-        }
-
-        return requiresCraftItem ? item.craftItem() : item.item();
-    }
-
-    /**
-     * Tries to parse a potion value. Internal.
-     */
-    @ConfigurationValueHandler
-    @Deprecated
-    public static Potion handlePotionValue(Map map) throws ConfigurationParseException {
-        if (!map.containsKey("effect")) {
-            throw new ConfigurationParseException("Potion effect is required.", map);
-        }
-
-        PotionType type = handleEnumValue(map.get("effect"), PotionType.class);
-        int level = map.containsKey("level") ? handleByteValue(map.get("level")) : 1;
-        boolean splash = map.containsKey("splash") && handleBoolValue(map.get("splash"));
-        boolean extended = map.containsKey("extended") && handleBoolValue(map.get("extended"));
-
-        return new Potion(type, level, splash, extended);
     }
 
     /**

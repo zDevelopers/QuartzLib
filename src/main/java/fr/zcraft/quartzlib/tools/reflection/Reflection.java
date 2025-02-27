@@ -123,7 +123,7 @@ public final class Reflection {
     /**
      * Returns the value of a field (regardless of its visibility) for the given instance.
      *
-     * @param klass   The instance's class.
+     * @param klass    The instance's class.
      * @param instance The instance.
      * @param name     The field's name.
      * @return The field's value for the given instance.
@@ -217,7 +217,7 @@ public final class Reflection {
     /**
      * Update the field with the given name in the given instance using the given value.
      *
-     * @param klass   The field's parent class.
+     * @param klass    The field's parent class.
      * @param instance The instance to update.
      * @param name     The name of the field to be updated.
      * @param value    The new value of the field.
@@ -235,7 +235,7 @@ public final class Reflection {
     /**
      * Calls the given static method of the given class, passing the given parameters to it.
      *
-     * @param klass     The method's parent class.
+     * @param klass      The method's parent class.
      * @param name       The method's name.
      * @param parameters The parameters to be passed to the method.
      * @return the object the called method returned.
@@ -287,7 +287,7 @@ public final class Reflection {
     /**
      * Calls the given method on the given instance, passing the given parameters to it.
      *
-     * @param klass     The method's parent class.
+     * @param klass      The method's parent class.
      * @param instance   The object the method is invoked from.
      * @param name       The method's name.
      * @param parameters The parameters to be passed to the method.
@@ -324,7 +324,7 @@ public final class Reflection {
     /**
      * Returns if a given class has a method matching the given parameters.
      *
-     * @param klass         The class.
+     * @param klass          The class.
      * @param name           The name of the method to look for
      * @param parameterTypes The parameter types to look for
      * @return If the method exists in the given class, or not
@@ -455,7 +455,7 @@ public final class Reflection {
      * appropriate constructor.
      *
      * @param <T>        The type of the object to be instanciated.
-     * @param klass     The class to be instantiated.
+     * @param klass      The class to be instantiated.
      * @param parameters The parameters to be passed to the constructor. This also determines which
      *                   constructor will be called.
      * @return the created instance.
@@ -552,6 +552,7 @@ public final class Reflection {
 
             final Class caller;
             try {
+                PluginLogger.info(stackTrace[i].getClassName());
                 caller = Class.forName(stackTrace[i].getClassName());
             } catch (ClassNotFoundException ex) {
                 continue;
@@ -561,7 +562,7 @@ public final class Reflection {
                 return caller;
             }
         }
-
+        PluginLogger.info("return null");
         return null;
     }
 

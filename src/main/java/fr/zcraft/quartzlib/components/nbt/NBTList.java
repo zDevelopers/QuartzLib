@@ -103,7 +103,7 @@ public class NBTList implements List<Object> {
                         Reflection.setFieldValue(nmsNbtTag, "type",
                                 (byte) NBTType.fromNmsNbtTag(internalNbtList.get(0)).getId());
                     } catch (Exception e) {
-                        PluginLogger.info("\n\n\n\nahbjdhgjuqshgjcqsjg" + nmsNbtTag.getClass().toString());
+                        PluginLogger.info("" + e.toString());
                     }
                 }
             }

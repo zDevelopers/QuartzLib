@@ -70,8 +70,9 @@ public abstract class NBT {
      * @throws NMSException If there was any issue while assigning NBT data.
      */
     public static NBTCompound fromItemStack(ItemStack item) throws NMSException {
-        PluginLogger.info("fromItemStack");
+        PluginLogger.info("init before");
         init();
+        PluginLogger.info("init after");
         try {
             return new NBTCompound(getMcNBTCompound(item));
         } catch (Exception ex) {
@@ -208,19 +209,24 @@ public abstract class NBT {
 
         try {
             final ItemStack craftItemStack = (ItemStack) ItemUtils.getCraftItemStack(item);
+            PluginLogger.info("before mcitemstack");
             final Object mcItemStack = ItemUtils.getNMSItemStack(item);
+            PluginLogger.info("after mcitemstack");
             final NBTCompound compound = fromItemStack(craftItemStack);
+            PluginLogger.info("after nbtcompound");
 
             if (replace) {
                 compound.clear();
             }
+            PluginLogger.info("after 1");
             compound.putAll(tags);
+            PluginLogger.info("after 2");
             Object tag = compound.getNbtTagCompound();
-
+            PluginLogger.info("after 3");
             if (tag != null) {
                 final ItemMeta craftItemMeta = (ItemMeta) Reflection
                         .call(craftItemStack.getClass(), null, "getItemMeta", new Object[] {mcItemStack});
-
+                PluginLogger.info("after 4");
                 // There's an "applyToItem" method in CraftItemMeta but is doesn't handle well new NBT tags.
                 // We try to re-create a whole new instance from the same CraftItemMeta base class instead,
                 // using the constructor accepting a NBTTagCompound.
@@ -238,7 +244,7 @@ public abstract class NBT {
 
             return craftItemStack;
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException
-                | IllegalAccessException | NMSException e) {
+                 | IllegalAccessException | NMSException e) {
             throw new NMSException("Cannot set item stack tags", e);
         }
     }
@@ -293,18 +299,19 @@ public abstract class NBT {
      * @throws NMSException If something goes wrong while extracting the tag.
      */
     private static Object getMcNBTCompound(ItemStack item) throws NMSException {
-
+        PluginLogger.info("getMcNBTCompound");
         Object mcItemStack = ItemUtils.getNMSItemStack(item);
+        PluginLogger.info("getNMSItemStack");
         if (mcItemStack == null) {
             return null;
         }
-        PluginLogger.info("NMSitemstack");
         try {
+            PluginLogger.info("erreur ici?");
             Object tagCompound;
             try {
+                PluginLogger.info("get tag?");
                 //1.18
                 tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "t");
-                PluginLogger.info("tagcompound");
             } catch (Exception e) {
                 //1.17
                 try {
@@ -313,15 +320,18 @@ public abstract class NBT {
                     tagCompound = Reflection.call(mcItemStack.getClass(), mcItemStack, "a");
                 }
             }
-
+            PluginLogger.info("ici?");
             if (tagCompound == null) {
-                PluginLogger.info("tag null");
                 tagCompound = Reflection.instantiate(MC_NBT_TAG_COMPOUND);
+                PluginLogger.info("MC_NBT_TAG_COMPOUND");
                 Reflection.call(MC_ITEM_STACK, mcItemStack, "setTag", tagCompound);
+                PluginLogger.info("setTag");
             }
+            PluginLogger.info("aft MC_NBT_TAG_COMPOUND");
             return tagCompound;
 
         } catch (Exception exc) {
+            PluginLogger.info("Older method");
             //Older method
             try {
                 Object tag = Reflection.getFieldValue(MC_ITEM_STACK, mcItemStack, "tag");
@@ -381,9 +391,8 @@ public abstract class NBT {
             case TAG_LIST:
                 return new NBTList(nbtTag);
             default:
-                PluginLogger.info("nbt tag " + nbtTag.toString());
                 return nbtTag;
-                //return type.getData(nbtTag);
+            //return type.getData(nbtTag);
         }
     }
 

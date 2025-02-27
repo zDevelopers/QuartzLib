@@ -171,7 +171,6 @@ public class NBTCompound implements Map<String, Object> {
 
     @Override
     public Object get(Object key) {
-        PluginLogger.info("get");
         return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.get(key));
     }
 
@@ -280,10 +279,8 @@ public class NBTCompound implements Map<String, Object> {
 
                     break;
                 case "net.minecraft.nbt.NBTTagList":
-                    PluginLogger.info("\n\n\n\ntest\n\n\n\n");
                     break;
                 case "net.minecraft.nbt.NBTTagCompound":
-                    PluginLogger.info("\n\n\n\ncompound\n\n\n\n");
                     try {
                         Class klass = Reflection.getMinecraft1_17ClassByName("nbt.NBTBase");
                         // Cannot use Reflection.call here because int is casted as an integer and we need the method
@@ -305,9 +302,7 @@ public class NBTCompound implements Map<String, Object> {
             }
             return getNbtMap();
         } catch (Exception e) {
-            PluginLogger.info(e.toString());
             try {
-                PluginLogger.info("put");
                 return NBT.toNativeValue(getNbtMap());
             } catch (Exception ex) {
                 PluginLogger.error("Issue while putting tag. " + ex.toString());
@@ -321,7 +316,6 @@ public class NBTCompound implements Map<String, Object> {
 
     @Override
     public Object remove(Object key) {
-        PluginLogger.info("remove");
         return nmsNbtMap == null ? null : NBT.toNativeValue(nmsNbtMap.remove(key));
     }
 
@@ -353,7 +347,6 @@ public class NBTCompound implements Map<String, Object> {
         }
 
         for (Object value : nmsNbtMap.values()) {
-            PluginLogger.info("values");
             list.add(NBT.toNativeValue(value));
         }
         return list;

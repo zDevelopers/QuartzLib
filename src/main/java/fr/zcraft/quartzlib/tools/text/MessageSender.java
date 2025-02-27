@@ -42,7 +42,7 @@ import org.bukkit.entity.Player;
 
 
 public final class MessageSender {
-    private static final String nmsVersion = Reflection.getBukkitPackageVersion();
+    private static final String nmsVersion = Bukkit.getBukkitVersion();
     private static boolean enabled = true;
     private static Class<?> packetPlayOutChatClass;
     private static Class<?> chatSerializerClass;
@@ -529,6 +529,7 @@ public final class MessageSender {
      * @return {@code true} if the packet was sent.
      */
     private static boolean sendChatPacket(Player receiver, String content, MessageType type) {
+        PluginLogger.info(content);
         if (receiver == null || content == null) {
             return false;
         }

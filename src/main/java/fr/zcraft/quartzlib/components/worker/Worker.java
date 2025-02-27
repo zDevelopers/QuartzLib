@@ -112,6 +112,8 @@ public abstract class Worker extends QuartzComponent {
             throw new IllegalAccessError("Main thread queries must be submitted from a WorkerRunnable");
         }
 
+        PluginLogger.info("caller " + caller.getName());
+        PluginLogger.info("runnables " + runnables.toString());
         Worker worker = runnables.get(caller);
         if (worker == null) {
             throw new IllegalStateException("Caller runnable does not belong to any worker");
